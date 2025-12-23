@@ -100,9 +100,9 @@
                         <p class="text-xs text-green-700 font-bold">Sedang Berlangsung</p>
                         <p class="text-xs text-green-600 mt-1">Silakan kerjakan sekarang.</p>
                     </div>
-                    <button class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 uppercase tracking-wider text-sm">
+                    <a href="{{ route('student.exam.show', ['id' => 1]) }}" class="block w-full text-center bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 uppercase tracking-wider text-sm">
                         Mulai Kerjakan
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
