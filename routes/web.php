@@ -11,6 +11,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+    Route::get('/teachers', App\Livewire\Admin\ManageTeacher::class)->name('admin.teachers');
 });
 
 // Teacher Routes
