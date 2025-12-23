@@ -47,4 +47,12 @@ Route::prefix('student')->name('student.')->group(function () {
     Route::get('/exam/{id}', function ($id) {
         return view('student.exam.show');
     })->name('exam.show');
+
+    Route::get('/results', function () {
+        return view('student.exam.results');
+    })->name('results');
+
+    Route::get('/results/{id}', function ($id) {
+        return view('student.exam.result_detail');
+    })->name('results.detail');
 });
