@@ -13,6 +13,7 @@ Route::prefix('admin')->group(function () {
     })->name('admin.dashboard');
     Route::get('/teachers', App\Livewire\Admin\ManageTeacher::class)->name('admin.teachers');
     Route::get('/students', App\Livewire\Admin\ManageStudent::class)->name('admin.students');
+    Route::get('/classes', App\Livewire\Admin\ManageClass::class)->name('admin.classes');
 });
 
 // Teacher Routes
