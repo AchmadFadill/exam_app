@@ -33,3 +33,10 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/grading/{exam}/{student}', App\Livewire\Teacher\Grading\Detail::class)->name('grading.detail');
     Route::get('/reports', App\Livewire\Teacher\Report\Index::class)->name('reports.index');
 });
+
+// Student Routes
+Route::prefix('student')->name('student.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('student.dashboard');
+    })->name('dashboard');
+});
