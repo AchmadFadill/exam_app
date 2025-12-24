@@ -45,7 +45,7 @@
                             <span class="text-lg font-bold text-green-600">85.0</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('student.results.detail', ['id' => 1]) }}" class="text-indigo-600 hover:text-indigo-900 font-bold uppercase tracking-wider text-xs">Lihat Detail</a>
+                            <a href="{{ route('student.results.detail', ['id' => 1]) }}" class="text-blue-600 hover:text-blue-900 font-bold uppercase tracking-wider text-xs">Lihat Detail</a>
                         </td>
                     </tr>
 
@@ -99,7 +99,7 @@
                              <span class="text-lg font-bold text-green-600">92.5</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 font-bold uppercase tracking-wider text-xs">Lihat Detail</a>
+                            <a href="#" class="text-blue-600 hover:text-blue-900 font-bold uppercase tracking-wider text-xs">Lihat Detail</a>
                         </td>
                     </tr>
                 </tbody>

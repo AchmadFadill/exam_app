@@ -165,7 +165,7 @@
                             </div>
                             <div>
                                 <p class="text-sm font-semibold">Ujian Akhir Semester</p>
-                                <p class="text-xs text-indigo-200">Dimulai 08:00 WIB</p>
+                                <p class="text-xs text-blue-200">Dimulai 08:00 WIB</p>
                             </div>
                         </div>
                     </div>

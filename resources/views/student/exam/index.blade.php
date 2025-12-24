@@ -27,7 +27,7 @@
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="p-2 rounded bg-indigo-100 text-indigo-700 mr-3">
+                                <div class="p-2 rounded bg-blue-100 text-blue-700 mr-3">
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
@@ -75,7 +75,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('student.exam.show', ['id' => 1]) }}" class="inline-flex items-center px-4 py-1.5 bg-indigo-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <a href="{{ route('student.exam.show', ['id' => 1]) }}" class="inline-flex items-center px-4 py-1.5 bg-blue-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
                                 Kerjakan
                             </a>
                         </td>
@@ -105,7 +105,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-indigo-600 hover:text-indigo-900 font-bold uppercase tracking-wider text-xs">Lihat Hasil</button>
+                            <button class="text-blue-600 hover:text-blue-900 font-bold uppercase tracking-wider text-xs">Lihat Hasil</button>
                         </td>
                     </tr>
                 </tbody>

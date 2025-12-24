@@ -8,8 +8,8 @@
             </div>
             
             <!-- Timer Badge -->
-            <div class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-100 font-mono font-bold text-lg flex items-center shadow-sm">
-                <svg class="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 font-mono font-bold text-lg flex items-center shadow-sm">
+                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span x-text="$store.exam.formattedTime" :class="{'text-red-600 animate-pulse': $store.exam.timeLeft < 300}"></span>
@@ -45,16 +45,16 @@
                         <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
                             <label class="flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50"
                                 :class="{
-                                    'border-indigo-600 bg-indigo-50': answers[questions[currentQuestion].id] === option.id,
+                                    'border-blue-600 bg-blue-50': answers[questions[currentQuestion].id] === option.id,
                                     'border-gray-200': answers[questions[currentQuestion].id] !== option.id
                                 }">
                                 <input type="radio" 
                                     :name="'question_' + questions[currentQuestion].id" 
                                     :value="option.id"
                                     x-model="answers[questions[currentQuestion].id]"
-                                    class="h-5 w-5 text-indigo-600 mt-0.5 focus:ring-indigo-500 border-gray-300">
+                                    class="h-5 w-5 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300">
                                 <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
-                                    :class="{'font-medium text-indigo-900': answers[questions[currentQuestion].id] === option.id}" 
+                                    :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}" 
                                     x-text="option.text"></span>
                             </label>
                         </template>
@@ -81,7 +81,7 @@
 
                     <button @click="nextQuestion()" 
                         x-show="currentQuestion < questions.length - 1"
-                        class="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-white font-medium hover:bg-indigo-700 flex items-center transition shadow-sm">
+                        class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-white font-medium hover:bg-blue-700 flex items-center transition shadow-sm">
                         Selanjutnya
                         <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
@@ -106,14 +106,14 @@
                             <button @click="jumpToQuestion(index)"
                                 class="w-10 h-10 rounded-lg text-sm font-bold flex items-center justify-center transition-all duration-200 relative border-2"
                                 :class="{
-                                    'border-indigo-600 ring-2 ring-indigo-200 ring-offset-1': currentQuestion === index,
+                                    'border-blue-600 ring-2 ring-blue-200 ring-offset-1': currentQuestion === index,
                                     'bg-green-500 text-white border-green-500 hover:bg-green-600': answers[q.id] && !flags[q.id] && currentQuestion !== index,
                                     'bg-yellow-400 text-white border-yellow-400 hover:bg-yellow-500': flags[q.id] && currentQuestion !== index,
                                     'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200': !answers[q.id] && !flags[q.id] && currentQuestion !== index
                                 }">
                                 <span x-text="index + 1"></span>
                                 <!-- Indicator dots -->
-                                <div x-show="currentQuestion === index" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-indigo-600 rounded-full border-2 border-white"></div>
+                                <div x-show="currentQuestion === index" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white"></div>
                             </button>
                         </template>
                     </div>
@@ -133,7 +133,7 @@
                     </div>
                     
                      <div class="mt-6">
-                        <button @click="finishExam()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5">
+                        <button @click="finishExam()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg shadow-blue-200 transform hover:-translate-y-0.5">
                             Kumpulkan Jawaban
                         </button>
                     </div>
@@ -192,7 +192,7 @@
                 <button @click="showFinishModal = false" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none">
                     Batal
                 </button>
-                 <button @click="submitExam()" class="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-white font-medium hover:bg-indigo-700 focus:outline-none shadow-sm">
+                 <button @click="submitExam()" class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-white font-medium hover:bg-blue-700 focus:outline-none shadow-sm">
                     Ya, Selesaikan Sekarang
                 </button>
             </div>

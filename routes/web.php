@@ -18,6 +18,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/exams', App\Livewire\Admin\ManageExam::class)->name('admin.exams');
     Route::get('/monitor', App\Livewire\Admin\Monitoring\Index::class)->name('admin.monitor');
     Route::get('/monitor/{id}', App\Livewire\Admin\MonitorExam::class)->name('admin.monitor.detail');
+    
+    // Reports / Hasil Ujian
+    Route::get('/reports', App\Livewire\Admin\Reports\Index::class)->name('admin.reports.index');
+    Route::get('/reports/{id}', App\Livewire\Admin\Reports\Detail::class)->name('admin.reports.detail');
+
     Route::get('/settings', App\Livewire\Admin\Settings::class)->name('admin.settings');
 });
 
@@ -42,7 +47,10 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/monitoring/{id}', App\Livewire\Teacher\Exam\Monitor::class)->name('monitoring.detail');
     Route::get('/grading', App\Livewire\Teacher\Grading\Index::class)->name('grading.index');
     Route::get('/grading/{exam}/{student}', App\Livewire\Teacher\Grading\Detail::class)->name('grading.detail');
+    
+    // Reports
     Route::get('/reports', App\Livewire\Teacher\Report\Index::class)->name('reports.index');
+    Route::get('/reports/{id}', App\Livewire\Teacher\Report\Detail::class)->name('reports.detail');
 });
 
 // Student Routes

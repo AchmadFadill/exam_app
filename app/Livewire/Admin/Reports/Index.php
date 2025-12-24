@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Teacher\Report;
+namespace App\Livewire\Admin\Reports;
 
 use Livewire\Component;
 
@@ -12,7 +12,7 @@ class Index extends Component
         $results = [
             [
                 'id' => 1,
-                'exam_name' => 'Ujian Harian Matematika',
+                'exam_name' => 'Ujian Akhir Semester Matematika',
                 'class' => 'XI IPA 1',
                 'subject' => 'Matematika',
                 'date' => '23 Des 2025',
@@ -23,6 +23,17 @@ class Index extends Component
             ],
             [
                 'id' => 2,
+                'exam_name' => 'Ujian Akhir Semester Fisika',
+                'class' => 'XI IPA 1',
+                'subject' => 'Fisika',
+                'date' => '22 Des 2025',
+                'avg_score' => 75.0,
+                'highest' => 90,
+                'lowest' => 55,
+                'participants' => 32
+            ],
+            [
+                'id' => 3,
                 'exam_name' => 'Kuis Sejarah',
                 'class' => 'X IPS 2',
                 'subject' => 'Sejarah',
@@ -34,8 +45,8 @@ class Index extends Component
             ]
         ];
 
-        return view('teacher.report.index', [
+        return view('admin.reports.index', [
             'results' => $results
-        ])->extends('layouts.teacher')->section('content');
+        ])->extends('layouts.admin')->section('content');
     }
 }

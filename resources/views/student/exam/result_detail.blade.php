@@ -6,7 +6,7 @@
 <div class="container mx-auto px-6 py-8">
     <!-- Back Button -->
     <div class="mb-6">
-        <a href="{{ route('student.results') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-indigo-600 transition">
+        <a href="{{ route('student.results') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 transition">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7"></path></svg>
             Kembali ke Riwayat
         </a>
@@ -14,12 +14,12 @@
 
     <!-- Result Header Card -->
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-        <div class="bg-gradient-to-r from-indigo-600 to-blue-700 px-8 py-10 text-white">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10 text-white">
             <div class="md:flex justify-between items-center">
                 <div class="mb-6 md:mb-0">
                     <h2 class="text-3xl font-bold mb-2">Ulangan Harian 1</h2>
-                    <p class="text-indigo-100 text-lg">Bahasa Indonesia - Kelas X</p>
-                    <div class="flex items-center mt-4 text-indigo-100 text-sm">
+                    <p class="text-blue-100 text-lg">Bahasa Indonesia - Kelas X</p>
+                    <div class="flex items-center mt-4 text-blue-100 text-sm">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         Dikerjakan pada 23 Desember 2025, 09:00 - 09:30
                     </div>
@@ -77,7 +77,7 @@
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="text-sm">
                         <div class="font-semibold text-gray-500 mb-2">Jawaban Kamu:</div>
-                        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-700 font-medium">
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 font-medium">
                              C. Harimau merupakan hewan karnivora yang memakan daging.
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                 <!-- Teacher Explanation -->
                 <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                     <div class="flex items-center mb-2">
-                         <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-2">
+                         <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                          </div>
                          <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Catatan Dari  Guru</span>
@@ -136,7 +136,7 @@
                 <!-- Teacher Explanation -->
                 <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                     <div class="flex items-center mb-2">
-                          <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-2">
+                          <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                          </div>
                          <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Catatan Dari  Guru</span>

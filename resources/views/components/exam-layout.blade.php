@@ -31,7 +31,7 @@
             <div class="flex items-center">
                 <!-- Logo / School Name -->
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-xl font-bold text-indigo-600">CBT System</span>
+                    <span class="text-xl font-bold text-blue-600">CBT SMAIT Baitul Muslim</span>
                 </div>
                 <div class="hidden md:ml-6 md:flex md:items-center border-l border-gray-200 pl-6">
                     <div>
