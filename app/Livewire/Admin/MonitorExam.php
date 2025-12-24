@@ -6,6 +6,13 @@ use Livewire\Component;
 
 class MonitorExam extends Component
 {
+    public $examId;
+
+    public function mount($id)
+    {
+        $this->examId = $id;
+    }
+
     // Simulate real-time polling
     public function render()
     {

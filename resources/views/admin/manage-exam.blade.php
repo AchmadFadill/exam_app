@@ -3,8 +3,8 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h2 class="font-bold text-2xl text-text-main">Kelola Ujian</h2>
-            <p class="text-text-muted text-sm">Buat dan atur jadwal ujian untuk siswa</p>
+            <h2 class="font-bold text-2xl text-text-main">Kelola Ujian </h2>
+            <p class="text-text-muted text-sm">Buat dan atur jadwal ujian untuk semua kelas</p>
         </div>
         <div>
             <a href="#" class="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -17,7 +17,7 @@
     <!-- Exam List -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($exams as $exam)
-        <div class="bg-bg-surface rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
             <div class="p-5 flex-1">
                 <div class="flex justify-between items-start mb-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -32,7 +32,7 @@
                         <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-gray-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
-                        <div x-show="open" class="absolute right-0 mt-2 w-48 bg-bg-surface rounded-md shadow-lg py-1 z-10 border border-gray-100">
+                        <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100">
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Duplikasi</a>
                             <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</a>
@@ -61,19 +61,19 @@
 
             <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-2 gap-3 mt-auto">
                 @if($exam['status'] == 'ongoing')
-                    <a href="{{ route('teacher.monitoring.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-2 bg-primary hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition-colors">
+                    <a href="{{ route('admin.monitor.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-2 bg-primary hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        Monitoring Live
+                        Monitoring 
                     </a>
                 @elseif($exam['status'] == 'completed')
-                    <a href="{{ route('teacher.grading.index') }}" class="flex justify-center items-center gap-2 bg-bg-surface border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
+                    <a href="#" class="flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
                         Lihat Nilai
                     </a>
-                    <a href="{{ route('teacher.reports.index') }}" class="flex justify-center items-center gap-2 bg-bg-surface border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
+                    <a href="#" class="flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
                         Laporan
                     </a>
                 @else
-                    <a href="#" class="col-span-2 flex justify-center items-center gap-2 bg-bg-surface border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
+                    <a href="#" class="col-span-2 flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit Ujian
                     </a>
@@ -83,4 +83,3 @@
         @endforeach
     </div>
 </div>
-
