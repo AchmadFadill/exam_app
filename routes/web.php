@@ -18,6 +18,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/exams', App\Livewire\Admin\ManageExam::class)->name('admin.exams');
     Route::get('/monitor', App\Livewire\Admin\Monitoring\Index::class)->name('admin.monitor');
     Route::get('/monitor/{id}', App\Livewire\Admin\MonitorExam::class)->name('admin.monitor.detail');
+    Route::get('/settings', App\Livewire\Admin\Settings::class)->name('admin.settings');
 });
 
 // Teacher Routes
