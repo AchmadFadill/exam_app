@@ -88,7 +88,7 @@
                         <h4 class="font-bold text-lg">Buat Soal Baru</h4>
                         <p class="text-blue-100 text-sm mt-1">Tambahkan soal ke bank soal</p>
                     </div>
-                    <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4">
+                    <div class="absolute right-0 bottom-0 oMoitoracity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4">
                         <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
                     </div>
                 </a>

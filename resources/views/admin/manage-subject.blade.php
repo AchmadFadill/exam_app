@@ -1,3 +1,4 @@
+@section('title', 'Kelola Mata Pelajaran')
 <div>
     <x-slot name="title">Kelola Mata Pelajaran</x-slot>
 

@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Livewire\Teacher\Exam;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 
-class Monitor extends Component
+class MonitorExam extends Component
 {
     // Simulate real-time polling
     public function render()
     {
-        // Dummy Student Progress Data
+        // Dummy Student Progress Data (Replicated from Teacher view for Admin monitoring)
         $students = [
             ['name' => 'Aditya Pratama', 'class' => 'XI IPA 1', 'status' => 'working', 'progress' => '15/30', 'w' => '50%', 'tab_alert' => 0],
             ['name' => 'Bunga Citra', 'class' => 'XI IPA 2', 'status' => 'working', 'progress' => '28/30', 'w' => '93%', 'tab_alert' => 1],
@@ -22,13 +22,14 @@ class Monitor extends Component
              ['name' => 'Indah Permata', 'class' => 'XI IPS 1', 'status' => 'working', 'progress' => '15/30', 'w' => '50%', 'tab_alert' => 2],
         ];
 
-        return view('teacher.exam.monitor', [
+        return view('admin.monitor-exam', [
             'students' => $students
-        ])->extends('layouts.teacher')->section('content');
+        ])->extends('layouts.admin')->section('content');
     }
 
     public function forceSubmit($studentId)
     {
-        // Logic to force submit
+        // Logic to force submit (Simulated)
+        $this->dispatch('notify', ['message' => 'Ujian siswa berhasil dihentikan (Simulasi)']);
     }
 }
