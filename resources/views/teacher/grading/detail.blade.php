@@ -13,11 +13,68 @@
                         <span>{{ $grade }}</span>
                     </div>
                  </div>
-                 <div class="text-right">
-                     <p class="text-xs text-text-muted uppercase">Total Nilai Sementara</p>
-                     <p class="text-3xl font-bold text-primary">{{ $current_score }}</p>
+                 <div class="text-right flex gap-4">
+                     <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+                         <p class="text-xs text-text-muted uppercase">Nilai PG (Auto)</p>
+                         <p class="text-xl font-bold text-blue-600">{{ $pg_score }}<span class="text-sm font-normal text-gray-400">/{{ $max_pg_score }}</span></p>
+                     </div>
+                     <div class="bg-amber-50 px-4 py-2 rounded-lg border border-amber-100">
+                         <p class="text-xs text-text-muted uppercase">Nilai Essay (Manual)</p>
+                         <p class="text-xl font-bold text-amber-600">{{ $current_score - $pg_score }}<span class="text-sm font-normal text-gray-400">/50</span></p>
+                     </div>
+                     <div class="bg-green-50 px-4 py-2 rounded-lg border border-green-100">
+                         <p class="text-xs text-text-muted uppercase">Total Akhir</p>
+                         <p class="text-2xl font-bold text-green-600">{{ $current_score }}</p>
+                     </div>
                  </div>
              </div>
+        </div>
+    </div>
+
+    <!-- PG Answers Accordion -->
+    <div x-data="{ expanded: false }" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <button @click="expanded = !expanded" class="w-full px-6 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-text-main uppercase">Rincian Jawaban Pilihan Ganda</span>
+                <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">{{ count($pg_answers) }} Soal</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400 transform transition-transform duration-200" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div x-show="expanded" x-collapse style="display: none;">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-gray-50 text-gray-500 border-b border-gray-100 font-medium">
+                        <tr>
+                            <th class="px-6 py-3 w-10">No</th>
+                            <th class="px-6 py-3">Pertanyaan</th>
+                            <th class="px-6 py-3">Jawaban Siswa</th>
+                            <th class="px-6 py-3">Kunci</th>
+                            <th class="px-6 py-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($pg_answers as $pg)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3 text-center">{{ $pg['no'] }}</td>
+                            <td class="px-6 py-3 text-text-main">{{ $pg['question'] }}</td>
+                            <td class="px-6 py-3 {{ $pg['is_correct'] ? 'text-green-600 font-medium' : 'text-red-600 font-medium' }}">{{ $pg['student_answer'] }}</td>
+                            <td class="px-6 py-3 text-gray-600">{{ $pg['key'] }}</td>
+                            <td class="px-6 py-3 text-center">
+                                @if($pg['is_correct'])
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

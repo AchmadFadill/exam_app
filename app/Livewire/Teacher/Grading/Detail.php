@@ -8,6 +8,32 @@ class Detail extends Component
 {
     public $examId;
     public $studentId = 1;
+    public $pgScore = 45; // Dummy PG Score
+    public $maxPgScore = 50; // Max PG Score
+
+    public $pgAnswers = [
+        [
+            'no' => 1,
+            'question' => 'Apa fungsi utama stomata pada daun?',
+            'student_answer' => 'A. Pertukaran gas',
+            'key' => 'A. Pertukaran gas',
+            'is_correct' => true
+        ],
+        [
+            'no' => 2,
+            'question' => 'Bagian sel yang berfungsi sebagai pembangkit energi adalah...',
+            'student_answer' => 'C. Ribosom',
+            'key' => 'B. Mitokondria',
+            'is_correct' => false
+        ],
+        [
+            'no' => 3,
+            'question' => 'Hewan yang berkembang biak dengan cara bertelur disebut...',
+            'student_answer' => 'A. Ovipar',
+            'key' => 'A. Ovipar',
+            'is_correct' => true
+        ]
+    ];
     
     // Essay Answers
     public $answers = [
@@ -36,7 +62,10 @@ class Detail extends Component
         return view('teacher.grading.detail', [
             'student_name' => 'Aditya Pratama',
             'grade' => 'XI IPA 1',
-            'current_score' => 85 // Total score so far
+            'current_score' => 85, // Total score so far
+            'pg_score' => $this->pgScore,
+            'max_pg_score' => $this->maxPgScore,
+            'pg_answers' => $this->pgAnswers
         ])->extends('layouts.teacher')->section('content');
     }
 
