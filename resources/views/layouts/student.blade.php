@@ -12,13 +12,6 @@
             </x-sidebar-link>
 
             <div class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mt-6 mb-2">Ujian</div>
-
-            <x-sidebar-link :href="route('student.exams.index')" :active="request()->routeIs('student.exams.*')">
-                <x-slot name="icon">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                </x-slot>
-                Daftar Ujian
-            </x-sidebar-link>
             
              <x-sidebar-link :href="route('student.results')" :active="request()->routeIs('student.results*')">
                 <x-slot name="icon">
