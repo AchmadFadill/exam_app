@@ -46,6 +46,7 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/monitoring', App\Livewire\Teacher\Monitoring\Index::class)->name('monitoring');
     Route::get('/monitoring/{id}', App\Livewire\Teacher\Exam\Monitor::class)->name('monitoring.detail');
     Route::get('/grading', App\Livewire\Teacher\Grading\Index::class)->name('grading.index');
+    Route::get('/grading/{exam}', App\Livewire\Teacher\Grading\StudentList::class)->name('grading.show');
     Route::get('/grading/{exam}/{student}', App\Livewire\Teacher\Grading\Detail::class)->name('grading.detail');
     
     // Reports

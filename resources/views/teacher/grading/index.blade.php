@@ -13,11 +13,6 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-    <div class="bg-bg-surface rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Nama Ujian</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Kelas</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Tanggal</th>
@@ -52,9 +47,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             @if($exam['pending_count'] > 0)
-                            <a href="#" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-lg">Mulai Koreksi</a>
+                            <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-lg">Koreksi</a>
                             @else
-                            <a href="#" class="text-text-muted hover:text-primary">Lihat Detail</a>
+                            <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-text-muted hover:text-primary">Lihat Detail</a>
                             @endif
                         </td>
                     </tr>

@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="flex items-center gap-4">
-        <a href="{{ route('teacher.grading.index') }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
+        <a href="{{ route('teacher.grading.show', ['exam' => 1]) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </a>
         <div class="flex-1">
@@ -21,6 +21,18 @@
         </div>
     </div>
 
+    <div class="space-y-6">
+        @foreach($answers as $index => $answer)
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+             <!-- Question Header -->
+             <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-start gap-3">
+                 <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-sm">
+                     {{ $index + 1 }}
+                 </span>
+                 <div class="flex-1">
+                     <p class="text-text-main font-medium">{{ $answer['question'] }}</p>
+                 </div>
+             </div>
              
              <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                  <!-- Student Answer -->
