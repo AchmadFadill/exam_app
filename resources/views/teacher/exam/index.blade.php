@@ -7,7 +7,7 @@
             <p class="text-text-muted text-sm">Buat dan atur jadwal ujian untuk siswa</p>
         </div>
         <div>
-            <a href="#" class="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <a href="{{ route('teacher.exams.create') }}" class="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Buat Ujian Baru
             </a>
@@ -33,7 +33,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
                         <div x-show="open" class="absolute right-0 mt-2 w-48 bg-bg-surface rounded-md shadow-lg py-1 z-10 border border-gray-100">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Duplikasi</a>
                             <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</a>
                         </div>
@@ -73,7 +73,7 @@
                         Laporan
                     </a>
                 @else
-                    <a href="#" class="col-span-2 flex justify-center items-center gap-2 bg-bg-surface border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
+                    <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-2 bg-bg-surface border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Edit Ujian
                     </a>

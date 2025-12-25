@@ -56,15 +56,26 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-text-main mb-1">Kelas Peserta</label>
-                        <select wire:model="classes" multiple class="w-full border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main h-24">
-                            <option value="X IPA 1">X IPA 1</option>
-                            <option value="X IPA 2">X IPA 2</option>
-                            <option value="XI IPA 1">XI IPA 1</option>
-                            <option value="XII IPS 1">XII IPS 1</option>
-                        </select>
-                        <p class="text-xs text-text-muted mt-1">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</p>
+                    <div class="md:col-span-2">
+                        <div class="flex justify-between items-end mb-3">
+                            <label class="block text-sm font-medium text-text-main">Kelas Peserta</label>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="toggleLevel('X')" class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 transition-colors">Pilih Semua Kelas X</button>
+                                <button type="button" wire:click="toggleLevel('XI')" class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 transition-colors">Pilih Semua Kelas XI</button>
+                                <button type="button" wire:click="toggleLevel('XII')" class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 transition-colors">Pilih Semua Kelas XII</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            @foreach($availableClasses as $class)
+                            <label class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {{ in_array($class, $classes) ? 'ring-2 ring-primary border-transparent' : '' }}">
+                                <div class="flex items-center h-5">
+                                    <input type="checkbox" wire:model="classes" value="{{ $class }}" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                </div>
+                                <span class="text-sm text-gray-700 font-medium select-none">{{ $class }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                        @error('classes') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
@@ -90,6 +101,18 @@
                     <div>
                          <label class="block text-sm font-medium text-text-main mb-1">Passing Grade</label>
                          <input type="number" wire:model="passing_grade" class="w-full border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main" placeholder="70">
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-sm font-medium text-text-main mb-1">Kode Ujian (Token)</label>
+                        <div class="flex gap-2">
+                            <input type="text" wire:model="token" class="flex-1 border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main font-mono text-lg font-bold tracking-widest uppercase" placeholder="TOKEN">
+                            <button type="button" wire:click="regenerateToken" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Generate
+                            </button>
+                        </div>
+                        <p class="text-xs text-text-muted mt-1">Kode ini akan digunakan siswa untuk masuk ke ujian.</p>
                     </div>
                 </div>
 
@@ -131,10 +154,21 @@
                     <span class="text-sm">Total Poin: 0</span>
                 </div>
 
-                <!-- Simple Search for Questions in Bank -->
-                <div class="relative">
-                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Cari soal dari bank soal...">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <!-- Search & Filters -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary" placeholder="Cari soal dari bank soal...">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <div class="w-full sm:w-48">
+                        <select wire:model="filterSubject" class="w-full border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main">
+                            <option value="">Semua Mapel</option>
+                            <option value="Matematika">Matematika</option>
+                            <option value="Biologi">Biologi</option>
+                            <option value="Fisika">Fisika</option>
+                            <option value="Kimia">Kimia</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Dummy List of Questions to Add -->
