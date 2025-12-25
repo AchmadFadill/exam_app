@@ -60,11 +60,19 @@ Route::prefix('student')->name('student.')->group(function () {
         return view('student.dashboard');
     })->name('dashboard');
     
+    Route::get('/login', function () {
+        return view('student.auth.login');
+    })->name('login');
+
     Route::get('/exams', function () {
         return view('student.exam.index');
     })->name('exams.index');
     
-    Route::get('/exam/{id}', function ($id) {
+    Route::get('/exam/{id}/start', function ($id) {
+        return view('student.exam.start');
+    })->name('exam.start');
+
+    Route::get('/exam/{id}/take', function ($id) {
         return view('student.exam.show');
     })->name('exam.show');
 

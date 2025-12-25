@@ -140,6 +140,26 @@
                 </div>
             </div>
         </div>
+
+
+    <!-- Start Exam Overlay -->
+    <div x-cloak x-show="showStartOverlay" class="fixed inset-0 z-[60] flex items-center justify-center bg-white">
+        <div class="text-center max-w-lg px-6">
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 mb-6">
+                <svg class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Ujian Siap Dimulai</h2>
+            <p class="text-gray-600 mb-8 text-lg">
+                Klik tombol di bawah ini untuk masuk ke mode layar penuh dan memulai waktu ujian.
+            </p>
+            <button @click="beginExam()" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-lg px-8 py-4 bg-blue-600 text-lg font-bold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 transform transition hover:scale-105">
+                MULAI MENGERJAKAN SEKARANG
+            </button>
+            <p class="mt-4 text-sm text-gray-400">Pastikan browser Anda mengizinkan fitur Fullscreen.</p>
+        </div>
     </div>
 
     <!-- Security Warnings Modal -->
@@ -199,14 +219,22 @@
         </div>
     </div>
 
+    </div>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('exam', {
                 timeLeft: 3600, // 60 minutes in seconds
                 formattedTime: '01:00:00',
+                isActive: false,
                 
+                startTimer() {
+                    this.isActive = true;
+                    // Timer logic moved here or controlled by isActive
+                },
+
                 updateTime() {
-                    if (this.timeLeft > 0) {
+                    if (this.timeLeft > 0 && this.isActive) {
                         this.timeLeft--;
                         const h = Math.floor(this.timeLeft / 3600).toString().padStart(2, '0');
                         const m = Math.floor((this.timeLeft % 3600) / 60).toString().padStart(2, '0');
@@ -223,6 +251,7 @@
                 violations: 0,
                 showWarningModal: false,
                 showFinishModal: false,
+                showStartOverlay: true,
                 questions: [
                     {
                         id: 1,
@@ -275,20 +304,17 @@
                 ],
 
                 initExam() {
-                    // Fullscreen request
-                    // document.documentElement.requestFullscreen().catch((e) => console.log(e));
-
                     // Timer
                     setInterval(() => {
                         Alpine.store('exam').updateTime();
-                        if (Alpine.store('exam').timeLeft <= 0) {
+                        if (Alpine.store('exam').timeLeft <= 0 && Alpine.store('exam').isActive) {
                             this.submitExam();
                         }
                     }, 1000);
 
                     // Visibility Change (Anti-Cheat)
                     document.addEventListener('visibilitychange', () => {
-                        if (document.hidden) {
+                         if (document.hidden && Alpine.store('exam').isActive) {
                             this.violations++;
                             if (this.violations >= 3) {
                                 alert('Anda telah melanggar batas toleransi meninggalkan ujian. Ujian akan dikirim otomatis.');
@@ -305,6 +331,15 @@
                     };
                 },
 
+                beginExam() {
+                    this.showStartOverlay = false;
+                    Alpine.store('exam').startTimer();
+                    document.documentElement.requestFullscreen().catch((e) => {
+                        console.log("Fullscreen blocked", e);
+                        alert("Mohon izinkan Fullscreen untuk melanjutkan ujian.");
+                    });
+                },
+
                 prevQuestion() {
                     if (this.currentQuestion > 0) this.currentQuestion--;
                 },
@@ -319,8 +354,7 @@
                 
                 resumeExam() {
                     this.showWarningModal = false;
-                    // Try fullscreen again
-                    // document.documentElement.requestFullscreen().catch((e) => {});
+                    document.documentElement.requestFullscreen().catch((e) => {});
                 },
 
                 finishExam() {
@@ -329,6 +363,7 @@
 
                 submitExam() {
                      // In real app, submit form here
+                     document.exitFullscreen();
                      alert('Ujian Selesai! Jawaban tersimpan.');
                      window.location.href = "{{ route('student.dashboard') }}";
                 }
