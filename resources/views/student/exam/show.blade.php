@@ -339,7 +339,29 @@
                     document.addEventListener('fullscreenchange', onFullscreenChange);
                     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
                     document.addEventListener('mozfullscreenchange', onFullscreenChange);
-                    document.addEventListener('MSFullscreenChange', onFullscreenChange);
+                    document.addEventListener('msfullscreenchange', onFullscreenChange);
+
+                    // Disable Right Click
+                    document.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                    });
+
+                    // Disable Keyboard Shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        // F12
+                        if (e.key === 'F12') {
+                            e.preventDefault();
+                        }
+                        
+                        // Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+Shift+I
+                        if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V' || e.key === 'u' || e.key === 'U')) {
+                            e.preventDefault();
+                        }
+                        
+                        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+                            e.preventDefault();
+                        }
+                    });
                     
                     // Prevent closing window
                     window.onbeforeunload = function() {
