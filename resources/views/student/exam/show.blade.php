@@ -303,6 +303,16 @@
                     }
                 ],
 
+                handleViolation() {
+                    this.violations++;
+                    if (this.violations >= 3) {
+                        alert('Anda telah melanggar batas toleransi meninggalkan ujian. Ujian akan dikirim otomatis.');
+                        this.submitExam();
+                    } else {
+                        this.showWarningModal = true;
+                    }
+                },
+
                 initExam() {
                     // Timer
                     setInterval(() => {
@@ -315,15 +325,21 @@
                     // Visibility Change (Anti-Cheat)
                     document.addEventListener('visibilitychange', () => {
                          if (document.hidden && Alpine.store('exam').isActive) {
-                            this.violations++;
-                            if (this.violations >= 3) {
-                                alert('Anda telah melanggar batas toleransi meninggalkan ujian. Ujian akan dikirim otomatis.');
-                                this.submitExam();
-                            } else {
-                                this.showWarningModal = true;
-                            }
+                            this.handleViolation();
                         }
                     });
+
+                    // Fullscreen Exit Detection
+                    const onFullscreenChange = () => {
+                        if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal) {
+                            this.handleViolation();
+                        }
+                    };
+
+                    document.addEventListener('fullscreenchange', onFullscreenChange);
+                    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+                    document.addEventListener('mozfullscreenchange', onFullscreenChange);
+                    document.addEventListener('MSFullscreenChange', onFullscreenChange);
                     
                     // Prevent closing window
                     window.onbeforeunload = function() {
