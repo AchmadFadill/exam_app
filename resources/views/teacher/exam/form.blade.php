@@ -129,10 +129,7 @@
                             <span class="text-sm text-text-main">Acak Pilihan Jawaban</span>
                         </label>
 
-                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="checkbox" wire:model="show_score" class="w-5 h-5 text-primary rounded focus:ring-primary border-gray-300">
-                            <span class="text-sm text-text-main">Tampilkan Nilai Segera</span>
-                        </label>
+
                         
                          <div class="p-3 border border-gray-200 rounded-lg">
                              <label class="block text-sm font-medium text-text-main mb-1">Toleransi Pindah Tab</label>
