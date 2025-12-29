@@ -88,25 +88,6 @@
             </div>
         </div>
 
-        <!-- Pengaturan Ujian -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-             <h3 class="font-bold text-lg text-text-main mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-                Default Ujian
-            </h3>
-            <div>
-                <label class="block text-sm font-medium text-text-main mb-1">Toleransi Pindah Tab</label>
-                <div class="flex items-center gap-3">
-                    <div class="relative w-full">
-                        <input type="number" wire:model="tabTolerance" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary/20 transition-shadow">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span class="text-gray-400 text-sm">kali</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-xs text-text-muted mt-1">Jumlah maksimal siswa boleh berpindah tab sebelum ujian otomatis dihentikan.</p>
-                @error('tabTolerance') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-            </div>
-        </div>
+
     </div>
 </div>
