@@ -12,7 +12,6 @@ class Settings extends Component
     public $schoolName;
     public $academicYear;
     public $semester;
-    public $tabTolerance;
     public $logo; // For file upload
 
     public function mount()
@@ -21,7 +20,6 @@ class Settings extends Component
         $this->schoolName = 'SMAIT Baitul Muslim';
         $this->academicYear = '2025/2026';
         $this->semester = 'Ganjil';
-        $this->tabTolerance = 3;
     }
 
     public function save()
@@ -31,7 +29,6 @@ class Settings extends Component
             'schoolName' => 'required|string|max:255',
             'academicYear' => 'required|string|max:20',
             'semester' => 'required|in:Ganjil,Genap',
-            'tabTolerance' => 'required|integer|min:0',
             'logo' => 'nullable|image|max:1024', // 1MB Max
         ]);
 
