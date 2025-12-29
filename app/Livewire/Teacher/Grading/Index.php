@@ -18,6 +18,7 @@ class Index extends Component
                 'status' => 'needs_grading', // needs_grading, graded
                 'pending_count' => 5, // Essays to grade
                 'total_students' => 30,
+                'is_published' => false,
             ],
             [
                 'id' => 2,
@@ -27,6 +28,7 @@ class Index extends Component
                 'status' => 'graded',
                 'pending_count' => 0,
                 'total_students' => 28,
+                'is_published' => true,
             ]
         ];
 

@@ -25,18 +25,60 @@
     <!-- Filter Bar -->
     <x-monitor.filter-bar />
 
-    <!-- Student Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        @foreach($students as $student)
-        <x-monitor.student-card :student="$student">
-            <button class="px-2 py-1 text-xs border border-gray-200 rounded text-text-main hover:bg-gray-50">Detail</button>
-            @if($student['status'] == 'working')
-            <button class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100">Akhiri </button>
-            @else
-            <button class="px-2 py-1 text-xs border border-gray-200 rounded text-gray-300 cursor-not-allowed">Akhiri </button>
-            @endif
-        </x-monitor.student-card>
-        @endforeach
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Student Grid -->
+        <div class="lg:col-span-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($students as $student)
+                <x-monitor.student-card :student="$student">
+                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-text-main hover:bg-gray-50 uppercase font-bold tracking-wider">Detail</button>
+                    @if($student['status'] == 'working')
+                    <button class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 uppercase font-bold tracking-wider">Akhiri </button>
+                    @else
+                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-gray-300 cursor-not-allowed uppercase font-bold tracking-wider">Akhiri </button>
+                    @endif
+                </x-monitor.student-card>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Live Activity Log Sidebar -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col h-full max-h-[1000px]">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-text-main dark:text-white flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        Aktivitas Terbaru
+                    </h3>
+                    <span class="text-[10px] text-gray-400 font-mono">Live Update</span>
+                </div>
+                <div class="p-4 overflow-y-auto space-y-4 flex-1">
+                    @foreach($live_logs as $log)
+                    <div class="flex gap-3">
+                        <div class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full
+                            {{ $log['type'] === 'warning' ? 'bg-amber-500' : '' }}
+                            {{ $log['type'] === 'success' ? 'bg-green-500' : '' }}
+                            {{ $log['type'] === 'info' ? 'bg-blue-500' : '' }}
+                            {{ $log['type'] === 'primary' ? 'bg-indigo-500' : '' }}
+                        "></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-0.5">
+                                <p class="text-[11px] font-bold text-gray-900 dark:text-white truncate">{{ $log['student'] }}</p>
+                                <span class="text-[9px] font-mono text-gray-400 flex-shrink-0">{{ $log['time'] }}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ $log['activity'] }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-700/20 border-t border-gray-100 dark:border-gray-700">
+                    <button class="w-full text-[10px] text-primary font-bold hover:underline">Lihat Semua History</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

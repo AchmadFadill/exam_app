@@ -34,7 +34,7 @@
                          <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
                             {{ $exam['date'] }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap space-y-1">
                             @if($exam['pending_count'] > 0)
                                 <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
                                     Butuh Koreksi ({{ $exam['pending_count'] }})
@@ -44,12 +44,28 @@
                                     Selesai Dinilai
                                 </span>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            @if($exam['pending_count'] > 0)
-                            <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-lg">Koreksi</a>
+                            <br>
+                            @if($exam['is_published'] ?? false)
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 text-[10px] uppercase tracking-wider">
+                                    Sudah Terbit (Published)
+                                </span>
                             @else
-                            <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-text-muted hover:text-primary">Lihat Detail</a>
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800 text-[10px] uppercase tracking-wider">
+                                    Belum Terbit (Draft)
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                            @if(!($exam['is_published'] ?? false) && $exam['pending_count'] == 0)
+                                <button type="button" class="text-blue-600 hover:text-blue-800 font-bold bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors">
+                                    Publish Nilai
+                                </button>
+                            @endif
+
+                            @if($exam['pending_count'] > 0)
+                                <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1.5 rounded-lg">Koreksi</a>
+                            @else
+                                <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-text-muted hover:text-primary">Lihat Detail</a>
                             @endif
                         </td>
                     </tr>
