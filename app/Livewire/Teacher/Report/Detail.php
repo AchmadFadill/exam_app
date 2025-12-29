@@ -36,9 +36,34 @@ class Detail extends Component
             ['name' => 'Eka Putri', 'score' => 75, 'status' => 'Lulus', 'submitted_at' => '08:55'],
         ];
 
+        $most_failed_questions = [
+            [
+                'number' => 12,
+                'text' => 'Berapakah hasil dari integral sin(x) dx?',
+                'failed_count' => 15,
+                'failed_percentage' => 46,
+                'correct_answer' => '-cos(x) + C'
+            ],
+            [
+                'number' => 5,
+                'text' => 'Tentukan turunan pertama dari f(x) = x³ - 2x + 5.',
+                'failed_count' => 10,
+                'failed_percentage' => 31,
+                'correct_answer' => '3x² - 2'
+            ],
+            [
+                'number' => 28,
+                'text' => 'Jika log 2 = a dan log 3 = b, maka log 18 adalah...',
+                'failed_count' => 8,
+                'failed_percentage' => 25,
+                'correct_answer' => 'a + 2b'
+            ],
+        ];
+
         return view('teacher.report.detail', [
             'exam' => $exam,
-            'students' => $students
+            'students' => $students,
+            'most_failed_questions' => $most_failed_questions
         ])->extends('layouts.teacher')->section('content');
     }
 }
