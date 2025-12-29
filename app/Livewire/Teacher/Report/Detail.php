@@ -29,11 +29,11 @@ class Detail extends Component
         ];
 
         $students = [
-            ['name' => 'Ahmad Fadhil', 'score' => 98, 'status' => 'Lulus', 'submitted_at' => '08:45'],
-            ['name' => 'Budi Santoso', 'score' => 85, 'status' => 'Lulus', 'submitted_at' => '09:00'],
-            ['name' => 'Citra Dewi', 'score' => 90, 'status' => 'Lulus', 'submitted_at' => '08:50'],
-            ['name' => 'Doni Pratama', 'score' => 65, 'status' => 'Remedial', 'submitted_at' => '09:15'],
-            ['name' => 'Eka Putri', 'score' => 75, 'status' => 'Lulus', 'submitted_at' => '08:55'],
+            ['id' => 1, 'name' => 'Ahmad Fadhil', 'score' => 98, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:45'],
+            ['id' => 2, 'name' => 'Budi Santoso', 'score' => 85, 'status' => 'Lulus', 'started_at' => '08:05', 'submitted_at' => '09:00'],
+            ['id' => 3, 'name' => 'Citra Dewi', 'score' => 90, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:50'],
+            ['id' => 4, 'name' => 'Doni Pratama', 'score' => 65, 'status' => 'Remedial', 'started_at' => '08:10', 'submitted_at' => '09:15'],
+            ['id' => 5, 'name' => 'Eka Putri', 'score' => 75, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:55'],
         ];
 
         $most_failed_questions = [
@@ -63,7 +63,7 @@ class Detail extends Component
         return view('teacher.report.detail', [
             'exam' => $exam,
             'students' => $students,
-            'most_failed_questions' => $most_failed_questions
+            'most_failed_questions' => $most_failed_questions,
         ])->extends('layouts.teacher')->section('content');
     }
 }
