@@ -20,7 +20,6 @@ class Form extends Component
     public $shuffle_questions = false;
     public $shuffle_answers = false;
     public $tab_tolerance = 3;
-    public $show_score = true;
 
     // Data Sources
     public $availableClasses = ['X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPS 1'];
