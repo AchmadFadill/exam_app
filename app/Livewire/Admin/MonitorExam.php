@@ -29,8 +29,17 @@ class MonitorExam extends Component
              ['name' => 'Indah Permata', 'class' => 'XI IPS 1', 'status' => 'working', 'progress' => '15/30', 'w' => '50%', 'tab_alert' => 2],
         ];
 
+        $live_logs = [
+            ['time' => '09:30:10', 'student' => 'Aditya Pratama', 'activity' => 'Menjawab Soal #15', 'type' => 'info'],
+            ['time' => '09:28:05', 'student' => 'Eko Kurniawan', 'activity' => 'Keluar Fullscreen', 'type' => 'warning'],
+            ['time' => '09:27:30', 'student' => 'Bunga Citra', 'activity' => 'Menjawab Soal #28', 'type' => 'info'],
+            ['time' => '09:26:15', 'student' => 'Chandra Wijaya', 'activity' => 'Menyelesaikan Ujian', 'type' => 'success'],
+            ['time' => '09:25:00', 'student' => 'Dewi Sartika', 'activity' => 'Masuk ke Halaman Ujian', 'type' => 'primary'],
+        ];
+
         return view('admin.monitor-exam', [
-            'students' => $students
+            'students' => $students,
+            'live_logs' => $live_logs
         ])->extends('layouts.admin')->section('content');
     }
 

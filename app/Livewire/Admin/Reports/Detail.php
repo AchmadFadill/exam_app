@@ -29,11 +29,11 @@ class Detail extends Component
         ];
 
         $students = [
-            ['name' => 'Ahmad Fadhil', 'score' => 98, 'status' => 'Lulus', 'submitted_at' => '08:45'],
-            ['name' => 'Budi Santoso', 'score' => 85, 'status' => 'Lulus', 'submitted_at' => '09:00'],
-            ['name' => 'Citra Dewi', 'score' => 90, 'status' => 'Lulus', 'submitted_at' => '08:50'],
-            ['name' => 'Doni Pratama', 'score' => 65, 'status' => 'Remedial', 'submitted_at' => '09:15'],
-            ['name' => 'Eka Putri', 'score' => 75, 'status' => 'Lulus', 'submitted_at' => '08:55'],
+            ['name' => 'Ahmad Fadhil', 'score' => 98, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:45'],
+            ['name' => 'Budi Santoso', 'score' => 85, 'status' => 'Lulus', 'started_at' => '08:05', 'submitted_at' => '09:00'],
+            ['name' => 'Citra Dewi', 'score' => 90, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:50'],
+            ['name' => 'Doni Pratama', 'score' => 65, 'status' => 'Remedial', 'started_at' => '08:10', 'submitted_at' => '09:15'],
+            ['name' => 'Eka Putri', 'score' => 75, 'status' => 'Lulus', 'started_at' => '08:00', 'submitted_at' => '08:55'],
             // Add more dummy data as needed
         ];
 
