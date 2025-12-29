@@ -44,5 +44,33 @@
     </div>
     
     @livewireScripts
+
+    <!-- Notification System -->
+    <div x-data="{ 
+        notifications: [],
+        add(message) {
+            this.notifications.push({ id: Date.now(), message });
+            setTimeout(() => {
+                this.notifications = this.notifications.filter(n => n.id !== this.notifications[0].id);
+            }, 3000);
+        }
+    }" 
+    @notify.window="add($event.detail[0].message)"
+    class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3">
+        <template x-for="n in notifications" :key="n.id">
+            <div x-transition:enter="transition ease-out duration-300 transform translate-y-4 opacity-0"
+                 x-transition:enter-start="translate-y-4 opacity-0"
+                 x-transition:enter-end="translate-y-0 opacity-100"
+                 x-transition:leave="transition ease-in duration-200 transform translate-y-2 opacity-0"
+                 class="bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-white/10 min-w-80">
+                <div class="bg-green-500/20 p-2 rounded-xl">
+                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold" x-text="n.message"></p>
+                </div>
+            </div>
+        </template>
+    </div>
 </body>
 </html>
