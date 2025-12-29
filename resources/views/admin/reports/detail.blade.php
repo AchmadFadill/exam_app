@@ -48,7 +48,8 @@
                     <tr>
                         <th class="px-6 py-4">No</th>
                         <th class="px-6 py-4">Nama Siswa</th>
-                        <th class="px-6 py-4">Waktu Submit</th>
+                        <th class="px-6 py-4 text-center">Waktu Mulai</th>
+                        <th class="px-6 py-4 text-center">Waktu Submit</th>
                         <th class="px-6 py-4 text-center">Status</th>
                         <th class="px-6 py-4 text-center">Nilai</th>
                     </tr>
@@ -57,10 +58,9 @@
                     @foreach($students as $index => $student)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-6 py-4 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
-                        <td class="px-6 py-4">
-                            <span class="font-medium text-gray-900 dark:text-white">{{ $student['name'] }}</span>
-                        </td>
-                        <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ $student['submitted_at'] }}</td>
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $student['name'] }}</td>
+                        <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-300 font-mono text-xs">{{ $student['started_at'] }}</td>
+                        <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-300 font-mono text-xs">{{ $student['submitted_at'] }}</td>
                         <td class="px-6 py-4 text-center">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student['status'] === 'Lulus' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' }}">
                                 {{ $student['status'] }}

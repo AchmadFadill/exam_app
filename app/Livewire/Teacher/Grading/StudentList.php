@@ -9,6 +9,14 @@ class StudentList extends Component
     public $examId;
     public $examName = 'Biologi Dasar - UTS';
     public $className = 'XI IPA 1';
+    public $isPublished = false;
+
+    public function publish()
+    {
+        // Just for demo purposes
+        $this->isPublished = true;
+        $this->dispatch('notify', ['message' => 'Nilai ujian berhasil dipublikasikan!']);
+    }
 
     // Dummy Data
     public $students = [
