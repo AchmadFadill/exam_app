@@ -172,7 +172,8 @@
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Peringatan Pelanggaran!</h3>
             <p class="text-gray-600 mb-6">
-                Anda terdeteksi meninggalkan halaman ujian. Ini adalah pelanggaran <span class="font-bold text-red-600" x-text="violations"></span> dari <span class="font-bold">3</span>.
+                <span class="block text-lg font-semibold text-red-600 mb-2" x-text="violationMessage"></span>
+                Ini adalah pelanggaran <span class="font-bold text-red-600" x-text="violations"></span> dari <span class="font-bold">3</span>.
                 <br><br>
                 Jika Anda melanggar lebih dari 3 kali, ujian akan otomatis dihentikan.
             </p>
@@ -249,6 +250,7 @@
                 answers: {},
                 flags: {},
                 violations: 0,
+                violationMessage: '',
                 showWarningModal: false,
                 showFinishModal: false,
                 showStartOverlay: true,
@@ -303,13 +305,22 @@
                     }
                 ],
 
-                handleViolation() {
+                handleViolation(message) {
+                    if (this.showFinishModal) return; // Ignore violations if user is finishing
+                    
                     this.violations++;
+                    this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
+                    
                     if (this.violations >= 3) {
-                        alert('Anda telah melanggar batas toleransi meninggalkan ujian. Ujian akan dikirim otomatis.');
+                        alert('Batas pelanggaran tercapai. Ujian Anda akan otomatis dikirim.');
                         this.submitExam();
                     } else {
                         this.showWarningModal = true;
+                        // For extra safety, ensure we exit fullscreen when showing warning 
+                        // so they can't bypass it easily, though normally they are already out
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
                     }
                 },
 
@@ -325,14 +336,14 @@
                     // Visibility Change (Anti-Cheat)
                     document.addEventListener('visibilitychange', () => {
                          if (document.hidden && Alpine.store('exam').isActive) {
-                            this.handleViolation();
+                            this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
                         }
                     });
 
                     // Fullscreen Exit Detection
                     const onFullscreenChange = () => {
-                        if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal) {
-                            this.handleViolation();
+                        if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal) {
+                            this.handleViolation('Anda keluar dari mode layar penuh (fullscreen).');
                         }
                     };
 
