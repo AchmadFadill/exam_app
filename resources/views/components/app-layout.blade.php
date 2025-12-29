@@ -72,5 +72,61 @@
             </div>
         </template>
     </div>
+    <!-- Idle Logout System -->
+    <div x-data="{ 
+        idleTimeout: 15 * 60 * 1000, // 15 Minutes
+        warningThreshold: 60 * 1000, // Show warning 60 seconds before
+        lastActivity: Date.now(),
+        showWarning: false,
+        countdown: 60,
+
+        init() {
+            // Register activity trackers
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+                window.addEventListener(event, () => this.resetTimer());
+            });
+
+            // Periodic check
+            setInterval(() => {
+                let now = Date.now();
+                let diff = now - this.lastActivity;
+                let remaining = this.idleTimeout - diff;
+
+                if (remaining <= this.warningThreshold && remaining > 0) {
+                    this.showWarning = true;
+                    this.countdown = Math.ceil(remaining / 1000);
+                } else if (remaining <= 0) {
+                    window.location.href = '/'; // Fallback to home/login
+                } else {
+                    this.showWarning = false;
+                }
+            }, 1000);
+        },
+
+        resetTimer() {
+            this.lastActivity = Date.now();
+            this.showWarning = false;
+        }
+    }">
+        <!-- Modal Peringatan Idle -->
+        <template x-if="showWarning">
+            <div class="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-2xl text-center max-w-sm w-full border border-gray-100 dark:border-gray-700 transform transition-all scale-100">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 mb-6">
+                        <svg class="h-8 w-8 text-amber-600 dark:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-2">Sesi Akan Berakhir</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm leading-relaxed">
+                        Anda sudah tidak aktif dalam waktu lama. Sistem akan mengeluarkan Anda secara otomatis dalam <span class="font-bold text-red-600 dark:text-red-400" x-text="countdown"></span> detik.
+                    </p>
+                    <button @click="resetTimer()" class="w-full bg-primary hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none transform hover:-translate-y-0.5">
+                        Lanjutkan Sesi
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
 </body>
 </html>
