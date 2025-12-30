@@ -13,7 +13,7 @@
                 <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-contain">
             </div>
             <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-                Login Siswa
+                Portal Siswa
             </h2>
             <p class="mt-2 text-sm text-gray-600">
                 CBT SMAIT Baitul Muslim

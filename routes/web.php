@@ -6,6 +6,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Staff (Admin & Guru) Login Route
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
 // Admin Routes
 Route::prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
