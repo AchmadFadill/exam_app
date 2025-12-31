@@ -21,6 +21,12 @@ class ManageTeacher extends Component
     public $selectedTeacher = null;
     public $search = '';
 
+    // Bulk Action States
+    public $selectedTeachers = [];
+    public $selectAll = false;
+    public $showBulkResetPasswordModal = false;
+    public $showBulkDeleteModal = false;
+
     public function openAddModal()
     {
         $this->reset('teacherForm');
@@ -72,6 +78,52 @@ class ManageTeacher extends Component
         // Dummy reset logic
         $this->showResetPasswordModal = false;
         $this->dispatch('notify', ['message' => 'Password guru berhasil direset!']);
+    }
+
+    // Bulk Action Methods
+    public function openBulkResetPasswordModal()
+    {
+        if (empty($this->selectedTeachers)) {
+            $this->dispatch('notify', ['message' => 'Pilih guru terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkResetPasswordModal = true;
+    }
+
+    public function openBulkDeleteModal()
+    {
+        if (empty($this->selectedTeachers)) {
+            $this->dispatch('notify', ['message' => 'Pilih guru terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function bulkResetPassword()
+    {
+        // Dummy bulk reset logic
+        $this->showBulkResetPasswordModal = false;
+        $this->selectedTeachers = [];
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => 'Password guru terpilih berhasil direset massal!']);
+    }
+
+    public function bulkDelete()
+    {
+        // Dummy bulk delete logic
+        $this->showBulkDeleteModal = false;
+        $this->selectedTeachers = [];
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => 'Data guru terpilih berhasil dihapus massal!', 'type' => 'success']);
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedTeachers = [1, 2, 3, 4, 5];
+        } else {
+            $this->selectedTeachers = [];
+        }
     }
 
     public function render()

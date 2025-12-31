@@ -27,6 +27,13 @@ class ManageStudent extends Component
     public $selectedStudent = null;
     public $search = '';
 
+    // Bulk Action States
+    public $selectedStudents = [];
+    public $selectAll = false;
+    public $showBulkClassModal = false;
+    public $showBulkDeleteModal = false;
+    public $bulkClass = '';
+
     public function openAddModal()
     {
         $this->reset('studentForm');
@@ -92,6 +99,55 @@ class ManageStudent extends Component
         // Dummy import logic
         $this->showImportModal = false;
         $this->dispatch('notify', ['message' => 'Data siswa berhasil diimport!']);
+    }
+
+    // Bulk Action Methods
+    public function openBulkClassModal()
+    {
+        if (empty($this->selectedStudents)) {
+            $this->dispatch('notify', ['message' => 'Pilih siswa terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->bulkClass = '';
+        $this->showBulkClassModal = true;
+    }
+
+    public function openBulkDeleteModal()
+    {
+        if (empty($this->selectedStudents)) {
+            $this->dispatch('notify', ['message' => 'Pilih siswa terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function saveBulkClass()
+    {
+        // Dummy bulk save logic
+        $this->showBulkClassModal = false;
+        $this->selectedStudents = []; // Reset selection
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => 'Kelas siswa terpilih berhasil diubah!']);
+    }
+
+    public function bulkDelete()
+    {
+         // Dummy bulk delete logic
+         $this->showBulkDeleteModal = false;
+         $this->selectedStudents = []; // Reset selection
+         $this->selectAll = false;
+         $this->dispatch('notify', ['message' => 'Data siswa terpilih berhasil dihapus massal!', 'type' => 'success']);
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            // In a real app, you would select all IDs from the DB/Current Page
+            // For this dummy UI, we'll just pre-fill some IDs to simulate it
+            $this->selectedStudents = [1, 2, 3, 4, 5]; 
+        } else {
+            $this->selectedStudents = [];
+        }
     }
 
     public function render()

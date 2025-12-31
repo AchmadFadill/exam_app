@@ -39,6 +39,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-6 py-4 w-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                            </div>
+                        </th>
                         <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">NIS / Nama</th>
                         <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Kelas</th>
                         <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Email</th>
@@ -48,6 +53,11 @@
                 <tbody class="divide-y divide-gray-50">
                     @forelse($students as $student)
                     <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student['id'] }}" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                            </div>
+                        </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
@@ -246,6 +256,95 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showResetPasswordModal', false)">Batal</x-button>
                 <x-button variant="primary" class="bg-amber-600 hover:bg-amber-700" wire:click="resetPassword">Ya, Reset</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Bulk Action Floating Bar -->
+    @if(count($selectedStudents) > 0)
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-6 py-4 rounded-full shadow-2xl border border-gray-100 flex items-center gap-6 z-40 animate-bounce-in">
+        <div class="flex items-center gap-2">
+            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{{ count($selectedStudents) }}</span>
+            <span class="text-sm font-medium text-gray-600">Siswa Terpilih</span>
+        </div>
+        <div class="h-6 w-px bg-gray-200"></div>
+        <button wire:click="openBulkClassModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-primary transition-colors">
+            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-primary/10 text-gray-500 group-hover:text-primary transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            </div>
+            Ubah Kelas
+        </button>
+        <div class="h-6 w-px bg-gray-200"></div>
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors">
+            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-500 group-hover:text-red-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+            Hapus Massal
+        </button>
+    </div>
+    @endif
+
+    <!-- Bulk Edit Class Modal -->
+    @if($showBulkClassModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showBulkClassModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-lg font-bold text-text-main">Ubah Kelas Massal</h3>
+                <button wire:click="$set('showBulkClassModal', false)" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm">
+                    <p class="font-semibold">Info:</p>
+                    <p>Anda akan mengubah kelas untuk <span class="font-bold">{{ count($selectedStudents) }}</span> siswa yang dipilih.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas Baru</label>
+                    <select wire:model="bulkClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        <option value="">Pilih Kelas</option>
+                        <option value="X IPA 1">X IPA 1</option>
+                        <option value="X IPA 2">X IPA 2</option>
+                        <option value="X IPS 1">X IPS 1</option>
+                        <option value="XI IPA 1">XI IPA 1</option>
+                        <option value="XI IPS 2">XI IPS 2</option>
+                        <option value="XII IPA 1">XII IPA 1</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('showBulkClassModal', false)">Batal</x-button>
+                <x-button variant="primary" wire:click="saveBulkClass">Simpan Perubahan</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Bulk Delete Modal -->
+    @if($showBulkDeleteModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showBulkDeleteModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Siswa Massal?</h3>
+                <p class="text-gray-500">Anda akan menghapus <span class="font-bold">{{ count($selectedStudents) }}</span> siswa yang dipilih. Data yang dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
+                <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
             </div>
         </div>
     </div>

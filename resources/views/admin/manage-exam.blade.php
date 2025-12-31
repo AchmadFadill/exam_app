@@ -15,19 +15,27 @@
     </div>
 
     <!-- Exam List -->
+    <div class="flex items-center gap-2">
+        <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-4 h-4 rounded text-primary border-gray-300 focus:ring-primary">
+        <label for="selectAllExams" class="text-sm text-gray-600 font-medium cursor-pointer">Pilih Semua</label>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($exams as $exam)
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
             <div class="p-5 flex-1">
                 <div class="flex justify-between items-start mb-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                        @if($exam['status'] == 'completed') bg-gray-100 text-gray-800
-                        @elseif($exam['status'] == 'ongoing') bg-green-100 text-green-800 animate-pulse
-                        @else bg-blue-100 text-blue-800 @endif">
-                        @if($exam['status'] == 'completed') Selesai
-                        @elseif($exam['status'] == 'ongoing') Sedang Berlangsung
-                        @else Terjadwal @endif
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-5 h-5 rounded text-primary border-gray-300 focus:ring-primary">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            @if($exam['status'] == 'completed') bg-gray-100 text-gray-800
+                            @elseif($exam['status'] == 'ongoing') bg-green-100 text-green-800 animate-pulse
+                            @else bg-blue-100 text-blue-800 @endif">
+                            @if($exam['status'] == 'completed') Selesai
+                            @elseif($exam['status'] == 'ongoing') Sedang Berlangsung
+                            @else Terjadwal @endif
+                        </span>
+                    </div>
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-gray-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
@@ -82,4 +90,45 @@
         </div>
         @endforeach
     </div>
+
+    <!-- Bulk Action Floating Bar -->
+    @if(count($selectedExams) > 0)
+    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-6 py-4 rounded-full shadow-2xl border border-gray-100 flex items-center gap-6 z-40 animate-bounce-in">
+        <div class="flex items-center gap-2">
+            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{{ count($selectedExams) }}</span>
+            <span class="text-sm font-medium text-gray-600">Ujian Terpilih</span>
+        </div>
+        <div class="h-6 w-px bg-gray-200"></div>
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors">
+            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-500 group-hover:text-red-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+            Hapus Massal
+        </button>
+    </div>
+    @endif
+
+    <!-- Bulk Delete Modal -->
+    @if($showBulkDeleteModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showBulkDeleteModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Ujian Massal?</h3>
+                <p class="text-gray-500">Anda akan menghapus <span class="font-bold">{{ count($selectedExams) }}</span> ujian yang dipilih. Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
+                <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

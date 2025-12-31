@@ -6,6 +6,37 @@ use Livewire\Component;
 
 class ManageExam extends Component
 {
+    // Bulk Action States
+    public $selectedExams = [];
+    public $selectAll = false;
+    public $showBulkDeleteModal = false;
+
+    public function openBulkDeleteModal()
+    {
+        if (empty($this->selectedExams)) {
+            $this->dispatch('notify', ['message' => 'Pilih ujian terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function bulkDelete()
+    {
+        // Dummy bulk delete logic
+        $this->showBulkDeleteModal = false;
+        $this->selectedExams = [];
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedExams = [1, 2, 3];
+        } else {
+            $this->selectedExams = [];
+        }
+    }
     public function render()
     {
         // Dummy Exams Data (Replicated from Teacher for Admin)
