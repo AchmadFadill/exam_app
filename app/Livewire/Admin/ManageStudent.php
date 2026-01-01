@@ -34,6 +34,11 @@ class ManageStudent extends Component
     public $showBulkDeleteModal = false;
     public $bulkClass = '';
 
+    // Export Filter States
+    public $showExportModal = false;
+    public $exportClass = '';
+    public $exportPeriod = '';
+
     public function openAddModal()
     {
         $this->reset('studentForm');
@@ -99,6 +104,23 @@ class ManageStudent extends Component
         // Dummy import logic
         $this->showImportModal = false;
         $this->dispatch('notify', ['message' => 'Data siswa berhasil diimport!']);
+    }
+
+    public function exportStudents()
+    {
+        $this->reset(['exportClass', 'exportPeriod']);
+        $this->showExportModal = true;
+    }
+
+    public function processExport()
+    {
+        // Dummy export logic with filters
+        $message = 'Data siswa sedang diexport';
+        if ($this->exportClass) $message .= ' untuk kelas ' . $this->exportClass;
+        if ($this->exportPeriod) $message .= ' periode ' . $this->exportPeriod;
+        
+        $this->showExportModal = false;
+        $this->dispatch('notify', ['message' => $message . '...']);
     }
 
     // Bulk Action Methods

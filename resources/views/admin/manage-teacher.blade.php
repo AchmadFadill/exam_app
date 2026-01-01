@@ -16,12 +16,26 @@
                 </span>
                 <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama atau email...">
             </div>
-            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Guru
-            </x-button>
+            <div class="flex gap-2">
+                <x-button wire:click="exportTeachers" variant="secondary" class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export Excel
+                </x-button>
+                <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Import Excel
+                </x-button>
+                <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Guru
+                </x-button>
+            </div>
         </div>
     </div>
 
@@ -135,6 +149,61 @@
             <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)">Batal</x-button>
                 <x-button variant="primary" wire:click="saveTeacher">Simpan Perubahan</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Import Modal -->
+    @if($showImportModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showImportModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-lg font-bold text-text-main">Import Guru dari Excel</h3>
+                <button wire:click="$set('showImportModal', false)" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-start gap-3">
+                    <svg class="h-5 w-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold mb-1">Instruksi Import:</p>
+                        <p>Pastikan format Excel Anda sesuai dengan template. Kolom wajib: Nama, Email, Mata Pelajaran, Password.</p>
+                        <a href="#" class="mt-2 inline-block font-bold underline">Download Template Excel</a>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih File Excel (.xlsx, .xls)</label>
+                    <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer group">
+                        <input type="file" wire:model="importFile" class="hidden" id="fileImport">
+                        <label for="fileImport" class="cursor-pointer">
+                            <svg class="h-10 w-10 text-gray-400 group-hover:text-primary mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="text-sm text-gray-600">Klik untuk upload atau drag and drop</p>
+                            <p class="text-xs text-gray-400 mt-1">Maksimal file 2MB</p>
+                        </label>
+                    </div>
+                    @if($importFile)
+                        <div class="mt-3 flex items-center justify-between p-2 bg-green-50 rounded border border-green-100">
+                            <span class="text-xs text-green-700 truncate">{{ $importFile->getClientOriginalName() }}</span>
+                            <button wire:click="$set('importFile', null)" class="text-red-500 hover:text-red-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('showImportModal', false)">Batal</x-button>
+                <x-button variant="primary" wire:click="importTeachers" :disabled="!$importFile">Import Sekarang</x-button>
             </div>
         </div>
     </div>

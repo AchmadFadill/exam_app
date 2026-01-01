@@ -4,8 +4,11 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 
+use Livewire\WithFileUploads;
+
 class ManageTeacher extends Component
 {
+    use WithFileUploads;
     public $showAddModal = false;
     public $showEditModal = false;
     public $showDeleteModal = false;
@@ -26,6 +29,8 @@ class ManageTeacher extends Component
     public $selectAll = false;
     public $showBulkResetPasswordModal = false;
     public $showBulkDeleteModal = false;
+    public $showImportModal = false;
+    public $importFile;
 
     public function openAddModal()
     {
@@ -78,6 +83,25 @@ class ManageTeacher extends Component
         // Dummy reset logic
         $this->showResetPasswordModal = false;
         $this->dispatch('notify', ['message' => 'Password guru berhasil direset!']);
+    }
+
+    public function openImportModal()
+    {
+        $this->reset('importFile');
+        $this->showImportModal = true;
+    }
+
+    public function importTeachers()
+    {
+        // Dummy import logic
+        $this->showImportModal = false;
+        $this->dispatch('notify', ['message' => 'Data guru berhasil diimport!']);
+    }
+
+    public function exportTeachers()
+    {
+        // Dummy export logic
+        $this->dispatch('notify', ['message' => 'Data guru sedang diexport...']);
     }
 
     // Bulk Action Methods

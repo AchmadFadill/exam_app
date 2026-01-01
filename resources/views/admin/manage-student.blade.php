@@ -17,6 +17,12 @@
                 <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama, NIS, atau email...">
             </div>
             <div class="flex gap-2">
+                <x-button wire:click="exportStudents" variant="secondary" class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export Excel
+                </x-button>
                 <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -345,6 +351,60 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
                 <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Export Modal -->
+    @if($showExportModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showExportModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-lg font-bold text-text-main">Export Data Siswa</h3>
+                <button wire:click="$set('showExportModal', false)" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-green-50 text-green-700 rounded-lg text-sm flex items-start gap-3">
+                    <svg class="h-5 w-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold mb-1">Opsi Export:</p>
+                        <p>Pilih filter di bawah jika ingin mengexport data spesifik. Kosongkan untuk mengexport semua data.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter Kelas</label>
+                    <select wire:model="exportClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        <option value="">Semua Kelas</option>
+                        <option value="X IPA 1">X IPA 1</option>
+                        <option value="X IPA 2">X IPA 2</option>
+                        <option value="X IPS 1">X IPS 1</option>
+                        <option value="XI IPA 1">XI IPA 1</option>
+                        <option value="XI IPS 2">XI IPS 2</option>
+                        <option value="XII IPA 1">XII IPA 1</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter Periode/Tahun Masuk</label>
+                    <select wire:model="exportPeriod" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        <option value="">Semua Periode</option>
+                        <option value="2025/2026">2025/2026</option>
+                        <option value="2024/2025">2024/2025</option>
+                        <option value="2023/2024">2023/2024</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <x-button variant="secondary" wire:click="$set('showExportModal', false)">Batal</x-button>
+                <x-button variant="primary" wire:click="processExport">Download Excel</x-button>
             </div>
         </div>
     </div>
