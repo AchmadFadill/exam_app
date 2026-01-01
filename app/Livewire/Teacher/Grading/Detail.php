@@ -57,12 +57,23 @@ class Detail extends Component
         ]
     ];
 
+    public function updatedAnswers()
+    {
+        // Recalculate is done in render automatically or via computed property
+    }
+
+    public function getTotalScoreProperty()
+    {
+        $essayScore = collect($this->answers)->sum('score');
+        return $this->pgScore + $essayScore;
+    }
+
     public function render()
     {
         return view('teacher.grading.detail', [
             'student_name' => 'Aditya Pratama',
             'grade' => 'XI IPA 1',
-            'current_score' => 85, // Total score so far
+            'current_score' => $this->totalScore, 
             'pg_score' => $this->pgScore,
             'max_pg_score' => $this->maxPgScore,
             'pg_answers' => $this->pgAnswers
