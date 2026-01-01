@@ -46,10 +46,13 @@
             <div class="p-6 flex-1 flex flex-col">
                 <div class="flex justify-between items-start mb-4">
                     <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">Matematika</span>
-                    <span class="flex items-center text-sm text-gray-500">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        90 Menit
-                    </span>
+                    <div class="text-right">
+                        <span class="flex items-center justify-end text-sm text-gray-500">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            90 Menit
+                        </span>
+                        <span class="text-xs text-gray-400 block mt-0.5">08:00 - 09:30</span>
+                    </div>
                 </div>
                 
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Ujian Tengah Semester</h3>
@@ -86,10 +89,13 @@
             <div class="p-6 flex-1 flex flex-col">
                 <div class="flex justify-between items-start mb-4">
                     <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">Bahasa Indonesia</span>
-                    <span class="flex items-center text-sm text-gray-500">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        60 Menit
-                    </span>
+                    <div class="text-right">
+                        <span class="flex items-center justify-end text-sm text-gray-500">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            60 Menit
+                        </span>
+                        <span class="text-xs text-gray-400 block mt-0.5">10:00 - 11:00</span>
+                    </div>
                 </div>
                 
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Ulangan Harian 1</h3>
@@ -113,10 +119,13 @@
             <div class="p-6 flex-1 flex flex-col">
                 <div class="flex justify-between items-start mb-4">
                     <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded">Fisika</span>
-                    <span class="flex items-center text-sm text-gray-500">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        45 Menit
-                    </span>
+                    <div class="text-right">
+                        <span class="flex items-center justify-end text-sm text-gray-500">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            45 Menit
+                        </span>
+                        <span class="text-xs text-gray-400 block mt-0.5">13:00 - 13:45</span>
+                    </div>
                 </div>
                 
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Kuis Fisika Dasar</h3>

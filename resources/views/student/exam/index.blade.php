@@ -39,7 +39,8 @@
                             Ujian Tengah Semester
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            90 Menit
+                            90 Menit <br>
+                            <span class="text-xs text-gray-400">08:00 - 09:30</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
@@ -67,7 +68,8 @@
                             Ulangan Harian 1
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            60 Menit
+                            60 Menit <br>
+                            <span class="text-xs text-gray-400">10:00 - 11:00</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 animate-pulse">
@@ -97,7 +99,8 @@
                             Kuis Fisika Dasar
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                            45 Menit
+                            45 Menit <br>
+                            <span class="text-xs text-gray-400">13:00 - 13:45</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500">
