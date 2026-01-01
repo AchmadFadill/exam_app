@@ -11,6 +11,8 @@ class ManageExam extends Component
     public $selectAll = false;
     public $showBulkDeleteModal = false;
 
+
+
     public function openBulkDeleteModal()
     {
         if (empty($this->selectedExams)) {
@@ -47,7 +49,11 @@ class ManageExam extends Component
                 'subject' => 'Matematika',
                 'class' => 'XI IPA 1',
                 'date' => '2025-12-23',
-                'duration' => 90,
+                'start_time' => '',
+                'end_time' => '',
+                'token' => '',
+                'duration' => 60,
+                'default_score' => 5,
                 'status' => 'scheduled', // scheduled, ongoing, completed
                 'questions_count' => 30,
             ],

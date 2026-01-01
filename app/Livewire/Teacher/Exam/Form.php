@@ -15,6 +15,7 @@ class Form extends Component
     public $end_time;
     public $duration; // in minutes
     public $passing_grade = 70;
+    public $default_score = 5;
     
     // Settings
     public $shuffle_questions = false;

@@ -103,6 +103,11 @@
                          <input type="number" wire:model="passing_grade" class="w-full border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main" placeholder="70">
                     </div>
 
+                    <div>
+                         <label class="block text-sm font-medium text-text-main mb-1">Bobot Poin Default</label>
+                         <input type="number" wire:model="default_score" class="w-full border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main" placeholder="5">
+                    </div>
+
                     <div class="col-span-1 md:col-span-2">
                         <label class="block text-sm font-medium text-text-main mb-1">Kode Ujian (Token)</label>
                         <div class="flex gap-2">

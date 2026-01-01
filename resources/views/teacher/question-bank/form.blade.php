@@ -90,10 +90,7 @@
             </div>
             @endif
 
-            <div class="border-t border-gray-100 pt-6">
-                 <label class="block text-sm font-medium text-text-main mb-1">Poin Soal</label>
-                 <input type="number" wire:model="points" class="w-24 border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-text-main" min="0">
-            </div>
+
 
             <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
                 <a href="{{ route('teacher.question-bank.index') }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-text-main hover:bg-gray-50 font-medium transition-colors">Batal</a>
