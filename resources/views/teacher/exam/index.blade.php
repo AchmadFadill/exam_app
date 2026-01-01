@@ -41,7 +41,7 @@
                         </button>
                         <div x-show="open" class="absolute right-0 mt-2 w-48 bg-bg-surface rounded-md shadow-lg py-1 z-10 border border-gray-100">
                             <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Duplikasi</a>
+                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Duplikasi</button>
                             <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</a>
                         </div>
                     </div>

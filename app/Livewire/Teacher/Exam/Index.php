@@ -29,26 +29,22 @@ class Index extends Component
         $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
     }
 
-    public function updatedSelectAll($value)
+    public $exams = [];
+
+    public function mount()
     {
-        if ($value) {
-            $this->selectedExams = [1, 2, 3];
-        } else {
-            $this->selectedExams = [];
-        }
-    }
-    public function render()
-    {
-        // Dummy Exams Data
-        $exams = [
+        // Dummy Exams Data (Initialized in mount)
+        $this->exams = [
             [
                 'id' => 1,
                 'name' => 'Ujian Harian Matematika',
                 'subject' => 'Matematika',
                 'class' => 'XI IPA 1',
                 'date' => '2025-12-23',
+                'start_time' => '08:00',
+                'end_time' => '09:30',
                 'duration' => 90,
-                'status' => 'scheduled', // scheduled, ongoing, completed
+                'status' => 'scheduled',
                 'questions_count' => 30,
             ],
             [
@@ -57,6 +53,8 @@ class Index extends Component
                 'subject' => 'Fisika',
                 'class' => 'XII IPA 2',
                 'date' => '2025-12-22',
+                'start_time' => '08:00',
+                'end_time' => '10:00',
                 'duration' => 120,
                 'status' => 'ongoing',
                 'questions_count' => 45,
@@ -67,14 +65,39 @@ class Index extends Component
                 'subject' => 'Sejarah',
                 'class' => 'X IPS 1',
                 'date' => '2025-12-20',
+                'start_time' => '08:00',
+                'end_time' => '08:45',
                 'duration' => 45,
                 'status' => 'completed',
                 'questions_count' => 20,
             ],
         ];
+    }
 
-        return view('teacher.exam.index', [
-            'exams' => $exams
-        ])->extends('layouts.teacher')->section('content');
+    public function duplicateExam($id)
+    {
+        // Find the exam to duplicate
+        $original = collect($this->exams)->firstWhere('id', $id);
+
+        if ($original) {
+            $newExam = $original;
+            $newExam['id'] = count($this->exams) + 1; // Simple increment ID
+            $newExam['name'] = 'Salinan - ' . $original['name'];
+            $newExam['status'] = 'scheduled';
+            $newExam['date'] = date('Y-m-d'); // Reset to today
+            $newExam['token'] = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 5)); // New Token
+            
+            // Add to top of list
+            array_unshift($this->exams, $newExam);
+
+            $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi!']);
+        }
+    }
+
+    public function render()
+    {
+        return view('teacher.exam.index')
+            ->extends('layouts.teacher')
+            ->section('content');
     }
 }
