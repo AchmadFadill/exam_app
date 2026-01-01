@@ -8,10 +8,38 @@ use Livewire\WithPagination;
 class Index extends Component
 {
     use WithPagination;
+    use \Livewire\WithFileUploads;
 
     public $search = '';
     public $subjectFilter = '';
     public $typeFilter = '';
+
+    // Import State
+    public $showImportModal = false;
+    public $importFile;
+
+    public function openImportModal()
+    {
+        $this->reset(['importFile']);
+        $this->showImportModal = true;
+    }
+
+    public function importQuestions()
+    {
+        $this->validate([
+            'importFile' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        // Dummy Import Logic
+        $this->showImportModal = false;
+        $this->dispatch('notify', ['message' => 'Soal berhasil diimport ke Bank Soal!']);
+    }
+
+    public function downloadTemplate()
+    {
+        // Dummy Download
+        $this->dispatch('notify', ['message' => 'Template berhasil didownload!']);
+    }
 
     public function render()
     {
