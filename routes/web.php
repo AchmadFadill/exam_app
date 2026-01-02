@@ -19,12 +19,12 @@ Route::prefix('admin')->group(function () {
     Route::get('/classes', App\Livewire\Admin\ManageClass::class)->name('admin.classes');
     Route::get('/subjects', App\Livewire\Admin\ManageSubject::class)->name('admin.subjects');
     Route::get('/exams', App\Livewire\Admin\ManageExam::class)->name('admin.exams');
-    Route::get('/monitor', App\Livewire\Admin\Monitoring\Index::class)->name('admin.monitor');
-    Route::get('/monitor/{id}', App\Livewire\Admin\MonitorExam::class)->name('admin.monitor.detail');
+    Route::get('/monitor', App\Livewire\Common\Monitoring\Index::class)->name('admin.monitor');
+    Route::get('/monitor/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('admin.monitor.detail');
     
     // Reports / Hasil Ujian
-    Route::get('/reports', App\Livewire\Admin\Reports\Index::class)->name('admin.reports.index');
-    Route::get('/reports/{id}', App\Livewire\Admin\Reports\Detail::class)->name('admin.reports.detail');
+    Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('admin.reports.index');
+    Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('admin.reports.detail');
 
     Route::get('/settings', App\Livewire\Admin\Settings::class)->name('admin.settings');
 });
@@ -45,16 +45,16 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
 
     Route::get('/exams/{id}/edit', App\Livewire\Teacher\Exam\Form::class)->name('exams.edit');
 
-    // Placeholders for future routes
-    Route::get('/monitoring', App\Livewire\Teacher\Monitoring\Index::class)->name('monitoring');
-    Route::get('/monitoring/{id}', App\Livewire\Teacher\Exam\Monitor::class)->name('monitoring.detail');
+    // Shared routes via Common namespace
+    Route::get('/monitoring', App\Livewire\Common\Monitoring\Index::class)->name('monitoring');
+    Route::get('/monitoring/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('monitoring.detail');
     Route::get('/grading', App\Livewire\Teacher\Grading\Index::class)->name('grading.index');
     Route::get('/grading/{exam}', App\Livewire\Teacher\Grading\StudentList::class)->name('grading.show');
     Route::get('/grading/{exam}/{student}', App\Livewire\Teacher\Grading\Detail::class)->name('grading.detail');
     
     // Reports
-    Route::get('/reports', App\Livewire\Teacher\Report\Index::class)->name('reports.index');
-    Route::get('/reports/{id}', App\Livewire\Teacher\Report\Detail::class)->name('reports.detail');
+    Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('reports.index');
+    Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('reports.detail');
 });
 
 // Student Routes

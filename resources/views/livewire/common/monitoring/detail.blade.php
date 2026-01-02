@@ -1,17 +1,16 @@
-@section('title', 'Monitoring Ujian ')
+@section('title', 'Monitoring Ujian')
 
 <div wire:poll.10s class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{{ route('teacher.exams.index') }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
+            <a href="{{ route($backRoute) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
                 <h2 class="font-bold text-2xl text-text-main">Monitoring Ujian</h2>
-                <p class="text-text-muted text-sm">Ujian Harian Matematika </p>
+                <p class="text-text-muted text-sm">Ujian Harian Matematika</p>
             </div>
         </div>
-
     </div>
 
     <!-- Summary Cards -->
@@ -33,9 +32,9 @@
                 <x-monitor.student-card :student="$student">
                     <button class="px-2 py-1 text-xs border border-gray-200 rounded text-text-main hover:bg-gray-50 uppercase font-bold tracking-wider">Detail</button>
                     @if($student['status'] == 'working')
-                    <button class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 uppercase font-bold tracking-wider">Akhiri </button>
+                    <button wire:click="forceSubmit('mock_id')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 uppercase font-bold tracking-wider">Akhiri</button>
                     @else
-                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-gray-300 cursor-not-allowed uppercase font-bold tracking-wider">Akhiri </button>
+                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-gray-300 cursor-not-allowed uppercase font-bold tracking-wider">Akhiri</button>
                     @endif
                 </x-monitor.student-card>
                 @endforeach
@@ -44,9 +43,9 @@
 
         <!-- Live Activity Log Sidebar -->
         <div class="lg:col-span-1 space-y-4">
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col h-full max-h-[1000px]">
-                <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
-                    <h3 class="font-bold text-sm text-text-main dark:text-white flex items-center gap-2">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full max-h-[1000px]">
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-text-main flex items-center gap-2">
                         <span class="relative flex h-2 w-2">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
@@ -66,19 +65,18 @@
                         "></div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-start mb-0.5">
-                                <p class="text-[11px] font-bold text-gray-900 dark:text-white truncate">{{ $log['student'] }}</p>
+                                <p class="text-[11px] font-bold text-gray-900 truncate">{{ $log['student'] }}</p>
                                 <span class="text-[9px] font-mono text-gray-400 flex-shrink-0">{{ $log['time'] }}</span>
                             </div>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ $log['activity'] }}</p>
+                            <p class="text-[10px] text-gray-500">{{ $log['activity'] }}</p>
                         </div>
                     </div>
                     @endforeach
                 </div>
-                <div class="p-3 bg-gray-50 dark:bg-gray-700/20 border-t border-gray-100 dark:border-gray-700">
-                    <button class="w-full text-[10px] text-primary font-bold hover:underline">Lihat Semua History</button>
+                <div class="p-3 bg-gray-50 border-t border-gray-100 text-center">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Historical Logs available in Reports</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
