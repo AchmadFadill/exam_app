@@ -13,9 +13,7 @@ Route::get('/login', function () {
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
     Route::get('/teachers', App\Livewire\Admin\ManageTeacher::class)->name('admin.teachers');
     Route::get('/students', App\Livewire\Admin\ManageStudent::class)->name('admin.students');
     Route::get('/classes', App\Livewire\Admin\ManageClass::class)->name('admin.classes');
