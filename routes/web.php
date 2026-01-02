@@ -61,9 +61,7 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
 
 // Student Routes
 Route::prefix('student')->name('student.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('student.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', App\Livewire\Student\Dashboard::class)->name('dashboard');
     
     Route::get('/login', function () {
         return view('student.auth.login');
