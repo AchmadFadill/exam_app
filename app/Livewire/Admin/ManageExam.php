@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Livewire\Admin;
+
+use Livewire\Component;
+
+class ManageExam extends Component
+{
+    // Bulk Action States
+    public $selectedExams = [];
+    public $selectAll = false;
+    public $showBulkDeleteModal = false;
+
+
+
+    public function openBulkDeleteModal()
+    {
+        if (empty($this->selectedExams)) {
+            $this->dispatch('notify', ['message' => 'Pilih ujian terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function bulkDelete()
+    {
+        // Dummy bulk delete logic
+        $this->showBulkDeleteModal = false;
+        $this->selectedExams = [];
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedExams = [1, 2, 3];
+        } else {
+            $this->selectedExams = [];
+        }
+    }
+    public function render()
+    {
+        // Dummy Exams Data (Replicated from Teacher for Admin)
+        $exams = [
+            [
+                'id' => 1,
+                'name' => 'Ujian Harian Matematika',
+                'subject' => 'Matematika',
+                'class' => 'XI IPA 1',
+                'date' => '2025-12-23',
+                'start_time' => '',
+                'end_time' => '',
+                'token' => '',
+                'duration' => 60,
+                'default_score' => 5,
+                'status' => 'scheduled', // scheduled, ongoing, completed
+                'questions_count' => 30,
+            ],
+            [
+                'id' => 2,
+                'name' => 'Ujian Akhir Semester Fisika',
+                'subject' => 'Fisika',
+                'class' => 'XII IPA 2',
+                'date' => '2025-12-22',
+                'duration' => 120,
+                'status' => 'ongoing',
+                'questions_count' => 45,
+            ],
+            [
+                'id' => 3,
+                'name' => 'Kuis Sejarah Indonesia',
+                'subject' => 'Sejarah',
+                'class' => 'X IPS 1',
+                'date' => '2025-12-20',
+                'duration' => 45,
+                'status' => 'completed',
+                'questions_count' => 20,
+            ],
+        ];
+
+        return view('admin.manage-exam', [
+            'exams' => $exams
+        ])->extends('layouts.admin')->section('content');
+    }
+}
