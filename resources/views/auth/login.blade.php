@@ -22,12 +22,25 @@
                     </div>
                 </div>
 
-                <h1 class="text-3xl font-extrabold text-[var(--color-text-main)] tracking-tight">Portal Staff</h1>
-                <p class="mt-2 text-sm text-[var(--color-text-muted)] font-medium">Admin & Guru SMAIT Baitul Muslim</p>
+                <h1 class="text-3xl font-extrabold text-[var(--color-text-main)] tracking-tight">Portal Admin</h1>
+                <p class="mt-2 text-sm text-[var(--color-text-muted)] font-medium">CBT SMAIT Baitul Muslim</p>
             </div>
             
-            <form class="mt-10 space-y-6" action="#" method="POST">
+            <form class="mt-10 space-y-6" action="{{ route('login') }}" method="POST">
                 @csrf
+
+                {{-- Global Error Message --}}
+                @if ($errors->any())
+                <div class="p-4 rounded-2xl bg-red-50 border border-red-100">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-sm font-semibold text-red-700">{{ $errors->first() }}</p>
+                    </div>
+                </div>
+                @endif
+
                 <div class="space-y-5">
                     <!-- Email Field -->
                     <div class="space-y-2 group">
@@ -38,8 +51,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
                                 </svg>
                             </span>
-                            <input id="email" name="email" type="email" required 
-                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium" 
+                            <input id="email" name="email" type="email" required value="{{ old('email') }}"
+                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium @error('email') border-red-300 @enderror" 
                                 placeholder="nama@sekolah.sch.id">
                         </div>
                     </div>
@@ -64,8 +77,8 @@
                 </div>
 
                 <div class="flex items-center px-1">
-                    <input id="remember-me" name="remember-me" type="checkbox" class="h-5 w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]/10 border-gray-300 rounded-lg cursor-pointer transition-all">
-                    <label for="remember-me" class="ml-3 block text-sm text-[var(--color-text-muted)] font-semibold cursor-pointer select-none">
+                    <input id="remember" name="remember" type="checkbox" class="h-5 w-5 text-[var(--color-primary)] focus:ring-[var(--color-primary)]/10 border-gray-300 rounded-lg cursor-pointer transition-all">
+                    <label for="remember" class="ml-3 block text-sm text-[var(--color-text-muted)] font-semibold cursor-pointer select-none">
                         Ingat Saya
                     </label>
                 </div>
@@ -75,12 +88,23 @@
                 </button>
             </form>
 
-            <!-- Link to Student Login -->
-            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-                <p class="text-sm text-[var(--color-text-muted)]">
-                    Bukan Admin atau Guru? 
-                    <a href="{{ route('student.login') }}" class="font-bold text-[var(--color-primary)] hover:underline ml-1">Login sebagai Siswa</a>
-                </p>
+            <!-- Alternative Login Links -->
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <p class="text-xs text-center text-[var(--color-text-muted)] font-semibold mb-4 uppercase tracking-wider">Login Sebagai</p>
+                <div class="flex gap-3">
+                    <a href="{{ route('teacher.login') }}" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Guru
+                    </a>
+                    <a href="{{ route('student.login') }}" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all border border-blue-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Siswa
+                    </a>
+                </div>
             </div>
             
             <!-- Bottom Branding -->
