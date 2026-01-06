@@ -1,4 +1,3 @@
-@section('title', 'Kelola Kelas')
 <div>
     <x-slot name="title">Kelola Kelas</x-slot>
 
@@ -124,7 +123,7 @@
                 <div class="max-h-60 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-50">
                     @forelse($allStudents as $student)
                     <div class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors">
-                        <input type="checkbox" wire:model="selectedStudents" value="{{ $student['id'] }}" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
+                        <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student['id'] }}" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                         <div class="flex-1">
                             <div class="text-sm font-medium text-text-main">{{ $student['name'] }}</div>
                             <div class="text-xs text-text-muted">NIS: {{ $student['nis'] }}</div>
@@ -143,7 +142,7 @@
             </div>
             <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('showAssignModal', false)">Batal</x-button>
-                <x-button variant="primary" wire:click="assignStudents" :disabled="count($selectedStudents) == 0">Simpan Penempatan</x-button>
+                <x-button variant="primary" wire:click="assignStudents">Simpan Penempatan</x-button>
             </div>
         </div>
     </div>

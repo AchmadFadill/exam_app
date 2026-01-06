@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Classroom;
+use App\Models\Student;
 use Livewire\Component;
 
 class ManageClass extends Component
@@ -21,20 +23,32 @@ class ManageClass extends Component
     public $studentSearch = '';
     public $selectedStudents = [];
 
+    protected $rules = [
+        'classForm.name' => 'required|string|max:50',
+        'classForm.level' => 'required|in:X,XI,XII',
+    ];
+
+    protected $messages = [
+        'classForm.name.required' => 'Nama kelas wajib diisi.',
+        'classForm.level.required' => 'Tingkatan kelas wajib dipilih.',
+    ];
+
     public function openAddModal()
     {
-        $this->reset('classForm');
+        $this->reset('classForm', 'selectedClass');
+        $this->resetValidation();
         $this->showAddModal = true;
     }
 
     public function openEditModal($classId)
     {
-        // Dummy data for editing
+        $class = Classroom::findOrFail($classId);
         $this->classForm = [
-            'name' => 'X IPA ' . $classId,
-            'level' => 'X',
+            'name' => $class->name,
+            'level' => $class->level,
         ];
         $this->selectedClass = $classId;
+        $this->resetValidation();
         $this->showEditModal = true;
     }
 
@@ -47,63 +61,108 @@ class ManageClass extends Component
     public function openAssignModal($classId)
     {
         $this->selectedClass = $classId;
-        $this->selectedStudents = [];
+        
+        // Pre-select students already in this class
+        $this->selectedStudents = Student::where('classroom_id', $classId)
+            ->pluck('id')
+            ->toArray();
+        
         $this->studentSearch = '';
         $this->showAssignModal = true;
     }
 
     public function saveClass()
     {
-        // Dummy save logic
+        $this->validate();
+
+        if ($this->showEditModal && $this->selectedClass) {
+            // Update existing class
+            $class = Classroom::findOrFail($this->selectedClass);
+            $class->update($this->classForm);
+            $message = 'Data kelas berhasil diperbarui!';
+        } else {
+            // Create new class
+            Classroom::create($this->classForm);
+            $message = 'Kelas baru berhasil ditambahkan!';
+        }
+
         $this->showAddModal = false;
         $this->showEditModal = false;
-        $this->dispatch('notify', ['message' => 'Data kelas berhasil disimpan!']);
+        $this->reset('classForm', 'selectedClass');
+        $this->dispatch('notify', ['message' => $message]);
     }
 
     public function deleteClass()
     {
-        // Dummy delete logic
+        if ($this->selectedClass) {
+            $class = Classroom::findOrFail($this->selectedClass);
+            
+            // Unassign students from this class before deletion
+            Student::where('classroom_id', $this->selectedClass)
+                ->update(['classroom_id' => null]);
+            
+            $class->delete();
+        }
+
         $this->showDeleteModal = false;
+        $this->reset('selectedClass');
         $this->dispatch('notify', ['message' => 'Data kelas berhasil dihapus!']);
     }
 
     public function assignStudents()
     {
-        // Dummy assign logic
+        if ($this->selectedClass) {
+            // First, unassign all students from this class
+            Student::where('classroom_id', $this->selectedClass)
+                ->update(['classroom_id' => null]);
+            
+            // Then assign selected students to this class
+            if (!empty($this->selectedStudents)) {
+                Student::whereIn('id', $this->selectedStudents)
+                    ->update(['classroom_id' => $this->selectedClass]);
+            }
+        }
+
         $this->showAssignModal = false;
-        $this->dispatch('notify', ['message' => 'Siswa berhasil ditambahkan ke kelas!']);
+        $this->reset('selectedStudents', 'studentSearch');
+        $this->dispatch('notify', ['message' => 'Penempatan siswa berhasil diperbarui!']);
     }
 
     public function render()
     {
-        $classes = [
-            ['id' => 1, 'name' => 'X IPA 1', 'level' => 'X', 'student_count' => 32],
-            ['id' => 2, 'name' => 'X IPA 2', 'level' => 'X', 'student_count' => 30],
-            ['id' => 3, 'name' => 'XI IPS 1', 'level' => 'XI', 'student_count' => 28],
-            ['id' => 4, 'name' => 'XI IPS 2', 'level' => 'XI', 'student_count' => 25],
-            ['id' => 5, 'name' => 'XII IPA 1', 'level' => 'XII', 'student_count' => 35],
-        ];
-
+        // Query classes with student count
+        $classesQuery = Classroom::withCount('students');
+        
         if ($this->search) {
-            $classes = array_filter($classes, function($class) {
-                return str_contains(strtolower($class['name']), strtolower($this->search));
-            });
+            $classesQuery->where('name', 'like', '%' . $this->search . '%');
         }
+        
+        $classes = $classesQuery->orderBy('level')->orderBy('name')->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'level' => $c->level,
+                'student_count' => $c->students_count,
+            ]);
 
-        $allStudents = [
-            ['id' => 101, 'name' => 'Ahmad Fulan', 'nis' => '10001'],
-            ['id' => 102, 'name' => 'Siti Aminah', 'nis' => '10002'],
-            ['id' => 103, 'name' => 'Budi Sudarsono', 'nis' => '10003'],
-            ['id' => 104, 'name' => 'Dewi Sartika', 'nis' => '10004'],
-            ['id' => 105, 'name' => 'Eko Prasetyo', 'nis' => '10005'],
-        ];
-
+        // Query all students for assignment modal
+        $studentsQuery = Student::with('user');
+        
         if ($this->studentSearch) {
-            $allStudents = array_filter($allStudents, function($student) {
-                return str_contains(strtolower($student['name']), strtolower($this->studentSearch)) ||
-                       str_contains(strtolower($student['nis']), strtolower($this->studentSearch));
+            $studentsQuery->where(function($q) {
+                $q->where('nis', 'like', '%' . $this->studentSearch . '%')
+                  ->orWhereHas('user', function($q2) {
+                      $q2->where('name', 'like', '%' . $this->studentSearch . '%');
+                  });
             });
         }
+        
+        $allStudents = $studentsQuery->orderBy('nis')->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => $s->user->name,
+                'nis' => $s->nis,
+            ]);
 
         return view('admin.manage-class', [
             'classes' => $classes,

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Subject;
+use App\Models\Teacher;
 use Livewire\Component;
 
 class ManageSubject extends Component
@@ -21,26 +23,33 @@ class ManageSubject extends Component
     public $teacherSearch = '';
     public $selectedTeacher = null;
 
+    protected $rules = [
+        'subjectForm.name' => 'required|string|max:100',
+        'subjectForm.code' => 'required|string|max:10',
+    ];
+
+    protected $messages = [
+        'subjectForm.name.required' => 'Nama mata pelajaran wajib diisi.',
+        'subjectForm.code.required' => 'Kode mapel wajib diisi.',
+    ];
+
     public function openAddModal()
     {
-        $this->reset('subjectForm');
+        $this->reset('subjectForm', 'selectedSubject');
+        $this->resetValidation();
         $this->showAddModal = true;
     }
 
     public function openEditModal($subjectId)
     {
-        // Dummy data for editing
-        $data = $this->getSubjects();
-        $subject = collect($data)->firstWhere('id', $subjectId);
-        
-        if ($subject) {
-            $this->subjectForm = [
-                'name' => $subject['name'],
-                'code' => $subject['code'],
-            ];
-            $this->selectedSubject = $subjectId;
-            $this->showEditModal = true;
-        }
+        $subject = Subject::findOrFail($subjectId);
+        $this->subjectForm = [
+            'name' => $subject->name,
+            'code' => $subject->code,
+        ];
+        $this->selectedSubject = $subjectId;
+        $this->resetValidation();
+        $this->showEditModal = true;
     }
 
     public function openDeleteModal($subjectId)
@@ -52,69 +61,114 @@ class ManageSubject extends Component
     public function openAssignModal($subjectId)
     {
         $this->selectedSubject = $subjectId;
-        $this->selectedTeacher = null;
+        
+        // Pre-select teacher already assigned to this subject
+        $currentTeacher = Teacher::where('subject_id', $subjectId)->first();
+        $this->selectedTeacher = $currentTeacher?->id;
+        
         $this->teacherSearch = '';
         $this->showAssignModal = true;
     }
 
     public function saveSubject()
     {
-        // Dummy save logic
+        $this->validate();
+
+        // Uppercase the code
+        $this->subjectForm['code'] = strtoupper($this->subjectForm['code']);
+
+        if ($this->showEditModal && $this->selectedSubject) {
+            // Update existing subject
+            $subject = Subject::findOrFail($this->selectedSubject);
+            $subject->update($this->subjectForm);
+            $message = 'Mata pelajaran berhasil diperbarui!';
+        } else {
+            // Create new subject
+            Subject::create($this->subjectForm);
+            $message = 'Mata pelajaran baru berhasil ditambahkan!';
+        }
+
         $this->showAddModal = false;
         $this->showEditModal = false;
-        $this->dispatch('notify', ['message' => 'Mata pelajaran berhasil disimpan!']);
+        $this->reset('subjectForm', 'selectedSubject');
+        $this->dispatch('notify', ['message' => $message]);
     }
 
     public function deleteSubject()
     {
-        // Dummy delete logic
+        if ($this->selectedSubject) {
+            $subject = Subject::findOrFail($this->selectedSubject);
+            
+            // Unassign teachers from this subject before deletion
+            Teacher::where('subject_id', $this->selectedSubject)
+                ->update(['subject_id' => null]);
+            
+            $subject->delete();
+        }
+
         $this->showDeleteModal = false;
+        $this->reset('selectedSubject');
         $this->dispatch('notify', ['message' => 'Mata pelajaran berhasil dihapus!']);
     }
 
     public function assignTeacher()
     {
-        // Dummy assign logic
-        $this->showAssignModal = false;
-        $this->dispatch('notify', ['message' => 'Guru pengampu berhasil ditetapkan!']);
-    }
+        if ($this->selectedSubject) {
+            // First, unassign any teacher currently assigned to this subject
+            Teacher::where('subject_id', $this->selectedSubject)
+                ->update(['subject_id' => null]);
+            
+            // Then assign selected teacher to this subject
+            if ($this->selectedTeacher) {
+                Teacher::where('id', $this->selectedTeacher)
+                    ->update(['subject_id' => $this->selectedSubject]);
+            }
+        }
 
-    private function getSubjects()
-    {
-        return [
-            ['id' => 1, 'name' => 'Matematika Wajib', 'code' => 'MTK-W', 'teacher' => 'Budi Santoso'],
-            ['id' => 2, 'name' => 'Bahasa Indonesia', 'code' => 'BIND', 'teacher' => 'Siti Aminah'],
-            ['id' => 3, 'name' => 'Bahasa Inggris', 'code' => 'BING', 'teacher' => 'John Doe'],
-            ['id' => 4, 'name' => 'Fisika', 'code' => 'FIS', 'teacher' => '-'],
-            ['id' => 5, 'name' => 'Biologi', 'code' => 'BIO', 'teacher' => 'Dewi Sartika'],
-            ['id' => 6, 'name' => 'Kimia', 'code' => 'KIM', 'teacher' => '-'],
-        ];
+        $this->showAssignModal = false;
+        $this->reset('selectedTeacher', 'teacherSearch');
+        $this->dispatch('notify', ['message' => 'Guru pengampu berhasil ditetapkan!']);
     }
 
     public function render()
     {
-        $subjects = $this->getSubjects();
-
+        // Query subjects with their assigned teacher
+        $subjectsQuery = Subject::query();
+        
         if ($this->search) {
-            $subjects = array_filter($subjects, function($subject) {
-                return str_contains(strtolower($subject['name']), strtolower($this->search)) ||
-                       str_contains(strtolower($subject['code']), strtolower($this->search));
+            $subjectsQuery->where(function($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('code', 'like', '%' . $this->search . '%');
             });
         }
+        
+        $subjects = $subjectsQuery->orderBy('name')->get()
+            ->map(function($s) {
+                // Find teacher assigned to this subject
+                $teacher = Teacher::with('user')->where('subject_id', $s->id)->first();
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'code' => $s->code,
+                    'teacher' => $teacher ? $teacher->user->name : '-',
+                ];
+            });
 
-        $teachers = [
-            ['id' => 1, 'name' => 'Budi Santoso', 'email' => 'budi@example.com'],
-            ['id' => 2, 'name' => 'Siti Aminah', 'email' => 'siti@example.com'],
-            ['id' => 3, 'name' => 'John Doe', 'email' => 'john@example.com'],
-            ['id' => 4, 'name' => 'Dewi Sartika', 'email' => 'dewi@example.com'],
-            ['id' => 5, 'name' => 'Eko Prasetyo', 'email' => 'eko@example.com'],
-        ];
-
+        // Query all teachers for assignment modal
+        $teachersQuery = Teacher::with('user');
+        
         if ($this->teacherSearch) {
-            $teachers = array_filter($teachers, function($teacher) {
-                return str_contains(strtolower($teacher['name']), strtolower($this->teacherSearch));
+            $teachersQuery->whereHas('user', function($q) {
+                $q->where('name', 'like', '%' . $this->teacherSearch . '%');
             });
         }
+        
+        $teachers = $teachersQuery->get()
+            ->map(fn($t) => [
+                'id' => $t->id,
+                'name' => $t->user->name,
+                'email' => $t->user->email,
+            ]);
 
         return view('admin.manage-subject', [
             'subjects' => $subjects,
