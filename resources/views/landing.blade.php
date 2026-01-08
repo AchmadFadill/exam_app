@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-900">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="min-h-full bg-slate-900">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="h-full antialiased selection:bg-blue-500 selection:text-white overflow-hidden">
+<body class="min-h-full antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden">
     
     <!-- Background Effects -->
     <div class="fixed inset-0 z-0">

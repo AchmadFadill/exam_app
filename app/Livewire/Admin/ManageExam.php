@@ -81,6 +81,6 @@ class ManageExam extends Component
 
         return view('admin.manage-exam', [
             'exams' => $exams
-        ])->extends('layouts.admin')->section('content');
+        ])->layout('layouts.admin', ['title' => 'Kelola Ujian']);
     }
 }

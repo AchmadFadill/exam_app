@@ -112,11 +112,13 @@ class ManageClass extends Component
     public function assignStudents()
     {
         if ($this->selectedClass) {
-            // First, unassign all students from this class
+            // First, unassign all students currently in THIS class
+            // (students that were deselected should be removed from this class)
             Student::where('classroom_id', $this->selectedClass)
                 ->update(['classroom_id' => null]);
             
             // Then assign selected students to this class
+            // This also removes them from any OTHER class they might be in
             if (!empty($this->selectedStudents)) {
                 Student::whereIn('id', $this->selectedStudents)
                     ->update(['classroom_id' => $this->selectedClass]);
@@ -145,8 +147,8 @@ class ManageClass extends Component
                 'student_count' => $c->students_count,
             ]);
 
-        // Query all students for assignment modal
-        $studentsQuery = Student::with('user');
+        // Query all students for assignment modal (include their current classroom)
+        $studentsQuery = Student::with(['user', 'classroom']);
         
         if ($this->studentSearch) {
             $studentsQuery->where(function($q) {
@@ -162,11 +164,13 @@ class ManageClass extends Component
                 'id' => $s->id,
                 'name' => $s->user->name,
                 'nis' => $s->nis,
+                'current_class' => $s->classroom ? $s->classroom->name : null,
+                'current_class_id' => $s->classroom_id,
             ]);
 
         return view('admin.manage-class', [
             'classes' => $classes,
             'allStudents' => $allStudents
-        ])->extends('layouts.admin')->section('content');
+        ])->layout('layouts.admin', ['title' => 'Data Kelas']);
     }
 }

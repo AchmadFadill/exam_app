@@ -80,9 +80,9 @@
 
     <!-- Top Navbar -->
     <x-slot name="navbar">
-        <x-navbar :title="View::yieldContent('title', 'Dashboard')" userPrefix="Administrator" />
+        <x-navbar :title="$title ?? 'Dashboard'" userPrefix="Administrator" />
     </x-slot>
 
     <!-- Content -->
-    @yield('content')
+    {{ $slot }}
 </x-app-layout>

@@ -132,8 +132,15 @@ class ManageSubject extends Component
 
     public function render()
     {
-        // Query subjects with their assigned teacher
-        $subjectsQuery = Subject::query();
+        // Query subjects with their assigned teacher (optimized - no N+1)
+        $subjectsQuery = Subject::query()
+            ->select('subjects.*')
+            ->addSelect([
+                'teacher_name' => Teacher::select('users.name')
+                    ->join('users', 'teachers.user_id', '=', 'users.id')
+                    ->whereColumn('teachers.subject_id', 'subjects.id')
+                    ->limit(1)
+            ]);
         
         if ($this->search) {
             $subjectsQuery->where(function($q) {
@@ -143,16 +150,12 @@ class ManageSubject extends Component
         }
         
         $subjects = $subjectsQuery->orderBy('name')->get()
-            ->map(function($s) {
-                // Find teacher assigned to this subject
-                $teacher = Teacher::with('user')->where('subject_id', $s->id)->first();
-                return [
-                    'id' => $s->id,
-                    'name' => $s->name,
-                    'code' => $s->code,
-                    'teacher' => $teacher ? $teacher->user->name : '-',
-                ];
-            });
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'code' => $s->code,
+                'teacher' => $s->teacher_name ?? '-',
+            ]);
 
         // Query all teachers for assignment modal
         $teachersQuery = Teacher::with('user');
@@ -173,6 +176,6 @@ class ManageSubject extends Component
         return view('admin.manage-subject', [
             'subjects' => $subjects,
             'teachers' => $teachers
-        ])->extends('layouts.admin')->section('content');
+        ])->layout('layouts.admin', ['title' => 'Mata Pelajaran']);
     }
 }

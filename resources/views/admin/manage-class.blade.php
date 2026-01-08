@@ -1,27 +1,22 @@
 <div>
-    <x-slot name="title">Kelola Kelas</x-slot>
-
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h2 class="text-2xl font-bold text-text-main">Data Kelas</h2>
-            <p class="text-sm text-text-muted">Kelola grup kelas dan atur penempatan siswa.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div class="relative w-full sm:w-64">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </span>
-                <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama kelas...">
-            </div>
-            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Search Bar (Left - fills space) -->
+        <div class="relative w-full sm:flex-1 sm:max-w-lg">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                Tambah Kelas
-            </x-button>
+            </span>
+            <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama kelas...">
         </div>
+        
+        <!-- Action Button (Right) -->
+        <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Kelas
+        </x-button>
     </div>
 
     <!-- Class Grid -->
@@ -122,11 +117,20 @@
 
                 <div class="max-h-60 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-50">
                     @forelse($allStudents as $student)
-                    <div class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors {{ $student['current_class_id'] && $student['current_class_id'] != $selectedClass ? 'bg-amber-50' : '' }}">
                         <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student['id'] }}" class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary">
                         <div class="flex-1">
                             <div class="text-sm font-medium text-text-main">{{ $student['name'] }}</div>
-                            <div class="text-xs text-text-muted">NIS: {{ $student['nis'] }}</div>
+                            <div class="text-xs text-text-muted flex items-center gap-2">
+                                <span>NIS: {{ $student['nis'] }}</span>
+                                @if($student['current_class'])
+                                    <span class="px-1.5 py-0.5 rounded text-xs {{ $student['current_class_id'] == $selectedClass ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                        {{ $student['current_class'] }}
+                                    </span>
+                                @else
+                                    <span class="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-xs">Belum ada kelas</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     @empty

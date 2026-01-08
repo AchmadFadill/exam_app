@@ -1,41 +1,35 @@
-@section('title', 'Kelola Siswa')
 <div>
-    <x-slot name="title">Kelola Siswa</x-slot>
-
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h2 class="text-2xl font-bold text-text-main">Data Siswa</h2>
-            <p class="text-sm text-text-muted">Kelola informasi siswa, kelas, dan akun akses mereka.</p>
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Search Bar (Left - fills space) -->
+        <div class="relative w-full sm:flex-1 sm:max-w-lg">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </span>
+            <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama, NIS, atau email...">
         </div>
-        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div class="relative w-full sm:w-64">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </span>
-                <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama, NIS, atau email...">
-            </div>
-            <div class="flex gap-2">
-                <x-button wire:click="exportStudents" variant="secondary" class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export Excel
-                </x-button>
-                <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    Import Excel
-                </x-button>
-                <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Tambah Siswa
-                </x-button>
-            </div>
+        
+        <!-- Action Buttons (Right) -->
+        <div class="flex gap-2 flex-wrap">
+            <x-button wire:click="exportStudents" variant="secondary" class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export
+            </x-button>
+            <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Import
+            </x-button>
+            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Siswa
+            </x-button>
         </div>
     </div>
 
@@ -61,39 +55,39 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student['id'] }}" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student->id }}" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
                             </div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                                    {{ substr($student['name'], 0, 2) }}
+                                    {{ substr($student->user->name, 0, 2) }}
                                 </div>
                                 <div>
-                                    <div class="font-medium text-text-main">{{ $student['name'] }}</div>
-                                    <div class="text-xs text-text-muted">NIS: {{ $student['nis'] }}</div>
+                                    <div class="font-medium text-text-main">{{ $student->user->name }}</div>
+                                    <div class="text-xs text-text-muted">NIS: {{ $student->nis }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm">
                             <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
-                                {{ $student['class'] }}
+                                {{ $student->classroom?->name ?? '-' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-text-muted">{{ $student['email'] }}</td>
+                        <td class="px-6 py-4 text-sm text-text-muted">{{ $student->user->email }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-2">
-                                <button wire:click="openResetPasswordModal({{ $student['id'] }})" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Reset Password">
+                                <button wire:click="openResetPasswordModal({{ $student->id }})" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Reset Password">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openEditModal({{ $student['id'] }})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                <button wire:click="openEditModal({{ $student->id }})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openDeleteModal({{ $student['id'] }})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                <button wire:click="openDeleteModal({{ $student->id }})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -103,7 +97,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-text-muted italic">
+                        <td colspan="5" class="px-6 py-12 text-center text-text-muted italic">
                             Tidak ada data siswa ditemukan.
                         </td>
                     </tr>
@@ -111,16 +105,23 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination Links -->
+        @if($students->hasPages())
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $students->links() }}
+        </div>
+        @endif
     </x-card>
 
     <!-- Modals -->
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
         <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 class="text-lg font-bold text-text-main">{{ $showAddModal ? 'Tambah Siswa Baru' : 'Edit Data Siswa' }}</h3>
-                <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="text-gray-400 hover:text-gray-600">
+                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -139,29 +140,26 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                    <select wire:model="studentForm.class" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    <select wire:model="studentForm.classroom_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
                         <option value="">Pilih Kelas</option>
-                        <option value="X IPA 1">X IPA 1</option>
-                        <option value="X IPA 2">X IPA 2</option>
-                        <option value="X IPS 1">X IPS 1</option>
-                        <option value="XI IPA 1">XI IPA 1</option>
-                        <option value="XI IPS 2">XI IPS 2</option>
-                        <option value="XII IPA 1">XII IPA 1</option>
+                        @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}">{{ $classroom->name }} ({{ $classroom->level }})</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email (Opsional)</label>
-                    <input type="email" wire:model="studentForm.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="siswa@example.com">
+                    <input type="email" wire:model="studentForm.email" autocomplete="off" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="siswa@example.com">
                 </div>
                 @if($showAddModal)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" wire:model="studentForm.password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Min. 8 karakter">
+                    <input type="password" wire:model="studentForm.password" autocomplete="new-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Min. 8 karakter">
                 </div>
                 @endif
             </div>
             <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)">Batal</x-button>
+                <x-button variant="secondary" wire:click="closeModal">Batal</x-button>
                 <x-button variant="primary" wire:click="saveStudent">Simpan Perubahan</x-button>
             </div>
         </div>
@@ -315,14 +313,11 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas Baru</label>
-                    <select wire:model="bulkClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    <select wire:model="bulkClassId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
                         <option value="">Pilih Kelas</option>
-                        <option value="X IPA 1">X IPA 1</option>
-                        <option value="X IPA 2">X IPA 2</option>
-                        <option value="X IPS 1">X IPS 1</option>
-                        <option value="XI IPA 1">XI IPA 1</option>
-                        <option value="XI IPS 2">XI IPS 2</option>
-                        <option value="XII IPA 1">XII IPA 1</option>
+                        @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}">{{ $classroom->name }} ({{ $classroom->level }})</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -382,14 +377,11 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Filter Kelas</label>
-                    <select wire:model="exportClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                    <select wire:model="exportClassId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
                         <option value="">Semua Kelas</option>
-                        <option value="X IPA 1">X IPA 1</option>
-                        <option value="X IPA 2">X IPA 2</option>
-                        <option value="X IPS 1">X IPS 1</option>
-                        <option value="XI IPA 1">XI IPA 1</option>
-                        <option value="XI IPS 2">XI IPS 2</option>
-                        <option value="XII IPA 1">XII IPA 1</option>
+                        @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}">{{ $classroom->name }} ({{ $classroom->level }})</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>

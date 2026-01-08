@@ -70,7 +70,7 @@ class Dashboard extends Component
             'system_health' => $system_health,
             'active_exams' => $active_exams,
             'alerts' => $alerts,
-        ])->extends('layouts.admin')->section('content');
+        ])->layout('layouts.admin', ['title' => 'Dashboard']);
     }
 
     private function getGreeting()

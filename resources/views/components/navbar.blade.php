@@ -1,4 +1,9 @@
-@props(['title' => 'Dashboard', 'userPrefix' => 'Teacher'])
+@props(['title' => 'Dashboard', 'userPrefix' => 'User'])
+
+@php
+    $userName = auth()->check() ? auth()->user()->name : 'Guest';
+    $userRole = auth()->check() ? ucfirst(auth()->user()->role) : $userPrefix;
+@endphp
 
 <header class="hidden md:flex h-16 bg-bg-surface border-b border-gray-200 items-center justify-between px-6">
     <div>
@@ -20,10 +25,14 @@
 
         <!-- User Profile -->
         <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold border border-green-200">
-                {{ substr($userPrefix, 0, 2) }}
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {{ strtoupper(substr($userName, 0, 2)) }}
             </div>
-            <span class="text-sm font-medium text-text-main hidden md:block">{{ $userPrefix }} User</span>
+            <div class="hidden md:block text-right">
+                <p class="text-sm font-semibold text-text-main leading-tight">{{ $userName }}</p>
+                <p class="text-xs text-text-muted">{{ $userRole }}</p>
+            </div>
         </div>
     </div>
 </header>
+
