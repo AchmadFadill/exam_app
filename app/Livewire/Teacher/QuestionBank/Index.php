@@ -91,6 +91,6 @@ class Index extends Component
 
         return view('teacher.question-bank.index', [
             'questions' => $questions
-        ])->extends('layouts.teacher')->section('content');
+        ])->layout('layouts.teacher');
     }
 }

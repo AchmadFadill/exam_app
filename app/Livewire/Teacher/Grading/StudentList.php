@@ -51,6 +51,6 @@ class StudentList extends Component
 
     public function render()
     {
-        return view('teacher.grading.student-list')->extends('layouts.teacher')->section('content');
+        return view('teacher.grading.student-list')->layout('layouts.teacher');
     }
 }

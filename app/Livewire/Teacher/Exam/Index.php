@@ -97,7 +97,6 @@ class Index extends Component
     public function render()
     {
         return view('teacher.exam.index')
-            ->extends('layouts.teacher')
-            ->section('content');
+            ->layout('layouts.teacher');
     }
 }

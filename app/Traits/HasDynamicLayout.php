@@ -16,7 +16,6 @@ trait HasDynamicLayout
     public function applyLayout($view, $data = [])
     {
         return view($view, $data)
-            ->extends($this->getLayout())
-            ->section('content');
+            ->layout($this->getLayout());
     }
 }

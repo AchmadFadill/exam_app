@@ -55,7 +55,7 @@ class Form extends Component
 
     public function render()
     {
-        return view('teacher.question-bank.form')->extends('layouts.teacher')->section('content');
+        return view('teacher.question-bank.form')->layout('layouts.teacher');
     }
 
     public function save()

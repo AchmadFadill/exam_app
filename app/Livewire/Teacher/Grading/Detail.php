@@ -77,7 +77,7 @@ class Detail extends Component
             'pg_score' => $this->pgScore,
             'max_pg_score' => $this->maxPgScore,
             'pg_answers' => $this->pgAnswers
-        ])->extends('layouts.teacher')->section('content');
+        ])->layout('layouts.teacher');
     }
 
     public function saveScore($index)

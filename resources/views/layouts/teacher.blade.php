@@ -57,5 +57,5 @@
     </x-slot>
 
     <!-- Content -->
-    @yield('content')
+    {{ $slot }}
 </x-app-layout>

@@ -89,7 +89,7 @@ class Dashboard extends Component
             'upcoming_exams' => $upcoming_exams,
             'recent_activities' => $recent_activities,
             'greeting' => $this->getGreeting()
-        ])->extends('layouts.teacher')->section('content');
+        ])->layout('layouts.teacher');
     }
 
     private function getGreeting()

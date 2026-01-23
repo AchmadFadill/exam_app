@@ -84,7 +84,7 @@ class Form extends Component
 
     public function render()
     {
-        return view('teacher.exam.form')->extends('layouts.teacher')->section('content');
+        return view('teacher.exam.form')->layout('layouts.teacher');
     }
 
     public function nextStep()
