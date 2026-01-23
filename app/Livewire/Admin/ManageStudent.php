@@ -38,6 +38,7 @@ class ManageStudent extends Component
     public $selectAll = false;
     public $showBulkClassModal = false;
     public $showBulkDeleteModal = false;
+    public $showBulkResetPasswordModal = false;
     public $bulkClassId = '';
 
     // Export Filter States
@@ -162,7 +163,7 @@ class ManageStudent extends Component
                 $user = User::create([
                     'name' => $this->studentForm['name'],
                     'email' => $this->studentForm['email'] ?: $this->studentForm['nis'] . '@student.local',
-                    'password' => Hash::make($this->studentForm['password']),
+                    'password' => Hash::make($this->studentForm['nis']), // Default password = NIS
                     'role' => 'student',
                 ]);
 
@@ -215,22 +216,63 @@ class ManageStudent extends Component
 
     public function importStudents()
     {
-        // TODO: Implement Excel import
-        $this->showImportModal = false;
-        $this->dispatch('notify', ['message' => 'Fitur import akan segera tersedia!']);
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:2048',
+        ], [
+            'importFile.required' => 'File wajib dipilih.',
+            'importFile.mimes' => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'importFile.max' => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        try {
+            $import = new \App\Imports\StudentsImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $this->importFile);
+
+            $this->showImportModal = false;
+            $this->reset('importFile');
+
+            if (count($import->errors) > 0) {
+                $errorMsg = implode(' | ', array_slice($import->errors, 0, 3));
+                $this->dispatch('notify', [
+                    'message' => "Berhasil import {$import->importedCount} siswa. Ada error: {$errorMsg}",
+                    'type' => 'warning'
+                ]);
+            } else {
+                $this->dispatch('notify', ['message' => "Berhasil import {$import->importedCount} siswa!"]);
+            }
+        } catch (\Exception $e) {
+            $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = ['nis', 'nama', 'email', 'kelas'];
+        $filename = 'template_siswa.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new class($headers) implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
+                private $headers;
+                public function __construct($headers) { $this->headers = $headers; }
+                public function array(): array { return []; }
+                public function headings(): array { return $this->headers; }
+            },
+            $filename
+        );
     }
 
     public function exportStudents()
     {
-        $this->reset(['exportClassId']);
-        $this->showExportModal = true;
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\StudentsExport(),
+            'data_siswa_' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function processExport()
     {
-        // TODO: Implement Excel export
-        $this->showExportModal = false;
-        $this->dispatch('notify', ['message' => 'Fitur export akan segera tersedia!']);
+        // Legacy method - redirect to direct export
+        return $this->exportStudents();
     }
 
     // Bulk Action Methods
@@ -281,6 +323,33 @@ class ManageStudent extends Component
         $this->selectedStudents = [];
         $this->selectAll = false;
         $this->dispatch('notify', ['message' => "{$count} siswa berhasil dihapus massal!"]);
+    }
+
+    public function openBulkResetPasswordModal()
+    {
+        if (empty($this->selectedStudents)) {
+            $this->dispatch('notify', ['message' => 'Pilih siswa terlebih dahulu!', 'type' => 'error']);
+            return;
+        }
+        $this->showBulkResetPasswordModal = true;
+    }
+
+    public function bulkResetPassword()
+    {
+        DB::transaction(function () {
+            $students = Student::with('user')->whereIn('id', $this->selectedStudents)->get();
+            foreach ($students as $student) {
+                $student->user->update([
+                    'password' => Hash::make($student->nis) // Reset to NIS
+                ]);
+            }
+        });
+
+        $this->showBulkResetPasswordModal = false;
+        $count = count($this->selectedStudents);
+        $this->selectedStudents = [];
+        $this->selectAll = false;
+        $this->dispatch('notify', ['message' => "Password {$count} siswa berhasil direset ke NIS masing-masing!"]);
     }
 
     public function updatedSelectAll($value)
