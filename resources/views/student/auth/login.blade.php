@@ -42,25 +42,25 @@
                 @endif
 
                 <div class="space-y-5">
-                    <!-- NISN Field -->
+                    <!-- Email Field -->
                     <div class="space-y-2 group">
-                        <label for="nis" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] ml-1 opacity-60 group-focus-within:opacity-100 transition-opacity">NIS / NISN</label>
+                        <label for="email" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] ml-1 opacity-60 group-focus-within:opacity-100 transition-opacity">Email</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)] transition-colors group-focus-within:text-[var(--color-primary)]">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                 </svg>
                             </span>
-                            <input id="nis" name="nis" type="text" required value="{{ old('nis') }}"
-                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium @error('nis') border-red-300 @enderror" 
-                                placeholder="Masukkan NIS / NISN">
+                            <input id="email" name="email" type="email" required value="{{ old('email') }}"
+                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium @error('email') border-red-300 @enderror" 
+                                placeholder="Masukkan Email">
                         </div>
                     </div>
 
                     <!-- Password Field -->
                     <div class="space-y-1.5 group">
                         <div class="flex items-center justify-between ml-1">
-                            <label for="password" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] opacity-60 group-focus-within:opacity-100 transition-opacity">Password</label>
+                            <label for="password" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] opacity-60 group-focus-within:opacity-100 transition-opacity">Password (NIS)</label>
                             <a href="#" class="text-xs font-bold text-[var(--color-primary)] hover:underline transition-colors">Lupa password?</a>
                         </div>
                         <div class="relative">
@@ -71,7 +71,7 @@
                             </span>
                             <input id="password" name="password" type="password" required 
                                 class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium" 
-                                placeholder="••••••••">
+                                placeholder="Masukkan NIS sebagai password">
                         </div>
                         <p class="text-xs text-gray-400 ml-1">Password default adalah NIS Anda</p>
                     </div>
