@@ -42,6 +42,7 @@
                 <span class="ml-auto bg-secondary text-primary text-xs font-bold px-2 py-0.5 rounded-full">2</span>
             </x-sidebar-link>
 
+            <div class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mt-6 mb-2">Laporan</div>
             <x-sidebar-link :href="route('teacher.reports.index')" :active="request()->routeIs('teacher.reports.*')">
                 <x-slot name="icon">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
