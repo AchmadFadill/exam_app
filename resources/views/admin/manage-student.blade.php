@@ -1,7 +1,9 @@
 <div>
+    <x-slot name="title">Data Siswa</x-slot>
+
     <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <!-- Search Bar (Left - fills space) -->
-        <div class="relative w-full sm:flex-1 sm:max-w-lg">
+        <div class="relative w-full sm:flex-1 sm:max-w-md">
             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -282,6 +284,15 @@
             Ubah Kelas
         </button>
         <div class="h-6 w-px bg-gray-200"></div>
+        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-amber-600 transition-colors">
+            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-amber-100 text-gray-500 group-hover:text-amber-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+            </div>
+            Reset Password
+        </button>
+        <div class="h-6 w-px bg-gray-200"></div>
         <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors">
             <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-500 group-hover:text-red-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,6 +357,28 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
                 <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Bulk Reset Password Modal -->
+    @if($showBulkResetPasswordModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showBulkResetPasswordModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-text-main mb-2">Reset Password Massal?</h3>
+                <p class="text-gray-500">Password <span class="font-bold">{{ count($selectedStudents) }}</span> siswa yang dipilih akan direset ke <span class="font-bold">Nomor Induk Siswa (NIS)</span>.</p>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('showBulkResetPasswordModal', false)">Batal</x-button>
+                <x-button variant="primary" wire:click="bulkResetPassword">Ya, Reset Semua</x-button>
             </div>
         </div>
     </div>

@@ -104,33 +104,35 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle student login (NIS + Password)
+     * Handle student login (Email + Password)
+     * Password should be the student's NIS
      */
     public function studentLogin(Request $request)
     {
-        $request->validate([
-            'nis' => 'required|string',
+        $credentials = $request->validate([
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
         $remember = $request->boolean('remember');
 
-        $student = \App\Models\Student::where('nis', $request->nis)->first();
+        if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
 
-        if (!$student) {
-            return back()->withErrors([
-                'nis' => 'NIS tidak ditemukan.',
-            ])->withInput($request->only('nis'));
-        }
+            if (!$user->isStudent()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Akun ini bukan akun Siswa. Silakan gunakan halaman login yang sesuai.',
+                ])->withInput($request->only('email'));
+            }
 
-        if (Auth::attempt(['email' => $student->user->email, 'password' => $request->password], $remember)) {
             $request->session()->regenerate();
             return redirect()->intended(route('student.dashboard'));
         }
 
         return back()->withErrors([
-            'password' => 'Password salah.',
-        ])->withInput($request->only('nis'));
+            'email' => 'Email atau password salah.',
+        ])->withInput($request->only('email'));
     }
 
     /**

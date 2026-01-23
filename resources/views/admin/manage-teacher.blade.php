@@ -175,8 +175,8 @@
                     </svg>
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
-                        <p>Pastikan format Excel Anda sesuai dengan template. Kolom wajib: Nama, Email, Mata Pelajaran, Password.</p>
-                        <a href="#" class="mt-2 inline-block font-bold underline">Download Template Excel</a>
+                        <p>Kolom wajib: <strong>nama</strong>, <strong>email</strong>. Kolom opsional: <strong>mata_pelajaran</strong> (kode mapel). Password default: password123.</p>
+                        <button type="button" wire:click="downloadTemplate" class="mt-2 inline-block font-bold underline">Download Template Excel</button>
                     </div>
                 </div>
                 

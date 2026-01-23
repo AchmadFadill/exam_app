@@ -167,7 +167,7 @@ class ManageTeacher extends Component
         if ($this->selectedTeacher) {
             $teacher = Teacher::with('user')->findOrFail($this->selectedTeacher);
             $teacher->user->update([
-                'password' => Hash::make('password')
+                'password' => Hash::make('12345678')
             ]);
         }
 
@@ -182,17 +182,59 @@ class ManageTeacher extends Component
         $this->showImportModal = true;
     }
 
+    public function downloadTemplate()
+    {
+        $headers = ['nama', 'email', 'mata_pelajaran'];
+        $filename = 'template_guru.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new class($headers) implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
+                private $headers;
+                public function __construct($headers) { $this->headers = $headers; }
+                public function array(): array { return []; }
+                public function headings(): array { return $this->headers; }
+            },
+            $filename
+        );
+    }
+
     public function importTeachers()
     {
-        // TODO: Implement Excel import
-        $this->showImportModal = false;
-        $this->dispatch('notify', ['message' => 'Fitur import akan segera tersedia!']);
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:2048',
+        ], [
+            'importFile.required' => 'File wajib dipilih.',
+            'importFile.mimes' => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            'importFile.max' => 'Ukuran file maksimal 2MB.',
+        ]);
+
+        try {
+            $import = new \App\Imports\TeachersImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $this->importFile);
+
+            $this->showImportModal = false;
+            $this->reset('importFile');
+
+            if (count($import->errors) > 0) {
+                $errorMsg = implode(' | ', array_slice($import->errors, 0, 3));
+                $this->dispatch('notify', [
+                    'message' => "Berhasil import {$import->importedCount} guru. Ada error: {$errorMsg}",
+                    'type' => 'warning'
+                ]);
+            } else {
+                $this->dispatch('notify', ['message' => "Berhasil import {$import->importedCount} guru!"]);
+            }
+        } catch (\Exception $e) {
+            $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
+        }
     }
 
     public function exportTeachers()
     {
-        // TODO: Implement Excel export
-        $this->dispatch('notify', ['message' => 'Fitur export akan segera tersedia!']);
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TeachersExport(),
+            'data_guru_' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     // Bulk Action Methods
@@ -220,7 +262,7 @@ class ManageTeacher extends Component
             $teachers = Teacher::with('user')->whereIn('id', $this->selectedTeachers)->get();
             foreach ($teachers as $teacher) {
                 $teacher->user->update([
-                    'password' => Hash::make('password')
+                    'password' => Hash::make('12345678')
                 ]);
             }
         });

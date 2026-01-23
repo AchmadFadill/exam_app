@@ -41,18 +41,18 @@
                 </div>
                 @endif
 
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <!-- NISN Field -->
-                    <div class="space-y-1.5 group">
-                        <label for="nis" class="block text-[10px] font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] ml-1 opacity-60 group-focus-within:opacity-100 transition-opacity">NIS / NISN</label>
+                    <div class="space-y-2 group">
+                        <label for="nis" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] ml-1 opacity-60 group-focus-within:opacity-100 transition-opacity">NIS / NISN</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)] transition-colors group-focus-within:text-[var(--color-primary)]">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                                 </svg>
                             </span>
                             <input id="nis" name="nis" type="text" required value="{{ old('nis') }}"
-                                class="block w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium @error('nis') border-red-300 @enderror" 
+                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium @error('nis') border-red-300 @enderror" 
                                 placeholder="Masukkan NIS / NISN">
                         </div>
                     </div>
@@ -60,8 +60,8 @@
                     <!-- Password Field -->
                     <div class="space-y-1.5 group">
                         <div class="flex items-center justify-between ml-1">
-                            <label for="password" class="block text-[10px] font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] opacity-60 group-focus-within:opacity-100 transition-opacity">Password</label>
-                            <a href="#" class="text-[10px] font-bold text-[var(--color-primary)] hover:underline transition-colors">Lupa password?</a>
+                            <label for="password" class="block text-xs font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] opacity-60 group-focus-within:opacity-100 transition-opacity">Password</label>
+                            <a href="#" class="text-xs font-bold text-[var(--color-primary)] hover:underline transition-colors">Lupa password?</a>
                         </div>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)] transition-colors group-focus-within:text-[var(--color-primary)]">
@@ -70,16 +70,10 @@
                                 </svg>
                             </span>
                             <input id="password" name="password" type="password" required 
-                                class="block w-full pl-12 pr-12 py-3.5 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium" 
+                                class="block w-full pl-12 pr-4 py-4 bg-gray-50/50 border border-gray-200 text-sm rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-[var(--color-primary)] focus:bg-white outline-none transition-all placeholder:text-gray-400 font-medium" 
                                 placeholder="••••••••">
-                            <button type="button" onclick="togglePassword('password', 'password-icon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[var(--color-primary)] transition-colors">
-                                <svg id="password-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path class="eye-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    <path class="eye-closed hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 1.274-4.057 5.064-7 9.542-7 1.222 0 2.391.22 3.474.625M19.74 19.74A12.401 12.401 0 0112 21c-4.478 0-8.268-2.943-9.542-7 1.274-4.057 5.064-7 9.542-7 .92 0 1.817.11 2.68.315M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18" />
-                                </svg>
-                            </button>
                         </div>
+                        <p class="text-xs text-gray-400 ml-1">Password default adalah NIS Anda</p>
                     </div>
                 </div>
 
