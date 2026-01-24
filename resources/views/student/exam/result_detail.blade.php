@@ -1,8 +1,5 @@
-@extends('layouts.student')
-
-@section('title', 'Detail Hasil Ujian')
-
-@section('content')
+<x-student-layout>
+    <x-slot name="title">Detail Hasil Ujian</x-slot>
 <div class="container mx-auto px-6 py-8">
     <!-- Back Button -->
     <div class="mb-6">
@@ -13,7 +10,7 @@
     </div>
 
     <!-- Result Header Card -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+    <div class="bg-bg-surface dark:bg-bg-surface rounded-3xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden mb-8">
         <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10 text-white">
             <div class="md:flex justify-between items-center">
                 <div class="mb-6 md:mb-0">
@@ -24,7 +21,7 @@
                         Dikerjakan pada 23 Desember 2025, 09:00 - 09:30
                     </div>
                 </div>
-                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30">
+                <div class="bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30">
                     <div class="text-sm font-medium uppercase tracking-wider mb-1">Nilai Akhir</div>
                     <div class="text-6xl font-black">85.0</div>
                     <div class="mt-2 text-xs font-semibold px-3 py-1 bg-green-500 rounded-full inline-block">LULUS KKM</div>
@@ -33,10 +30,10 @@
         </div>
         
         <!-- Stats Summary -->
-        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 border-t border-gray-100">
+        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-border-subtle dark:divide-border-subtle border-t border-border-subtle dark:border-border-subtle">
             <div class="p-6 text-center">
-                <div class="text-sm font-medium text-gray-500 mb-1 leading-tight">Total Soal</div>
-                <div class="text-2xl font-bold text-gray-800">20</div>
+                <div class="text-sm font-medium text-text-muted mb-1 leading-tight">Total Soal</div>
+                <div class="text-2xl font-bold text-text-main">20</div>
             </div>
             <div class="p-6 text-center">
                 <div class="text-sm font-medium text-green-600 mb-1 leading-tight">Benar</div>
@@ -47,42 +44,42 @@
                 <div class="text-2xl font-bold text-red-600">3</div>
             </div>
             <div class="p-6 text-center">
-                <div class="text-sm font-medium text-gray-400 mb-1 leading-tight">Kosong</div>
-                <div class="text-2xl font-bold text-gray-400">0</div>
+                <div class="text-sm font-medium text-text-muted mb-1 leading-tight">Kosong</div>
+                <div class="text-2xl font-bold text-text-muted">0</div>
             </div>
         </div>
     </div>
 
     <!-- Discussion Section -->
     <div class="mb-6 flex items-center justify-between">
-        <h4 class="text-gray-800 text-xl font-bold">Pembahasan Jawaban</h4>
-        <div class="text-sm text-gray-500">Menampilkan 1-10 dari 20 soal</div>
+        <h4 class="text-text-main text-xl font-bold">Pembahasan Jawaban</h4>
+        <div class="text-sm text-text-muted">Menampilkan 1-10 dari 20 soal</div>
     </div>
 
     <div class="space-y-6">
         <!-- Question Item 1 (Correct) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-bg-surface dark:bg-bg-surface rounded-2xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-bold text-gray-400">SOAL NO. 1</span>
+                    <span class="text-sm font-bold text-text-muted">SOAL NO. 1</span>
                     <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                         BENAR
                     </span>
                 </div>
-                <div class="prose max-w-none text-gray-800 mb-4">
+                <div class="prose max-w-none text-text-main mb-4">
                     <p>Kalimat berikut yang merupakan contoh kalimat objektif dalam teks laporan hasil observasi adalah...</p>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="text-sm">
-                        <div class="font-semibold text-gray-500 mb-2">Jawaban Kamu:</div>
+                        <div class="font-semibold text-text-muted mb-2">Jawaban Kamu:</div>
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 font-medium">
                              C. Harimau merupakan hewan karnivora yang memakan daging.
                         </div>
                     </div>
                      <div class="text-sm">
-                        <div class="font-semibold text-gray-500 mb-2">Kunci Jawaban:</div>
+                        <div class="font-semibold text-text-muted mb-2">Kunci Jawaban:</div>
                         <div class="p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 font-medium">
                              C. Harimau merupakan hewan karnivora yang memakan daging.
                         </div>
@@ -105,28 +102,28 @@
         </div>
 
         <!-- Question Item 2 (Wrong) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-bg-surface dark:bg-bg-surface rounded-2xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-bold text-gray-400">SOAL NO. 2</span>
+                    <span class="text-sm font-bold text-text-muted">SOAL NO. 2</span>
                     <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                         SALAH
                     </span>
                 </div>
-                <div class="prose max-w-none text-gray-800 mb-4">
+                <div class="prose max-w-none text-text-main mb-4">
                     <p>Fungsi dari teks laporan hasil observasi adalah...</p>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="text-sm">
-                        <div class="font-semibold text-gray-500 mb-2">Jawaban Kamu:</div>
+                        <div class="font-semibold text-text-muted mb-2">Jawaban Kamu:</div>
                         <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
                              A. Menghibur pembaca dengan cerita unik.
                         </div>
                     </div>
                      <div class="text-sm">
-                        <div class="font-semibold text-gray-500 mb-2">Kunci Jawaban:</div>
+                        <div class="font-semibold text-text-muted mb-2">Kunci Jawaban:</div>
                         <div class="p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 font-medium">
                              D. Menyajikan informasi objektif tentang suatu hal.
                         </div>
@@ -151,4 +148,4 @@
     </div>
 
 </div>
-@endsection
+</x-student-layout>

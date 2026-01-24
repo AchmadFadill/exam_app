@@ -1,8 +1,5 @@
-@extends('layouts.student')
-
-@section('title', 'Konfirmasi Ujian')
-
-@section('content')
+<x-student-layout>
+    <x-slot name="title">Konfirmasi Ujian</x-slot>
 <div class="container mx-auto px-6 py-12 max-w-4xl">
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -10,33 +7,33 @@
         <div class="space-y-6">
             <div>
                 <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Ujian Aktif</span>
-                <h2 class="mt-4 text-3xl font-extrabold text-gray-900">Matematika Dasar</h2>
-                <p class="text-gray-500 mt-2">Ujian Tengah Semester Ganjil TA 2025/2026</p>
+                <h2 class="mt-4 text-3xl font-extrabold text-text-main">Matematika Dasar</h2>
+                <p class="text-text-muted mt-2">Ujian Tengah Semester Ganjil TA 2025/2026</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <span class="text-gray-500 text-sm">Kelas</span>
+            <div class="bg-bg-surface dark:bg-bg-surface rounded-2xl shadow-sm border border-border-subtle dark:border-border-subtle p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-border-subtle dark:border-border-subtle pb-4">
+                    <span class="text-text-muted text-sm">Kelas</span>
                     <span class="font-bold text-gray-800">X IPA 1</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <span class="text-gray-500 text-sm">Waktu</span>
+                <div class="flex items-center justify-between border-b border-border-subtle dark:border-border-subtle pb-4">
+                    <span class="text-text-muted text-sm">Waktu</span>
                     <span class="font-bold text-gray-800">90 Menit</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-gray-100 pb-4">
-                    <span class="text-gray-500 text-sm">Jumlah Soal</span>
+                <div class="flex items-center justify-between border-b border-border-subtle dark:border-border-subtle pb-4">
+                    <span class="text-text-muted text-sm">Jumlah Soal</span>
                     <span class="font-bold text-gray-800">40 PG / 5 Essay</span>
                 </div>
                  <div class="flex items-center justify-between">
-                    <span class="text-gray-500 text-sm">Guru Pengampu</span>
+                    <span class="text-text-muted text-sm">Guru Pengampu</span>
                     <span class="font-bold text-gray-800">Budi Santoso, S.Pd</span>
                 </div>
             </div>
         </div>
 
         <!-- Token & Start -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col justify-center">
-            <h3 class="text-xl font-bold text-gray-900 mb-6">Masukkan Token Ujian</h3>
+        <div class="bg-bg-surface dark:bg-bg-surface rounded-2xl shadow-lg border border-border-main dark:border-border-main p-8 flex flex-col justify-center">
+            <h3 class="text-xl font-bold text-text-main mb-6">Masukkan Token Ujian</h3>
             
             <form action="{{ route('student.exam.show', ['id' => 1]) }}" method="GET" class="space-y-6" x-data="{ token: '' }">
                 <div>
@@ -44,7 +41,7 @@
                     <input type="text" name="token" id="token" x-model="token" 
                         class="block w-full text-center text-3xl font-mono font-bold tracking-[0.5em] border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 uppercase placeholder-gray-300 py-4" 
                         placeholder="TOKEN" maxlength="6" required>
-                    <p class="mt-2 text-center text-sm text-gray-500">Minta token kepada pengawas ujian</p>
+                    <p class="mt-2 text-center text-sm text-text-muted">Minta token kepada pengawas ujian</p>
                 </div>
 
                 <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
@@ -78,4 +75,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-student-layout>

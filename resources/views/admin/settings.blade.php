@@ -13,7 +13,7 @@
     </div>
 
     <!-- Identitas Sekolah -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="bg-bg-surface dark:bg-bg-surface rounded-xl shadow-sm border border-border-main dark:border-border-main p-6">
         <h3 class="font-bold text-lg text-text-main mb-4 flex items-center gap-2">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
             Identitas Sekolah
@@ -22,12 +22,12 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-text-main mb-1">Nama Sekolah</label>
-                    <input type="text" wire:model="schoolName" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary/20 transition-shadow">
+                    <input type="text" wire:model="schoolName" class="w-full rounded-lg border-border-main dark:border-border-main dark:bg-slate-800 dark:text-white focus:border-primary focus:ring focus:ring-primary/20 transition-shadow">
                     @error('schoolName') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-text-main mb-1">Logo Sekolah</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border-main dark:border-border-main border-dashed rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors">
                         <div class="space-y-1 text-center">
                             @if ($logo)
                                 <img src="{{ $logo->temporaryUrl() }}" class="mx-auto h-12 w-auto mb-2">
@@ -48,7 +48,7 @@
                      @error('logo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-4 h-full flex items-center justify-center border border-gray-200">
+            <div class="bg-gray-50 dark:bg-slate-800/30 rounded-lg p-4 h-full flex items-center justify-center border border-border-subtle dark:border-border-subtle">
                 <div class="text-center">
                     <p class="text-xs text-text-muted mb-2 uppercase font-bold tracking-wider">Preview Sidebar</p>
                     <div class="bg-primary text-white w-48 h-20 rounded-lg flex items-center justify-center flex-col shadow-lg mx-auto">
@@ -69,7 +69,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Pengaturan Akademik -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-bg-surface dark:bg-bg-surface rounded-xl shadow-sm border border-border-main dark:border-border-main p-6">
              <h3 class="font-bold text-lg text-text-main mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Akademik
@@ -77,8 +77,8 @@
             <div>
                 <label class="block text-sm font-medium text-text-main mb-1">Tahun Ajaran / Semester</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" wire:model="academicYear" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary/20 transition-shadow" placeholder="Contoh: 2025/2026">
-                    <select wire:model="semester" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring focus:ring-primary/20 transition-shadow">
+                    <input type="text" wire:model="academicYear" class="w-full rounded-lg border-border-main dark:border-border-main dark:bg-slate-800 dark:text-white focus:border-primary focus:ring focus:ring-primary/20 transition-shadow" placeholder="Contoh: 2025/2026">
+                    <select wire:model="semester" class="w-full rounded-lg border-border-main dark:border-border-main dark:bg-slate-800 dark:text-white focus:border-primary focus:ring focus:ring-primary/20 transition-shadow">
                         <option value="Ganjil">Ganjil</option>
                         <option value="Genap">Genap</option>
                     </select>

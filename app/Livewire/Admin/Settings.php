@@ -40,7 +40,6 @@ class Settings extends Component
     public function render()
     {
         return view('admin.settings')
-            ->extends('layouts.admin')
-            ->section('content');
+            ->layout('layouts.admin', ['title' => 'Pengaturan Sistem']);
     }
 }

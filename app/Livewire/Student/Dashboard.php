@@ -64,7 +64,7 @@ class Dashboard extends Component
             'active_exams' => $active_exams,
             'upcoming_exams' => $upcoming_exams,
             'stats' => $stats
-        ])->extends('layouts.student')->section('content');
+        ])->layout('layouts.student', ['title' => 'Dashboard Siswa']);
     }
 
     private function getGreeting()
