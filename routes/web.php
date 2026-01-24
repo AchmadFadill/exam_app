@@ -59,6 +59,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(function () {
     Route::get('/dashboard', App\Livewire\Teacher\Dashboard::class)->name('dashboard');
     
+    // Question Management (single-page CRUD)
+    Route::get('/questions', App\Livewire\Teacher\ManageQuestion::class)->name('questions');
+    
     // Question Bank
     Route::get('/question-bank', App\Livewire\Teacher\QuestionBank\Index::class)->name('question-bank.index');
     Route::get('/question-bank/create', App\Livewire\Teacher\QuestionBank\Form::class)->name('question-bank.create');

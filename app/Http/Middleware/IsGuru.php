@@ -14,7 +14,8 @@ class IsGuru
             return redirect()->route('login');
         }
 
-        if (!auth()->user()->isTeacher()) {
+        // Allow access for both teachers and admins
+        if (!auth()->user()->isTeacher() && !auth()->user()->isAdmin()) {
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Guru.');
         }
 

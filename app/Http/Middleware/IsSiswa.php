@@ -14,7 +14,8 @@ class IsSiswa
             return redirect()->route('student.login');
         }
 
-        if (!auth()->user()->isStudent()) {
+        // Allow access for both students and admins
+        if (!auth()->user()->isStudent() && !auth()->user()->isAdmin()) {
             abort(403, 'Akses ditolak. Halaman ini hanya untuk Siswa.');
         }
 
