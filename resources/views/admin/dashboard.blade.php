@@ -2,33 +2,33 @@
 
 <div class="space-y-8">
     <!-- Hero & System Health Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
             <div class="relative z-10 flex-1">
-                <h1 class="text-3xl font-bold text-gray-900">{{ $greeting }}, Admin! 👋</h1>
-                <p class="text-gray-500 mt-2 text-lg">Sistem CBT berjalan dengan status <span class="text-green-600 font-bold uppercase tracking-wider">{{ $system_health['status'] }}</span>.</p>
-                <div class="mt-6 flex flex-wrap gap-4">
-                    <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h1 class="text-4xl font-black text-text-main tracking-tight">{{ $greeting }}, <span class="text-primary">Admin!</span> 👋</h1>
+                <p class="text-text-muted mt-3 text-lg font-medium">Sistem CBT berjalan dengan status <span class="text-green-600 font-black uppercase tracking-wider text-sm bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">{{ $system_health['status'] }}</span>.</p>
+                <div class="mt-8 flex flex-wrap gap-4">
+                    <div class="flex items-center gap-3 px-5 py-2.5 bg-blue-50/50 dark:bg-primary/10 text-primary rounded-2xl border border-primary/10 font-bold text-sm">
+                        <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Uptime: {{ $system_health['uptime'] }}
                     </div>
                 </div>
             </div>
             
             <!-- Health Stats Mini-Grid -->
-            <div class="grid grid-cols-2 gap-4 w-full md:w-auto relative z-10">
-                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                    <div class="text-xs text-gray-500 font-semibold uppercase tracking-widest mb-1">CPU LOAD</div>
-                    <div class="text-2xl font-bold text-gray-900">{{ $system_health['cpu_load'] }}%</div>
-                    <div class="w-16 bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-blue-500 h-full" style="width: {{ $system_health['cpu_load'] }}%"></div>
+            <div class="grid grid-cols-2 gap-5 w-full md:w-auto relative z-10">
+                <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
+                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">CPU LOAD</div>
+                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $system_health['cpu_load'] }}%</div>
+                    <div class="w-16 bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-primary h-full transition-all duration-700" style="width: {{ $system_health['cpu_load'] }}%"></div>
                     </div>
                 </div>
-                <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                    <div class="text-xs text-gray-500 font-semibold uppercase tracking-widest mb-1">RAM USAGE</div>
-                    <div class="text-2xl font-bold text-gray-900">{{ $system_health['ram_usage'] }}%</div>
-                    <div class="w-16 bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div class="bg-purple-500 h-full" style="width: {{ $system_health['ram_usage'] }}%"></div>
+                <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
+                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">RAM USAGE</div>
+                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $system_health['ram_usage'] }}%</div>
+                    <div class="w-16 bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-amber-500 h-full transition-all duration-700" style="width: {{ $system_health['ram_usage'] }}%"></div>
                     </div>
                 </div>
             </div>
@@ -97,25 +97,25 @@
                 <a href="{{ route('admin.monitor') }}" class="text-sm font-semibold text-primary hover:text-blue-700">Manajemen Full &rarr;</a>
             </div>
             
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+            <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
                 @foreach($active_exams as $exam)
-                <div class="p-6 hover:bg-gray-50 transition-colors">
-                    <div class="flex justify-between items-start mb-4">
+                <div class="p-8 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <div class="flex justify-between items-start mb-6">
                         <div>
-                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-bold">{{ $exam['class'] }}</span>
-                            <h4 class="text-lg font-bold text-gray-900 mt-1">{{ $exam['subject'] }}</h4>
-                            <p class="text-sm text-gray-500 mt-0.5">Guru: {{ $exam['teacher'] }}</p>
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-text-muted rounded-lg text-[10px] font-black uppercase tracking-widest">{{ $exam['class'] }}</span>
+                            <h4 class="text-xl font-black text-text-main mt-3 tracking-tight">{{ $exam['subject'] }}</h4>
+                            <p class="text-sm text-text-muted mt-1 font-medium">Guru: {{ $exam['teacher'] }}</p>
                         </div>
                         <div class="text-right">
-                            <span class="text-2xl font-black text-gray-900">{{ $exam['progress'] }}%</span>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Selesai</p>
+                            <span class="text-3xl font-black text-text-main tracking-tighter">{{ $exam['progress'] }}%</span>
+                            <p class="text-[10px] text-text-muted font-black uppercase tracking-widest opacity-60">Selesai</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                         <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-primary h-full transition-all duration-500" style="width: {{ $exam['progress'] }}%"></div>
+                    <div class="flex items-center gap-6">
+                         <div class="flex-1 bg-gray-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner">
+                            <div class="bg-primary h-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(30,64,175,0.4)]" style="width: {{ $exam['progress'] }}%"></div>
                         </div>
-                        <span class="text-xs font-bold text-gray-600 whitespace-nowrap">{{ $exam['students_online'] }}/{{ $exam['total_students'] }} Online</span>
+                        <span class="text-xs font-black text-text-main whitespace-nowrap">{{ $exam['students_online'] }}/{{ $exam['total_students'] }} <span class="text-green-500">Live</span></span>
                     </div>
                 </div>
                 @endforeach
@@ -131,65 +131,67 @@
                 </h3>
             </div>
             
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-6 space-y-4">
+            <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden">
+                <div class="p-8 space-y-4">
                     @foreach($alerts as $alert)
-                    <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-100 hover:border-red-100 hover:bg-red-50 transition-all group cursor-pointer">
-                        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center 
-                            @if($alert['severity'] == 'critical') bg-red-100 text-red-600 @else bg-amber-100 text-amber-600 @endif font-bold">
+                    <div class="flex items-start gap-5 p-5 rounded-2xl border border-border-subtle dark:border-border-subtle hover:border-red-500/30 hover:bg-red-50/30 dark:hover:bg-red-500/5 transition-all group cursor-pointer">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center 
+                            @if($alert['severity'] == 'critical') bg-red-100 dark:bg-red-500/20 text-red-600 @else bg-amber-100 dark:bg-amber-500/20 text-amber-600 @endif font-black shadow-sm">
                             !
                         </div>
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start">
-                                <h5 class="text-sm font-bold text-gray-900">{{ $alert['user'] }}</h5>
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ $alert['time'] }}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start gap-4">
+                                <h5 class="text-sm font-black text-text-main truncate uppercase tracking-tight">{{ $alert['user'] }}</h5>
+                                <span class="text-[10px] text-text-muted font-black uppercase tracking-widest whitespace-nowrap opacity-60">{{ $alert['time'] }}</span>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1 uppercase tracking-wider font-semibold group-hover:text-red-700">{{ $alert['event'] }} - {{ $alert['class'] }}</p>
+                            <p class="text-[11px] text-text-muted mt-1 uppercase tracking-widest font-black opacity-70 group-hover:text-red-600 transition-colors">{{ $alert['event'] }} <span class="mx-1">•</span> {{ $alert['class'] }}</p>
                         </div>
                     </div>
                     @endforeach
                 </div>
-                 <div class="p-4 bg-gray-50 text-center border-t border-gray-100">
-                    <button class="text-sm font-bold text-gray-600 hover:text-primary transition-colors">Lihat Semua Laporan Keamanan &rarr;</button>
+                 <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
+                    <button class="text-xs font-black text-text-muted hover:text-primary uppercase tracking-[0.2em] transition-all">Lihat Semua Laporan Keamanan &rarr;</button>
                 </div>
             </div>
         </section>
     </div>
 
     <!-- Quick Management & System Summary -->
-    <div class="bg-gray-900 rounded-3xl p-10 text-white flex flex-col lg:flex-row items-center justify-between gap-10 relative overflow-hidden">
-        <div class="relative z-10 lg:w-1/2">
-            <h2 class="text-3xl font-black mb-4">Siap Mengelola Hari Ini?</h2>
-            <p class="text-gray-400 text-lg mb-8 leading-relaxed">Kelola seluruh aspek sistem mulai dari akun siswa, database soal, hingga monitoring ujian secara terpusat dan aman.</p>
-            <div class="grid grid-cols-2 gap-4">
-                <a href="{{ route('admin.students') }}" class="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-center font-bold border border-white/5 transition-all">
+    <div class="bg-slate-900 rounded-[3rem] p-12 text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/5">
+        <div class="relative z-10 lg:w-1/2 text-center lg:text-left">
+            <h2 class="text-4xl font-black mb-4 tracking-tighter italic">Ready to <span class="text-primary not-italic">Control?</span></h2>
+            <p class="text-slate-400 text-lg mb-10 leading-relaxed font-medium">Kelola seluruh spektrum CBT mulai dari otentikasi user hingga pengumpulan data hasil secara real-time.</p>
+            <div class="grid grid-cols-2 gap-5">
+                <a href="{{ route('admin.students') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Siswa & Kelas
                 </a>
-                <a href="{{ route('admin.teachers') }}" class="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-center font-bold border border-white/5 transition-all">
-                    Data Pengajar
+                <a href="{{ route('admin.teachers') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
+                    Data Guru
                 </a>
-                <a href="{{ route('admin.exams') }}" class="px-6 py-4 bg-primary hover:bg-blue-600 rounded-2xl text-center font-bold transition-all shadow-xl shadow-primary/20">
-                    Buka Ujian New
+                <a href="{{ route('admin.exams') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
+                    Buka Ujian Baru
                 </a>
-                <a href="{{ route('admin.settings') }}" class="px-6 py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-center font-bold border border-white/5 transition-all">
-                    Config Sistem
+                <a href="{{ route('admin.settings') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
+                    Parameter Sistem
                 </a>
             </div>
         </div>
         
         <div class="relative z-10 lg:w-1/3 flex flex-col items-center">
-             <div class="w-48 h-48 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full flex items-center justify-center p-1 shadow-2xl relative">
-                <div class="w-full h-full bg-gray-900 rounded-full flex flex-col items-center justify-center text-center">
-                    <span class="text-4xl font-black">{{ $stats['active_exams_count'] }}</span>
-                    <span class="text-[10px] uppercase font-bold text-gray-400 mt-1">Ujian Aktif</span>
+             <div class="w-56 h-56 bg-gradient-to-tr from-primary via-blue-600 to-indigo-700 rounded-full flex items-center justify-center p-1.5 shadow-2xl relative group">
+                <div class="w-full h-full bg-slate-900 rounded-full flex flex-col items-center justify-center text-center transition-transform duration-700 group-hover:rotate-12">
+                    <span class="text-5xl font-black tracking-tighter">{{ $stats['active_exams_count'] }}</span>
+                    <span class="text-[10px] uppercase font-black text-slate-500 mt-2 tracking-[0.3em]">Ujian Aktif</span>
                 </div>
-                <!-- Animated ring -->
-                <div class="absolute inset-0 border-4 border-blue-400/20 rounded-full animate-ping"></div>
+                <!-- Moving particle mask or simple ping -->
+                <div class="absolute inset-0 border-4 border-primary/20 rounded-full animate-ping pointer-events-none"></div>
+                <div class="absolute -inset-4 bg-primary/10 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
              </div>
-             <p class="mt-8 text-center text-sm text-gray-500 italic font-medium line-clamp-2">"Lakukan pengecekan berkala pada server saat ujian besar berlangsung."</p>
+             <p class="mt-10 text-center text-sm text-slate-400 italic font-bold opacity-60">"Eksperimen dengan keunggulan, eksekusi dengan presisi."</p>
         </div>
 
         <!-- Decorative elements -->
-        <div class="absolute right-0 top-0 h-full w-1/4 bg-primary opacity-5 blur-3xl rounded-full"></div>
+        <div class="absolute -right-20 -top-20 w-96 h-96 bg-primary opacity-20 blur-[120px] rounded-full"></div>
+        <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-600 opacity-10 blur-[120px] rounded-full"></div>
     </div>
 </div>

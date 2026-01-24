@@ -3,78 +3,78 @@
 
 <div class="space-y-8">
     <!-- Hero Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $greeting }}, {{ auth()->user()->name ?? 'Siswa' }}! 👋</h1>
-            <p class="text-gray-500 mt-1">Siap untuk mengerjakan ujian hari ini? Semangat!</p>
+            <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">{{ $greeting }}, {{ explode(' ', auth()->user()->name)[0] ?? 'Learner' }}!</h1>
+            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Ready for today's academic mission?</p>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium shadow-sm">
+        <div class="shrink-0">
+             <div class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm text-[10px] font-black text-text-muted uppercase tracking-widest">
                 {{ now()->translatedFormat('l, d F Y') }}
-            </span>
+            </div>
         </div>
     </div>
 
     <!-- Active Exams (Ujian Tersedia) - HERO FEATURE -->
-    <section>
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+    <section class="mb-16">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em] flex items-center gap-4">
                 <span class="relative flex h-3 w-3">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                 </span>
-                Ujian Tersedia ({{ count($active_exams) }})
+                Live Assessment Instances ({{ count($active_exams) }})
             </h3>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             @forelse($active_exams as $exam)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative group">
+            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-border-main dark:border-white/5 overflow-hidden hover:border-primary/40 transition-all relative group">
                  @if($exam['is_urgent'])
-                <div class="absolute top-0 right-0 mt-4 mr-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse">
-                        Segera Berakhir
+                <div class="absolute top-0 right-0 mt-6 mr-8">
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-red-500/10 text-red-600 animate-pulse border border-red-500/20">
+                        CRITICAL TIME
                     </span>
                 </div>
                 @endif
                 
-                <div class="p-6">
+                <div class="p-10">
                     <div class="flex items-start justify-between">
                         <div>
-                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 tracking-wide uppercase">
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-lg">
                                 {{ $exam['subject'] }}
                             </span>
-                            <h4 class="mt-3 text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">
+                            <h4 class="mt-6 text-3xl font-black text-text-main group-hover:text-primary transition-colors tracking-tight italic leading-tight">
                                 {{ $exam['title'] }}
                             </h4>
-                            <p class="text-gray-500 text-sm mt-1">{{ $exam['teacher'] }}</p>
+                            <p class="text-text-muted text-[10px] font-bold uppercase tracking-widest mt-2 opacity-50">Invigilator: {{ $exam['teacher'] }}</p>
                         </div>
                     </div>
 
-                    <div class="mt-6 flex items-center gap-6 text-sm text-gray-500">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ $exam['duration'] }} Menit</span>
+                    <div class="mt-10 flex items-center gap-10 text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>{{ $exam['duration'] }} Mins</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                            <span>{{ $exam['questions_count'] }} Soal</span>
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            <span>{{ $exam['questions_count'] }} Items</span>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-gray-100 flex items-center justify-between">
-                        <div class="text-sm">
-                            <p class="text-gray-500">Batas Waktu</p>
-                            <p class="font-semibold text-gray-900">{{ $exam['end_time'] }} WIB</p>
+                    <div class="mt-10 pt-10 border-t border-border-subtle dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Cut-off Time</p>
+                            <p class="font-black text-text-main uppercase tracking-widest">{{ $exam['end_time'] }} WIB</p>
                         </div>
-                        <a href="{{ route('student.exam.start', $exam['id']) }}" class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform group-hover:translate-x-1">
-                            Kerjakan Sekarang
-                            <svg class="ml-2 -mr-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                        <a href="{{ route('student.exam.start', $exam['id']) }}" class="group/btn inline-flex items-center px-8 py-4 bg-primary hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-100">
+                            Initialize Sequence
+                            <svg class="ml-3 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </a>
                     </div>
                 </div>
-                <div class="h-1.5 w-full bg-gray-100">
-                    <div class="h-1.5 bg-primary rounded-r-full" style="width: 45%"></div> <!-- Dummy progress indicator -->
+                <div class="h-2 w-full bg-gray-100 dark:bg-slate-800">
+                    <div class="h-2 bg-primary rounded-r-full shadow-lg shadow-primary/20" style="width: 45%"></div>
                 </div>
             </div>
             @empty
@@ -90,73 +90,76 @@
     </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Upcoming Exams -->
-        <div class="lg:col-span-2 space-y-6">
-            <h3 class="text-lg font-bold text-gray-900">Jadwal Mendatang</h3>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100">
+        <div class="lg:col-span-2 space-y-8">
+            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Upcoming Protocol</h3>
+            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 divide-y divide-border-subtle dark:divide-slate-800 overflow-hidden">
                 @forelse($upcoming_exams as $exam)
-                <div class="p-5 flex items-center gap-4 hover:bg-gray-50 transition-colors">
-                    <div class="flex-shrink-0 w-16 h-16 bg-gray-50 rounded-lg flex flex-col items-center justify-center border border-gray-100">
-                         <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="p-8 flex items-center gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/20 transition-all group">
+                    <div class="shrink-0 w-20 h-20 bg-gray-100/50 dark:bg-slate-800 rounded-[1.5rem] flex flex-col items-center justify-center border border-border-main dark:border-slate-700 shadow-inner transition-transform group-hover:scale-105">
+                         <svg class="w-8 h-8 text-text-muted opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-semibold text-primary bg-blue-50 px-2 py-0.5 rounded">{{ $exam['subject'] }}</span>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-[8px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">{{ $exam['subject'] }}</span>
                         </div>
-                        <h4 class="text-base font-bold text-gray-900 truncate">{{ $exam['title'] }}</h4>
-                        <p class="text-sm text-gray-500 mt-0.5">{{ $exam['date'] }}</p>
+                        <h4 class="text-xl font-black text-text-main truncate tracking-tight uppercase group-hover:text-primary transition-colors italic leading-tight">{{ $exam['title'] }}</h4>
+                        <p class="text-[10px] font-bold text-text-muted mt-2 uppercase tracking-widest opacity-40">{{ date('d M Y', strtotime($exam['date'])) }}</p>
                     </div>
-                     <div class="text-right">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Akan Datang
+                     <div class="text-right sr-only sm:not-sr-only">
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-gray-100 dark:bg-slate-800 text-text-muted opacity-60">
+                            QUEUED
                         </span>
                     </div>
                 </div>
                 @empty
-                 <div class="p-6 text-center text-gray-500 text-sm">
-                    Belum ada jadwal ujian mendatang.
+                 <div class="p-10 text-center text-text-muted font-bold italic opacity-40 text-sm">
+                    No upcoming sessions detected in local buffer.
                 </div>
                 @endforelse
             </div>
         </div>
 
         <!-- Student Stats -->
-        <div class="space-y-6">
-            <h3 class="text-lg font-bold text-gray-900">Statistik Belajar</h3>
+        <div class="space-y-8">
+            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Neural Analytics</h3>
             
-            <div class="bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div class="bg-gradient-to-br from-primary via-blue-700 to-indigo-900 rounded-[2rem] shadow-2xl p-8 text-white relative overflow-hidden group">
                 <div class="relative z-10">
-                    <p class="text-blue-100 text-sm font-medium">Rata-rata Nilai</p>
-                    <h2 class="text-4xl font-bold mt-1">{{ $stats['avg_score'] }}</h2>
-                    <div class="mt-4 flex items-center gap-2 text-sm text-blue-100 bg-white/10 px-3 py-1.5 rounded-lg w-fit">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        <span>Top 10% di kelas</span>
+                    <p class="text-blue-100/60 text-[10px] font-black uppercase tracking-widest">Aggregate Efficiency</p>
+                    <h2 class="text-6xl font-black mt-2 tracking-tighter">{{ $stats['avg_score'] }}</h2>
+                    <div class="mt-10 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary bg-white px-5 py-3 rounded-2xl w-fit shadow-xl transition-transform group-hover:scale-105 active:scale-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        <span>Classe Elite: Top 10%</span>
                     </div>
                 </div>
-                <div class="absolute right-0 top-0 w-32 h-32 bg-white rounded-full opacity-10 blur-3xl -mr-10 -mt-10"></div>
+                <div class="absolute right-0 top-0 w-48 h-48 bg-white rounded-full opacity-5 blur-[80px] -mr-16 -mt-16 group-hover:opacity-10 transition-opacity"></div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h4 class="font-bold text-gray-900 mb-4">Ringkasan Aktivitas</h4>
-                <div class="space-y-4">
-                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">Ujian Selesai</span>
-                        <span class="font-bold text-gray-900">{{ $stats['completed_exams'] }}</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: 80%"></div>
+            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 p-10">
+                <h4 class="text-[10px] font-black text-text-main mb-8 uppercase tracking-[0.2em] opacity-60">Performance Indices</h4>
+                <div class="space-y-8">
+                     <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Completion Rate</span>
+                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['completed_exams'] }} Items</span>
+                        </div>
+                        <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div class="bg-green-500 h-2 rounded-full shadow-lg shadow-green-500/20" style="width: 80%"></div>
+                        </div>
                     </div>
                     
-                    <div class="flex items-center justify-between text-sm pt-2">
-                        <span class="text-gray-500">Kehadiran Ujian</span>
-                        <span class="font-bold text-gray-900">{{ $stats['attendance'] }}%</span>
-                    </div>
-                     <div class="w-full bg-gray-100 rounded-full h-2">
-                        <div class="bg-amber-500 h-2 rounded-full" style="width: {{ $stats['attendance'] }}%"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Attendance Index</span>
+                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['attendance'] }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div class="bg-amber-500 h-2 rounded-full shadow-lg shadow-amber-500/20" style="width: {{ $stats['attendance'] }}%"></div>
+                        </div>
                     </div>
                 </div>
-                 <button class="w-full mt-6 py-2 px-4 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                    Lihat Riwayat Lengkap
+                 <button class="w-full mt-12 py-4 px-6 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl text-[10px] font-black text-text-muted uppercase tracking-widest hover:bg-gray-50/50 hover:text-text-main hover:border-primary/30 transition-all shadow-sm">
+                    Access Neural History
                 </button>
             </div>
         </div>

@@ -20,9 +20,34 @@
     /* Gray-100 */
     --color-bg-surface: #FFFFFF;
 
+    /* Borders */
+    --color-border-main: #E5E7EB;
+    /* Gray-200 */
+    --color-border-subtle: #F3F4F6;
+    /* Gray-100 */
+
     /* Text */
     --color-text-main: #111827;
     /* Gray-900 */
     --color-text-muted: #6B7280;
     /* Gray-500 */
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@variant dark {
+    :root {
+        --color-bg-app: #020617;
+        /* Slate-950 */
+        --color-bg-surface: #0f172a;
+        /* Slate-900 */
+        --color-border-main: #1e293b;
+        /* Slate-800 */
+        --color-border-subtle: #1e293b;
+        /* Match main for cleaner look */
+        --color-text-main: #f8fafc;
+        /* Slate-50 */
+        --color-text-muted: #94a3b8;
+        /* Slate-400 */
+    }
 }

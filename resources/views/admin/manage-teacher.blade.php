@@ -1,32 +1,32 @@
 <div>
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <!-- Search Bar (Left - fills space) -->
-        <div class="relative w-full sm:flex-1 sm:max-w-lg">
-            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+        <div class="relative w-full sm:flex-1 sm:max-w-lg group">
+            <span class="absolute left-5 top-1/2 transform -translate-y-1/2 pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </span>
-            <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari nama atau email...">
+            <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari nama atau email pengajar...">
         </div>
         
         <!-- Action Buttons (Right) -->
-        <div class="flex gap-2 flex-wrap">
-            <x-button wire:click="exportTeachers" variant="secondary" class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        <div class="flex gap-3 flex-wrap">
+            <x-button wire:click="exportTeachers" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Export
             </x-button>
-            <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <x-button wire:click="openImportModal" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
                 Import
             </x-button>
-            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+                <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
                 </svg>
                 Tambah Guru
             </x-button>
@@ -38,55 +38,55 @@
         <div class="overflow-x-auto -mx-6 -my-6">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="px-6 py-4 w-4">
-                            <div class="flex items-center">
-                                <input type="checkbox" wire:model.live="selectAll" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                    <tr class="bg-gray-50/50 dark:bg-slate-800/50 border-b border-border-subtle dark:border-border-subtle">
+                        <th class="px-8 py-5 w-4">
+                            <div class="flex items-center justify-center">
+                                <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                             </div>
                         </th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Nama</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Email</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Mata Pelajaran</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 text-right">Aksi</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Identitas Pengajar</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Kontak Email</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Mata Pelajaran</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Manajemen</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($teachers as $teacher)
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <input type="checkbox" wire:model.live="selectedTeachers" value="{{ $teacher->id }}" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all group">
+                        <td class="px-8 py-5 text-center">
+                            <div class="flex items-center justify-center">
+                                <input type="checkbox" wire:model.live="selectedTeachers" value="{{ $teacher->id }}" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs shadow-inner group-hover:scale-110 transition-transform">
                                     {{ substr($teacher->user->name, 0, 2) }}
                                 </div>
-                                <span class="font-medium text-text-main">{{ $teacher->user->name }}</span>
+                                <span class="font-black text-text-main tracking-tight uppercase text-sm group-hover:text-primary transition-colors">{{ $teacher->user->name }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-text-muted">{{ $teacher->user->email }}</td>
-                        <td class="px-6 py-4 text-sm">
-                            <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
+                        <td class="px-8 py-5 text-sm font-bold text-text-muted">{{ $teacher->user->email }}</td>
+                        <td class="px-8 py-5 text-sm">
+                            <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
                                 {{ $teacher->subject?->name ?? '-' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <button wire:click="openResetPasswordModal({{ $teacher->id }})" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Reset Password">
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
+                                <button wire:click="openResetPasswordModal({{ $teacher->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all" title="Reset Password">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openEditModal({{ $teacher->id }})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                <button wire:click="openEditModal({{ $teacher->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openDeleteModal({{ $teacher->id }})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                <button wire:click="openDeleteModal({{ $teacher->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all" title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
                             </div>
@@ -94,7 +94,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-text-muted italic">Tidak ada data guru ditemukan.</td>
+                        <td colspan="5" class="px-8 py-20 text-center text-text-muted font-bold italic opacity-60">Tidak ada data koleksi pengajar ditemukan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -112,44 +112,47 @@
     <!-- Modals -->
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
-        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 class="text-lg font-bold text-text-main">{{ $showAddModal ? 'Tambah Guru Baru' : 'Edit Data Guru' }}</h3>
-                <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="text-gray-400 hover:text-gray-600">
+        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
+        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
+            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+                <div>
+                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Registrasi Guru' : 'Mutasi Data Guru' }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Database Configuration</p>
+                 </div>
+                <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-10 space-y-8">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" wire:model="teacherForm.name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Masukkan nama guru">
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Nama Lengkap Sesuai ID</label>
+                    <input type="text" wire:model="teacherForm.name" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Contoh: Dr. Budi Santoso">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" wire:model="teacherForm.email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="guru@example.com">
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Alamat Korespondensi (Email)</label>
+                    <input type="email" wire:model="teacherForm.email" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="guru@institusi.ac.id">
                 </div>
                 @if($showAddModal)
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" wire:model="teacherForm.password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Min. 8 karakter">
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Password Akses Portal</label>
+                    <input type="password" wire:model="teacherForm.password" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Min. 8 Karakter Unik">
                 </div>
                 @endif
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                    <select wire:model="teacherForm.subject_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
-                        <option value="">Pilih Mata Pelajaran</option>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Spesialisasi Mata Pelajaran</label>
+                    <select wire:model="teacherForm.subject_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                        <option value="">Pilih Bidang Studi</option>
                         @foreach($subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                         @endforeach
                     </select>
                 </div>
             </div>
-            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)">Batal</x-button>
-                <x-button variant="primary" wire:click="saveTeacher">Simpan Perubahan</x-button>
+            <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
+                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
+                <x-button variant="primary" wire:click="saveTeacher" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Konfigurasi</x-button>
             </div>
         </div>
     </div>
@@ -256,25 +259,25 @@
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedTeachers) > 0)
-    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-6 py-4 rounded-full shadow-2xl border border-gray-100 flex items-center gap-6 z-40 animate-bounce-in">
-        <div class="flex items-center gap-2">
-            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{{ count($selectedTeachers) }}</span>
-            <span class="text-sm font-medium text-gray-600">Guru Terpilih</span>
+    <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-10 py-5 rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-10 z-40 animate-bounce-in ring-4 ring-primary/20">
+        <div class="flex items-center gap-4">
+            <span class="bg-primary text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-lg">{{ count($selectedTeachers) }}</span>
+            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Guru Terpilih</span>
         </div>
-        <div class="h-6 w-px bg-gray-200"></div>
-        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-amber-600 transition-colors">
-            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-amber-100 text-gray-500 group-hover:text-amber-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+        <div class="h-8 w-px bg-white/10"></div>
+        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-amber-500/10 hover:text-amber-500 transition-all uppercase tracking-widest">
+            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-amber-500/30 text-white/50 group-hover:text-amber-500 transition-all shadow-inner">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                 </svg>
             </div>
-            Reset Password Massal
+            Reset Password
         </button>
-        <div class="h-6 w-px bg-gray-200"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors">
-            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-500 group-hover:text-red-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        <div class="h-8 w-px bg-white/10"></div>
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
+            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
             Hapus Massal

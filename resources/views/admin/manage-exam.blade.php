@@ -1,91 +1,100 @@
 @section('title', 'Kelola Ujian')
 
 <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
-            <h2 class="font-bold text-2xl text-text-main">Kelola Ujian </h2>
-            <p class="text-text-muted text-sm">Buat dan atur jadwal ujian untuk semua kelas</p>
+             <h2 class="text-4xl font-black text-text-main tracking-tight uppercase">Master Schedule</h2>
+            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Global Exam Orchestration</p>
         </div>
         <div>
-            <a href="{{ route('teacher.exams.create') }}" class="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Buat Ujian Baru
+            <a href="{{ route('teacher.exams.create') }}" class="group inline-flex items-center gap-4 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-[2rem] text-sm font-black transition-all shadow-xl shadow-primary/20 uppercase tracking-widest">
+                <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                Deploy Ujian Baru
             </a>
         </div>
     </div>
 
-    <!-- Exam List -->
-    <div class="flex items-center gap-2">
-        <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-4 h-4 rounded text-primary border-gray-300 focus:ring-primary">
-        <label for="selectAllExams" class="text-sm text-gray-600 font-medium cursor-pointer">Pilih Semua</label>
+    <!-- Exam Filter/Select All -->
+    <div class="flex items-center gap-4 mb-8">
+        <div class="flex items-center gap-3 px-6 py-3 bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-2xl shadow-sm">
+            <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-5 h-5 rounded-lg text-primary border-border-main dark:border-slate-700 focus:ring-primary/20 bg-transparent">
+            <label for="selectAllExams" class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] cursor-pointer">Seleksi Global</label>
+        </div>
+        <div class="h-6 w-px bg-border-subtle dark:bg-slate-800"></div>
+        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Showing {{ count($exams) }} Scheduled Instances</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @foreach($exams as $exam)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-            <div class="p-5 flex-1">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-5 h-5 rounded text-primary border-gray-300 focus:ring-primary">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            @if($exam['status'] == 'completed') bg-gray-100 text-gray-800
-                            @elseif($exam['status'] == 'ongoing') bg-green-100 text-green-800 animate-pulse
-                            @else bg-blue-100 text-blue-800 @endif">
-                            @if($exam['status'] == 'completed') Selesai
-                            @elseif($exam['status'] == 'ongoing') Sedang Berlangsung
-                            @else Terjadwal @endif
+        <div class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden hover:border-primary/40 transition-all flex flex-col group">
+            <div class="p-8 flex-1">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="flex items-center gap-4">
+                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-6 h-6 rounded-xl text-primary border-border-main dark:border-slate-700 focus:ring-primary/20 bg-gray-50/50 dark:bg-slate-900">
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-inner
+                            @if($exam['status'] == 'completed') bg-gray-100 text-gray-500
+                            @elseif($exam['status'] == 'ongoing') bg-green-500/10 text-green-600 animate-pulse border border-green-500/20
+                            @else bg-primary/10 text-primary border border-primary/20 @endif">
+                            @if($exam['status'] == 'completed') ARCHIVED
+                            @elseif($exam['status'] == 'ongoing') LIVE NOW
+                            @else SCHEDULED @endif
                         </span>
                     </div>
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                        <button @click="open = !open" @click.away="open = false" class="p-2 text-text-muted hover:text-text-main transition-colors opacity-40 group-hover:opacity-100">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
-                        <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Duplikasi</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Hapus</a>
+                        <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
+                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Metadata</a>
+                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Clone Instance</a>
+                            <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
+                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Purge Entry</a>
                         </div>
                     </div>
                 </div>
 
-                <h3 class="font-bold text-lg text-text-main mb-1">{{ $exam['name'] }}</h3>
-                <p class="text-sm text-text-muted mb-4">{{ $exam['subject'] }} - {{ $exam['class'] }}</p>
+                <h3 class="font-black text-2xl text-text-main mb-2 tracking-tight group-hover:text-primary transition-colors italic leading-tight">{{ $exam['name'] }}</h3>
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="text-[10px] font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
+                    <span class="w-1 h-1 rounded-full bg-border-main"></span>
+                    <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">{{ $exam['class'] }}</span>
+                </div>
 
-                <div class="space-y-3">
-                    <div class="flex items-center text-sm text-text-muted">
-                        <svg class="w-4 h-4 mr-2 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="space-y-4 pt-6 border-t border-border-subtle dark:border-slate-800/50">
+                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
+                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         {{ date('d M Y', strtotime($exam['date'])) }}
-                        <span class="mx-2">•</span>
-                        {{ $exam['start_time'] ?? '08:00' }} - {{ $exam['end_time'] ?? '09:30' }} WIB
+                        <span class="mx-3 opacity-20">|</span>
+                        {{ $exam['start_time'] ?? '08:00' }} - {{ $exam['end_time'] ?? '09:30' }}
                     </div>
-                    <div class="flex items-center text-sm text-text-muted">
-                        <svg class="w-4 h-4 mr-2 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ $exam['duration'] }} Menit
+                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
+                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {{ $exam['duration'] }} Minutes Effective
                     </div>
-                    <div class="flex items-center text-sm text-text-muted">
-                        <svg class="w-4 h-4 mr-2 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        {{ $exam['questions_count'] }} Soal
+                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
+                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        {{ $exam['questions_count'] }} Question Items
                     </div>
                 </div>
             </div>
 
-            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-2 gap-3 mt-auto">
+            <div class="px-8 py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-slate-800 grid grid-cols-2 gap-4 mt-auto">
                 @if($exam['status'] == 'ongoing')
-                    <a href="{{ route('admin.monitor.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-2 bg-primary hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        Monitoring 
+                    <a href="{{ route('admin.monitor.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-3 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Enter Traffic Monitor 
                     </a>
                 @elseif($exam['status'] == 'completed')
-                    <a href="#" class="flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
-                        Lihat Nilai
+                    <a href="#" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
+                        Analytics
                     </a>
-                    <a href="#" class="flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
-                        Laporan
+                    <a href="#" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
+                        Gradebook
                     </a>
                 @else
-                    <a href="#" class="col-span-2 flex justify-center items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-text-main text-sm font-medium py-2 rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        Edit Ujian
+                    <a href="#" class="col-span-2 flex justify-center items-center gap-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-gray-100 transition-all shadow-sm">
+                        <svg class="w-4 h-4 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Adjust Parameters
                     </a>
                 @endif
             </div>
@@ -95,19 +104,19 @@
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedExams) > 0)
-    <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white px-6 py-4 rounded-full shadow-2xl border border-gray-100 flex items-center gap-6 z-40 animate-bounce-in">
-        <div class="flex items-center gap-2">
-            <span class="bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">{{ count($selectedExams) }}</span>
-            <span class="text-sm font-medium text-gray-600">Ujian Terpilih</span>
+    <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-10 py-5 rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-10 z-40 animate-bounce-in ring-4 ring-primary/20">
+        <div class="flex items-center gap-4">
+            <span class="bg-primary text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-lg">{{ count($selectedExams) }}</span>
+            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Sesi Terpilih</span>
         </div>
-        <div class="h-6 w-px bg-gray-200"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-red-600 transition-colors">
-            <div class="p-1.5 rounded-full bg-gray-100 group-hover:bg-red-100 text-gray-500 group-hover:text-red-600 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        <div class="h-8 w-px bg-white/10"></div>
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
+            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            Hapus Massal
+            Batal Jadwal
         </button>
     </div>
     @endif

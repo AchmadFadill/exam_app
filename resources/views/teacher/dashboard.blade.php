@@ -1,15 +1,14 @@
 @section('title', 'Dashboard')
 
 <div class="space-y-8">
-    <!-- Hero Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $greeting }}, {{ auth()->user()->name ?? 'Guru' }}! 👋</h1>
-            <p class="text-gray-500 mt-1">Ini ringkasan aktivitas ujian hari ini, {{ now()->translatedFormat('l, d F Y') }}</p>
+            <h1 class="text-4xl font-black text-text-main tracking-tight italic">Teacher <span class="text-primary not-italic">Dashboard</span></h1>
+            <p class="text-text-muted mt-3 font-medium text-lg">Ringkasan aktivitas dan kendali ujian hari ini, {{ now()->translatedFormat('d F Y') }}</p>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="px-3 py-1 bg-blue-50 text-primary text-sm font-medium rounded-full border border-blue-100">
-                Semester Ganjil 2025/2026
+        <div class="flex items-center gap-4">
+            <span class="px-5 py-2 bg-blue-50/50 dark:bg-primary/10 text-primary text-sm font-black rounded-2xl border border-primary/10 uppercase tracking-widest">
+                 Genap 2025/2026
             </span>
         </div>
     </div>
@@ -65,81 +64,81 @@
                     <a href="#" class="text-sm font-medium text-primary hover:text-blue-700">Lihat Semua Monitor &rarr;</a>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100">
+                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
                     @forelse($ongoing_exams as $exam)
-                    <div class="p-5 hover:bg-gray-50 transition-colors group">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-8 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all group">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                             <!-- Exam Info -->
                             <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600">{{ $exam['class'] }}</span>
-                                    <span class="text-xs text-gray-400">•</span>
-                                    <span class="text-xs font-medium text-primary">{{ $exam['subject'] }}</span>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] bg-gray-100 dark:bg-slate-800 text-text-muted">{{ $exam['class'] }}</span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-border-main dark:bg-slate-700"></span>
+                                    <span class="text-xs font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
                                 </div>
-                                <h4 class="font-bold text-gray-900 group-hover:text-primary transition-colors text-lg">{{ $exam['name'] }}</h4>
-                                <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                                    <span class="flex items-center gap-1.5">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <h4 class="font-black text-text-main group-hover:text-primary transition-colors text-2xl tracking-tight">{{ $exam['name'] }}</h4>
+                                <div class="flex items-center gap-6 mt-4 text-sm text-text-muted font-bold">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                         {{ $exam['start_time'] }} - {{ $exam['end_time'] }}
                                     </span>
-                                    <span class="flex items-center gap-1.5">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                        {{ $exam['finished_students'] }}/{{ $exam['total_students'] }} Selesai
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                        {{ $exam['finished_students'] }}/{{ $exam['total_students'] }} <span class="uppercase tracking-widest text-[10px] opacity-60">Finished</span>
                                     </span>
                                 </div>
                             </div>
                             
                             <!-- Progress Circle / Action -->
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-5">
                                 <div class="text-right hidden sm:block">
-                                    <div class="text-2xl font-bold text-gray-900">{{ $exam['percentage'] }}%</div>
-                                    <div class="text-xs text-gray-500">Progress</div>
+                                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $exam['percentage'] }}%</div>
+                                    <div class="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] opacity-60">Progress</div>
                                 </div>
-                                <div class="w-px h-10 bg-gray-200 hidden sm:block"></div>
-                                <a href="#" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-sm shadow-sm">
+                                <div class="w-px h-12 bg-border-subtle dark:bg-slate-800 hidden sm:block"></div>
+                                <a href="#" class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-border-main text-text-main font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all text-xs uppercase tracking-widest shadow-sm">
                                     Detail
                                 </a>
-                                <a href="#" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-sm flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <a href="#" class="px-6 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center gap-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     Pantau
                                 </a>
                             </div>
                         </div>
                         <!-- Progress Bar -->
-                        <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-primary h-1.5 rounded-full" style="width: {{ $exam['percentage'] }}%"></div>
+                        <div class="mt-8 w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden shadow-inner">
+                            <div class="bg-primary h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(30,64,175,0.4)]" style="width: {{ $exam['percentage'] }}%"></div>
                         </div>
                     </div>
                     @empty
-                    <div class="p-8 text-center text-gray-500">
-                        <p>Tidak ada ujian yang sedang berlangsung saat ini.</p>
+                    <div class="p-16 text-center text-text-muted font-bold italic">
+                        <p>Tidak ada aktivitas ujian yang terdeteksi.</p>
                     </div>
                     @endforelse
                 </div>
             </section>
 
             <!-- Quick Actions Grid -->
-             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ route('teacher.question-bank.index') }}" class="group p-6 bg-gradient-to-br from-indigo-500 to-primary rounded-xl shadow-md text-white relative overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
+             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <a href="{{ route('teacher.question-bank.index') }}" class="group p-8 bg-gradient-to-br from-indigo-600 to-primary rounded-[2rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[1]">
                     <div class="relative z-10">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:rotate-6 transition-transform">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                         </div>
-                        <h4 class="font-bold text-xl">Buat Soal Baru</h4>
-                        <p class="text-indigo-100 text-sm mt-1 opacity-90">Tambahkan koleksi soal ke bank soal</p>
+                        <h4 class="font-black text-2xl tracking-tight italic">Create <span class="not-italic">Questions</span></h4>
+                        <p class="text-indigo-100 text-sm mt-2 font-bold opacity-80 uppercase tracking-widest">Bank Soal Konten</p>
                     </div>
-                    <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4 rotate-12">
-                        <svg class="w-40 h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4 rotate-12 pointer-events-none">
+                        <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
                 </a>
 
-                <a href="{{ route('teacher.exams.index') }}" class="group p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-primary/30 hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden">
+                <a href="{{ route('teacher.exams.index') }}" class="group p-8 bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 hover:border-primary/30 transition-all hover:scale-[1.02] active:scale-[1] relative overflow-hidden">
                     <div class="relative z-10">
-                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <div class="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <h4 class="font-bold text-xl text-gray-900">Jadwalkan Ujian</h4>
-                        <p class="text-gray-500 text-sm mt-1">Buat jadwal ujian baru untuk kelas</p>
+                        <h4 class="font-black text-2xl text-text-main tracking-tight italic">Schedule <span class="not-italic text-amber-600">Exam</span></h4>
+                        <p class="text-text-muted text-sm mt-2 font-bold uppercase tracking-widest opacity-60">Jadwal & Kelas</p>
                     </div>
                 </a>
             </div>
@@ -153,16 +152,16 @@
                      <h3 class="text-lg font-bold text-gray-900">Jadwal Mendatang</h3>
                      <a href="#" class="text-xs font-medium text-gray-500 hover:text-primary">Lihat Kalender</a>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-2">
+                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-4">
                     @foreach($upcoming_exams as $exam)
-                    <div class="flex gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors group cursor-pointer">
-                        <div class="flex-shrink-0 w-14 flex flex-col items-center justify-center bg-blue-50 text-primary rounded-lg">
-                            <span class="text-xs font-bold uppercase">{{ Str::substr($exam['date'], 0, 3) }}</span>
-                            <span class="text-lg font-bold">{{ filter_var($exam['date'], FILTER_SANITIZE_NUMBER_INT) ?: '03' }}</span>
+                    <div class="flex gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 rounded-2xl transition-all group cursor-pointer border border-transparent hover:border-border-subtle">
+                        <div class="flex-shrink-0 w-16 h-16 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-primary/10 text-primary rounded-xl border border-primary/5 shadow-inner">
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ Str::substr($exam['date'], 0, 3) }}</span>
+                            <span class="text-xl font-black tracking-tighter">{{ filter_var($exam['date'], FILTER_SANITIZE_NUMBER_INT) ?: '03' }}</span>
                         </div>
-                        <div class="flex-1 min-w-0 py-0.5">
-                            <h5 class="text-sm font-bold text-gray-900 truncate group-hover:text-primary transition-colors">{{ $exam['name'] }}</h5>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $exam['class'] }} • {{ $exam['time'] }}</p>
+                        <div class="flex-1 min-w-0 py-1">
+                            <h5 class="text-sm font-black text-text-main truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $exam['name'] }}</h5>
+                            <p class="text-xs text-text-muted mt-1 font-bold uppercase tracking-wider opacity-60">{{ $exam['class'] }} <span class="mx-1 opacity-20">•</span> {{ $exam['time'] }}</p>
                         </div>
                     </div>
                     @endforeach
@@ -172,28 +171,28 @@
             <!-- Recent Activity -->
             <section>
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Aktivitas Terkini</h3>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-8">
                     <div class="flow-root">
                         <ul role="list" class="-mb-8">
                             @foreach($recent_activities as $activity)
                             <li>
                                 <div class="relative pb-8">
                                     @if(!$loop->last)
-                                    <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-100" aria-hidden="true"></span>
+                                    <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-border-subtle dark:bg-slate-800" aria-hidden="true"></span>
                                     @endif
-                                    <div class="relative flex space-x-3">
+                                    <div class="relative flex space-x-4">
                                         <div>
-                                            <span class="h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-white
+                                            <span class="h-10 w-10 rounded-xl flex items-center justify-center ring-8 ring-bg-surface dark:ring-slate-900
                                                 @if($activity['type'] == 'success') bg-green-100 text-green-600
                                                 @elseif($activity['type'] == 'warning') bg-amber-100 text-amber-600
                                                 @elseif($activity['type'] == 'info') bg-blue-100 text-blue-600
-                                                @else bg-gray-100 text-gray-500 @endif">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                                @else bg-gray-100 text-gray-500 @endif shadow-sm">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                                             </span>
                                         </div>
                                         <div class="min-w-0 flex-1 pt-1.5 flex flex-col">
-                                            <p class="text-sm text-gray-900 font-medium">{{ $activity['action'] }}</p>
-                                            <span class="text-xs text-gray-400 mt-0.5">{{ $activity['time'] }}</span>
+                                            <p class="text-sm text-text-main font-black tracking-tight">{{ $activity['action'] }}</p>
+                                            <span class="text-[10px] text-text-muted mt-1 font-black uppercase tracking-widest opacity-60">{{ $activity['time'] }}</span>
                                         </div>
                                     </div>
                                 </div>
