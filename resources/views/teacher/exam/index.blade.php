@@ -3,13 +3,13 @@
 <div class="space-y-6">
     <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
-            <h2 class="text-4xl font-black text-text-main tracking-tight uppercase">Exam Orchestrator</h2>
-            <p class="text-[10px] font-black text-text-muted mt-2 uppercase tracking-widest opacity-60">Personal Assessment Pipeline</p>
+            <h2 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Daftar <span class="text-primary not-italic">Ujian</span></h2>
+            <p class="text-[10px] font-black text-text-muted mt-2 uppercase tracking-[0.2em] opacity-60">Manajemen Pelaksanaan Ujian</p>
         </div>
         <div>
             <a href="{{ route('teacher.exams.create') }}" class="group inline-flex items-center gap-4 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-[2rem] text-sm font-black transition-all shadow-xl shadow-primary/20 uppercase tracking-widest">
                 <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                Deploy New Session
+                Buat Ujian Baru
             </a>
         </div>
     </div>
@@ -18,10 +18,10 @@
     <div class="flex items-center gap-4 mb-8">
         <div class="flex items-center gap-3 px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm">
             <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-5 h-5 rounded-lg text-primary border-border-main dark:border-slate-600 focus:ring-primary/20 bg-bg-surface dark:bg-slate-900">
-            <label for="selectAllExams" class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] cursor-pointer">Global Selection</label>
+            <label for="selectAllExams" class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] cursor-pointer">Pilih Semua</label>
         </div>
         <div class="h-6 w-px bg-border-subtle dark:bg-slate-800"></div>
-        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Displaying {{ count($exams) }} Active Missions</p>
+        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Menampilkan {{ count($exams) }} Ujian Aktif</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @foreach($exams as $exam)
@@ -34,9 +34,9 @@
                         @if($exam['status'] == 'completed') bg-gray-100 text-gray-500
                         @elseif($exam['status'] == 'ongoing') bg-green-500/10 text-green-600 animate-pulse border border-green-500/20
                         @else bg-primary/10 text-primary border border-primary/20 @endif">
-                        @if($exam['status'] == 'completed') ARCHIVED
-                        @elseif($exam['status'] == 'ongoing') LIVE NOW
-                        @else SCHEDULED @endif
+                        @if($exam['status'] == 'completed') SELESAI
+                        @elseif($exam['status'] == 'ongoing') BERJALAN
+                        @else TERJADWAL @endif
                         </span>
                     </div>
                     <div class="relative" x-data="{ open: false }">
@@ -44,10 +44,10 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
                         <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
-                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Metadata</a>
-                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Clone Instance</button>
+                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Ujian</a>
+                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</button>
                             <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
-                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Purge Entry</a>
+                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus Ujian</a>
                         </div>
                     </div>
                 </div>
@@ -68,11 +68,11 @@
                     </div>
                     <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
                         <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ $exam['duration'] }} Minutes Effective
+                        {{ $exam['duration'] }} Menit
                     </div>
                     <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        {{ $exam['questions_count'] }} Question Items
+                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        {{ $exam['questions_count'] }} Butir Soal
                     </div>
                 </div>
             </div>
@@ -81,19 +81,19 @@
                 @if($exam['status'] == 'ongoing')
                     <a href="{{ route('teacher.monitoring.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-3 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        Enter Traffic Monitor
+                        Monitoring Live
                     </a>
                 @elseif($exam['status'] == 'completed')
                     <a href="{{ route('teacher.grading.index') }}" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
-                        Analytics
+                        Analisis Nilai
                     </a>
                     <a href="{{ route('teacher.reports.index') }}" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
-                        Gradebook
+                        Laporan Ujian
                     </a>
                 @else
                     <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-gray-100 transition-all shadow-sm">
                         <svg class="w-4 h-4 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        Adjust Parameters
+                        Edit Ujian
                     </a>
                 @endif
             </div>
@@ -116,7 +116,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            Purge Selected
+            Purge
         </button>
     </div>
     @endif

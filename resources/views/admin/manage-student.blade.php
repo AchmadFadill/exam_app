@@ -46,10 +46,10 @@
                                 <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                             </div>
                         </th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Profil Siswa / NIS</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Rombel / Kelas</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Kontak Email</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Manajemen</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Nama Siswa / NIS</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Kelas</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Email</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -121,8 +121,8 @@
         <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
-                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Registrasi Siswa' : 'Mutasi Data Siswa' }}</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Student Enrollment</p>
+                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Siswa' : 'Edit Data Siswa' }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Manajemen Database</p>
                  </div>
                 <button wire:click="closeModal" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,14 +156,14 @@
                 </div>
                 @if($showAddModal)
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Password Default Akses</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Password</label>
                     <input type="password" wire:model="studentForm.password" autocomplete="new-password" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Min. 8 Karakter">
                 </div>
                 @endif
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
                 <x-button variant="secondary" wire:click="closeModal" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="saveStudent" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Konten</x-button>
+                <x-button variant="primary" wire:click="saveStudent" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Data</x-button>
             </div>
         </div>
     </div>
@@ -300,7 +300,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            Purge Data
+            Purge Selected
         </button>
     </div>
     @endif

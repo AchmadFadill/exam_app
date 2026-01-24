@@ -58,7 +58,8 @@
         </x-card>
         @empty
         <div class="col-span-full py-24 text-center text-text-muted font-bold italic opacity-40 bg-bg-surface dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-border-main dark:border-slate-800">
-            Mata pelajaran yang Anda cari tidak tersedia dalam database.
+            Tambah Kelas
+an yang Anda cari tidak tersedia dalam database.
         </div>
         @endforelse
     </div>
@@ -69,8 +70,8 @@
         <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
-                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Kurikulum Baru' : 'Mutasi Capaian Mapel' }}</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Curriculum Data</p>
+                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Kelas' : 'Edit Data Kelas' }}</h3>
+                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Manajemen Database</p>
                 </div>
                 <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -78,17 +79,17 @@
             </div>
             <div class="p-10 space-y-8">
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Nomenklatur Mata Pelajaran</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Nama Mata Pelajaran</label>
                     <input type="text" wire:model="subjectForm.name" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Contoh: Fisika Terapan">
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Kode Identifikasi (Alias)</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Kode Mata Pelajaran</label>
                     <input type="text" wire:model="subjectForm.code" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold uppercase" placeholder="Contoh: PHY-A">
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
                 <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="saveSubject" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Konten</x-button>
+                <x-button variant="primary" wire:click="saveClass" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Data</x-button>
             </div>
         </div>
     </div>

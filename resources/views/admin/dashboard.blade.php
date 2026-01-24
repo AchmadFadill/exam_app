@@ -5,8 +5,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
             <div class="relative z-10 flex-1">
-                <h1 class="text-4xl font-black text-text-main tracking-tight">{{ $greeting }}, <span class="text-primary">Admin!</span> 👋</h1>
-                <p class="text-text-muted mt-3 text-lg font-medium">Sistem CBT berjalan dengan status <span class="text-green-600 font-black uppercase tracking-wider text-sm bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">{{ $system_health['status'] }}</span>.</p>
+                <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Dashboard <span class="text-primary not-italic">Utama</span></h1>
+                <p class="text-text-muted mt-3 text-lg font-medium">Sistem berjalan dengan status <span class="text-green-600 font-black uppercase tracking-wider text-sm bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">{{ $system_health['status'] }}</span>.</p>
                 <div class="mt-8 flex flex-wrap gap-4">
                     <div class="flex items-center gap-3 px-5 py-2.5 bg-blue-50/50 dark:bg-primary/10 text-primary rounded-2xl border border-primary/10 font-bold text-sm">
                         <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -18,14 +18,14 @@
             <!-- Health Stats Mini-Grid -->
             <div class="grid grid-cols-2 gap-5 w-full md:w-auto relative z-10">
                 <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
-                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">CPU LOAD</div>
+                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">BEBAN CPU</div>
                     <div class="text-3xl font-black text-text-main tracking-tighter">{{ $system_health['cpu_load'] }}%</div>
                     <div class="w-16 bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
                         <div class="bg-primary h-full transition-all duration-700" style="width: {{ $system_health['cpu_load'] }}%"></div>
                     </div>
                 </div>
                 <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
-                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">RAM USAGE</div>
+                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">PENGGUNAAN RAM</div>
                     <div class="text-3xl font-black text-text-main tracking-tighter">{{ $system_health['ram_usage'] }}%</div>
                     <div class="w-16 bg-gray-200 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
                         <div class="bg-amber-500 h-full transition-all duration-700" style="width: {{ $system_health['ram_usage'] }}%"></div>
@@ -90,9 +90,9 @@
         <!-- Global Live Activity -->
         <section>
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2 uppercase tracking-tight">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                    Live Monitoring ({{ $stats['active_exams_count'] }})
+                    Ujian Berjalan ({{ $stats['active_exams_count'] }})
                 </h3>
                 <a href="{{ route('admin.monitor') }}" class="text-sm font-semibold text-primary hover:text-blue-700">Manajemen Full &rarr;</a>
             </div>
@@ -108,7 +108,7 @@
                         </div>
                         <div class="text-right">
                             <span class="text-3xl font-black text-text-main tracking-tighter">{{ $exam['progress'] }}%</span>
-                            <p class="text-[10px] text-text-muted font-black uppercase tracking-widest opacity-60">Selesai</p>
+                            <p class="text-[10px] text-text-muted font-black uppercase tracking-widest opacity-60">PROGRES</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-6">
@@ -159,8 +159,8 @@
     <!-- Quick Management & System Summary -->
     <div class="bg-slate-900 rounded-[3rem] p-12 text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/5">
         <div class="relative z-10 lg:w-1/2 text-center lg:text-left">
-            <h2 class="text-4xl font-black mb-4 tracking-tighter italic">Ready to <span class="text-primary not-italic">Control?</span></h2>
-            <p class="text-slate-400 text-lg mb-10 leading-relaxed font-medium">Kelola seluruh spektrum CBT mulai dari otentikasi user hingga pengumpulan data hasil secara real-time.</p>
+            <h2 class="text-4xl font-black mb-4 tracking-tighter italic uppercase">Panel <span class="text-primary not-italic">Kendali</span></h2>
+            <p class="text-slate-400 text-lg mb-10 leading-relaxed font-medium">Kelola sistem CBT mulai dari data pengguna hingga pengaturan server secara real-time.</p>
             <div class="grid grid-cols-2 gap-5">
                 <a href="{{ route('admin.students') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Siswa & Kelas

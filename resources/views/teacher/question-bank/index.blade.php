@@ -3,17 +3,17 @@
 <div class="space-y-6">
     <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
-            <h2 class="text-4xl font-black text-text-main tracking-tight uppercase">Knowledge Base</h2>
-            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Question Repository Management</p>
+            <h2 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Bank <span class="text-primary not-italic">Soal</span></h2>
+            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Kelola Database Butir Soal</p>
         </div>
         <div class="flex gap-3">
             <button wire:click="openImportModal" class="group inline-flex items-center gap-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm">
                 <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                Import Matrix
+                Import Soal
             </button>
             <a href="{{ route('teacher.question-bank.create') }}" class="group inline-flex items-center gap-3 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-[2rem] text-sm font-black transition-all shadow-xl shadow-primary/20 uppercase tracking-widest">
                 <svg class="w-5 h-5 group-hover:rotate-90 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                Deploy New Item
+                Buat Soal Baru
             </a>
         </div>
     </div>
@@ -22,7 +22,7 @@
     <div class="bg-bg-surface dark:bg-slate-800/50 rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-8 mb-10 transition-all group focus-within:border-primary/30">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="md:col-span-2">
-                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Search Parameters</label>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Pencarian Konten</label>
                 <div class="relative group/input">
                     <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-text-muted group-focus-within/input:text-primary transition-colors">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div>
-                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Subject Discipline</label>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Mata Pelajaran</label>
                 <select wire:model.live="subjectFilter" class="block w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-2xl font-bold text-sm focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none outline-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
                     <option value="">Semua Disiplin</option>
                     <option value="Matematika">Matematika</option>
@@ -43,7 +43,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Taxonomy Type</label>
+                <label class="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 opacity-60">Tipe Soal</label>
                 <select wire:model.live="typeFilter" class="block w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-2xl font-bold text-sm focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all appearance-none outline-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
                     <option value="">Semua Format</option>
                     <option value="Pilihan Ganda">Pilihan Ganda</option>
@@ -59,11 +59,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50/50 dark:bg-slate-800/50 border-b border-border-subtle dark:border-border-subtle">
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Narrative Item / Content</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Discipline</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Taxonomy</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Timestamp</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Actions</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Konten Pertanyaan</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Mata Pelajaran</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Tipe</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Tanggal Dibuat</th>
+                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border-subtle dark:divide-slate-800">

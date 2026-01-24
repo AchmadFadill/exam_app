@@ -9,7 +9,7 @@
         <div>
             <a href="{{ route('teacher.exams.create') }}" class="group inline-flex items-center gap-4 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-[2rem] text-sm font-black transition-all shadow-xl shadow-primary/20 uppercase tracking-widest">
                 <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                Deploy Ujian Baru
+                Buat Ujian Baru
             </a>
         </div>
     </div>

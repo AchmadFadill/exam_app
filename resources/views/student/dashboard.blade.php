@@ -5,8 +5,8 @@
     <!-- Hero Section -->
     <div class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-            <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">{{ $greeting }}, {{ explode(' ', auth()->user()->name)[0] ?? 'Learner' }}!</h1>
-            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Ready for today's academic mission?</p>
+            <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Dashboard <span class="text-primary not-italic">Siswa</span></h1>
+            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Sudah siap untuk mengerjakan ujian hari ini?</p>
         </div>
         <div class="shrink-0">
              <div class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm text-[10px] font-black text-text-muted uppercase tracking-widest">
@@ -23,7 +23,7 @@
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                 </span>
-                Live Assessment Instances ({{ count($active_exams) }})
+                Ujian Tersedia ({{ count($active_exams) }})
             </h3>
         </div>
 
@@ -33,7 +33,7 @@
                  @if($exam['is_urgent'])
                 <div class="absolute top-0 right-0 mt-6 mr-8">
                     <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-red-500/10 text-red-600 animate-pulse border border-red-500/20">
-                        CRITICAL TIME
+                        SEGERA BERAKHIR
                     </span>
                 </div>
                 @endif
@@ -47,18 +47,18 @@
                             <h4 class="mt-6 text-3xl font-black text-text-main group-hover:text-primary transition-colors tracking-tight italic leading-tight">
                                 {{ $exam['title'] }}
                             </h4>
-                            <p class="text-text-muted text-[10px] font-bold uppercase tracking-widest mt-2 opacity-50">Invigilator: {{ $exam['teacher'] }}</p>
+                            <p class="text-text-muted text-[10px] font-bold uppercase tracking-widest mt-2 opacity-50">Guru Pengampu: {{ $exam['teacher'] }}</p>
                         </div>
                     </div>
 
                     <div class="mt-10 flex items-center gap-10 text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ $exam['duration'] }} Mins</span>
+                            <span>{{ $exam['duration'] }} Menit</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                            <span>{{ $exam['questions_count'] }} Items</span>
+                            <span>{{ $exam['questions_count'] }} Soal</span>
                         </div>
                     </div>
 
@@ -68,7 +68,7 @@
                             <p class="font-black text-text-main uppercase tracking-widest">{{ $exam['end_time'] }} WIB</p>
                         </div>
                         <a href="{{ route('student.exam.start', $exam['id']) }}" class="group/btn inline-flex items-center px-8 py-4 bg-primary hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-100">
-                            Initialize Sequence
+                            Kerjakan Sekarang
                             <svg class="ml-3 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </a>
                     </div>
@@ -91,7 +91,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-8">
-            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Upcoming Protocol</h3>
+            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Jadwal Mendatang</h3>
             <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 divide-y divide-border-subtle dark:divide-slate-800 overflow-hidden">
                 @forelse($upcoming_exams as $exam)
                 <div class="p-8 flex items-center gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/20 transition-all group">
@@ -107,13 +107,13 @@
                     </div>
                      <div class="text-right sr-only sm:not-sr-only">
                         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-gray-100 dark:bg-slate-800 text-text-muted opacity-60">
-                            QUEUED
+                            TERJADWAL
                         </span>
                     </div>
                 </div>
                 @empty
                  <div class="p-10 text-center text-text-muted font-bold italic opacity-40 text-sm">
-                    No upcoming sessions detected in local buffer.
+                    Tidak ada jadwal ujian mendatang.
                 </div>
                 @endforelse
             </div>
@@ -121,27 +121,27 @@
 
         <!-- Student Stats -->
         <div class="space-y-8">
-            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Neural Analytics</h3>
+            <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Statistik Belajar</h3>
             
             <div class="bg-gradient-to-br from-primary via-blue-700 to-indigo-900 rounded-[2rem] shadow-2xl p-8 text-white relative overflow-hidden group">
                 <div class="relative z-10">
-                    <p class="text-blue-100/60 text-[10px] font-black uppercase tracking-widest">Aggregate Efficiency</p>
+                    <p class="text-blue-100/60 text-[10px] font-black uppercase tracking-widest">Rata-rata Nilai</p>
                     <h2 class="text-6xl font-black mt-2 tracking-tighter">{{ $stats['avg_score'] }}</h2>
                     <div class="mt-10 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary bg-white px-5 py-3 rounded-2xl w-fit shadow-xl transition-transform group-hover:scale-105 active:scale-100">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        <span>Classe Elite: Top 10%</span>
+                        <span>Capaian: Top 10%</span>
                     </div>
                 </div>
                 <div class="absolute right-0 top-0 w-48 h-48 bg-white rounded-full opacity-5 blur-[80px] -mr-16 -mt-16 group-hover:opacity-10 transition-opacity"></div>
             </div>
 
             <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 p-10">
-                <h4 class="text-[10px] font-black text-text-main mb-8 uppercase tracking-[0.2em] opacity-60">Performance Indices</h4>
+                <h4 class="text-[10px] font-black text-text-main mb-8 uppercase tracking-[0.2em] opacity-60">Indikator Performa</h4>
                 <div class="space-y-8">
                      <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Completion Rate</span>
-                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['completed_exams'] }} Items</span>
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Tingkat Penyelesaian</span>
+                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['completed_exams'] }} Ujian</span>
                         </div>
                         <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
                             <div class="bg-green-500 h-2 rounded-full shadow-lg shadow-green-500/20" style="width: 80%"></div>
@@ -150,7 +150,7 @@
                     
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Attendance Index</span>
+                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Indeks Kehadiran</span>
                             <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['attendance'] }}%</span>
                         </div>
                         <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
@@ -159,7 +159,7 @@
                     </div>
                 </div>
                  <button class="w-full mt-12 py-4 px-6 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl text-[10px] font-black text-text-muted uppercase tracking-widest hover:bg-gray-50/50 hover:text-text-main hover:border-primary/30 transition-all shadow-sm">
-                    Access Neural History
+                    Lihat Riwayat Lengkap
                 </button>
             </div>
         </div>
