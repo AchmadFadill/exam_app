@@ -11,7 +11,7 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['teacher_id', 'subject_id', 'type', 'text', 'image_path', 'explanation', 'answer_key'];
+    protected $fillable = ['teacher_id', 'subject_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key'];
 
     public function teacher(): BelongsTo
     {

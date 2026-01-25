@@ -1,46 +1,25 @@
 <div>
-    <x-slot name="title">Bank Soal</x-slot>
+    <x-slot name="title">{{ $title }}</x-slot>
 
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <!-- Search Bar -->
-        <div class="relative w-full sm:flex-1 sm:max-w-md">
-            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    <!-- Header with Back Button -->
+    <div class="mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('teacher.questions') }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-            </span>
-            <input type="text" wire:model.live="search" class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" placeholder="Cari soal...">
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-text-main">{{ $title }}</h2>
+                <p class="text-sm text-gray-500 mt-1">{{ count($questions) }} Soal</p>
+            </div>
         </div>
-        
-        <!-- Filters & Actions -->
-        <div class="flex gap-2 flex-wrap w-full sm:w-auto">
-            <select wire:model.live="filterSubject" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm">
-                <option value="">Semua Mata Pelajaran</option>
-                @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                @endforeach
-            </select>
-
-            <select wire:model.live="filterType" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm">
-                <option value="">Semua Tipe</option>
-                <option value="multiple_choice">Pilihan Ganda</option>
-                <option value="essay">Essay</option>
-            </select>
-
-            <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import
-            </x-button>
-
-            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Soal
-            </x-button>
-        </div>
+        <x-button variant="primary" wire:click="openAddModal">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Soal
+        </x-button>
     </div>
 
     <!-- Bulk Action Bar -->
@@ -61,58 +40,67 @@
     </div>
     @endif
 
-    <!-- Question Group Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @forelse($groupedQuestions as $title => $questions)
-        <x-card class="hover:shadow-lg transition-shadow">
-            <div class="p-6">
-                <!-- Group Header -->
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-bold text-text-main mb-2">{{ $title }}</h3>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                                {{ $questions->first()->subject->name }}
+    <!-- Questions Table -->
+    <x-card>
+        <div class="overflow-x-auto -mx-6 -my-6">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 w-12">
+                            <input type="checkbox" 
+                                   wire:click="toggleSelectAll"
+                                   class="rounded border-gray-300 text-primary focus:ring-primary" 
+                                   title="Pilih Semua">
+                        </th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 w-16">#</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Pertanyaan</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Tipe</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Mata Pelajaran</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($questions as $question)
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" wire:model.live="selectedQuestions" value="{{ $question->id }}" class="rounded border-gray-300 text-primary focus:ring-primary">
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-gray-900 line-clamp-2">{!! \Illuminate\Support\Str::limit(strip_tags($question->text), 150) !!}</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $question->type === 'multiple_choice' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
+                                {{ $question->type === 'multiple_choice' ? 'Pilihan Ganda' : 'Essay' }}
                             </span>
-                            <span class="px-2.5 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full">
-                                {{ count($questions) }} soal
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Question Preview -->
-                <div class="space-y-2 mb-4">
-                    @foreach($questions->take(3) as $question)
-                    <div class="flex items-start gap-2 text-sm text-gray-600">
-                        <span class="text-primary font-medium">{{ $loop->iteration }}.</span>
-                        <p class="line-clamp-1">{{ \Illuminate\Support\Str::limit(strip_tags($question->text), 50) }}</p>
-                    </div>
-                    @endforeach
-                    @if(count($questions) > 3)
-                    <p class="text-xs text-gray-400 italic">+ {{ count($questions) - 3 }} soal lainnya...</p>
-                    @endif
-                </div>
-
-                <!-- Actions -->
-                <div class="pt-4 border-t border-gray-100">
-                    <a href="{{ route('teacher.questions.group', ['title' => urlencode($title)]) }}" 
-                       class="block w-full px-4 py-2.5 bg-primary text-white rounded-lg font-medium text-center hover:bg-blue-700 transition-colors">
-                        Lihat Detail
-                    </a>
-                </div>
-            </div>
-        </x-card>
-        @empty
-        <div class="col-span-full">
-            <x-card>
-                <div class="px-6 py-12 text-center text-text-muted italic">
-                    Tidak ada soal ditemukan. Klik "Tambah Soal" untuk membuat soal baru.
-                </div>
-            </x-card>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $question->subject->name }}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <button wire:click="openEditModal({{ $question->id }})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button wire:click="openDeleteModal({{ $question->id }})" class="p2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-text-muted italic">
+                            Tidak ada soal ditemukan.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        @endforelse
-    </div>
+    </x-card>
 
     <!-- Add/Edit Modal -->
     @if($showAddModal || $showEditModal)
@@ -120,7 +108,7 @@
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
         <div class="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 class="text-lg font-bold text-text-main">{{ $showAddModal ? 'Tambah Soal Baru' : 'Edit Soal' }}</h3>
+                <h3 class="text-lg font-bold text-text-main">{{ $showAddModal ? 'Tambah Soal' : 'Edit Soal' }}</h3>
                 <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -128,15 +116,21 @@
                 </button>
             </div>
             <div class="p-6 space-y-4">
-                <!-- Question Group/Title -->
+                <!-- Question Group/Title (only show when editing) -->
+                @if($showEditModal)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Judul Kelompok Soal <span class="text-red-500">*</span></label>
-                    <input type="text" wire:model.live="questionForm.title" wire:key="title-{{ $formKey }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.title') border-red-500 @enderror" placeholder="Contoh: Aljabar Dasar, Geometri, Trigonometri">
-                    <p class="mt-1 text-xs text-gray-500">💡 Gunakan "Simpan & Tambah Lagi" untuk menambah soal ke kelompok yang sama</p>
+                    <input type="text" wire:model.live="questionForm.title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.title') border-red-500 @enderror" placeholder="Contoh: Aljabar Dasar, Geometri, Trigonometri">
                     @error('questionForm.title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
+                @else
+                <!-- Hidden input to maintain title value when adding -->
+                <input type="hidden" wire:model="questionForm.title">
+                @endif
 
-                <!-- Subject Selection -->
+
+                <!-- Subject Selection (only show when editing) -->
+                @if($showEditModal)
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran <span class="text-red-500">*</span></label>
                     <select wire:model="questionForm.subject_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.subject_id') border-red-500 @enderror">
@@ -147,6 +141,10 @@
                     </select>
                     @error('questionForm.subject_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
+                @else
+                <!-- Hidden input to maintain subject value when adding -->
+                <input type="hidden" wire:model="questionForm.subject_id">
+                @endif
 
                 <!-- Question Type -->
                 <div>
@@ -264,53 +262,6 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
                 <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Import Modal -->
-    @if($showImportModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showImportModal', false)"></div>
-        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 class="text-lg font-bold text-text-main">Import Soal dari Excel</h3>
-                <button wire:click="$set('showImportModal', false)" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="p-6">
-                <div class="flex items-center gap-4 p-4 bg-blue-50 text-blue-700 rounded-lg mb-4">
-                    <svg class="w-8 h-8 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                        <p class="font-semibold mb-1">Instruksi Import:</p>
-                        <p class="text-sm">Pastikan format Excel sesuai dengan template. Kolom wajib: Mata Pelajaran, Tipe, Pertanyaan, Opsi A-D, Jawaban Benar, Pembahasan. <span class="font-semibold">Opsi E opsional</span> (kosongkan jika hanya butuh A-D).</p>
-                        <button type="button" wire:click="downloadTemplate" class="mt-2 inline-block font-bold underline text-sm">Download Template Excel</button>
-                    </div>
-                </div>
-
-                <!-- Title Input -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Kelompok Soal <span class="text-red-500">*</span></label>
-                    <input type="text" wire:model="importTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('importTitle') border-red-500 @enderror" placeholder="Contoh: UTS Matematika Semester 1">
-                    <p class="mt-1 text-xs text-gray-500">Semua soal yang diimport akan masuk ke kelompok ini</p>
-                    @error('importTitle') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload File Excel</label>
-                    <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-700 cursor-pointer">
-                    @error('importFile') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
-            </div>
-            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-                <x-button variant="secondary" wire:click="$set('showImportModal', false)">Batal</x-button>
-                <x-button variant="primary" wire:click="importQuestions">Import</x-button>
             </div>
         </div>
     </div>
