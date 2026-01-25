@@ -12,8 +12,21 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class QuestionsImport implements ToCollection, WithHeadingRow
 {
+    protected $title;
+
+    public function __construct($title)
+    {
+        $this->title = $title;
+    }
+
     public function collection(Collection $rows)
     {
+        // Get teacher_id properly
+        $user = Auth::user();
+        $teacherId = $user->isTeacher() 
+            ? $user->teacher->id 
+            : \App\Models\Teacher::first()->id;
+
         foreach ($rows as $row) {
             // Skip empty rows
             if (empty($row['pertanyaan']) || empty($row['mata_pelajaran'])) {
@@ -38,10 +51,11 @@ class QuestionsImport implements ToCollection, WithHeadingRow
                 $tipe = 'multiple_choice';
             }
 
-            // Create question
+            // Create question with title from modal
             $question = Question::create([
-                'teacher_id' => Auth::id(),
+                'teacher_id' => $teacherId,
                 'subject_id' => $subject->id,
+                'title' => $this->title, // Use title from modal
                 'type' => $tipe,
                 'text' => $pertanyaan,
                 'explanation' => $pembahasan,

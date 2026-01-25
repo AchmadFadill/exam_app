@@ -22,16 +22,22 @@ class ManageQuestion extends Component
     public $showEditModal = false;
     public $showDeleteModal = false;
     public $showImportModal = false;
+    public $showBulkDeleteModal = false;
     public $selectedQuestion = null;
+    public $selectedQuestions = [];
     public $importFile;
+    public $importTitle = ''; // Title for imported questions group
+    public $formKey = 0; // Used to force form re-render
+    public $optionCount = 4; // Number of options to show (min 2, max 5)
 
     // Form Data
     public $questionForm = [
+        'title' => '',
         'subject_id' => '',
         'type' => 'multiple_choice',
         'text' => '',
         'explanation' => '',
-        'options' => ['', '', '', '', ''], // 5 options for A-E
+        'options' => ['', '', '', ''], // Default 4 options A-D
         'correct_option' => '',
     ];
 
@@ -43,6 +49,7 @@ class ManageQuestion extends Component
     protected function rules()
     {
         $rules = [
+            'questionForm.title' => 'required|string|max:255',
             'questionForm.subject_id' => 'required|exists:subjects,id',
             'questionForm.type' => 'required|in:multiple_choice,essay',
             'questionForm.text' => 'required|string|max:5000',
@@ -63,6 +70,7 @@ class ManageQuestion extends Component
     }
 
     protected $messages = [
+        'questionForm.title.required' => 'Judul kelompok soal wajib diisi.',
         'questionForm.subject_id.required' => 'Mata pelajaran wajib dipilih.',
         'questionForm.text.required' => 'Pertanyaan wajib diisi.',
         'questionForm.text.max' => 'Pertanyaan maksimal 5000 karakter.',
@@ -70,10 +78,61 @@ class ManageQuestion extends Component
         'questionForm.correct_option.required' => 'Jawaban benar wajib dipilih.',
     ];
 
+    /**
+     * Get the teacher ID for the current user
+     * For admins, return null (we'll handle this differently)
+     * For teachers, return their teacher record ID
+     */
+    private function getTeacherId()
+    {
+        $user = Auth::user();
+        
+        if ($user->isAdmin()) {
+            // For admin, find the first teacher or return null
+            $teacher = \App\Models\Teacher::first();
+            return $teacher ? $teacher->id : null;
+        }
+        
+        if ($user->isTeacher()) {
+            $teacher = \App\Models\Teacher::where('user_id', $user->id)->first();
+            return $teacher ? $teacher->id : null;
+        }
+        
+        return null;
+    }
+
     public function openAddModal()
     {
         $this->resetForm();
+        $this->optionCount = 4; // Reset to 4 options
         $this->showAddModal = true;
+    }
+
+    public function addOption()
+    {
+        if ($this->optionCount < 5) {
+            $this->optionCount++;
+            // Ensure options array has enough elements
+            while (count($this->questionForm['options']) < $this->optionCount) {
+                $this->questionForm['options'][] = '';
+            }
+        }
+    }
+
+    public function removeOption()
+    {
+        if ($this->optionCount > 2) {
+            $this->optionCount--;
+            // Clear the last option
+            if (isset($this->questionForm['options'][$this->optionCount])) {
+                $this->questionForm['options'][$this->optionCount] = '';
+            }
+            // If correct option is the removed one, clear it
+            $labels = ['A', 'B', 'C', 'D', 'E'];
+            if ($this->questionForm['correct_option'] === $labels[$this->optionCount]) {
+                $this->questionForm['correct_option'] = '';
+            }
+        }
     }
 
     public function openEditModal($questionId)
@@ -81,32 +140,45 @@ class ManageQuestion extends Component
         $this->selectedQuestion = $questionId;
         $question = Question::with('options')->findOrFail($questionId);
 
-        // Check if question belongs to current teacher
-        if ($question->teacher_id !== Auth::id()) {
-            $this->dispatch('notify', ['message' => 'Anda tidak memiliki akses ke soal ini!', 'type' => 'error']);
-            return;
+        // Check if question belongs to current teacher (admins can edit any question)
+        if (Auth::user()->isTeacher()) {
+            $teacherId = $this->getTeacherId();
+            if ($question->teacher_id !== $teacherId) {
+                $this->dispatch('notify', ['message' => 'Anda tidak memiliki akses ke soal ini!', 'type' => 'error']);
+                return;
+            }
         }
 
         $this->questionForm = [
+            'title' => $question->title ?? '',
             'subject_id' => $question->subject_id,
             'type' => $question->type,
             'text' => $question->text,
             'explanation' => $question->explanation ?? '',
-            'options' => ['', '', '', '', ''],
+            'options' => ['', '', '', ''],
             'correct_option' => '',
         ];
 
         // Load options for multiple choice
         if ($question->type === 'multiple_choice') {
+            $maxIndex = 0;
             foreach ($question->options as $option) {
-                $index = ord($option->label) - ord('A'); // Convert A,B,C,D,E to 0,1,2,3,4
+                $index = ord($option->label) - ord('A');
                 if ($index >= 0 && $index < 5) {
+                    // Ensure options array is large enough
+                    while (count($this->questionForm['options']) <= $index) {
+                        $this->questionForm['options'][] = '';
+                    }
                     $this->questionForm['options'][$index] = $option->text;
                     if ($option->is_correct) {
                         $this->questionForm['correct_option'] = $option->label;
                     }
+                    $maxIndex = max($maxIndex, $index);
                 }
             }
+            $this->optionCount = $maxIndex + 1; // Set option count based on existing options
+        } else {
+            $this->optionCount = 4;
         }
 
         $this->showEditModal = true;
@@ -117,10 +189,13 @@ class ManageQuestion extends Component
         $this->selectedQuestion = $questionId;
         $question = Question::findOrFail($questionId);
 
-        // Check if question belongs to current teacher
-        if ($question->teacher_id !== Auth::id()) {
-            $this->dispatch('notify', ['message' => 'Anda tidak memiliki akses ke soal ini!', 'type' => 'error']);
-            return;
+        // Check if question belongs to current teacher (admins can delete any question)
+        if (Auth::user()->isTeacher()) {
+            $teacherId = $this->getTeacherId();
+            if ($question->teacher_id !== $teacherId) {
+                $this->dispatch('notify', ['message' => 'Anda tidak memiliki akses ke soal ini!', 'type' => 'error']);
+                return;
+            }
         }
 
         $this->showDeleteModal = true;
@@ -136,6 +211,7 @@ class ManageQuestion extends Component
                 $question = Question::findOrFail($this->selectedQuestion);
                 
                 $question->update([
+                    'title' => $this->questionForm['title'],
                     'subject_id' => $this->questionForm['subject_id'],
                     'type' => $this->questionForm['type'],
                     'text' => $this->questionForm['text'],
@@ -154,8 +230,15 @@ class ManageQuestion extends Component
                 $message = 'Soal berhasil diperbarui!';
             } else {
                 // Create new question
+                $teacherId = $this->getTeacherId();
+                
+                if (!$teacherId) {
+                    throw new \Exception('Tidak dapat menemukan teacher ID. Pastikan ada data guru di sistem.');
+                }
+                
                 $question = Question::create([
-                    'teacher_id' => Auth::id(),
+                    'teacher_id' => $teacherId,
+                    'title' => $this->questionForm['title'],
                     'subject_id' => $this->questionForm['subject_id'],
                     'type' => $this->questionForm['type'],
                     'text' => $this->questionForm['text'],
@@ -176,6 +259,54 @@ class ManageQuestion extends Component
         $this->showAddModal = false;
         $this->showEditModal = false;
         $this->resetForm();
+        // Component will auto-refresh
+    }
+
+    public function saveAndAddAnother()
+    {
+        $this->validate();
+
+        DB::transaction(function () {
+            $teacherId = $this->getTeacherId();
+            
+            if (!$teacherId) {
+                throw new \Exception('Tidak dapat menemukan teacher ID. Pastikan ada data guru di sistem.');
+            }
+            
+            $question = Question::create([
+                'teacher_id' => $teacherId,
+                'title' => $this->questionForm['title'],
+                'subject_id' => $this->questionForm['subject_id'],
+                'type' => $this->questionForm['type'],
+                'text' => $this->questionForm['text'],
+                'explanation' => $this->questionForm['explanation'],
+            ]);
+
+            // Create options for multiple choice
+            if ($this->questionForm['type'] === 'multiple_choice') {
+                $this->createOptions($question);
+            }
+
+            $this->dispatch('notify', ['message' => 'Soal berhasil ditambahkan! Silakan tambah soal berikutnya.']);
+        });
+
+        // Reset form but keep modal open - keep title, subject and type for same group
+        $keepTitle = $this->questionForm['title'];
+        $keepSubject = $this->questionForm['subject_id'];
+        $keepType = $this->questionForm['type'];
+        
+        $this->questionForm = [
+            'title' => $keepTitle, // Keep same title to add more questions to this group
+            'subject_id' => $keepSubject,
+            'type' => $keepType,
+            'text' => '',
+            'explanation' => '',
+            'options' => ['', '', '', '', ''],
+            'correct_option' => '',
+        ];
+        $this->resetValidation();
+        $this->formKey++; // Force form to re-render with cleared text field
+        // Component will auto-refresh to show new question
     }
 
     private function createOptions($question)
@@ -208,6 +339,27 @@ class ManageQuestion extends Component
         $this->reset('selectedQuestion');
     }
 
+    public function bulkDelete()
+    {
+        if (!empty($this->selectedQuestions)) {
+            DB::transaction(function () {
+                $questions = Question::with('options')->whereIn('id', $this->selectedQuestions)->get();
+                
+                foreach ($questions as $question) {
+                    $question->options()->delete();
+                    $question->delete();
+                }
+            });
+
+            $count = count($this->selectedQuestions);
+            $this->dispatch('notify', ['message' => "{$count} soal berhasil dihapus!"]);
+            
+            $this->selectedQuestions = [];
+        }
+
+        $this->showBulkDeleteModal = false;
+    }
+
     public function closeModal()
     {
         $this->showAddModal = false;
@@ -220,6 +372,7 @@ class ManageQuestion extends Component
     public function resetForm()
     {
         $this->questionForm = [
+            'title' => '',
             'subject_id' => '',
             'type' => 'multiple_choice',
             'text' => '',
@@ -242,13 +395,18 @@ class ManageQuestion extends Component
     {
         $this->validate([
             'importFile' => 'required|file|mimes:xlsx,xls|max:2048',
+            'importTitle' => 'required|string|max:255',
+        ], [
+            'importFile.required' => 'File Excel wajib dipilih.',
+            'importFile.mimes' => 'File harus berformat Excel (.xlsx atau .xls).',
+            'importTitle.required' => 'Judul kelompok soal wajib diisi.',
         ]);
 
         try {
-            Excel::import(new QuestionsImport, $this->importFile->getRealPath());
+            Excel::import(new QuestionsImport($this->importTitle), $this->importFile->getRealPath());
             
             $this->showImportModal = false;
-            $this->reset('importFile');
+            $this->reset(['importFile', 'importTitle']);
             $this->dispatch('notify', ['message' => 'Soal berhasil diimport!']);
         } catch (\Exception $e) {
             $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
@@ -308,8 +466,16 @@ class ManageQuestion extends Component
 
     public function render()
     {
-        $query = Question::with(['subject', 'options'])
-            ->where('teacher_id', Auth::id());
+        $query = Question::with(['subject', 'options']);
+        
+        // For teachers, only show their own questions
+        // For admins, show all questions
+        if (Auth::user()->isTeacher()) {
+            $teacherId = $this->getTeacherId();
+            if ($teacherId) {
+                $query->where('teacher_id', $teacherId);
+            }
+        }
 
         // Apply search
         if ($this->search) {
@@ -326,11 +492,18 @@ class ManageQuestion extends Component
             $query->where('type', $this->filterType);
         }
 
-        $questions = $query->latest()->paginate(10);
+        // Get all questions and group them
+        $allQuestions = $query->latest()->get();
+        
+        // Group questions by title
+        $groupedQuestions = $allQuestions->groupBy(function($question) {
+            return $question->title ?: 'Tanpa Kelompok';
+        });
+
         $subjects = Subject::orderBy('name')->get();
 
         return view('teacher.manage-question', [
-            'questions' => $questions,
+            'groupedQuestions' => $groupedQuestions,
             'subjects' => $subjects,
         ])->layout('layouts.teacher')->title('Bank Soal');
     }
