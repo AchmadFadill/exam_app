@@ -2,15 +2,15 @@
 
 @php
 $classes = $active
-            ? 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors bg-blue-900 text-white'
-            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-blue-100 hover:bg-blue-800 hover:text-white';
+            ? 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 bg-white/10 text-white font-bold shadow-sm'
+            : 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-white/70 hover:bg-white/5 hover:text-white font-medium';
 
 $iconClasses = $active
-            ? 'w-5 h-5 text-secondary'
-            : 'w-5 h-5 text-blue-300';
+            ? 'w-5 h-5 text-secondary transition-colors duration-200'
+            : 'w-5 h-5 text-white/40 group-hover:text-white transition-colors duration-200';
 @endphp
 
-<a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => "$classes group"]) }}>
     <svg class="{{ $iconClasses }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         {{ $icon ?? '' }}
     </svg>

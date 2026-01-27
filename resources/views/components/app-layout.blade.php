@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Laravel') }} - {{ $title ?? 'Dashboard' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @livewireStyles
 </head>
 <body class="font-sans antialiased bg-bg-app text-text-main">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
         
         <!-- Mobile Header -->
-        <div class="md:hidden bg-bg-surface border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
+        <div class="md:hidden bg-bg-surface border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-20">
             <div class="flex items-center gap-2">
                 <div class="font-bold text-xl tracking-wide text-primary">
                     <span class="text-secondary">SMAIT</span> CBT
