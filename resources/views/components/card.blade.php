@@ -5,8 +5,8 @@
     
     // Stat Card Logic
     $colors = [
-        'primary' => ['border' => 'border-l-primary', 'text' => 'text-primary', 'bg' => 'bg-blue-50'],
-        'secondary' => ['border' => 'border-l-secondary', 'text' => 'text-secondary', 'bg' => 'bg-amber-50'],
+        'primary' => ['border' => 'border-l-primary', 'text' => 'text-primary', 'bg' => 'bg-primary/10'],
+        'secondary' => ['border' => 'border-l-secondary', 'text' => 'text-secondary', 'bg' => 'bg-secondary/10'],
         'green' => ['border' => 'border-l-green-500', 'text' => 'text-green-600', 'bg' => 'bg-green-50'],
         'red' => ['border' => 'border-l-red-500', 'text' => 'text-red-500', 'bg' => 'bg-red-50'],
         'amber' => ['border' => 'border-l-amber-500', 'text' => 'text-amber-500', 'bg' => 'bg-amber-50'],

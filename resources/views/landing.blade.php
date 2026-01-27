@@ -42,13 +42,13 @@
                              x-transition:leave-end="opacity-0 scale-95 translate-y-1"
                              class="absolute right-0 mt-3 w-56 origin-top-right bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
                             <a href="{{ route('student.login') }}" class="group flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                 </div>
                                 <span class="font-semibold">Login Siswa</span>
                             </a>
                             <a href="{{ route('teacher.login') }}" class="group flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors text-secondary">
+                                <div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors text-secondary">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                                 </div>
                                 <span class="font-semibold">Login Guru</span>
@@ -110,8 +110,8 @@
     <main id="mulai" class="py-24 bg-primary relative overflow-hidden">
         <!-- Background Decoration -->
         <div class="absolute inset-0 z-0">
-            <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-600/20 blur-[120px] rounded-full"></div>
-            <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-blue-800/30 blur-[120px] rounded-full"></div>
+            <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-primary/20 blur-[120px] rounded-full"></div>
+            <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-secondary/10 blur-[120px] rounded-full"></div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -161,7 +161,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-white mb-2">Admin</h3>
                     <p class="text-blue-100 text-sm mb-6 leading-relaxed">Pengaturan sistem utama, manajemen pengguna, dan data master sekolah.</p>
-                    <div class="flex items-center text-white/80 font-bold gap-2 group-hover:gap-3 transition-all">
+                    <div class="flex items-center text-secondary font-bold gap-2 group-hover:gap-3 transition-all">
                         Login Admin
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </div>

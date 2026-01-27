@@ -10,10 +10,10 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 
     /* School Identity Colors */
-    --color-primary: #1E40AF;
-    /* Blue-800 */
-    --color-secondary: #F59E0B;
-    /* Amber-500 */
+    --color-primary: #0047AB;
+    /* Royal Blue from logo */
+    --color-secondary: #FFD700;
+    /* Gold/Yellow from logo */
 
     /* Backgrounds */
     --color-bg-app: #F3F4F6;

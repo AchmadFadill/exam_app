@@ -68,7 +68,7 @@
                 class="flex items-center gap-3 group focus:outline-none"
             >
                 <div class="relative">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-blue-200 transition-all duration-300 transform group-hover:-translate-y-0.5 group-active:translate-y-0">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-primary/20 transition-all duration-300 transform group-hover:-translate-y-0.5 group-active:translate-y-0">
                         {{ strtoupper(substr($userName, 0, 2)) }}
                     </div>
                 </div>
