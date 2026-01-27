@@ -29,6 +29,10 @@ class ManageQuestion extends Component
     public $importTitle = ''; // Title for imported questions group
     public $formKey = 0; // Used to force form re-render
     public $optionCount = 4; // Number of options to show (min 2, max 5)
+    
+    // Image Upload
+    public $questionImage;
+    public $editingImagePath = null;
 
     // Form Data
     public $questionForm = [
@@ -56,13 +60,15 @@ class ManageQuestion extends Component
             'questionForm.explanation' => 'nullable|string|max:1000',
         ];
 
-        // Add validation for multiple choice options
+        if ($this->questionImage) {
+            $rules['questionImage'] = 'image|max:5120|mimes:jpg,jpeg,png,gif,svg';
+        }
+
+        // Add validation for multiple choice options - only validate shown options
         if ($this->questionForm['type'] === 'multiple_choice') {
-            $rules['questionForm.options.0'] = 'required|string|max:500';
-            $rules['questionForm.options.1'] = 'required|string|max:500';
-            $rules['questionForm.options.2'] = 'required|string|max:500';
-            $rules['questionForm.options.3'] = 'required|string|max:500';
-            $rules['questionForm.options.4'] = 'required|string|max:500';
+            for ($i = 0; $i < $this->optionCount; $i++) {
+                $rules["questionForm.options.{$i}"] = 'required|string|max:500';
+            }
             $rules['questionForm.correct_option'] = 'required|in:A,B,C,D,E';
         }
 
@@ -76,6 +82,9 @@ class ManageQuestion extends Component
         'questionForm.text.max' => 'Pertanyaan maksimal 5000 karakter.',
         'questionForm.options.*.required' => 'Semua opsi jawaban wajib diisi.',
         'questionForm.correct_option.required' => 'Jawaban benar wajib dipilih.',
+        'questionImage.image' => 'File harus berupa gambar.',
+        'questionImage.max' => 'Ukuran gambar maksimal 5MB.',
+        'questionImage.mimes' => 'Format gambar harus JPG, JPEG, PNG, GIF, atau SVG.',
     ];
 
     /**
@@ -155,9 +164,11 @@ class ManageQuestion extends Component
             'type' => $question->type,
             'text' => $question->text,
             'explanation' => $question->explanation ?? '',
-            'options' => ['', '', '', ''],
+            'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
+
+        $this->editingImagePath = $question->image_path;
 
         // Load options for multiple choice
         if ($question->type === 'multiple_choice') {
@@ -203,63 +214,97 @@ class ManageQuestion extends Component
 
     public function saveQuestion()
     {
-        $this->validate();
+        try {
+            $this->validate();
 
-        DB::transaction(function () {
-            if ($this->showEditModal && $this->selectedQuestion) {
-                // Update existing question
-                $question = Question::findOrFail($this->selectedQuestion);
+            DB::transaction(function () {
+                $imagePath = null;
                 
-                $question->update([
-                    'title' => $this->questionForm['title'],
-                    'subject_id' => $this->questionForm['subject_id'],
-                    'type' => $this->questionForm['type'],
-                    'text' => $this->questionForm['text'],
-                    'explanation' => $this->questionForm['explanation'],
-                ]);
+                // Handle Image Upload
+                if ($this->questionImage) {
+                    $fileName = time() . '_' . $this->questionImage->getClientOriginalName();
+                    $imagePath = $this->questionImage->storeAs('questions', $fileName, 'public');
+                }
 
-                // Delete old options and create new ones for multiple choice
-                if ($this->questionForm['type'] === 'multiple_choice') {
-                    $question->options()->delete();
-                    $this->createOptions($question);
+                if ($this->showEditModal && $this->selectedQuestion) {
+                    // Update existing question
+                    $question = Question::findOrFail($this->selectedQuestion);
+                    
+                    // Delete old image if new one uploaded
+                    if ($this->questionImage && $question->image_path) {
+                        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
+                        }
+                    }
+
+                    $updateData = [
+                        'title' => $this->questionForm['title'],
+                        'subject_id' => $this->questionForm['subject_id'],
+                        'type' => $this->questionForm['type'],
+                        'text' => $this->questionForm['text'],
+                        'explanation' => $this->questionForm['explanation'],
+                    ];
+
+                    if ($this->questionImage) {
+                        $updateData['image_path'] = $imagePath;
+                    }
+
+                    $question->update($updateData);
+
+                    // Delete old options and create new ones for multiple choice
+                    if ($this->questionForm['type'] === 'multiple_choice') {
+                        $question->options()->delete();
+                        $this->createOptions($question);
+                    } else {
+                        // Delete options if changed to essay
+                        $question->options()->delete();
+                    }
+
+                    $message = 'Soal berhasil diperbarui!';
                 } else {
-                    // Delete options if changed to essay
-                    $question->options()->delete();
+                    // Create new question
+                    $teacherId = $this->getTeacherId();
+                    
+                    if (!$teacherId) {
+                        throw new \Exception('Tidak dapat menemukan teacher ID. Pastikan ada data guru di sistem.');
+                    }
+                    
+                    $createData = [
+                        'teacher_id' => $teacherId,
+                        'title' => $this->questionForm['title'],
+                        'subject_id' => $this->questionForm['subject_id'],
+                        'type' => $this->questionForm['type'],
+                        'text' => $this->questionForm['text'],
+                        'explanation' => $this->questionForm['explanation'],
+                    ];
+
+                    if ($this->questionImage) {
+                        $createData['image_path'] = $imagePath;
+                    }
+
+                    $question = Question::create($createData);
+
+                    // Create options for multiple choice
+                    if ($this->questionForm['type'] === 'multiple_choice') {
+                        $this->createOptions($question);
+                    }
+
+                    $message = 'Soal berhasil ditambahkan!';
                 }
 
-                $message = 'Soal berhasil diperbarui!';
-            } else {
-                // Create new question
-                $teacherId = $this->getTeacherId();
-                
-                if (!$teacherId) {
-                    throw new \Exception('Tidak dapat menemukan teacher ID. Pastikan ada data guru di sistem.');
-                }
-                
-                $question = Question::create([
-                    'teacher_id' => $teacherId,
-                    'title' => $this->questionForm['title'],
-                    'subject_id' => $this->questionForm['subject_id'],
-                    'type' => $this->questionForm['type'],
-                    'text' => $this->questionForm['text'],
-                    'explanation' => $this->questionForm['explanation'],
-                ]);
+                $this->dispatch('notify', ['message' => $message]);
+            });
 
-                // Create options for multiple choice
-                if ($this->questionForm['type'] === 'multiple_choice') {
-                    $this->createOptions($question);
-                }
-
-                $message = 'Soal berhasil ditambahkan!';
-            }
-
-            $this->dispatch('notify', ['message' => $message]);
-        });
-
-        $this->showAddModal = false;
-        $this->showEditModal = false;
-        $this->resetForm();
-        // Component will auto-refresh
+            $this->showAddModal = false;
+            $this->showEditModal = false;
+            $this->resetForm();
+            // Component will auto-refresh
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Validation errors will be shown automatically by Livewire
+            throw $e;
+        } catch (\Exception $e) {
+            $this->dispatch('notify', ['message' => 'Error: ' . $e->getMessage(), 'type' => 'error']);
+        }
     }
 
     public function saveAndAddAnother()
@@ -273,14 +318,26 @@ class ManageQuestion extends Component
                 throw new \Exception('Tidak dapat menemukan teacher ID. Pastikan ada data guru di sistem.');
             }
             
-            $question = Question::create([
+            $imagePath = null;
+            if ($this->questionImage) {
+                $fileName = time() . '_' . $this->questionImage->getClientOriginalName();
+                $imagePath = $this->questionImage->storeAs('questions', $fileName, 'public');
+            }
+
+            $createData = [
                 'teacher_id' => $teacherId,
                 'title' => $this->questionForm['title'],
                 'subject_id' => $this->questionForm['subject_id'],
                 'type' => $this->questionForm['type'],
                 'text' => $this->questionForm['text'],
                 'explanation' => $this->questionForm['explanation'],
-            ]);
+            ];
+
+            if ($imagePath) {
+                $createData['image_path'] = $imagePath;
+            }
+
+            $question = Question::create($createData);
 
             // Create options for multiple choice
             if ($this->questionForm['type'] === 'multiple_choice') {
@@ -304,9 +361,30 @@ class ManageQuestion extends Component
             'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
+        $this->questionImage = null;
+        $this->editingImagePath = null;
         $this->resetValidation();
         $this->formKey++; // Force form to re-render with cleared text field
         // Component will auto-refresh to show new question
+    }
+
+    public function removeImage()
+    {
+        $this->questionImage = null;
+        
+        if ($this->showEditModal && $this->selectedQuestion) {
+            $question = Question::findOrFail($this->selectedQuestion);
+            
+            if ($question->image_path) {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
+                }
+                
+                $question->update(['image_path' => null]);
+                $this->editingImagePath = null;
+                $this->dispatch('notify', ['message' => 'Gambar berhasil dihapus!']);
+            }
+        }
     }
 
     private function createOptions($question)
@@ -382,6 +460,8 @@ class ManageQuestion extends Component
         ];
         $this->selectedQuestion = null;
         $this->importFile = null;
+        $this->questionImage = null;
+        $this->editingImagePath = null;
         $this->resetValidation();
     }
 

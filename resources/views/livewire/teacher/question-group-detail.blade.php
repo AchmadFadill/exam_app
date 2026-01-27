@@ -68,6 +68,14 @@
                         <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
                         <td class="px-6 py-4">
                             <p class="text-sm text-gray-900 line-clamp-2">{!! \Illuminate\Support\Str::limit(strip_tags($question->text), 150) !!}</p>
+                            @if($question->image_path)
+                            <div class="mt-2">
+                                <a href="{{ $question->image_url }}" target="_blank" class="inline-block relative group">
+                                    <img src="{{ $question->image_url }}" class="h-16 w-auto rounded border border-gray-200 object-cover">
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded"></div>
+                                </a>
+                            </div>
+                            @endif
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $question->type === 'multiple_choice' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
@@ -167,6 +175,45 @@
                     <textarea wire:model="questionForm.text" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.text') border-red-500 @enderror" placeholder="Tulis pertanyaan di sini..."></textarea>
                     @error('questionForm.text') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     <p class="mt-1 text-xs text-gray-500">{{ strlen($questionForm['text']) }}/5000 karakter</p>
+                </div>
+
+                <!-- Question Image -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Soal (Opsional)</label>
+                    
+                    @if($showEditModal && $editingImagePath)
+                    <div class="mb-3 relative inline-block">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($editingImagePath) }}" 
+                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
+                        <button type="button" 
+                                wire:click="removeImage" 
+                                class="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition-colors"
+                                title="Hapus Gambar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    @endif
+                    
+                    <input type="file" 
+                           wire:model="questionImage" 
+                           accept="image/*"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg @error('questionImage') border-red-500 @enderror text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                    
+                    @error('questionImage') 
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p> 
+                    @enderror
+                    
+                    @if($questionImage)
+                    <div class="mt-2">
+                        <p class="text-xs text-gray-500 mb-1">Preview:</p>
+                        <img src="{{ $questionImage->temporaryUrl() }}" 
+                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
+                    </div>
+                    @endif
+                    
+                    <p class="mt-1 text-xs text-gray-500">Max 5MB. Format: JPG, PNG, GIF, SVG</p>
                 </div>
 
                 <!-- Multiple Choice Options -->

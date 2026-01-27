@@ -89,7 +89,14 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($questions as $q) {
-            $question = Question::create(['teacher_id' => $mathTeacher->id, 'subject_id' => $mathSubject->id, 'type' => 'multiple_choice', 'text' => $q['text'], 'explanation' => $q['explanation']]);
+            $question = Question::create([
+                'teacher_id' => $mathTeacher->id, 
+                'subject_id' => $mathSubject->id, 
+                'title' => 'Matematika Dasar', // Add title for grouping
+                'type' => 'multiple_choice', 
+                'text' => $q['text'], 
+                'explanation' => $q['explanation']
+            ]);
             foreach ($q['options'] as $o) {
                 QuestionOption::create(['question_id' => $question->id, 'label' => $o[0], 'text' => $o[1], 'is_correct' => $o[2]]);
             }

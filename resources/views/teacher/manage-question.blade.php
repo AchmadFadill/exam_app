@@ -86,7 +86,17 @@
                     @foreach($questions->take(3) as $question)
                     <div class="flex items-start gap-2 text-sm text-gray-600">
                         <span class="text-primary font-medium">{{ $loop->iteration }}.</span>
-                        <p class="line-clamp-1">{{ \Illuminate\Support\Str::limit(strip_tags($question->text), 50) }}</p>
+                        <div class="flex-1 min-w-0">
+                            <p class="line-clamp-1">{{ \Illuminate\Support\Str::limit(strip_tags($question->text), 50) }}</p>
+                            @if($question->image_path)
+                            <div class="mt-1">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                    <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    Gambar
+                                </span>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                     @endforeach
                     @if(count($questions) > 3)
@@ -169,6 +179,45 @@
                     <textarea wire:model="questionForm.text" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.text') border-red-500 @enderror" placeholder="Tulis pertanyaan di sini..."></textarea>
                     @error('questionForm.text') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     <p class="mt-1 text-xs text-gray-500">{{ strlen($questionForm['text']) }}/5000 karakter</p>
+                </div>
+
+                <!-- Question Image -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Soal (Opsional)</label>
+                    
+                    @if($showEditModal && $editingImagePath)
+                    <div class="mb-3 relative inline-block">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($editingImagePath) }}" 
+                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
+                        <button type="button" 
+                                wire:click="removeImage" 
+                                class="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition-colors"
+                                title="Hapus Gambar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    @endif
+                    
+                    <input type="file" 
+                           wire:model="questionImage" 
+                           accept="image/*"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg @error('questionImage') border-red-500 @enderror text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                    
+                    @error('questionImage') 
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p> 
+                    @enderror
+                    
+                    @if($questionImage)
+                    <div class="mt-2">
+                        <p class="text-xs text-gray-500 mb-1">Preview:</p>
+                        <img src="{{ $questionImage->temporaryUrl() }}" 
+                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
+                    </div>
+                    @endif
+                    
+                    <p class="mt-1 text-xs text-gray-500">Max 5MB. Format: JPG, PNG, GIF, SVG</p>
                 </div>
 
                 <!-- Multiple Choice Options -->

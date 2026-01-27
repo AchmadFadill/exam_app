@@ -8,9 +8,12 @@ use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class QuestionGroupDetail extends Component
 {
+    use WithFileUploads;
+
     public $title;
     public $selectedQuestions = [];
     public $showBulkDeleteModal = false;
@@ -19,6 +22,9 @@ class QuestionGroupDetail extends Component
     public $showDeleteModal = false;
     public $selectedQuestion = null;
     public $optionCount = 4; // Number of options to show
+    
+    public $questionImage;
+    public $editingImagePath = null;
     
     public $questionForm = [
         'title' => '',
@@ -39,6 +45,10 @@ class QuestionGroupDetail extends Component
             'questionForm.text' => 'required|string|max:5000',
             'questionForm.explanation' => 'nullable|string|max:1000',
         ];
+
+        if ($this->questionImage) {
+            $rules['questionImage'] = 'image|max:5120|mimes:jpg,jpeg,png,gif,svg';
+        }
 
         if ($this->questionForm['type'] === 'multiple_choice') {
             // Only validate the number of options currently shown
@@ -119,6 +129,8 @@ class QuestionGroupDetail extends Component
             'correct_option' => '',
         ];
 
+        $this->editingImagePath = $question->image_path;
+
         // Load options for multiple choice
         if ($question->type === 'multiple_choice') {
             foreach ($question->options as $option) {
@@ -140,17 +152,36 @@ class QuestionGroupDetail extends Component
         $this->validate();
 
         DB::transaction(function () {
+            $imagePath = null;
+            if ($this->questionImage) {
+                $fileName = time() . '_' . $this->questionImage->getClientOriginalName();
+                $imagePath = $this->questionImage->storeAs('questions', $fileName, 'public');
+            }
+
             if ($this->showEditModal && $this->selectedQuestion) {
                 // Update existing question
                 $question = Question::findOrFail($this->selectedQuestion);
                 
-                $question->update([
+                // Delete old image if new one uploaded
+                if ($this->questionImage && $question->image_path) {
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
+                    }
+                }
+
+                $updateData = [
                     'title' => $this->questionForm['title'],
                     'subject_id' => $this->questionForm['subject_id'],
                     'type' => $this->questionForm['type'],
                     'text' => $this->questionForm['text'],
                     'explanation' => $this->questionForm['explanation'],
-                ]);
+                ];
+
+                if ($this->questionImage) {
+                    $updateData['image_path'] = $imagePath;
+                }
+
+                $question->update($updateData);
             } else {
                 // Create new question
                 $user = \Illuminate\Support\Facades\Auth::user();
@@ -158,14 +189,20 @@ class QuestionGroupDetail extends Component
                     ? $user->teacher->id 
                     : \App\Models\Teacher::first()->id;
 
-                $question = Question::create([
+                $createData = [
                     'teacher_id' => $teacherId,
                     'title' => $this->questionForm['title'],
                     'subject_id' => $this->questionForm['subject_id'],
                     'type' => $this->questionForm['type'],
                     'text' => $this->questionForm['text'],
                     'explanation' => $this->questionForm['explanation'],
-                ]);
+                ];
+
+                if ($this->questionImage) {
+                    $createData['image_path'] = $imagePath;
+                }
+
+                $question = Question::create($createData);
             }
 
             // Delete old options and create new ones for multiple choice
@@ -195,14 +232,26 @@ class QuestionGroupDetail extends Component
                 ? $user->teacher->id 
                 : \App\Models\Teacher::first()->id;
 
-            $question = Question::create([
+            $imagePath = null;
+            if ($this->questionImage) {
+                $fileName = time() . '_' . $this->questionImage->getClientOriginalName();
+                $imagePath = $this->questionImage->storeAs('questions', $fileName, 'public');
+            }
+
+            $createData = [
                 'teacher_id' => $teacherId,
                 'title' => $this->questionForm['title'],
                 'subject_id' => $this->questionForm['subject_id'],
                 'type' => $this->questionForm['type'],
                 'text' => $this->questionForm['text'],
                 'explanation' => $this->questionForm['explanation'],
-            ]);
+            ];
+
+            if ($imagePath) {
+                $createData['image_path'] = $imagePath;
+            }
+
+            $question = Question::create($createData);
 
             if ($this->questionForm['type'] === 'multiple_choice') {
                 $this->createOptions($question);
@@ -222,6 +271,25 @@ class QuestionGroupDetail extends Component
         $this->questionForm['subject_id'] = $keepSubject;
         $this->questionForm['type'] = $keepType;
         $this->optionCount = 4;
+    }
+
+    public function removeImage()
+    {
+        $this->questionImage = null;
+        
+        if ($this->showEditModal && $this->selectedQuestion) {
+            $question = Question::findOrFail($this->selectedQuestion);
+            
+            if ($question->image_path) {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
+                }
+                
+                $question->update(['image_path' => null]);
+                $this->editingImagePath = null;
+                $this->dispatch('notify', ['message' => 'Gambar berhasil dihapus!']);
+            }
+        }
     }
 
     private function createOptions($question)
@@ -258,6 +326,8 @@ class QuestionGroupDetail extends Component
             'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
+        $this->questionImage = null;
+        $this->editingImagePath = null;
         $this->resetValidation();
     }
 

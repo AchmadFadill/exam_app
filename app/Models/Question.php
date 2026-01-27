@@ -13,6 +13,20 @@ class Question extends Model
 
     protected $fillable = ['teacher_id', 'subject_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key'];
 
+    protected static function booted()
+    {
+        static::deleting(function ($question) {
+            if ($question->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
+            }
+        });
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path) : null;
+    }
+
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class);
