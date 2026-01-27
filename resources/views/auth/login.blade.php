@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Staff Login - CBT Exam</title>
+    <link rel="icon" type="image/jpg" href="{{ asset('img/logo_school.jpg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full flex items-center justify-center p-4 antialiased selection:bg-blue-100 selection:text-blue-900">
@@ -18,7 +19,7 @@
                 <div class="relative inline-block mb-6 group">
                     <div class="absolute inset-0 bg-[var(--color-primary)]/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div class="relative w-20 h-20 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border border-gray-50 transition-transform duration-500 group-hover:scale-105">
-                        <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-contain">
+                        <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-cover">
                     </div>
                 </div>
 
