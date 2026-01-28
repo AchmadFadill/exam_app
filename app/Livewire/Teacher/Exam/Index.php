@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Teacher\Exam;
 
+use App\Models\Exam;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
@@ -22,81 +24,70 @@ class Index extends Component
 
     public function bulkDelete()
     {
-        // Dummy bulk delete logic
+        Exam::whereIn('id', $this->selectedExams)->delete();
+        
         $this->showBulkDeleteModal = false;
         $this->selectedExams = [];
         $this->selectAll = false;
         $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
     }
 
-    public $exams = [];
-
-    public function mount()
-    {
-        // Dummy Exams Data (Initialized in mount)
-        $this->exams = [
-            [
-                'id' => 1,
-                'name' => 'Ujian Harian Matematika',
-                'subject' => 'Matematika',
-                'class' => 'XI IPA 1',
-                'date' => '2025-12-23',
-                'start_time' => '08:00',
-                'end_time' => '09:30',
-                'duration' => 90,
-                'status' => 'scheduled',
-                'questions_count' => 30,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Ujian Akhir Semester Fisika',
-                'subject' => 'Fisika',
-                'class' => 'XII IPA 2',
-                'date' => '2025-12-22',
-                'start_time' => '08:00',
-                'end_time' => '10:00',
-                'duration' => 120,
-                'status' => 'ongoing',
-                'questions_count' => 45,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Kuis Sejarah Indonesia',
-                'subject' => 'Sejarah',
-                'class' => 'X IPS 1',
-                'date' => '2025-12-20',
-                'start_time' => '08:00',
-                'end_time' => '08:45',
-                'duration' => 45,
-                'status' => 'completed',
-                'questions_count' => 20,
-            ],
-        ];
-    }
-
     public function duplicateExam($id)
     {
-        // Find the exam to duplicate
-        $original = collect($this->exams)->firstWhere('id', $id);
+        $original = Exam::with(['questions', 'classrooms'])->findOrFail($id);
 
-        if ($original) {
-            $newExam = $original;
-            $newExam['id'] = count($this->exams) + 1; // Simple increment ID
-            $newExam['name'] = 'Salinan - ' . $original['name'];
-            $newExam['status'] = 'scheduled';
-            $newExam['date'] = date('Y-m-d'); // Reset to today
-            $newExam['token'] = strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 5)); // New Token
-            
-            // Add to top of list
-            array_unshift($this->exams, $newExam);
+        $newExam = $original->replicate();
+        $newExam->name = 'Salinan - ' . $original->name;
+        $newExam->status = 'draft';
+        $newExam->date = date('Y-m-d');
+        $newExam->token = Exam::generateToken();
+        $newExam->save();
 
-            $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi!']);
+        // Copy question relationships
+        foreach ($original->questions as $question) {
+            $newExam->questions()->attach($question->id, [
+                'order' => $question->pivot->order,
+                'score' => $question->pivot->score,
+            ]);
         }
+
+        // Copy classroom relationships
+        $newExam->classrooms()->sync($original->classrooms->pluck('id')->toArray());
+
+        $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi!']);
     }
 
     public function render()
     {
-        return view('teacher.exam.index')
-            ->layout('layouts.teacher');
+        $user = Auth::user();
+        $teacherId = $user->isTeacher() ? $user->teacher->id : null;
+
+        $examsQuery = Exam::with(['subject', 'classrooms', 'questions', 'teacher.user'])
+            ->orderBy('date', 'desc')
+            ->orderBy('start_time', 'desc');
+
+        // Filter by teacher if not admin
+        if ($teacherId) {
+            $examsQuery->where('teacher_id', $teacherId);
+        }
+
+        $exams = $examsQuery->get()->map(function ($exam) {
+            return [
+                'id' => $exam->id,
+                'name' => $exam->name,
+                'subject' => $exam->subject->name,
+                'class' => $exam->classrooms->pluck('name')->join(', '),
+                'date' => $exam->date->format('Y-m-d'),
+                'start_time' => $exam->start_time,
+                'end_time' => $exam->end_time,
+                'duration' => $exam->duration_minutes,
+                'status' => $exam->status,
+                'questions_count' => $exam->questions->count(),
+            ];
+        });
+
+        return view('teacher.exam.index', [
+            'exams' => $exams,
+        ])->layout('layouts.teacher')->title('Daftar Ujian');
     }
 }

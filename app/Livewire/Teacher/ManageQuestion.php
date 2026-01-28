@@ -41,6 +41,7 @@ class ManageQuestion extends Component
         'type' => 'multiple_choice',
         'text' => '',
         'explanation' => '',
+        'score' => 10,
         'options' => ['', '', '', ''], // Default 4 options A-D
         'correct_option' => '',
     ];
@@ -58,6 +59,7 @@ class ManageQuestion extends Component
             'questionForm.type' => 'required|in:multiple_choice,essay',
             'questionForm.text' => 'required|string|max:5000',
             'questionForm.explanation' => 'nullable|string|max:1000',
+            'questionForm.score' => 'required|integer|min:1|max:100',
         ];
 
         if ($this->questionImage) {
@@ -164,6 +166,7 @@ class ManageQuestion extends Component
             'type' => $question->type,
             'text' => $question->text,
             'explanation' => $question->explanation ?? '',
+            'score' => $question->score ?? 10,
             'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
@@ -243,6 +246,7 @@ class ManageQuestion extends Component
                         'type' => $this->questionForm['type'],
                         'text' => $this->questionForm['text'],
                         'explanation' => $this->questionForm['explanation'],
+                        'score' => $this->questionForm['score'],
                     ];
 
                     if ($this->questionImage) {
@@ -276,6 +280,7 @@ class ManageQuestion extends Component
                         'type' => $this->questionForm['type'],
                         'text' => $this->questionForm['text'],
                         'explanation' => $this->questionForm['explanation'],
+                        'score' => $this->questionForm['score'],
                     ];
 
                     if ($this->questionImage) {
@@ -331,6 +336,7 @@ class ManageQuestion extends Component
                 'type' => $this->questionForm['type'],
                 'text' => $this->questionForm['text'],
                 'explanation' => $this->questionForm['explanation'],
+                'score' => $this->questionForm['score'],
             ];
 
             if ($imagePath) {

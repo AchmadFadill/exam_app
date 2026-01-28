@@ -2,103 +2,289 @@
 
 namespace App\Livewire\Teacher\Exam;
 
+use App\Models\Classroom;
+use App\Models\Exam;
+use App\Models\Question;
+use App\Models\Subject;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Form extends Component
 {
-    public $examId;
-    public $name;
-    public $subject;
-    public $classes = []; // Selected classes
-    public $date;
-    public $start_time;
-    public $end_time;
-    public $duration; // in minutes
+    public $examId = null;
+    public $currentStep = 1;
+
+    // Step 1: Basic Information
+    public $name = '';
+    public $subject_id = '';
+    public $date = '';
+    public $start_time = '';
+    public $end_time = '';
+    public $duration_minutes = 90;
     public $passing_grade = 70;
-    public $default_score = 5;
-    
-    // Settings
+    public $default_score = 10;
+
+    // Step 2: Question Selection
+    public $selectedQuestions = [];
+    public $questionScores = [];
+    public $searchQuery = '';
+    public $filterSubject = '';
+    public $filterType = '';
+
+    // Step 3: Class Assignment & Settings
+    public $selectedClasses = [];
+    public $token = '';
     public $shuffle_questions = false;
     public $shuffle_answers = false;
     public $tab_tolerance = 3;
 
-    // Data Sources
-    public $availableClasses = ['X IPA 1', 'X IPA 2', 'XI IPA 1', 'XI IPA 2', 'XII IPA 1', 'XII IPS 1'];
-    
-    // Filters
-    public $filterSubject;
-    
-    // Step wizard (1: Details, 2: Questions)
-    public $step = 1;
-
-    public $token;
+    // Step 4: Status
+    public $status = 'draft';
 
     public function mount($id = null)
     {
         if ($id) {
             $this->examId = $id;
-            // Load dummy
-            $this->name = 'Ujian Harian Matematika';
-            $this->subject = 'Matematika';
-            $this->classes = ['XI IPA 1'];
-            $this->date = '2025-12-23';
+            $this->loadExam($id);
+        } else {
+            // Initialize default values
+            $this->date = date('Y-m-d');
             $this->start_time = '08:00';
             $this->end_time = '09:30';
-            $this->duration = 90;
-            $this->token = 'X7B29'; // Existing token
-        } else {
-            // New Exam
-            $this->token = $this->generateToken();
+            $this->generateToken();
         }
+    }
+
+    protected function loadExam($id)
+    {
+        $exam = Exam::with(['questions', 'classrooms'])->findOrFail($id);
+
+        $this->name = $exam->name;
+        $this->subject_id = $exam->subject_id;
+        $this->date = $exam->date->format('Y-m-d');
+        $this->start_time = $exam->start_time;
+        $this->end_time = $exam->end_time;
+        $this->duration_minutes = $exam->duration_minutes;
+        $this->passing_grade = $exam->passing_grade;
+        $this->default_score = $exam->default_score;
+        $this->token = $exam->token;
+        $this->shuffle_questions = $exam->shuffle_questions;
+        $this->shuffle_answers = $exam->shuffle_answers;
+        $this->tab_tolerance = $exam->tab_tolerance;
+        $this->status = $exam->status;
+
+        // Load selected questions with scores
+        foreach ($exam->questions as $question) {
+            $this->selectedQuestions[] = $question->id;
+            $this->questionScores[$question->id] = $question->pivot->score;
+        }
+
+        // Load selected classes
+        $this->selectedClasses = $exam->classrooms->pluck('id')->toArray();
     }
 
     public function generateToken()
     {
-        // Simple random 5-char alphanumeric token
-        return strtoupper(substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 5));
-    }
-    
-    public function regenerateToken()
-    {
-        $this->token = $this->generateToken();
-    }
-
-    public function toggleLevel($level)
-    {
-        // $level e.g., 'X', 'XI', 'XII'
-        $levelClasses = array_filter($this->availableClasses, function($class) use ($level) {
-            return str_starts_with($class, $level . ' ');
-        });
-
-        // Check if all are currently selected
-        $allSelected = count(array_intersect($levelClasses, $this->classes)) === count($levelClasses);
-
-        if ($allSelected) {
-            // Deselect all
-            $this->classes = array_values(array_diff($this->classes, $levelClasses));
-        } else {
-            // Select all (merge and unique)
-            $this->classes = array_values(array_unique(array_merge($this->classes, $levelClasses)));
-        }
-    }
-
-    public function render()
-    {
-        return view('teacher.exam.form')->layout('layouts.teacher');
+        do {
+            $this->token = Exam::generateToken();
+        } while (Exam::where('token', $this->token)->where('id', '!=', $this->examId)->exists());
     }
 
     public function nextStep()
     {
-        $this->step++;
+        $this->validateCurrentStep();
+        
+        if ($this->currentStep < 4) {
+            $this->currentStep++;
+        }
     }
 
-    public function prevStep()
+    public function previousStep()
     {
-        $this->step--;
+        if ($this->currentStep > 1) {
+            $this->currentStep--;
+        }
     }
 
-    public function save()
+    protected function validateCurrentStep()
     {
-        return redirect()->route('teacher.exams.index');
+        $rules = match ($this->currentStep) {
+            1 => [
+                'name' => 'required|string|max:255',
+                'subject_id' => 'required|exists:subjects,id',
+                'date' => 'required|date',
+                'start_time' => 'required',
+                'end_time' => 'required',
+                'duration_minutes' => 'required|integer|min:10|max:300',
+                'passing_grade' => 'required|integer|min:0|max:100',
+                'default_score' => 'required|integer|min:1',
+            ],
+            2 => [
+                'selectedQuestions' => 'required|array|min:1',
+                'questionScores.*' => 'required|integer|min:1',
+            ],
+            3 => [
+                'selectedClasses' => 'required|array|min:1',
+                'token' => 'required|string|size:6|unique:exams,token,' . $this->examId,
+                'tab_tolerance' => 'required|integer|min:0|max:10',
+            ],
+            default => [],
+        };
+
+        $this->validate($rules);
+    }
+
+    public function toggleQuestion($questionId)
+    {
+        if (in_array($questionId, $this->selectedQuestions)) {
+            // Remove question
+            $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, [$questionId]));
+            unset($this->questionScores[$questionId]);
+        } else {
+            // Add question with default score
+            $this->selectedQuestions[] = $questionId;
+            $this->questionScores[$questionId] = $this->default_score;
+        }
+    }
+
+    public function toggleQuestionGroup($title)
+    {
+        // Get all questions with this title
+        $groupQuestions = Question::where('title', $title)->pluck('id')->toArray();
+        
+        // Check if all questions in group are already selected
+        $allSelected = count(array_intersect($groupQuestions, $this->selectedQuestions)) === count($groupQuestions);
+        
+        if ($allSelected) {
+            // Remove all questions from this group
+            $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, $groupQuestions));
+            foreach ($groupQuestions as $qId) {
+                unset($this->questionScores[$qId]);
+            }
+        } else {
+            // Add all questions from this group
+            foreach ($groupQuestions as $qId) {
+                if (!in_array($qId, $this->selectedQuestions)) {
+                    $this->selectedQuestions[] = $qId;
+                    $this->questionScores[$qId] = $this->default_score;
+                }
+            }
+        }
+    }
+
+    public function saveExam()
+    {
+        // Validate all steps
+        $this->currentStep = 1;
+        $this->validateCurrentStep();
+        $this->currentStep = 2;
+        $this->validateCurrentStep();
+        $this->currentStep = 3;
+        $this->validateCurrentStep();
+        $this->currentStep = 4;
+
+        try {
+            DB::beginTransaction();
+
+            $user = Auth::user();
+            $teacherId = $user->isTeacher() ? $user->teacher->id : null;
+
+            if (!$teacherId) {
+                throw new \Exception('Teacher ID not found');
+            }
+
+            // Create or update exam
+            $examData = [
+                'teacher_id' => $teacherId,
+                'subject_id' => $this->subject_id,
+                'name' => $this->name,
+                'date' => $this->date,
+                'start_time' => $this->start_time,
+                'end_time' => $this->end_time,
+                'duration_minutes' => $this->duration_minutes,
+                'token' => $this->token,
+                'passing_grade' => $this->passing_grade,
+                'default_score' => $this->default_score,
+                'shuffle_questions' => $this->shuffle_questions,
+                'shuffle_answers' => $this->shuffle_answers,
+                'tab_tolerance' => $this->tab_tolerance,
+                'status' => $this->status,
+            ];
+
+            if ($this->examId) {
+                $exam = Exam::findOrFail($this->examId);
+                $exam->update($examData);
+            } else {
+                $exam = Exam::create($examData);
+            }
+
+            // Sync questions with scores and order
+            $questionsData = [];
+            foreach ($this->selectedQuestions as $index => $questionId) {
+                $questionsData[$questionId] = [
+                    'order' => $index + 1,
+                    'score' => $this->questionScores[$questionId] ?? $this->default_score,
+                ];
+            }
+            $exam->questions()->sync($questionsData);
+
+            // Sync classrooms
+            $exam->classrooms()->sync($this->selectedClasses);
+
+            DB::commit();
+
+            $this->dispatch('notify', [
+                'message' => $this->examId ? 'Ujian berhasil diperbarui!' : 'Ujian berhasil dibuat!',
+            ]);
+
+            return redirect()->route('teacher.exams.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->dispatch('notify', [
+                'message' => 'Gagal menyimpan ujian: ' . $e->getMessage(),
+                'type' => 'error',
+            ]);
+        }
+    }
+
+    public function saveDraft()
+    {
+        $this->status = 'draft';
+        $this->saveExam();
+    }
+
+    public function publish()
+    {
+        $this->status = 'scheduled';
+        $this->saveExam();
+    }
+
+    public function render()
+    {
+        $subjects = Subject::orderBy('name')->get();
+        $classrooms = Classroom::orderBy('name')->get();
+        
+        // Group questions by title for selection
+        $questionGroups = Question::with(['subject'])
+            ->when($this->searchQuery, function ($q) {
+                $q->where('title', 'like', '%' . $this->searchQuery . '%');
+            })
+            ->when($this->filterSubject, function ($q) {
+                $q->where('subject_id', $this->filterSubject);
+            })
+            ->when($this->filterType, function ($q) {
+                $q->where('type', $this->filterType);
+            })
+            ->select('title', 'subject_id', \DB::raw('COUNT(*) as question_count'), \DB::raw('MIN(id) as first_id'))
+            ->groupBy('title', 'subject_id')
+            ->orderBy('title')
+            ->get();
+
+        return view('teacher.exam.form', [
+            'subjects' => $subjects,
+            'classrooms' => $classrooms,
+            'questionGroups' => $questionGroups,
+        ])->layout('layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
     }
 }
