@@ -74,17 +74,17 @@
                         </td>
                         <td class="px-8 py-5 text-right">
                             <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="openResetPasswordModal({{ $teacher->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all" title="Reset Password">
+                                <button wire:click="openResetPasswordModal({{ $teacher->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Reset Password">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openEditModal({{ $teacher->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all" title="Edit">
+                                <button wire:click="openEditModal({{ $teacher->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Edit">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <button wire:click="openDeleteModal({{ $teacher->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all" title="Hapus">
+                                <button wire:click="openDeleteModal({{ $teacher->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -265,7 +265,7 @@
             <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Guru Dipilih</span>
         </div>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-amber-500/10 hover:text-amber-500 transition-all uppercase tracking-widest">
+        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-amber-500/10 hover:text-amber-500 hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest">
             <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-amber-500/30 text-white/50 group-hover:text-amber-500 transition-all shadow-inner">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -274,7 +274,7 @@
             Reset Password
         </button>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest">
             <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

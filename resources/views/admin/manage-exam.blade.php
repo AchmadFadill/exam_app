@@ -4,13 +4,13 @@
     <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <div>
              <h2 class="font-bold text-2xl text-text-main uppercase">Daftar Ujian</h2>
-            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase ">Kelola Daftar Ujian Anda Disini</p>
+            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase ">Kelola Ujian Anda Disini</p>
         </div>
         <div>
-            <a href="{{ route('teacher.exams.create') }}" class="group inline-flex items-center gap-4 bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-[2rem] text-sm font-black transition-all shadow-xl shadow-primary/20 uppercase tracking-widest">
-                <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+            <x-button href="{{ route('teacher.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
+                <svg class="w-5 h-5  transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                 Buat Ujian Baru
-            </a>
+            </x-button>
         </div>
     </div>
 
@@ -45,7 +45,7 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
                         <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
-                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Ubah Keterangan</a>
+                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit ujian</a>
                             <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</a>
                             <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
                             <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus</a>
@@ -69,33 +69,33 @@
                     </div>
                     <div class="flex items-center text-[10px] font-black uppercase tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ $exam['duration'] }} Menit pengerjaan
+                        {{ $exam['duration'] }} Menit 
                     </div>
                     <div class="flex items-center text-[10px] font-black uppercase tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        {{ $exam['questions_count'] }} Butir Soal
+                        {{ $exam['questions_count'] }} Soal
                     </div>
                 </div>
             </div>
 
             <div class="px-8 py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-slate-800 grid grid-cols-2 gap-4 mt-auto">
                 @if($exam['status'] == 'ongoing')
-                    <a href="{{ route('admin.monitor.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-3 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <x-button href="{{ route('admin.monitor.detail', $exam['id']) }}" variant="primary" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
+                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         Monitor Ujian 
-                    </a>
+                    </x-button>
                 @elseif($exam['status'] == 'completed')
-                    <a href="#" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
-                        Hasil
-                    </a>
-                    <a href="#" class="flex justify-center items-center gap-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-100 transition-all">
+                    <x-button href="#" variant="secondary" class="text-[10px] py-3 rounded-xl tracking-widest">
+                        Lihat Hasil
+                    </x-button>
+                    <x-button href="#" variant="secondary" class="text-[10px] py-3 rounded-xl tracking-widest">
                         Daftar Nilai
-                    </a>
+                    </x-button>
                 @else
-                    <a href="#" class="col-span-2 flex justify-center items-center gap-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 text-text-main text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-gray-100 transition-all shadow-sm">
-                        <svg class="w-4 h-4 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <x-button href="#" variant="secondary" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
+                        <svg class="w-4 h-4 mr-3 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Atur Jadwal
-                    </a>
+                    </x-button>
                 @endif
             </div>
         </div>
@@ -116,7 +116,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            Batal Jadwal
+            Hapus Jadwal ujian
         </button>
     </div>
     @endif

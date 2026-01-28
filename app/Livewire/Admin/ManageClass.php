@@ -42,6 +42,13 @@ class ManageClass extends Component
         $this->showAddModal = true;
     }
 
+    public function closeModal()
+    {
+        $this->showAddModal = false;
+        $this->showEditModal = false;
+        $this->resetValidation();
+    }
+
     public function openEditModal($classId)
     {
         $class = Classroom::findOrFail($classId);

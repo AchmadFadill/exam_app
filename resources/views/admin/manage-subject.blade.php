@@ -7,7 +7,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </span>
-            <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari nama mata pelajaran atau kode...">
+            <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari mata pelajaran">
         </div>
         
         <!-- Action Button (Right) -->
@@ -25,10 +25,10 @@
         <x-card class="relative overflow-hidden group hover:border-primary/40">
             <div class="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                 <div class="flex gap-2">
-                    <button wire:click="openEditModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-primary hover:bg-primary hover:text-white transition-all">
+                    <button wire:click="openEditModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-primary hover:bg-primary hover:text-white hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
-                    <button wire:click="openDeleteModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-red-600 hover:bg-red-600 hover:text-white transition-all">
+                    <button wire:click="openDeleteModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-red-600 hover:bg-red-600 hover:text-white hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </div>
@@ -58,22 +58,21 @@
         </x-card>
         @empty
         <div class="col-span-full py-24 text-center text-text-muted font-bold italic opacity-40 bg-bg-surface dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-border-main dark:border-slate-800">
-            Tambah Kelas
-an yang Anda cari tidak tersedia dalam database.
+            Mata pelajaran yang Anda cari tidak tersedia dalam database.
         </div>
         @endforelse
     </div>
 
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
+        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="closeModal"></div>
         <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
-                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Kelas' : 'Edit Data Kelas' }}</h3>
+                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Mata Pelajaran' : 'Edit Mata Pelajaran' }}</h3>
                     
                 </div>
-                <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <button wire:click="closeModal" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
@@ -88,8 +87,8 @@ an yang Anda cari tidak tersedia dalam database.
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
-                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="saveClass" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Data</x-button>
+                <x-button variant="secondary" wire:click="closeModal" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
+                <x-button variant="primary" wire:click="saveSubject" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Data</x-button>
             </div>
         </div>
     </div>
