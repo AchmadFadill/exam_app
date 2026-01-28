@@ -1,5 +1,5 @@
 <x-student-layout>
-    <x-slot name="title">Daftar Ujian</x-slot>
+    <x-slot name="title"></x-slot>
 <div class="container mx-auto px-6 py-8">
     <div class="mb-8">
         <h3 class="text-gray-700 text-3xl font-medium">Daftar Ujian</h3>

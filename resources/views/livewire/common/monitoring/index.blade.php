@@ -3,7 +3,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h2 class="font-bold text-2xl text-text-main">Dashboard Monitoring</h2>
+            <h2 class="font-bold text-2xl text-text-main uppercase">Dashboard Monitoring</h2>
             <p class="text-text-muted text-sm">{{ request()->is('admin/*') ? 'Pantau semua ujian yang sedang berlangsung' : 'Pantau ujian siswa Anda yang sedang berlangsung' }}</p>
         </div>
     </div>
@@ -29,15 +29,15 @@
             <div class="p-5 grid grid-cols-3 gap-4 text-center">
                 <div>
                     <div class="text-2xl font-bold text-text-main">{{ $exam['total_students'] }}</div>
-                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Total</div>
+                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Total Siswa</div>
                 </div>
                 <div>
                     <div class="text-2xl font-bold text-primary">{{ $exam['working'] }}</div>
-                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Mengerjakan</div>
+                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Siswa Mengerjakan</div>
                 </div>
                 <div>
                     <div class="text-2xl font-bold text-green-600">{{ $exam['finished'] }}</div>
-                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Selesai</div>
+                    <div class="text-[10px] uppercase tracking-wider text-text-muted font-semibold mt-1">Siswa Selesai</div>
                 </div>
             </div>
 

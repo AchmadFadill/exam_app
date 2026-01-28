@@ -46,12 +46,12 @@
                         @if($subject['teacher'] !== '-')
                             <span class="text-text-main truncate">{{ $subject['teacher'] }}</span>
                         @else
-                            <span class="text-red-500 text-[10px] font-black uppercase tracking-widest">Unassigned</span>
+                            <span class="text-red-500 text-[10px] font-black uppercase tracking-widest">Belum Ada Guru Pengampu</span>
                         @endif
                     </div>
 
                     <x-button wire:click="openAssignModal({{ $subject['id'] }})" variant="secondary" class="w-full font-black uppercase text-[10px] tracking-[0.2em] py-3 rounded-xl border-dashed">
-                        {{ $subject['teacher'] !== '-' ? 'Reassign Guru' : 'Assign Specialist' }}
+                        {{ $subject['teacher'] !== '-' ? 'Ganti  Guru Pengampu' : 'Tetapkan Guru Pengampu' }}
                     </x-button>
                 </div>
             </div>
@@ -71,7 +71,7 @@ an yang Anda cari tidak tersedia dalam database.
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
                      <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Kelas' : 'Edit Data Kelas' }}</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Manajemen Database</p>
+                    
                 </div>
                 <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>

@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Laporan Hasil Ujian</h1>
+            <h1 class="text-2xl font-bold text-gray-900 uppercase">Laporan Hasil Ujian</h1>
             <p class="text-sm text-gray-500">Lihat statistik dan hasil ujian per kelas</p>
         </div>
     </div>

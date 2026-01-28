@@ -46,10 +46,10 @@
                                 <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                             </div>
                         </th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Nama Siswa / NIS</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Kelas</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Email</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Aksi</th>
+                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Nama Siswa</th>
+                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Kelas</th>
+                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Email</th>
+                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em] text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="min-w-0">
                                     <div class="font-black text-text-main tracking-tight uppercase text-sm truncate group-hover:text-primary transition-colors">{{ $student->user->name }}</div>
-                                    <div class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">NIS: {{ $student->nis }}</div>
+                                    <div class="text-[10px] font-black text-text-muted uppercase tracking-widest ">NIS: {{ $student->nis }}</div>
                                 </div>
                             </div>
                         </td>
@@ -122,7 +122,7 @@
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Siswa' : 'Edit Data Siswa' }}</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Manajemen Database</p>
+                    
                  </div>
                 <button wire:click="closeModal" class="p-2 text-text-muted hover:text-red-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,9 +142,9 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Rombongan Belajar (Kelas)</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Kelas</label>
                     <select wire:model="studentForm.classroom_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
-                        <option value="">Pilih Target Kelas</option>
+                        <option value="">Pilih Kelas</option>
                         @foreach($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }} - {{ $classroom->level }}</option>
                         @endforeach

@@ -5,7 +5,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
             <div class="relative z-10 flex-1">
-                <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Dashboard <span class="text-primary not-italic">Utama</span></h1>
+                <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Halaman <span class="text-primary not-italic">Utama</span></h1>
                 <p class="text-text-muted mt-3 text-lg font-medium">Sistem berjalan dengan status <span class="text-green-600 font-black uppercase tracking-wider text-sm bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">{{ $system_health['status'] }}</span>.</p>
                 <div class="mt-8 flex flex-wrap gap-4">
                     <div class="flex items-center gap-3 px-5 py-2.5 bg-blue-50/50 dark:bg-primary/10 text-primary rounded-2xl border border-primary/10 font-bold text-sm">
@@ -94,7 +94,7 @@
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                     Ujian Berjalan ({{ $stats['active_exams_count'] }})
                 </h3>
-                <a href="{{ route('admin.monitor') }}" class="text-sm font-semibold text-primary hover:text-blue-700">Manajemen Full &rarr;</a>
+                <a href="{{ route('admin.monitor') }}" class="text-sm font-semibold text-primary hover:text-blue-700">Selengkapnya &rarr;</a>
             </div>
             
             <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
@@ -150,7 +150,7 @@
                     @endforeach
                 </div>
                  <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
-                    <button class="text-xs font-black text-text-muted hover:text-primary uppercase tracking-[0.2em] transition-all">Lihat Semua Laporan Keamanan &rarr;</button>
+                    <button class="text-xs font-black text-text-muted hover:text-primary uppercase tracking-[0.2em] transition-all">Selengkapnya &rarr;</button>
                 </div>
             </div>
         </section>
@@ -169,10 +169,10 @@
                     Data Guru
                 </a>
                 <a href="{{ route('admin.exams') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
-                    Buka Ujian Baru
+                    Buat Ujian Baru
                 </a>
                 <a href="{{ route('admin.settings') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
-                    Parameter Sistem
+                    Pengaturan Sistem
                 </a>
             </div>
         </div>

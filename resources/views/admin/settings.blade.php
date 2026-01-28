@@ -4,8 +4,8 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-            <h1 class="font-black text-4xl text-text-main tracking-tight italic">Global <span class="text-primary not-italic">Settings</span></h1>
-            <p class="text-text-muted mt-2 font-medium">Konfigurasi pusat identitas dan parameter sistem CBT.</p>
+            <h1 class="font-black text-4xl text-text-main tracking-tight italic uppercase">Pengaturan <span class="text-primary not-italic"> Sistem</span></h1>
+            <p class="text-text-muted mt-2 font-medium">Konfigurasi pusat identitas dan pengaturan sistem CBT.</p>
         </div>
         <button wire:click="save" class="group bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl font-bold transition-all flex items-center gap-3 shadow-xl shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0">
             <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -34,7 +34,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Logo Signature</label>
+                    <label class="block text-sm font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Logo Sekolah</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="relative group">
                             <input type="file" wire:model="logo" id="logo-upload" class="hidden">
@@ -80,7 +80,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Parameter Akademik</h3>
+                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Pengaturan Akademik</h3>
                     <p class="text-text-muted text-xs font-bold tracking-widest leading-none mt-1 uppercase opacity-60">Defaults & Schedules</p>
                 </div>
             </div>
@@ -88,12 +88,12 @@
             <div class="p-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Tahun Ajaran Aktif</label>
+                        <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Tahun Ajaran </label>
                         <input type="text" wire:model="academicYear" class="w-full px-6 py-4 rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold" placeholder="2025/2026">
                         @error('academicYear') <span class="text-red-500 text-xs mt-2 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Semester Default</label>
+                        <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Semester</label>
                         <select wire:model="semester" class="w-full px-6 py-4 rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
                             <option value="Ganjil">Semester Ganjil</option>
                             <option value="Genap">Semester Genap</option>
