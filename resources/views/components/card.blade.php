@@ -5,11 +5,12 @@
     
     // Stat Card Logic
     $colors = [
-        'primary' => ['border' => 'border-l-primary', 'text' => 'text-primary', 'bg' => 'bg-primary/10'],
-        'secondary' => ['border' => 'border-l-secondary', 'text' => 'text-secondary', 'bg' => 'bg-secondary/10'],
-        'green' => ['border' => 'border-l-green-500', 'text' => 'text-green-600', 'bg' => 'bg-green-50'],
-        'red' => ['border' => 'border-l-red-500', 'text' => 'text-red-500', 'bg' => 'bg-red-50'],
-        'amber' => ['border' => 'border-l-amber-500', 'text' => 'text-amber-500', 'bg' => 'bg-amber-50'],
+        'primary' => ['border' => 'border-l-primary', 'text' => 'text-primary', 'bg' => 'bg-primary/20 dark:bg-primary/30'],
+        'secondary' => ['border' => 'border-l-secondary', 'text' => 'text-secondary', 'bg' => 'bg-secondary/20 dark:bg-secondary/30'],
+        'green' => ['border' => 'border-l-green-500', 'text' => 'text-green-600 dark:text-green-400', 'bg' => 'bg-green-100 dark:bg-green-500/30'],
+        'red' => ['border' => 'border-l-red-500', 'text' => 'text-red-500 dark:text-red-400', 'bg' => 'bg-red-100 dark:bg-red-500/30'],
+        'amber' => ['border' => 'border-l-amber-500', 'text' => 'text-amber-600 dark:text-amber-400', 'bg' => 'bg-amber-100 dark:bg-amber-500/30'],
+        'indigo' => ['border' => 'border-l-indigo-500', 'text' => 'text-indigo-600 dark:text-indigo-400', 'bg' => 'bg-indigo-100 dark:bg-indigo-500/30'],
     ];
     $theme = $colors[$color] ?? $colors['primary'];
 @endphp
@@ -17,16 +18,20 @@
 @if($variant === 'stat')
     <div {{ $attributes->merge(['class' => "$baseClasses border-l-[6px] " . $theme['border'] . " p-8 flex justify-between items-center hover:scale-[1.02] active:scale-[1] transition-all duration-300 group cursor-default"]) }}>
         <div>
-            <p class="text-xs font-black uppercase tracking-[0.2em]">{{ $title }}</p>
-            <h3 class="text-3xl font-black text-text-main mt-2 tracking-tighter">{{ $value }}</h3>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-text-muted">{{ $title }}</p>
+            <h3 class="text-4xl font-black text-text-main mt-2 tracking-tighter">{{ $value }}</h3>
+            @if($subtitle)
             <p class="text-[10px] font-bold mt-2 px-2 py-0.5 rounded-md inline-block {{ $theme['bg'] }} {{ $theme['text'] }} uppercase tracking-wider">
                 {{ $subtitle }}
             </p>
+            @endif
         </div>
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 {{ $theme['bg'] }} {{ $theme['text'] }} group-hover:rotate-6 shadow-inner">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {{ $icon ?? '' }}
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 {{ $theme['bg'] }} {{ $theme['text'] }} group-hover:rotate-6 shadow-lg dark:shadow-none">
+            @if($icon)
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ $icon }}
             </svg>
+            @endif
         </div>
     </div>
 @else
