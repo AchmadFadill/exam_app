@@ -46,7 +46,11 @@ class Settings extends Component
         for ($i = 0; $i <= 5; $i++) {
             $startYear = $currentYear + $i;
             $endYear = $startYear + 1;
-            $years[] = "$startYear/$endYear";
+            $yearStr = "$startYear/$endYear";
+            $years[] = [
+                'value' => $yearStr,
+                'label' => $yearStr
+            ];
         }
         
         return $years;
