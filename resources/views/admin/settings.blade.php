@@ -21,8 +21,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Identitas Institusi</h3>
-                    <p class="text-text-muted text-xs font-bold tracking-widest leading-none mt-1 uppercase opacity-60">School Info & Branding</p>
+                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Identitas Sekolah</h3>
                 </div>
             </div>
 
@@ -81,7 +80,6 @@
                 </div>
                 <div>
                     <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Pengaturan Akademik</h3>
-                    <p class="text-text-muted text-xs font-bold tracking-widest leading-none mt-1 uppercase opacity-60">Defaults & Schedules</p>
                 </div>
             </div>
 
@@ -89,7 +87,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Tahun Ajaran </label>
-                        <input type="text" wire:model="academicYear" class="w-full px-6 py-4 rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold" placeholder="2025/2026">
+                        <select wire:model="academicYear" class="w-full px-6 py-4 rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                            @foreach($this->getAcademicYearOptions() as $year)
+                                <option value="{{ $year }}">{{ $year }}</option>
+                            @endforeach
+                        </select>
                         @error('academicYear') <span class="text-red-500 text-xs mt-2 block font-bold">{{ $message }}</span> @enderror
                     </div>
                     <div>
