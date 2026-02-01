@@ -1,10 +1,10 @@
 <x-student-layout>
     <x-slot name="title">Hasil Ujian</x-slot>
 <div class="container mx-auto px-6 py-8">
-    <div class="mb-8">
-        <h3 class="text-text-main text-3xl font-medium">Riwayat Hasil Ujian</h3>
-        <p class="text-text-muted mt-1">Pantau perkembangan belajarmu di sini.</p>
-    </div>
+    <x-header 
+        title="Riwayat Hasil Ujian" 
+        subtitle="Pantau perkembangan belajarmu di sini." 
+    />
 
     <!-- Results History Table -->
     <!-- Results History Table -->

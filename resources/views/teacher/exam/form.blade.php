@@ -167,8 +167,8 @@
                             <div>
                                 <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Token Masuk Ujian</label>
                                 <div class="relative group">
-                                    <input type="text" wire:model="token" readonly class="w-full px-4 py-6 bg-slate-900 text-white border-2 border-slate-800 rounded-[2.5rem] focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-black text-3xl tracking-[0.3em] uppercase italic text-center shadow-2xl" placeholder="TOKEN">
-                                    <button type="button" wire:click="regenerateToken" class="absolute top-1/2 -translate-y-1/2 right-2 p-2 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl shadow-xl shadow-amber-500/30 transition-all hover:scale-110 active:rotate-180 group/btn" title="Regenerate Token">
+                                    <input type="text" wire:model="token" readonly class="w-full px-2 py-6 bg-slate-900 text-white border-2 border-slate-800 rounded-[2.5rem] focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-black text-2xl tracking-[0.3em] uppercase italic text-center shadow-2xl" placeholder="TOKEN">
+                                    <button type="button" wire:click="regenerateToken" class="absolute top-1/2 -translate-y-1/2 right-2 p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl shadow-xl shadow-amber-500/30 transition-all hover:scale-110 active:rotate-180 group/btn" title="Regenerate Token">
                                         <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                     </button>
                                 </div>

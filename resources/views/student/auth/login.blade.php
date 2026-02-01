@@ -85,21 +85,21 @@
                     </label>
                 </div>
 
-                <button type="submit" class="group relative w-full flex justify-center py-3.5 px-6 border border-transparent text-sm font-bold rounded-2xl text-white bg-[var(--color-primary)] hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all shadow-xl shadow-blue-900/20 active:scale-[0.98]">
-                    <span class="relative z-10">MASUK DASHBOARD</span>
-                </button>
+                <x-button type="submit" variant="primary" class="w-full py-3.5 px-6 !rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-blue-900/20 active:scale-[0.98]">
+                    MASUK DASHBOARD
+                </x-button>
             </form>
 
             <!-- Alternative Login Links -->
             <div class="mt-5 pt-4 border-t border-gray-100">
                 <p class="text-[10px] text-center text-[var(--color-text-muted)] font-bold mb-2.5 uppercase tracking-wider">Login Sebagai</p>
                 <div class="flex gap-2">
-                    <a href="{{ route('teacher.login') }}" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-100">
+                    <x-button href="{{ route('teacher.login') }}" variant="secondary" size="xs" class="flex-1 !rounded-xl !bg-emerald-50 !text-emerald-700 !border-emerald-100 hover:!bg-emerald-100">
                         Guru
-                    </a>
-                    <a href="{{ route('login') }}" class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all border border-blue-100">
+                    </x-button>
+                    <x-button href="{{ route('login') }}" variant="secondary" size="xs" class="flex-1 !rounded-xl !bg-blue-50 !text-blue-700 !border-blue-100 hover:!bg-blue-100">
                         Admin
-                    </a>
+                    </x-button>
                 </div>
             </div>
             

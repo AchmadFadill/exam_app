@@ -1,5 +1,24 @@
 <div>
-    <x-slot name="title">Data Siswa</x-slot>
+    <x-header title="Data Siswa" subtitle="Kelola dan pantau seluruh data siswa di sistem.">
+        <x-button wire:click="exportStudents" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+        </x-button>
+        <x-button wire:click="openImportModal" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import
+        </x-button>
+        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Siswa
+        </x-button>
+    </x-header>
 
     <div class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <!-- Search Bar (Left - fills space) -->
@@ -10,28 +29,6 @@
                 </svg>
             </span>
             <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari NIS, nama, atau email siswa...">
-        </div>
-        
-        <!-- Action Buttons (Right) -->
-        <div class="flex gap-3 flex-wrap">
-            <x-button wire:click="exportStudents" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export
-            </x-button>
-            <x-button wire:click="openImportModal" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import
-            </x-button>
-            <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-                <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Siswa
-            </x-button>
         </div>
     </div>
 
@@ -77,21 +74,21 @@
                 <x-table.td class="font-bold text-text-muted lowercase">{{ $student->user->email }}</x-table.td>
                 <x-table.td class="text-right">
                     <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
-                        <button wire:click="openResetPasswordModal({{ $student->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Reset Password">
+                        <x-button wire:click="openResetPasswordModal({{ $student->id }})" variant="warning" size="sm" square="true" title="Reset Password">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                             </svg>
-                        </button>
-                        <button wire:click="openEditModal({{ $student->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Edit">
+                        </x-button>
+                        <x-button wire:click="openEditModal({{ $student->id }})" variant="primary" size="sm" square="true" title="Edit">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                        </button>
-                        <button wire:click="openDeleteModal({{ $student->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Hapus">
+                        </x-button>
+                        <x-button wire:click="openDeleteModal({{ $student->id }})" variant="danger" size="sm" square="true" title="Hapus">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                        </button>
+                        </x-button>
                     </div>
                 </x-table.td>
             </x-table.tr>
@@ -120,11 +117,11 @@
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Siswa' : 'Edit Data Siswa' }}</h3>
                     
                  </div>
-                <button wire:click="closeModal" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <x-button wire:click="closeModal" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-10 space-y-8">
                 <div class="grid grid-cols-2 gap-8">
@@ -172,11 +169,11 @@
         <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 class="text-lg font-bold text-text-main">Import Siswa dari Excel</h3>
-                <button wire:click="$set('showImportModal', false)" class="text-gray-400 hover:text-gray-600">
+                <x-button wire:click="$set('showImportModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-start gap-3">
@@ -186,7 +183,7 @@
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
                         <p>Pastikan format Excel Anda sesuai dengan template. Kolom wajib: Nama, NIS, Kelas, Email, Password.</p>
-                        <a href="#" class="mt-2 inline-block font-bold underline">Download Template Excel</a>
+                        <x-button href="#" variant="soft" size="xs" class="mt-2">Download Template Excel</x-button>
                     </div>
                 </div>
                 
@@ -205,9 +202,9 @@
                     @if($importFile)
                         <div class="mt-3 flex items-center justify-between p-2 bg-green-50 rounded border border-green-100">
                             <span class="text-xs text-green-700 truncate">{{ $importFile->getClientOriginalName() }}</span>
-                            <button wire:click="$set('importFile', null)" class="text-red-500 hover:text-red-700">
+                            <x-button wire:click="$set('importFile', null)" variant="danger" size="xs" square="true" class="!rounded-lg">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
+                            </x-button>
                         </div>
                     @endif
                 </div>
@@ -272,32 +269,26 @@
             <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Siswa Terpilih</span>
         </div>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkClassModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest">
-            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-primary/30 text-white/50 group-hover:text-primary transition-all shadow-inner">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-            </div>
+        <x-button wire:click="openBulkClassModal" variant="primary" size="sm" class="uppercase tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
             Pindah Kelas
-        </button>
+        </x-button>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkResetPasswordModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-amber-500/10 hover:text-amber-500 hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest">
-            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-amber-500/30 text-white/50 group-hover:text-amber-500 transition-all shadow-inner">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-            </div>
+        <x-button wire:click="openBulkResetPasswordModal" variant="warning" size="sm" class="uppercase tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
             Reset Pass
-        </button>
+        </x-button>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest">
-            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-            </div>
+        <x-button wire:click="openBulkDeleteModal" variant="danger" size="sm" class="uppercase tracking-widest px-6 py-3">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
             Hapus Massal
-        </button>
+        </x-button>
     </div>
     @endif
 
@@ -308,11 +299,11 @@
         <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 class="text-lg font-bold text-text-main">Ubah Kelas Massal</h3>
-                <button wire:click="$set('showBulkClassModal', false)" class="text-gray-400 hover:text-gray-600">
+                <x-button wire:click="$set('showBulkClassModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm">
@@ -388,11 +379,11 @@
         <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 class="text-lg font-bold text-text-main">Export Data Siswa</h3>
-                <button wire:click="$set('showExportModal', false)" class="text-gray-400 hover:text-gray-600">
+                <x-button wire:click="$set('showExportModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-6 space-y-4">
                 <div class="p-4 bg-green-50 text-green-700 rounded-lg text-sm flex items-start gap-3">

@@ -130,12 +130,11 @@
     </div>
 
     <div class="flex items-center justify-between pb-10">
-        <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-text-main hover:bg-gray-50 font-medium transition-colors">
-            &larr; Siswa Sebelumnya
-        </button>
-        <button class="px-6 py-2 bg-primary hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
-            Simpan & Lanjut Siswa Berikutnya &rarr;
-        </button>
+        <x-button variant="soft" href="#" class="px-6 text-[10px]">&larr; KEMBALI</x-button>
+        <x-button href="#" variant="primary" class="col-span-2 py-3 text-[10px] tracking-[0.2em]">
+            
+            SIMPAN & LANJUT &rarr;
+        </x-button>
     </div>
 </div>
 

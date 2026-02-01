@@ -1,18 +1,15 @@
 @section('title', 'Kelola Ujian')
 
 <div class="space-y-6">
-    <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
-        <div>
-             <h2 class="font-bold text-2xl text-text-main uppercase">Daftar Ujian</h2>
-            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase ">Kelola Ujian Anda Disini</p>
-        </div>
-        <div>
-            <x-button href="{{ route('teacher.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
-                <svg class="w-5 h-5  transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                Buat Ujian Baru
-            </x-button>
-        </div>
-    </div>
+    <x-header 
+        title="Daftar Ujian" 
+        subtitle="Kelola Ujian Anda Disini"
+    >
+        <x-button href="{{ route('teacher.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
+            <svg class="w-5 h-5 transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+            BUAT UJIAN BARU 
+        </x-button>
+    </x-header>
 
     <!-- Exam Filter/Select All -->
     <div class="flex items-center gap-4 mb-8">
@@ -41,9 +38,9 @@
                         </span>
                     </div>
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" class="p-2 text-text-muted hover:text-text-main transition-colors opacity-40 group-hover:opacity-100">
+                        <x-button @click="open = !open" @click.away="open = false" variant="secondary" size="sm" square="true" class="!bg-transparent !border-transparent !shadow-none text-text-muted hover:text-text-main opacity-40 group-hover:opacity-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                        </button>
+                        </x-button>
                         <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
                             <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit ujian</a>
                             <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</a>
@@ -82,7 +79,7 @@
                 @if($exam['status'] == 'ongoing')
                     <x-button href="{{ route('admin.monitor.detail', $exam['id']) }}" variant="primary" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        Monitor Ujian 
+                        MONITOR UJIAN 
                     </x-button>
                 @elseif($exam['status'] == 'completed')
                     <x-button href="#" variant="soft" class="text-[10px] py-3 tracking-widest">
@@ -110,14 +107,14 @@
             <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Sesi Terpilih</span>
         </div>
         <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
+        <x-button wire:click="openBulkDeleteModal" variant="secondary" class="!bg-transparent !border-transparent hover:!bg-red-500/10 text-white hover:text-red-500 gap-3 font-black uppercase tracking-widest text-xs">
             <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
             Hapus Jadwal ujian
-        </button>
+        </x-button>
     </div>
     @endif
 

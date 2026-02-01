@@ -1,4 +1,13 @@
 <div>
+    <x-header title="Mata Pelajaran" subtitle="Kelola kurikulum dan mata pelajaran akademik.">
+        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
+            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Mata Pelajaran
+        </x-button>
+    </x-header>
+
     <div class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <!-- Search Bar (Left - fills space) -->
         <div class="relative w-full sm:flex-1 sm:max-w-lg group">
@@ -9,14 +18,6 @@
             </span>
             <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari mata pelajaran">
         </div>
-        
-        <!-- Action Button (Right) -->
-        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
-            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Mata Pelajaran
-        </x-button>
     </div>
 
     <!-- Subject Grid -->
@@ -25,12 +26,12 @@
         <x-card class="relative overflow-hidden group hover:border-primary/40">
             <div class="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                 <div class="flex gap-2">
-                    <button wire:click="openEditModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-primary hover:bg-primary hover:text-white hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 transition-all duration-300">
+                    <x-button wire:click="openEditModal({{ $subject['id'] }})" variant="primary" size="sm" square="true" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    </button>
-                    <button wire:click="openDeleteModal({{ $subject['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-red-600 hover:bg-red-600 hover:text-white hover:-translate-y-1 hover:shadow-2xl active:translate-y-0 transition-all duration-300">
+                    </x-button>
+                    <x-button wire:click="openDeleteModal({{ $subject['id'] }})" variant="danger" size="sm" square="true" title="Hapus">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
+                    </x-button>
                 </div>
             </div>
             
@@ -72,9 +73,9 @@
                      <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Mata Pelajaran' : 'Edit Mata Pelajaran' }}</h3>
                     
                 </div>
-                <button wire:click="closeModal" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <x-button wire:click="closeModal" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-10 space-y-8">
                 <div>
@@ -103,9 +104,9 @@
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase">Penugasan Pengajar</h3>
                     <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Human Resources Assignment</p>
                 </div>
-                <button wire:click="$set('showAssignModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <x-button wire:click="$set('showAssignModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-10 space-y-8">
                 <div class="relative group">

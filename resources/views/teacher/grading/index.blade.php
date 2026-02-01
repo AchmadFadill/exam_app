@@ -1,12 +1,10 @@
 @section('title', 'Penilaian Essay')
 
 <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="font-bold text-2xl text-text-main">Penilaian Essay</h2>
-            <p class="text-text-muted text-sm">Daftar ujian yang memerlukan koreksi manual</p>
-        </div>
-    </div>
+    <x-header 
+        title="Penilaian Essay" 
+        subtitle="Daftar ujian yang memerlukan koreksi manual" 
+    />
 
     <x-table>
         <x-table.thead>
@@ -62,7 +60,7 @@
                         @if($exam['pending_count'] > 0)
                             <x-button href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" variant="soft">Koreksi</x-button>
                         @else
-                            <x-button href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" variant="secondary" class="border-transparent bg-transparent hover:bg-transparent hover:text-primary shadow-none px-2 uppercase text-[10px] tracking-widest">Detail</x-button>
+                            <x-button href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" variant="secondary" >LIHAT DETAIL</x-button>
                         @endif
                     </div>
                 </x-table.td>

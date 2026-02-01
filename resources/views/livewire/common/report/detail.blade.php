@@ -43,30 +43,34 @@
             <x-card title="Hasil Per Siswa">
                 <!-- Filter Buttons -->
                 <div class="flex flex-wrap gap-2 mb-6 -mt-2">
-                    <button 
+                    <x-button 
                         wire:click="sortByHighest" 
-                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all
-                            {{ $sortBy === 'highest' ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                        variant="{{ $sortBy === 'highest' ? 'success' : 'secondary' }}"
+                        size="sm"
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
                         🏆 Tertinggi
-                    </button>
-                    <button 
+                    </x-button>
+                    <x-button 
                         wire:click="sortByLowest" 
-                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all
-                            {{ $sortBy === 'lowest' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                        variant="{{ $sortBy === 'lowest' ? 'warning' : 'secondary' }}"
+                        size="sm"
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
                         📉 Terendah
-                    </button>
-                    <button 
+                    </x-button>
+                    <x-button 
                         wire:click="sortByFastest" 
-                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all
-                            {{ $sortBy === 'fastest' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                        variant="{{ $sortBy === 'fastest' ? 'primary' : 'secondary' }}"
+                        size="sm"
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
                         ⚡ Tercepat
-                    </button>
-                    <button 
+                    </x-button>
+                    <x-button 
                         wire:click="sortBySlowest" 
-                        class="px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all
-                            {{ $sortBy === 'slowest' ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                        variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
+                        size="sm"
+                        class="!rounded-xl uppercase tracking-widest !bg-purple-500 {{ $sortBy !== 'slowest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
                         🐌 Terlambat
-                    </button>
+                    </x-button>
                 </div>
 
                 <x-table>

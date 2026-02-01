@@ -3,14 +3,14 @@
 <div class="max-w-5xl mx-auto space-y-10 pb-12">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-            <h1 class="font-black text-4xl text-text-main tracking-tight italic uppercase">Pengaturan <span class="text-primary not-italic"> Sistem</span></h1>
-            <p class="text-text-muted mt-2 font-medium">Konfigurasi pusat identitas dan pengaturan sistem CBT.</p>
-        </div>
-        <button wire:click="save" class="group bg-primary hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl font-bold transition-all flex items-center gap-3 shadow-xl shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0">
-            <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+        <x-header 
+            title="Pengaturan" 
+            subtitle="Konfigurasi pusat identitas dan pengaturan sistem CBT" 
+        />
+        <x-button wire:click="save" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
             Simpan Konfigurasi
-        </button>
+        </x-button>
     </div>
 
     <div class="space-y-8 max-w-4xl mx-auto">

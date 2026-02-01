@@ -1,12 +1,10 @@
 @section('title', 'Dashboard Monitoring')
 
 <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h2 class="font-bold text-2xl text-text-main uppercase">Dashboard Monitoring</h2>
-            <p class="text-text-muted text-sm">{{ request()->is('admin/*') ? 'Pantau semua ujian yang sedang berlangsung' : 'Pantau ujian siswa Anda yang sedang berlangsung' }}</p>
-        </div>
-    </div>
+    <x-header 
+        title="Dashboard Monitoring" 
+        subtitle="{{ request()->is('admin/*') ? 'Pantau semua ujian yang sedang berlangsung' : 'Pantau ujian siswa Anda yang sedang berlangsung' }}" 
+    />
 
     <!-- Active Exams Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -43,10 +41,10 @@
 
             <!-- Action -->
             <div class="px-5 py-4 bg-gray-50 border-t border-gray-100">
-                <a href="{{ route($detailRoute, $exam['id']) }}" class="flex justify-center items-center gap-2 w-full bg-primary hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition-all shadow-sm hover:shadow">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    Pantau Sekarang
-                </a>
+                    <x-button href="{{ route('admin.monitor.detail', $exam['id']) }}" variant="primary" class="col-span-2 py-3 w-full text-[10px] tracking-[0.2em]">
+                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        MONITOR UJIAN  
+                    </x-button>
             </div>
         </div>
         @endforeach
