@@ -11,31 +11,42 @@ class Index extends Component
 
     public function render()
     {
-        // Shared logic: In a real app, we would scope this by role/auth()->user()
-        // For Admin: Show all exams
-        // For Teacher: Show only teacher's exams
-        $isAdmin = request()->is('admin/*');
-
-        $activeExams = [
-            [
-                'id' => 1,
-                'name' => 'Ujian Harian Matematika',
-                'class' => 'XI IPA 1',
-                'subject' => 'Matematika',
-                'start_time' => '08:00',
-                'end_time' => '09:30',
-                'total_students' => 32,
-                'working' => 25,
-                'finished' => 6,
-                'not_started' => 1,
-            ],
-            // ... more dummy data
-        ];
-
-        // If not admin, maybe filter or limit data (Simulated)
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $isAdmin = $user->isAdmin();
+        
+        // Base query for active exams
+        $query = \App\Models\Exam::where('status', 'scheduled')
+            ->whereDate('date', now())
+            ->whereTime('start_time', '<=', now()->format('H:i'))
+            ->whereTime('end_time', '>=', now()->format('H:i'));
+            
+        // Filter by teacher if not admin
         if (!$isAdmin) {
-             // Teacher specific logic here
+            $query->where('teacher_id', $user->teacher->id);
         }
+        
+        $activeExams = $query->with(['classrooms', 'attempts'])
+            ->get()
+            ->map(function($exam) {
+                $totalStudents = $exam->classrooms->sum(function($c) { 
+                    return $c->students()->count(); 
+                });
+                
+                $attempts = $exam->attempts;
+                
+                return [
+                    'id' => $exam->id,
+                    'name' => $exam->name,
+                    'class' => $exam->classrooms->pluck('name')->join(', '),
+                    'subject' => $exam->subject->name,
+                    'start_time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i'),
+                    'end_time' => \Carbon\Carbon::parse($exam->end_time)->format('H:i'),
+                    'total_students' => $totalStudents,
+                    'working' => $attempts->where('status', 'in_progress')->count(),
+                    'finished' => $attempts->whereIn('status', ['submitted', 'graded'])->count(),
+                    'not_started' => $totalStudents - $attempts->count(),
+                ];
+            });
 
         return $this->applyLayout('livewire.common.monitoring.index', [
             'activeExams' => $activeExams,

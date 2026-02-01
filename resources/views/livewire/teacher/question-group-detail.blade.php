@@ -222,7 +222,7 @@
                     <div class="flex justify-between items-center">
                         <label class="block text-sm font-medium text-gray-700">Opsi Jawaban <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
-                            @if($optionCount < 5)
+                            @if($optionCount < 4)
                             <button type="button" wire:click="addOption" class="text-xs px-3 py-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors">
                                 + Tambah Opsi
                             </button>

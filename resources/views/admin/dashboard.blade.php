@@ -1,6 +1,6 @@
 @section('title', 'Admin Dashboard')
 
-<div class="space-y-8">
+<div class="space-y-8" wire:poll.10s>
     <!-- Hero & System Health Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
@@ -136,8 +136,11 @@
                     @foreach($alerts as $alert)
                     <div class="flex items-start gap-5 p-5 rounded-2xl border border-border-subtle dark:border-border-subtle hover:border-red-500/30 hover:bg-red-50/30 dark:hover:bg-red-500/5 transition-all group cursor-pointer">
                         <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center 
-                            @if($alert['severity'] == 'critical') bg-red-100 dark:bg-red-500/20 text-red-600 @else bg-amber-100 dark:bg-amber-500/20 text-amber-600 @endif font-black shadow-sm">
-                            !
+                            @if($alert['severity'] == 'critical') bg-red-100 dark:bg-red-500/20 text-red-600 
+                            @elseif($alert['severity'] == 'warning') bg-amber-100 dark:bg-amber-500/20 text-amber-600 
+                            @elseif($alert['severity'] == 'success') bg-green-100 dark:bg-green-500/20 text-green-600
+                            @else bg-blue-100 dark:bg-blue-500/20 text-blue-600 @endif font-black shadow-sm">
+                            @if($alert['severity'] == 'critical' || $alert['severity'] == 'warning') ! @else <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> @endif
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-start gap-4">

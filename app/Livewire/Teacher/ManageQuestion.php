@@ -121,7 +121,7 @@ class ManageQuestion extends Component
 
     public function addOption()
     {
-        if ($this->optionCount < 5) {
+        if ($this->optionCount < 4) {
             $this->optionCount++;
             // Ensure options array has enough elements
             while (count($this->questionForm['options']) < $this->optionCount) {

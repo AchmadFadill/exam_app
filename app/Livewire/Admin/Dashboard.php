@@ -8,61 +8,75 @@ class Dashboard extends Component
 {
     public function render()
     {
-        // Global Stats Dummy Data
+        // Global Stats
         $stats = [
-            'total_students' => 1240,
-            'total_teachers' => 86,
-            'total_exams' => 42,
-            'total_questions' => 12500,
-            'active_exams_count' => 5,
+            'total_students' => \App\Models\Student::count(),
+            'total_teachers' => \App\Models\Teacher::count(),
+            'total_exams' => \App\Models\Exam::count(),
+            'total_questions' => \App\Models\Question::count(),
+            'active_exams_count' => 0, // Will update below
         ];
 
-        // System Health Dummy Data
+        // System Health (Simulated/Partial Real)
+        $diskFree = disk_free_space(base_path());
+        $diskTotal = disk_total_space(base_path());
+        $diskUsage = round((($diskTotal - $diskFree) / $diskTotal) * 100);
+        
         $system_health = [
-            'cpu_load' => 24,
-            'ram_usage' => 45,
-            'disk_space' => 78,
-            'uptime' => '12 Hari, 4 Jam',
+            'cpu_load' => rand(10, 40), // Simulated
+            'ram_usage' => rand(30, 60), // Simulated
+            'disk_space' => $diskUsage,
+            'uptime' => 'Online', // Simplified
             'status' => 'Healthy',
         ];
 
         // Active Exams Feed
-        $active_exams = [
-            [
-                'subject' => 'Matematika Wajib',
-                'class' => 'XII IPA 1',
-                'teacher' => 'Pak Budi',
-                'progress' => 85,
-                'students_online' => 32,
-                'total_students' => 34,
-            ],
-            [
-                'subject' => 'Bahasa Inggris',
-                'class' => 'X IPS 2',
-                'teacher' => 'Bu Siti',
-                'progress' => 42,
-                'students_online' => 28,
-                'total_students' => 30,
-            ],
-        ];
+        $active_exams_query = \App\Models\Exam::where('status', 'scheduled')
+            ->whereDate('date', now())
+            ->whereTime('start_time', '<=', now()->format('H:i'))
+            ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->with(['teacher', 'subject']);
 
-        // Security Alerts Feed
-        $alerts = [
-            [
-                'user' => 'Andi Wijaya',
-                'class' => 'XII IPA 1',
-                'event' => 'Pindah Tab Aler',
-                'time' => '2 menit yang lalu',
-                'severity' => 'critical',
-            ],
-            [
-                'user' => 'Siska Pratama',
-                'class' => 'X IPS 2',
-                'event' => 'Keluar Fullscreen',
-                'time' => '15 menit yang lalu',
-                'severity' => 'warning',
-            ],
-        ];
+        $stats['active_exams_count'] = $active_exams_query->count();
+
+        $active_exams = $active_exams_query->get()->map(function($exam) {
+            $totalStudents = $exam->classrooms->sum(function($c) { return $c->students()->count(); });
+            $finishedCount = $exam->attempts()->whereIn('status', ['submitted', 'graded'])->count();
+            $inProgressCount = $exam->attempts()->where('status', 'in_progress')->count();
+            $progress = $totalStudents > 0 ? round(($finishedCount / $totalStudents) * 100) : 0;
+
+            return [
+                'subject' => $exam->subject->name,
+                'class' => $exam->classrooms->pluck('name')->join(', '),
+                'teacher' => $exam->teacher->user->name,
+                'progress' => $progress,
+                'students_online' => $inProgressCount,
+                'total_students' => $totalStudents,
+            ];
+        });
+
+        // Security Alerts Feed (Using recent exam attempts as proxy for activity)
+        $alerts = \App\Models\ExamAttempt::with(['student.user', 'student.classroom'])
+            ->where('updated_at', '>=', now()->subDay())
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function($attempt) {
+                $event = match($attempt->status) {
+                    'in_progress' => 'Memulai Ujian',
+                    'submitted' => 'Mengumpulkan Ujian',
+                    'graded' => 'Nilai Keluar',
+                    default => 'Aktivitas Ujian'
+                };
+                
+                return [
+                    'user' => $attempt->student->user->name,
+                    'class' => $attempt->student->classroom->name,
+                    'event' => $event,
+                    'time' => $attempt->updated_at->diffForHumans(),
+                    'severity' => $attempt->status === 'submitted' ? 'success' : 'info',
+                ];
+            });
 
         return view('admin.dashboard', [
             'greeting' => $this->getGreeting(),

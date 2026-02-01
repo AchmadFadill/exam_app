@@ -8,80 +8,128 @@ class Dashboard extends Component
 {
     public function render()
     {
-        // Dummy data for stats
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $teacher = $user->teacher;
+        
+        if (!$teacher) {
+            return view('teacher.dashboard', [
+                'stats' => [
+                    'active_exams' => 0,
+                    'grading_needed' => 0,
+                    'completed_exams' => 0,
+                    'questions_count' => 0
+                ],
+                'ongoing_exams' => [],
+                'upcoming_exams' => [],
+                'recent_activities' => [],
+                'greeting' => $this->getGreeting()
+            ])->layout('layouts.teacher', ['title' => 'Dashboard Guru']);
+        }
+
+        // 1. Stats
+        $activeExamsCount = \App\Models\Exam::where('teacher_id', $teacher->id)
+            ->where('status', 'scheduled')
+            ->whereDate('date', now())
+            ->whereTime('start_time', '<=', now()->format('H:i'))
+            ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->count();
+            
+        // 3. Average Score (unused in view but good to calculate)
+        // $avgScore = ...
+
+        // 4. Pending Grading (status = submitted)
+        $gradingNeeded = \App\Models\ExamAttempt::whereHas('exam', function($q) use ($teacher) {
+            $q->where('teacher_id', $teacher->id);
+        })->where('status', 'submitted')->count();
+
+        // 5. Completed Exams (status = finished OR time passed)
+        $completedExams = \App\Models\Exam::where('teacher_id', $teacher->id)
+            ->where(function($q) {
+                $q->where('status', 'finished')
+                  ->orWhere(function($sq) {
+                      $sq->where('status', 'scheduled')
+                         ->where('end_time', '<', now()->format('H:i'))
+                         ->whereDate('date', '<=', now());
+                  });
+            })->count();
+
+        // 6. Questions Count
+        $questionsCount = \App\Models\Question::where('teacher_id', $teacher->id)->count();
+
         $stats = [
-            'active_exams' => 3,
-            'completed_exams' => 45,
-            'grading_needed' => 12,
-            'questions_count' => 1250
+            'active_exams' => $activeExamsCount,
+            'grading_needed' => $gradingNeeded,
+            'completed_exams' => $completedExams,
+            'questions_count' => $questionsCount
         ];
 
-        // Dummy data for Ongoing Exams (Live)
-        $ongoing_exams = [
-            [
-                'id' => 1,
-                'name' => 'Ujian Akhir Semester Matematika',
-                'class' => 'XII IPA 1',
-                'subject' => 'Matematika Wajib',
-                'total_students' => 32,
-                'finished_students' => 18,
-                'start_time' => '07:30',
-                'end_time' => '09:30',
-                'percentage' => 56 // (18/32)*100
-            ],
-            [
-                'id' => 2,
-                'name' => 'Kuis Fisika Bab 3',
-                'class' => 'XI IPA 2',
-                'subject' => 'Fisika',
-                'total_students' => 30,
-                'finished_students' => 5,
-                'start_time' => '08:00',
-                'end_time' => '09:00',
-                'percentage' => 16
-            ],
-            [
-                'id' => 3,
-                'name' => 'Ulangan Harian Biologi',
-                'class' => 'X IPA 3',
-                'subject' => 'Biologi',
-                'total_students' => 28,
-                'finished_students' => 28,
-                'start_time' => '07:30',
-                'end_time' => '09:00',
-                'percentage' => 100
-            ]
-        ];
+        // 2. Ongoing Exams
+        $ongoing_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
+            ->where('status', 'scheduled')
+            ->whereDate('date', now())
+            ->whereTime('start_time', '<=', now()->format('H:i'))
+            ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->withCount(['attempts' => function($q) {
+                $q->where('status', 'in_progress');
+            }])
+            ->get()
+            ->map(function($exam) {
+                $totalStudents = $exam->classrooms->sum(function($c) { return $c->students()->count(); });
+                $finishedCount = $exam->attempts()->whereIn('status', ['submitted', 'graded'])->count();
+                $percentage = $totalStudents > 0 ? round(($finishedCount / $totalStudents) * 100) : 0;
 
-        // Dummy data for Upcoming Exams
-        $upcoming_exams = [
-            [
-                'name' => 'Ujian Kimia Dasar',
-                'class' => 'X IPA 1',
-                'date' => 'Besok, 3 Jan',
-                'time' => '08:00 - 10:00'
-            ],
-            [
-                'name' => 'Kuis Sejarah Indonesia',
-                'class' => 'XI IPS 1',
-                'date' => 'Senin, 6 Jan',
-                'time' => '10:00 - 11:30'
-            ],
-            [
-                'name' => 'Ujian Susulan Bahasa Inggris',
-                'class' => 'XII Bahasa',
-                'date' => 'Selasa, 7 Jan',
-                'time' => '13:00 - 14:30'
-            ]
-        ];
+                return [
+                    'id' => $exam->id,
+                    'subject' => $exam->subject->name,
+                    'class' => $exam->classrooms->pluck('name')->join(', '),
+                    'name' => $exam->name,
+                    'participants' => $exam->attempts_count, // Keeping just in case
+                    'finished_students' => $finishedCount,
+                    'total_students' => $totalStudents,
+                    'percentage' => $percentage,
+                    'start_time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i'),
+                    'end_time' => \Carbon\Carbon::parse($exam->end_time)->format('H:i')
+                ];
+            });
 
-        // Dummy data for Recent Activities
-        $recent_activities = [
-            ['action' => 'Ujian Matematika X-A selesai', 'time' => '10 menit yang lalu', 'type' => 'success'],
-            ['action' => 'Soal Essay Fisika belum dinilai', 'time' => '25 menit yang lalu', 'type' => 'warning'],
-            ['action' => 'Bank Soal Kimia diperbarui', 'time' => '1 jam yang lalu', 'type' => 'info'],
-            ['action' => 'Jadwal Ujian Sejarah dibuat', 'time' => '2 jam yang lalu', 'type' => 'neutral'],
-        ];
+        // 3. Upcoming Exams
+        $upcoming_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
+            ->where('status', 'scheduled')
+            ->where(function($q) {
+                $q->whereDate('date', '>', now())
+                  ->orWhere(function($sq) {
+                      $sq->whereDate('date', now())
+                         ->whereTime('start_time', '>', now()->format('H:i'));
+                  });
+            })
+            ->orderBy('date')->orderBy('start_time')
+            ->limit(5)
+            ->get()
+            ->map(function($exam) {
+                return [
+                    'name' => $exam->name,
+                    'class' => $exam->classrooms->pluck('name')->join(', '),
+                    'date' => \Carbon\Carbon::parse($exam->date)->translatedFormat('d M'),
+                    'time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($exam->end_time)->format('H:i')
+                ];
+            });
+            
+        // 4. Recent Activity (Latest 5 submissions)
+        $recent_activities = \App\Models\ExamAttempt::whereHas('exam', function($q) use ($teacher) {
+            $q->where('teacher_id', $teacher->id);
+        })
+        ->whereNotNull('submitted_at')
+        ->with(['student', 'exam'])
+        ->orderBy('submitted_at', 'desc')
+        ->limit(5)
+        ->get()
+        ->map(function($attempt) {
+            return [
+                'action' => "{$attempt->student->user->name} menyelesaikan {$attempt->exam->name}",
+                'time' => $attempt->submitted_at->diffForHumans(),
+                'type' => 'success'
+            ];
+        });
 
         return view('teacher.dashboard', [
             'stats' => $stats,

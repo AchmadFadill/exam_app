@@ -91,13 +91,9 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(
 Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group(function () {
     Route::get('/dashboard', App\Livewire\Student\Dashboard::class)->name('dashboard');
 
-    Route::get('/exams', function () {
-        return view('student.exam.index');
-    })->name('exams.index');
-    
-    Route::get('/exam/{id}/start', function ($id) {
-        return view('student.exam.start');
-    })->name('exam.start');
+    // Exam Management
+    Route::get('/exams', App\Livewire\Student\ExamList::class)->name('exams.index');
+    Route::get('/exam/{id}/start', App\Livewire\Student\ExamStart::class)->name('exam.start');
 
     Route::get('/exam/{id}/take', function ($id) {
         return view('student.exam.show');

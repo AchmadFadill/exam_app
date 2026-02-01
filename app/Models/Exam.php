@@ -51,6 +51,11 @@ class Exam extends Model
             ->orderBy('exam_questions.order');
     }
 
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(ExamAttempt::class);
+    }
+
     public function sessions(): HasMany
     {
         return $this->hasMany(ExamSession::class);

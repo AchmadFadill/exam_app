@@ -1,6 +1,6 @@
 @section('title', 'Dashboard Monitoring')
 
-<div class="space-y-6">
+<div class="space-y-6" wire:poll.10s>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h2 class="font-bold text-2xl text-text-main">Dashboard Monitoring</h2>

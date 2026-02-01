@@ -188,10 +188,21 @@ class Form extends Component
             DB::beginTransaction();
 
             $user = Auth::user();
-            $teacherId = $user->isTeacher() ? $user->teacher->id : null;
+            
+            // Get teacher ID properly for both teacher and admin users
+            $teacherId = null;
+            if ($user->isAdmin()) {
+                // For admin, use the first teacher or create one
+                $teacher = \App\Models\Teacher::first();
+                $teacherId = $teacher ? $teacher->id : null;
+            } elseif ($user->isTeacher()) {
+                // For teacher, find their teacher record
+                $teacher = \App\Models\Teacher::where('user_id', $user->id)->first();
+                $teacherId = $teacher ? $teacher->id : null;
+            }
 
             if (!$teacherId) {
-                throw new \Exception('Teacher ID not found');
+                throw new \Exception('Teacher ID not found. Please ensure you have a teacher profile.');
             }
 
             // Create or update exam
