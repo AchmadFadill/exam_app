@@ -1,17 +1,11 @@
 @section('title', 'Dashboard')
 
 <div class="space-y-8">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
-        <div>
-            <h1 class="text-4xl font-black text-text-main tracking-tight italic">Teacher <span class="text-primary not-italic">Dashboard</span></h1>
-            <p class="text-text-muted mt-3 font-medium text-lg">Ringkasan aktivitas dan kendali ujian hari ini, {{ now()->translatedFormat('d F Y') }}</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="px-5 py-2 bg-blue-50/50 dark:bg-primary/10 text-primary text-sm font-black rounded-2xl border border-primary/10 uppercase tracking-widest">
-                 Genap 2025/2026
-            </span>
-        </div>
-    </div>
+    <x-page-header 
+        title="Teacher" 
+        highlight="Dashboard" 
+        subtitle="Ringkasan aktivitas dan kendali ujian hari ini" 
+    />
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -61,7 +55,10 @@
                         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                         Live Activity ({{ count($ongoing_exams) }})
                     </h3>
-                    <a href="#" class="text-sm font-medium text-primary hover:text-blue-700">Lihat Semua Monitor &rarr;</a>
+                    <x-button href="{{ route('teacher.monitoring') }}" variant="soft">
+                        SELENGKAPNYA
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </x-button>
                 </div>
                 
                 <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
@@ -150,7 +147,10 @@
             <section>
                 <div class="flex items-center justify-between mb-4">
                      <h3 class="text-lg font-bold text-gray-900">Jadwal Mendatang</h3>
-                     <a href="#" class="text-xs font-medium text-gray-500 hover:text-primary">Lihat Kalender</a>
+                     <x-button href="{{ route('teacher.exams.index') }}" variant="soft">
+                         SELENGKAPNYA
+                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                     </x-button>
                 </div>
                 <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-4">
                     @foreach($upcoming_exams as $exam)

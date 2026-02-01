@@ -63,11 +63,6 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(
     Route::get('/questions', App\Livewire\Teacher\ManageQuestion::class)->name('questions');
     Route::get('/questions/group/{title}', App\Livewire\Teacher\QuestionGroupDetail::class)->name('questions.group');
     
-    // Question Bank
-    Route::get('/question-bank', App\Livewire\Teacher\QuestionBank\Index::class)->name('question-bank.index');
-    Route::get('/question-bank/create', App\Livewire\Teacher\QuestionBank\Form::class)->name('question-bank.create');
-    Route::get('/question-bank/{id}/edit', App\Livewire\Teacher\QuestionBank\Form::class)->name('question-bank.edit');
-
     // Exam Management
     Route::get('/exams', App\Livewire\Teacher\Exam\Index::class)->name('exams.index');
     Route::get('/exams/create', App\Livewire\Teacher\Exam\Form::class)->name('exams.create');

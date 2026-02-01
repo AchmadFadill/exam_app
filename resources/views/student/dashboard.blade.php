@@ -3,17 +3,12 @@
 
 <div class="space-y-8">
     <!-- Hero Section -->
-    <div class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-            <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Dashboard <span class="text-primary not-italic">Siswa</span></h1>
-            <p class="text-text-muted mt-2 font-bold tracking-widest text-[10px] uppercase opacity-60">Sudah siap untuk mengerjakan ujian hari ini?</p>
-        </div>
-        <div class="shrink-0">
-             <div class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm text-[10px] font-black text-text-muted uppercase tracking-widest">
-                {{ now()->translatedFormat('l, d F Y') }}
-            </div>
-        </div>
-    </div>
+    <!-- Hero Section -->
+    <x-page-header 
+        title="Dashboard" 
+        highlight="Siswa" 
+        subtitle="Sudah siap untuk mengerjakan ujian hari ini?" 
+    />
 
     <!-- Active Exams (Ujian Tersedia) - HERO FEATURE -->
     <section class="mb-16">
@@ -158,9 +153,10 @@
                         </div>
                     </div>
                 </div>
-                 <button class="w-full mt-12 py-4 px-6 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl text-[10px] font-black text-text-muted uppercase tracking-widest hover:bg-gray-50/50 hover:text-text-main hover:border-primary/30 transition-all shadow-sm">
+                <x-button href="{{ route('student.results') }}" variant="soft" class="w-full mt-12">
                     Lihat Riwayat Lengkap
-                </button>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </x-button>
             </div>
         </div>
     </div>

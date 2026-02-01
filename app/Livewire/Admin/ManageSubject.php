@@ -40,6 +40,13 @@ class ManageSubject extends Component
         $this->showAddModal = true;
     }
 
+    public function closeModal()
+    {
+        $this->showAddModal = false;
+        $this->showEditModal = false;
+        $this->resetValidation();
+    }
+
     public function openEditModal($subjectId)
     {
         $subject = Subject::findOrFail($subjectId);

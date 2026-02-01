@@ -1,4 +1,13 @@
 <div>
+    <x-header title="Data Kelas" subtitle="Kelola dan pantau seluruh unit rombongan belajar.">
+        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
+            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+            </svg>
+            Buat Kelas
+        </x-button>
+    </x-header>
+
     <div class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
         <!-- Search Bar (Left - fills space) -->
         <div class="relative w-full sm:flex-1 sm:max-w-lg group">
@@ -7,16 +16,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </span>
-            <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari identitas kelas...">
+            <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari kelas...">
         </div>
-        
-        <!-- Action Button (Right) -->
-        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
-            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-            </svg>
-            Buka Rombel Baru
-        </x-button>
     </div>
 
     <!-- Class Grid -->
@@ -25,12 +26,12 @@
         <x-card class="relative overflow-hidden group hover:border-primary/40">
             <div class="absolute top-0 right-0 p-5 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                 <div class="flex gap-2">
-                    <button wire:click="openEditModal({{ $class['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-primary hover:bg-primary hover:text-white transition-all">
+                    <x-button wire:click="openEditModal({{ $class['id'] }})" variant="primary" size="sm" square="true" title="Edit">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    </button>
-                    <button wire:click="openDeleteModal({{ $class['id'] }})" class="p-2.5 bg-bg-surface dark:bg-slate-800 shadow-xl border border-border-main dark:border-slate-700 rounded-xl text-red-600 hover:bg-red-600 hover:text-white transition-all">
+                    </x-button>
+                    <x-button wire:click="openDeleteModal({{ $class['id'] }})" variant="danger" size="sm" square="true" title="Hapus">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
+                    </x-button>
                 </div>
             </div>
             
@@ -42,15 +43,15 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="text-2xl font-black text-text-main tracking-tight uppercase truncate group-hover:text-primary transition-colors">{{ $class['name'] }}</h3>
-                    <p class="text-[10px] font-black text-text-muted mt-1 uppercase tracking-[0.2em] opacity-60">Level Index: {{ $class['level'] }}</p>
-                    
+                    <p class="text-[10px] font-black  mt-1 uppercase">Wali Kelas : {{ $class['teacher_name'] ?? 'Belum ada' }}</p>
+
                     <div class="flex items-center gap-2.5 text-sm text-text-muted mt-4 mb-8 font-bold">
                         <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                        <span>{{ $class['student_count'] }} Peserta Didik</span>
+                        <span>{{ $class['student_count'] }} Siswa</span>
                     </div>
 
                     <x-button wire:click="openAssignModal({{ $class['id'] }})" variant="secondary" class="w-full font-black uppercase text-[10px] tracking-[0.2em] py-3 rounded-xl border-dashed">
-                        Assign Member
+                        Kelola Siswa 
                     </x-button>
                 </div>
             </div>
@@ -64,35 +65,44 @@
 
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
+        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="closeModal"></div>
         <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
-                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Konfigurasi Rombel' : 'Mutasi Struktur Rombel' }}</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Academic Structure</p>
+                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Tambah kelas' : 'Edit Kelas' }}</h3>
+                    
                 </div>
-                <button wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <x-button wire:click="closeModal" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-10 space-y-8">
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Identitas Rombongan Belajar</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Identitas Kelas</label>
                     <input type="text" wire:model="classForm.name" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Contoh: XII - TEKNIK INFORMATIKA">
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Tingkat / Grade Index</label>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Tingkat Kelas</label>
                     <select wire:model="classForm.level" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
-                        <option value="">Pilih Tingkatan Instansiasi</option>
-                        <option value="X">Matrikulasi / Kelas X</option>
-                        <option value="XI">Intermediasi / Kelas XI</option>
-                        <option value="XII">Finalisasi / Kelas XII</option>
+                        <option value="">Pilih Tingkatan kelas</option>
+                        <option value="X">Kelas X</option>
+                        <option value="XI">Kelas XI</option>
+                        <option value="XII">Kelas XII</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Wali Kelas</label>
+                    <select wire:model="classForm.teacher_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                        <option value="">Pilih Wali Kelas</option>
+                        @foreach($teachers as $teacher)
+                            <option value="{{ $teacher->id }}">{{ $teacher->user->name }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
-                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="saveClass" class="font-black text-[10px] uppercase tracking-widest px-8">Komit Perubahan</x-button>
+                <x-button variant="secondary" wire:click="closeModal" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
+                <x-button variant="primary" wire:click="saveClass" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Perubahan</x-button>
             </div>
         </div>
     </div>
@@ -104,12 +114,12 @@
         <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
             <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
                 <div>
-                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase">Penempatan Peserta</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60">Classroom Population</p>
+                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase">Kelola Anggota Kelas</h3>
+                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60"></p>
                 </div>
-                <button wire:click="$set('showAssignModal', false)" class="p-2 text-text-muted hover:text-red-500 transition-colors">
+                <x-button wire:click="$set('showAssignModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
+                </x-button>
             </div>
             <div class="p-10 space-y-8">
                 <div class="relative group">
@@ -153,7 +163,7 @@
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
                 <x-button variant="secondary" wire:click="$set('showAssignModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="assignStudents" class="font-black text-[10px] uppercase tracking-widest px-8">Eksekusi Penempatan</x-button>
+                <x-button variant="primary" wire:click="assignStudents" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Perubahan</x-button>
             </div>
         </div>
     </div>

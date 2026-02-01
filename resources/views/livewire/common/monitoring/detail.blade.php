@@ -30,11 +30,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
-                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-text-main hover:bg-gray-50 uppercase font-bold tracking-wider">Detail</button>
+                    <x-button variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
                     @if($student['status'] == 'working')
-                    <button wire:click="forceSubmit('mock_id')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 uppercase font-bold tracking-wider">Akhiri</button>
+                    <x-button wire:click="forceSubmit('mock_id')" variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @else
-                    <button class="px-2 py-1 text-xs border border-gray-200 rounded text-gray-300 cursor-not-allowed uppercase font-bold tracking-wider">Akhiri</button>
+                    <x-button variant="secondary" size="xs" disabled class="!text-gray-300 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @endif
                 </x-monitor.student-card>
                 @endforeach

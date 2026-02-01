@@ -16,6 +16,7 @@ class ManageClass extends Component
     public $classForm = [
         'name' => '',
         'level' => '',
+        'teacher_id' => '',
     ];
 
     public $selectedClass = null;
@@ -26,6 +27,7 @@ class ManageClass extends Component
     protected $rules = [
         'classForm.name' => 'required|string|max:50',
         'classForm.level' => 'required|in:X,XI,XII',
+        'classForm.teacher_id' => 'nullable|exists:teachers,id',
     ];
 
     protected $messages = [
@@ -40,12 +42,20 @@ class ManageClass extends Component
         $this->showAddModal = true;
     }
 
+    public function closeModal()
+    {
+        $this->showAddModal = false;
+        $this->showEditModal = false;
+        $this->resetValidation();
+    }
+
     public function openEditModal($classId)
     {
         $class = Classroom::findOrFail($classId);
         $this->classForm = [
             'name' => $class->name,
             'level' => $class->level,
+            'teacher_id' => $class->teacher_id ?? '',
         ];
         $this->selectedClass = $classId;
         $this->resetValidation();
@@ -139,12 +149,13 @@ class ManageClass extends Component
             $classesQuery->where('name', 'like', '%' . $this->search . '%');
         }
         
-        $classes = $classesQuery->orderBy('level')->orderBy('name')->get()
+        $classes = $classesQuery->with('teacher.user')->orderBy('level')->orderBy('name')->get()
             ->map(fn($c) => [
                 'id' => $c->id,
                 'name' => $c->name,
                 'level' => $c->level,
                 'student_count' => $c->students_count,
+                'teacher_name' => $c->teacher ? $c->teacher->user->name : '-',
             ]);
 
         // Query all students for assignment modal (include their current classroom)
@@ -170,7 +181,8 @@ class ManageClass extends Component
 
         return view('admin.manage-class', [
             'classes' => $classes,
-            'allStudents' => $allStudents
+            'allStudents' => $allStudents,
+            'teachers' => \App\Models\Teacher::with('user')->get(),
         ])->layout('layouts.admin', ['title' => 'Data Kelas']);
     }
 }
