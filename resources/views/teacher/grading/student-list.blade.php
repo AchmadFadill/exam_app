@@ -24,52 +24,46 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Nama Siswa</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Waktu Submit</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Status</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Nilai</th>
-                        <th scope="col" class="relative px-6 py-3">
-                            <span class="sr-only">Actions</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-bg-surface divide-y divide-gray-200">
-                    @foreach($students as $student)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-text-main">{{ $student['name'] }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
-                            {{ $student['submitted_at'] }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($student['status'] == 'Sudah Dinilai')
-                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    {{ $student['status'] }}
-                                </span>
-                            @else
-                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
-                                    {{ $student['status'] }}
-                                </span>
-                            @endif
-                        </td>
-                         <td class="px-6 py-4 whitespace-nowrap text-sm text-text-main font-bold">
-                            {{ $student['score'] }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('teacher.grading.detail', ['exam' => $examId, 'student' => $student['id']]) }}" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1 rounded-lg">
-                                {{ $student['status'] == 'Sudah Dinilai' ? 'Edit Nilai' : 'Beri Nilai' }}
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-table>
+        <x-table.thead>
+            <x-table.tr>
+                <x-table.th>Nama Siswa</x-table.th>
+                <x-table.th>Waktu Submit</x-table.th>
+                <x-table.th>Status</x-table.th>
+                <x-table.th>Nilai</x-table.th>
+                <x-table.th class="text-right">Aksi</x-table.th>
+            </x-table.tr>
+        </x-table.thead>
+        <tbody class="bg-bg-surface divide-y divide-gray-200">
+            @foreach($students as $student)
+            <x-table.tr>
+                <x-table.td>
+                    <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">{{ $student['name'] }}</div>
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap italic font-bold text-text-muted uppercase text-[10px] tracking-widest">
+                    {{ $student['submitted_at'] }}
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap">
+                    @if($student['status'] == 'Sudah Dinilai')
+                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
+                            {{ $student['status'] }}
+                        </span>
+                    @else
+                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                            {{ $student['status'] }}
+                        </span>
+                    @endif
+                </x-table.td>
+                 <x-table.td class="whitespace-nowrap text-sm text-text-main font-black">
+                    {{ $student['score'] }}
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap text-right font-medium">
+                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $examId, 'student' => $student['id']]) }}" variant="soft" class="text-[10px] px-6">
+                        {{ $student['status'] == 'Sudah Dinilai' ? 'Edit Nilai' : 'Beri Nilai' }}
+                    </x-button>
+                </x-table.td>
+            </x-table.tr>
+            @endforeach
+        </tbody>
+    </x-table>
 </div>

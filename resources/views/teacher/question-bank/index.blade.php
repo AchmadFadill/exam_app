@@ -54,60 +54,58 @@
     </div>
 
     <!-- Question List -->
-    <x-card class="overflow-hidden">
-        <div class="overflow-x-auto -mx-6 -my-6">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 dark:bg-slate-800/50 border-b border-border-subtle dark:border-border-subtle">
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Konten Pertanyaan</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Mata Pelajaran</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Tipe</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60">Tanggal Dibuat</th>
-                        <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted opacity-60 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-border-subtle dark:divide-slate-800">
-                    @forelse($questions as $question)
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all group">
-                        <td class="px-8 py-6">
-                            <div class="text-sm font-black text-text-main line-clamp-2 max-w-lg tracking-tight leading-relaxed group-hover:text-primary transition-colors">{{ $question['q'] }}</div>
-                        </td>
-                        <td class="px-8 py-6 whitespace-nowrap">
-                            <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-primary/10 text-primary">
-                                {{ $question['subject'] }}
-                            </span>
-                        </td>
-                        <td class="px-8 py-6 whitespace-nowrap">
-                            <div class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">{{ $question['type'] }}</div>
-                        </td>
-                        <td class="px-8 py-6 whitespace-nowrap text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">
-                            {{ $question['created_at'] }}
-                        </td>
-                        <td class="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex items-center justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
-                                <a href="{{ route('teacher.question-bank.edit', $question['id']) }}" class="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                </a>
-                                <button type="button" class="p-2 text-red-600 hover:bg-red-500/10 rounded-xl transition-all">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-8 py-20 text-center text-text-muted font-bold italic opacity-40">
-                             Tidak ada data butir soal dalam modul ini.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="px-8 py-5 border-t border-border-subtle dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/30">
-            <div class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-40">Matrix Count: {{ count($questions) }} Operational Items</div>
-        </div>
-    </x-card>
+    <x-table>
+        <x-table.thead>
+            <x-table.tr>
+                <x-table.th>Konten Pertanyaan</x-table.th>
+                <x-table.th>Mata Pelajaran</x-table.th>
+                <x-table.th>Tipe</x-table.th>
+                <x-table.th>Tanggal Dibuat</x-table.th>
+                <x-table.th class="text-right">Aksi</x-table.th>
+            </x-table.tr>
+        </x-table.thead>
+        <tbody class="divide-y divide-border-subtle dark:divide-slate-800">
+            @forelse($questions as $question)
+            <x-table.tr>
+                <x-table.td>
+                    <div class="text-sm font-black text-text-main line-clamp-2 max-w-lg tracking-tight leading-relaxed group-hover:text-primary transition-colors">{{ $question['q'] }}</div>
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap">
+                    <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-primary/10 text-primary">
+                        {{ $question['subject'] }}
+                    </span>
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap">
+                    <div class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">{{ $question['type'] }}</div>
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">
+                    {{ $question['created_at'] }}
+                </x-table.td>
+                <x-table.td class="whitespace-nowrap text-right font-medium">
+                    <div class="flex items-center justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
+                        <a href="{{ route('teacher.question-bank.edit', $question['id']) }}" class="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </a>
+                        <button type="button" class="p-2 text-red-600 hover:bg-red-500/10 rounded-xl transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                </x-table.td>
+            </x-table.tr>
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="5" class="py-20 text-center text-text-muted font-bold italic opacity-40">
+                     Tidak ada data butir soal dalam modul ini.
+                </x-table.td>
+            </x-table.tr>
+            @endforelse
+        </tbody>
+        <x-slot name="footer">
+            <div class="px-8 py-5 border-t border-border-subtle dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/30">
+                <div class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-40">Matrix Count: {{ count($questions) }} Operational Items</div>
+            </div>
+        </x-slot>
+    </x-table>
     </div>
 
     <!-- Import Modal -->

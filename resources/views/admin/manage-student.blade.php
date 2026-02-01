@@ -36,83 +36,79 @@
     </div>
 
     <!-- Student Table -->
-    <x-card>
-        <div class="overflow-x-auto -mx-6 -my-6">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/50 dark:bg-slate-800/50 border-b border-border-subtle dark:border-border-subtle">
-                        <th class="px-8 py-5 w-4">
-                            <div class="flex items-center justify-center">
-                                <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
-                            </div>
-                        </th>
-                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Nama Siswa</th>
-                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Kelas</th>
-                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em]">Email</th>
-                        <th class="px-8 py-5 text-[15px] font-black uppercase tracking-[0.2em] text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($students as $student)
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all group">
-                        <td class="px-8 py-5 text-center">
-                            <div class="flex items-center justify-center">
-                                <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student->id }}" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs shadow-inner group-hover:scale-110 transition-transform">
-                                    {{ substr($student->user->name, 0, 2) }}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="font-black text-text-main tracking-tight uppercase text-sm truncate group-hover:text-primary transition-colors">{{ $student->user->name }}</div>
-                                    <div class="text-[10px] font-black text-text-muted uppercase tracking-widest ">NIS: {{ $student->nis }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5 text-sm">
-                            <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
-                                {{ $student->classroom?->name ?? '-' }}
-                            </span>
-                        </td>
-                        <td class="px-8 py-5 text-sm font-bold text-text-muted lowercase">{{ $student->user->email }}</td>
-                        <td class="px-8 py-5 text-right">
-                            <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="openResetPasswordModal({{ $student->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Reset Password">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                    </svg>
-                                </button>
-                                <button wire:click="openEditModal({{ $student->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
-                                <button wire:click="openDeleteModal({{ $student->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Hapus">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-8 py-20 text-center text-text-muted font-bold italic opacity-60">Tidak ada data koleksi siswa ditemukan.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Pagination Links -->
-        @if($students->hasPages())
-        <div class="px-6 py-4 border-t border-gray-100">
-            {{ $students->links() }}
-        </div>
-        @endif
-    </x-card>
+    <x-table>
+        <x-table.thead>
+            <x-table.tr>
+                <x-table.th class="w-4">
+                    <div class="flex items-center justify-center">
+                        <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
+                    </div>
+                </x-table.th>
+                <x-table.th>Nama Siswa</x-table.th>
+                <x-table.th>Kelas</x-table.th>
+                <x-table.th>Email</x-table.th>
+                <x-table.th class="text-right">Aksi</x-table.th>
+            </x-table.tr>
+        </x-table.thead>
+        <tbody class="divide-y divide-gray-50">
+            @forelse($students as $student)
+            <x-table.tr>
+                <x-table.td class="text-center">
+                    <div class="flex items-center justify-center">
+                        <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student->id }}" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
+                    </div>
+                </x-table.td>
+                <x-table.td>
+                    <div class="flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs shadow-inner group-hover:scale-110 transition-transform">
+                            {{ substr($student->user->name, 0, 2) }}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-black text-text-main tracking-tight uppercase text-sm truncate group-hover:text-primary transition-colors">{{ $student->user->name }}</div>
+                            <div class="text-[10px] font-black text-text-muted uppercase tracking-widest ">NIS: {{ $student->nis }}</div>
+                        </div>
+                    </div>
+                </x-table.td>
+                <x-table.td>
+                    <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                        {{ $student->classroom?->name ?? '-' }}
+                    </span>
+                </x-table.td>
+                <x-table.td class="font-bold text-text-muted lowercase">{{ $student->user->email }}</x-table.td>
+                <x-table.td class="text-right">
+                    <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
+                        <button wire:click="openResetPasswordModal({{ $student->id }})" class="p-2.5 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Reset Password">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                        </button>
+                        <button wire:click="openEditModal({{ $student->id }})" class="p-2.5 text-primary hover:bg-blue-50 dark:hover:bg-primary/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Edit">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                        <button wire:click="openDeleteModal({{ $student->id }})" class="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 duration-300" title="Hapus">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </x-table.td>
+            </x-table.tr>
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="5" class="py-20 text-center text-text-muted font-bold italic opacity-60">Tidak ada data koleksi siswa ditemukan.</x-table.td>
+            </x-table.tr>
+            @endforelse
+        </tbody>
+        <x-slot name="after">
+            @if($students->hasPages())
+            <div class="px-6 py-4 border-t border-border-subtle dark:border-border-subtle bg-gray-50/30 dark:bg-slate-800/20">
+                {{ $students->links() }}
+            </div>
+            @endif
+        </x-slot>
+    </x-table>
 
     <!-- Modals -->
     @if($showAddModal || $showEditModal)

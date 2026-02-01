@@ -69,38 +69,38 @@
                     </button>
                 </div>
 
-                <div class="overflow-x-auto -mx-6 -my-6">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-gray-50 text-gray-500 font-medium">
-                            <tr>
-                                <th class="px-6 py-4">Nama Siswa</th>
-                                <th class="px-6 py-4 text-center">Nilai</th>
-                                <th class="px-6 py-4 text-center">Status</th>
-                                <th class="px-6 py-4 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($students as $student)
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="font-bold text-gray-900">{{ $student['name'] }}</div>
-                                    <div class="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{{ $student['started_at'] }} - {{ $student['submitted_at'] }}</div>
-                                </td>
-                                <td class="px-6 py-4 text-center font-black text-lg text-gray-900">{{ $student['score'] }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                                        {{ $student['status'] == 'Lulus' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                        {{ $student['status'] }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <x-button variant="soft" class="px-3 py-1 text-[10px]">Detail</x-button>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                <x-table>
+                    <x-table.thead>
+                        <x-table.tr>
+                            <x-table.th>Nama Siswa</x-table.th>
+                            <x-table.th class="text-center">Nilai</x-table.th>
+                            <x-table.th class="text-center">Status</x-table.th>
+                            <x-table.th class="text-right">Aksi</x-table.th>
+                        </x-table.tr>
+                    </x-table.thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
+                        @foreach($students as $student)
+                        <x-table.tr>
+                            <x-table.td>
+                                <div class="font-black text-text-main uppercase tracking-tight">{{ $student['name'] }}</div>
+                                <div class="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">{{ $student['started_at'] }} - {{ $student['submitted_at'] }}</div>
+                            </x-table.td>
+                            <x-table.td class="text-center font-black text-xl text-text-main italic">{{ $student['score'] }}</x-table.td>
+                            <x-table.td class="text-center">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                                    {{ $student['status'] == 'Lulus' ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20' }}">
+                                    {{ $student['status'] }}
+                                </span>
+                            </x-table.td>
+                            <x-table.td class="text-right">
+                                <div class="flex justify-end">
+                                    <x-button variant="soft" class="px-6 text-[10px]">Detail</x-button>
+                                </div>
+                            </x-table.td>
+                        </x-table.tr>
+                        @endforeach
+                    </tbody>
+                </x-table>
             </x-card>
         </div>
 

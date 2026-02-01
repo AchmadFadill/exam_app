@@ -20,6 +20,7 @@ class Form extends Component
     // Settings
     public $shuffle_questions = false;
     public $shuffle_answers = false;
+    public $enable_tab_tolerance = true;
     public $tab_tolerance = 3;
 
     // Data Sources

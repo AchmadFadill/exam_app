@@ -51,6 +51,7 @@ class Dashboard extends Component
             [
                 'user' => 'Andi Wijaya',
                 'class' => 'XII IPA 1',
+                'exam' => 'Matematika Wajib',
                 'event' => 'Pindah Tab Aler',
                 'time' => '2 menit yang lalu',
                 'severity' => 'critical',
@@ -58,6 +59,7 @@ class Dashboard extends Component
             [
                 'user' => 'Siska Pratama',
                 'class' => 'X IPS 2',
+                'exam' => 'Bahasa Inggris',
                 'event' => 'Keluar Fullscreen',
                 'time' => '15 menit yang lalu',
                 'severity' => 'warning',

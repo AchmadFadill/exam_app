@@ -41,74 +41,70 @@
     @endif
 
     <!-- Questions Table -->
-    <x-card>
-        <div class="overflow-x-auto -mx-6 -my-6">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 w-12">
-                            <input type="checkbox" 
-                                   wire:click="toggleSelectAll"
-                                   class="rounded border-gray-300 text-primary focus:ring-primary" 
-                                   title="Pilih Semua">
-                        </th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 w-16">#</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Pertanyaan</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Tipe</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500">Mata Pelajaran</th>
-                        <th class="px-6 py-4 text-xs font-semibold uppercase text-gray-500 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($questions as $question)
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <input type="checkbox" wire:model.live="selectedQuestions" value="{{ $question->id }}" class="rounded border-gray-300 text-primary focus:ring-primary">
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4">
-                            <p class="text-sm text-gray-900 line-clamp-2">{!! \Illuminate\Support\Str::limit(strip_tags($question->text), 150) !!}</p>
-                            @if($question->image_path)
-                            <div class="mt-2">
-                                <a href="{{ $question->image_url }}" target="_blank" class="inline-block relative group">
-                                    <img src="{{ $question->image_url }}" class="h-16 w-auto rounded border border-gray-200 object-cover">
-                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded"></div>
-                                </a>
-                            </div>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $question->type === 'multiple_choice' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
-                                {{ $question->type === 'multiple_choice' ? 'Pilihan Ganda' : 'Essay' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ $question->subject->name }}</td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <button wire:click="openEditModal({{ $question->id }})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
-                                <button wire:click="openDeleteModal({{ $question->id }})" class="p2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-text-muted italic">
-                            Tidak ada soal ditemukan.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </x-card>
+    <x-table>
+        <x-table.thead>
+            <x-table.tr>
+                <x-table.th class="w-12">
+                    <input type="checkbox" 
+                           wire:click="toggleSelectAll"
+                           class="rounded border-gray-300 text-primary focus:ring-primary" 
+                           title="Pilih Semua">
+                </x-table.th>
+                <x-table.th class="w-16">#</x-table.th>
+                <x-table.th>Pertanyaan</x-table.th>
+                <x-table.th>Tipe</x-table.th>
+                <x-table.th>Mata Pelajaran</x-table.th>
+                <x-table.th class="text-right">Aksi</x-table.th>
+            </x-table.tr>
+        </x-table.thead>
+        <tbody class="divide-y divide-border-subtle dark:divide-slate-800">
+            @forelse($questions as $question)
+            <x-table.tr>
+                <x-table.td>
+                    <input type="checkbox" wire:model.live="selectedQuestions" value="{{ $question->id }}" class="rounded border-gray-300 text-primary focus:ring-primary">
+                </x-table.td>
+                <x-table.td class="text-sm text-text-muted font-bold italic">{{ $loop->iteration }}</x-table.td>
+                <x-table.td>
+                    <p class="text-sm text-text-main font-medium line-clamp-2 leading-relaxed group-hover:text-primary transition-colors">{!! \Illuminate\Support\Str::limit(strip_tags($question->text), 150) !!}</p>
+                    @if($question->image_path)
+                    <div class="mt-2">
+                        <a href="{{ $question->image_url }}" target="_blank" class="inline-block relative group/img">
+                            <img src="{{ $question->image_url }}" class="h-16 w-auto rounded-xl border border-border-subtle object-cover shadow-sm group-hover/img:shadow-md transition-all">
+                            <div class="absolute inset-0 bg-black/0 group-hover/img:bg-black/5 transition-colors rounded-xl"></div>
+                        </a>
+                    </div>
+                    @endif
+                </x-table.td>
+                <x-table.td>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $question->type === 'multiple_choice' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' : 'bg-purple-500/10 text-purple-600 border-purple-500/20' }}">
+                        {{ $question->type === 'multiple_choice' ? 'Pilihan Ganda' : 'Essay' }}
+                    </span>
+                </x-table.td>
+                <x-table.td class="text-xs font-black text-text-muted uppercase tracking-widest">{{ $question->subject->name }}</x-table.td>
+                <x-table.td class="text-right">
+                    <div class="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                        <button wire:click="openEditModal({{ $question->id }})" class="p-2 text-primary hover:bg-primary/10 rounded-xl transition-all" title="Edit">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                        <button wire:click="openDeleteModal({{ $question->id }})" class="p-2 text-red-600 hover:bg-red-500/10 rounded-xl transition-all" title="Hapus">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </x-table.td>
+            </x-table.tr>
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="6" class="py-20 text-center text-text-muted font-bold italic opacity-40">
+                    Tidak ada soal ditemukan dalam kelompok ini.
+                </x-table.td>
+            </x-table.tr>
+            @endforelse
+        </tbody>
+    </x-table>
 
     <!-- Add/Edit Modal -->
     @if($showAddModal || $showEditModal)

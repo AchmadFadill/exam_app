@@ -137,7 +137,12 @@
                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     Aktivitas Keamanan
                 </h3>
+                <x-button href="{{ route('admin.monitor') }}" variant="soft">
+                        Selengkapnya
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </x-button>
             </div>
+            
             
             <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden">
                 <div class="p-8 space-y-4">
@@ -152,16 +157,15 @@
                                 <h5 class="text-sm font-black text-text-main truncate uppercase tracking-tight">{{ $alert['user'] }}</h5>
                                 <span class="text-[10px] text-text-muted font-black uppercase tracking-widest whitespace-nowrap opacity-60">{{ $alert['time'] }}</span>
                             </div>
-                            <p class="text-[11px] text-text-muted mt-1 uppercase tracking-widest font-black opacity-70 group-hover:text-red-600 transition-colors">{{ $alert['event'] }} <span class="mx-1">•</span> {{ $alert['class'] }}</p>
+                            <p class="text-[11px] text-text-muted mt-1 uppercase tracking-widest font-black opacity-70 group-hover:text-red-600 transition-colors">
+                                {{ $alert['event'] }} <span class="mx-1">•</span> {{ $alert['exam'] }} <span class="mx-1">•</span> {{ $alert['class'] }}
+                            </p>
                         </div>
                     </div>
                     @endforeach
                 </div>
                  <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
-                    <x-button variant="soft">
-                        Selengkapnya
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </x-button>
+                    
                 </div>
             </div>
         </section>
@@ -179,7 +183,7 @@
                 <a href="{{ route('admin.teachers') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Data Guru
                 </a>
-                <a href="{{ route('admin.exams') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
+                <a href="{{ route('teacher.exams.create') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Buat Ujian Baru
                 </a>
                 <a href="{{ route('admin.settings') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
