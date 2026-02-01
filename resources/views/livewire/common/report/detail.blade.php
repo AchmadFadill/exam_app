@@ -94,7 +94,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <button class="text-primary hover:underline font-bold text-xs uppercase tracking-widest">Detail</button>
+                                    <x-button variant="soft" class="px-3 py-1 text-[10px]">Detail</x-button>
                                 </td>
                             </tr>
                             @endforeach
@@ -122,7 +122,7 @@
                     </div>
                     @endforeach
                 </div>
-                <button class="w-full mt-6 py-3 bg-gray-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-all">Lihat Analisis Lengkap</button>
+                <x-button variant="primary" class="w-full mt-6">Lihat Analisis Lengkap</x-button>
             </x-card>
         </div>
     </div>

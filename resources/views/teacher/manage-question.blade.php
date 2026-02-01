@@ -106,10 +106,9 @@
 
                 <!-- Actions -->
                 <div class="pt-4 border-t border-gray-100">
-                    <a href="{{ route('teacher.questions.group', ['title' => urlencode($title)]) }}" 
-                       class="block w-full px-4 py-2.5 bg-primary text-white rounded-lg font-medium text-center hover:bg-blue-700 transition-colors">
+                    <x-button href="{{ route('teacher.questions.group', ['title' => urlencode($title)]) }}" variant="primary" class="w-full">
                         Lihat Detail
-                    </a>
+                    </x-button>
                 </div>
             </div>
         </x-card>

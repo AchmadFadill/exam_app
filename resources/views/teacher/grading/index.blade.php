@@ -57,15 +57,15 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                             @if(!($exam['is_published'] ?? false) && $exam['pending_count'] == 0)
-                                <button type="button" class="text-blue-600 hover:text-blue-800 font-bold bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 transition-colors">
+                                <x-button variant="soft" class="bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-blue-200">
                                     Publish Nilai
-                                </button>
+                                </x-button>
                             @endif
 
                             @if($exam['pending_count'] > 0)
-                                <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-primary hover:text-blue-800 font-bold bg-blue-50 px-3 py-1.5 rounded-lg">Koreksi</a>
+                                <x-button href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" variant="soft">Koreksi</x-button>
                             @else
-                                <a href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" class="text-text-muted hover:text-primary">Lihat Detail</a>
+                                <x-button href="{{ route('teacher.grading.show', ['exam' => $exam['id']]) }}" variant="secondary" class="border-transparent bg-transparent hover:bg-transparent hover:text-primary shadow-none p-0">Lihat Detail</x-button>
                             @endif
                         </td>
                     </tr>

@@ -85,14 +85,14 @@
                         Monitor Ujian 
                     </x-button>
                 @elseif($exam['status'] == 'completed')
-                    <x-button href="#" variant="secondary" class="text-[10px] py-3 rounded-xl tracking-widest">
+                    <x-button href="#" variant="soft" class="text-[10px] py-3 tracking-widest">
                         Lihat Hasil
                     </x-button>
-                    <x-button href="#" variant="secondary" class="text-[10px] py-3 rounded-xl tracking-widest">
+                    <x-button href="#" variant="soft" class="text-[10px] py-3 tracking-widest">
                         Daftar Nilai
                     </x-button>
                 @else
-                    <x-button href="#" variant="secondary" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
+                    <x-button href="#" variant="soft" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Atur Jadwal
                     </x-button>

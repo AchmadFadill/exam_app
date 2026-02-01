@@ -54,9 +54,7 @@
                     </div>
                 </div>
             </div>
-            <button class="mt-6 w-full py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all border border-white/10">
-                Kelola Institusi
-            </button>
+
             <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
         </div>
     </div>
@@ -94,7 +92,10 @@
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                     Ujian Berjalan ({{ $stats['active_exams_count'] }})
                 </h3>
-                <a href="{{ route('admin.monitor') }}" class="text-sm font-semibold text-primary hover:text-blue-700">Selengkapnya &rarr;</a>
+                <x-button href="{{ route('admin.monitor') }}" variant="soft">
+                    Selengkapnya
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </x-button>
             </div>
             
             <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
@@ -117,6 +118,7 @@
                         </div>
                         <span class="text-xs font-black text-text-main whitespace-nowrap">{{ $exam['students_online'] }}/{{ $exam['total_students'] }} <span class="text-green-500">Live</span></span>
                     </div>
+                    
                 </div>
                 @endforeach
             </div>
@@ -150,7 +152,10 @@
                     @endforeach
                 </div>
                  <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
-                    <button class="text-xs font-black text-text-muted hover:text-primary uppercase tracking-[0.2em] transition-all">Selengkapnya &rarr;</button>
+                    <x-button variant="soft">
+                        Selengkapnya
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </x-button>
                 </div>
             </div>
         </section>

@@ -158,9 +158,10 @@
                         </div>
                     </div>
                 </div>
-                 <button class="w-full mt-12 py-4 px-6 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl text-[10px] font-black text-text-muted uppercase tracking-widest hover:bg-gray-50/50 hover:text-text-main hover:border-primary/30 transition-all shadow-sm">
+                <x-button href="{{ route('student.results') }}" variant="soft" class="w-full mt-12">
                     Lihat Riwayat Lengkap
-                </button>
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </x-button>
             </div>
         </div>
     </div>

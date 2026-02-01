@@ -74,9 +74,9 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('student.exam.show', ['id' => 1]) }}" class="inline-flex items-center px-4 py-1.5 bg-blue-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <x-button href="{{ route('student.exam.show', ['id' => 1]) }}" variant="primary" class="text-xs">
                                 Kerjakan
-                            </a>
+                            </x-button>
                         </td>
                     </tr>
 
@@ -105,7 +105,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-blue-600 hover:text-blue-900 font-bold uppercase tracking-wider text-xs">Lihat Hasil</button>
+                            <x-button variant="soft" class="text-xs">Lihat Hasil</x-button>
                         </td>
                     </tr>
                 </tbody>
