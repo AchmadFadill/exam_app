@@ -1,17 +1,11 @@
 @section('title', 'Dashboard')
 
 <div class="space-y-8">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
-        <div>
-            <h1 class="text-4xl font-black text-text-main tracking-tight italic">Teacher <span class="text-primary not-italic">Dashboard</span></h1>
-            <p class="text-text-muted mt-3 font-medium text-lg">Ringkasan aktivitas dan kendali ujian hari ini, {{ now()->translatedFormat('d F Y') }}</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="px-5 py-2 bg-blue-50/50 dark:bg-primary/10 text-primary text-sm font-black rounded-2xl border border-primary/10 uppercase tracking-widest">
-                 Genap 2025/2026
-            </span>
-        </div>
-    </div>
+    <x-page-header 
+        title="Teacher" 
+        highlight="Dashboard" 
+        subtitle="Ringkasan aktivitas dan kendali ujian hari ini" 
+    />
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

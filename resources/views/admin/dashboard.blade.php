@@ -5,9 +5,15 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
             <div class="relative z-10 flex-1">
-                <h1 class="text-4xl font-black text-text-main tracking-tight uppercase italic">Halaman <span class="text-primary not-italic">Utama</span></h1>
-                <p class="text-text-muted mt-3 text-lg font-medium">Sistem berjalan dengan status <span class="text-green-600 font-black uppercase tracking-wider text-sm bg-green-50 dark:bg-green-500/10 px-3 py-1 rounded-full">{{ $system_health['status'] }}</span>.</p>
-                <div class="mt-8 flex flex-wrap gap-4">
+                <x-page-header 
+                    title="Halaman" 
+                    highlight="Utama" 
+                    subtitle="Sistem berjalan dengan status {{ $system_health['status'] }}"
+                    :date="false"
+                    :semester="false"
+                />
+                
+                <div class="mt-4 flex flex-wrap gap-4">
                     <div class="flex items-center gap-3 px-5 py-2.5 bg-blue-50/50 dark:bg-primary/10 text-primary rounded-2xl border border-primary/10 font-bold text-sm">
                         <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Uptime: {{ $system_health['uptime'] }}
