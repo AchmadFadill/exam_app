@@ -76,8 +76,8 @@
                     @endif
                 </x-table.td>
                 <x-table.td>
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $question->type === 'multiple_choice' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' : 'bg-purple-500/10 text-purple-600 border-purple-500/20' }}">
-                        {{ $question->type === 'multiple_choice' ? 'Pilihan Ganda' : 'Essay' }}
+                    <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border whitespace-nowrap {{ $question->type === 'multiple_choice' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' : 'bg-purple-500/10 text-purple-600 border-purple-500/20' }}">
+                        {{ $question->type === 'multiple_choice' ? 'PILIHAN GANDA' : 'ESSAY' }}
                     </span>
                 </x-table.td>
                 <x-table.td class="text-xs font-black text-text-muted uppercase tracking-widest">{{ $question->subject->name }}</x-table.td>

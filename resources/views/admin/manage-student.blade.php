@@ -111,52 +111,59 @@
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="closeModal"></div>
-        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
-            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5 flex flex-col max-h-[90vh]">
+            <div class="px-8 py-6 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30 shrink-0">
                 <div>
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Siswa' : 'Edit Data Siswa' }}</h3>
-                    
-                 </div>
+                </div>
                 <x-button wire:click="closeModal" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </x-button>
             </div>
-            <div class="p-10 space-y-8">
-                <div class="grid grid-cols-2 gap-8">
+            <div class="p-8 space-y-6 overflow-y-auto">
+                <div class="grid grid-cols-2 gap-6">
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Nama Lengkap Siswa</label>
-                        <input type="text" wire:model="studentForm.name" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Nama lengkap">
+                        <label class="block text-xs font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Nama Lengkap Siswa</label>
+                        <input type="text" wire:model="studentForm.name" class="w-full px-5 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Nama lengkap">
+                        @error('studentForm.name') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Nomor Induk (NIS)</label>
-                        <input type="text" wire:model="studentForm.nis" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Nomor Induk">
+                        <label class="block text-xs font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Nomor Induk (NIS)</label>
+                        <input type="text" wire:model="studentForm.nis" class="w-full px-5 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Nomor Induk">
+                        @error('studentForm.nis') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Kelas</label>
-                    <select wire:model="studentForm.classroom_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                    <label class="block text-xs font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Kelas</label>
+                    <select wire:model="studentForm.classroom_id" class="w-full px-5 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
                         <option value="">Pilih Kelas</option>
                         @foreach($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }} - {{ $classroom->level }}</option>
                         @endforeach
                     </select>
+                    @error('studentForm.classroom_id') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Email Siswa (Opsional)</label>
-                    <input type="email" wire:model="studentForm.email" autocomplete="off" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="siswa@sekolah.sch.id">
+                    <label class="block text-xs font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Email Siswa (Opsional)</label>
+                    <input type="email" wire:model="studentForm.email" autocomplete="off" class="w-full px-5 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="siswa@sekolah.sch.id">
+                    @error('studentForm.email') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 @if($showAddModal)
                 <div>
-                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Password</label>
-                    <input type="password" wire:model="studentForm.password" autocomplete="new-password" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Min. 8 Karakter">
+                    <label class="block text-xs font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Password</label>
+                    <input type="password" wire:model="studentForm.password" autocomplete="new-password" class="w-full px-5 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Min. 8 Karakter">
+                    @error('studentForm.password') <span class="text-red-600 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 @endif
             </div>
-            <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
+            <div class="px-8 py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4 shrink-0">
                 <x-button variant="secondary" wire:click="closeModal" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="saveStudent" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Data</x-button>
+                <x-button variant="primary" wire:click="saveStudent" wire:loading.attr="disabled" class="font-black uppercase text-[10px] tracking-widest px-8">
+                    <span wire:loading.remove wire:target="saveStudent">Simpan Data</span>
+                    <span wire:loading wire:target="saveStudent">Menyimpan...</span>
+                </x-button>
             </div>
         </div>
     </div>
@@ -183,7 +190,7 @@
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
                         <p>Pastikan format Excel Anda sesuai dengan template. Kolom wajib: Nama, NIS, Kelas, Email, Password.</p>
-                        <x-button href="#" variant="soft" size="xs" class="mt-2">Download Template Excel</x-button>
+                        <x-button wire:click="downloadTemplate" variant="soft" size="xs" class="mt-2">Download Template Excel</x-button>
                     </div>
                 </div>
                 

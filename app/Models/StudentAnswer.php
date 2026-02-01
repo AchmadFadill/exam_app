@@ -10,7 +10,7 @@ class StudentAnswer extends Model
         'exam_attempt_id',
         'question_id',
         'answer',
-        'selected_option',
+        'selected_option_id',
         'is_correct',
         'score_awarded',
         'teacher_feedback',

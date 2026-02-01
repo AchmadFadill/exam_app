@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[var(--color-bg-app)]">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="h-full flex items-center justify-center p-4 antialiased selection:bg-blue-100 selection:text-blue-900 font-sans bg-bg-app text-text-main">
-    <div class="max-w-md w-full relative">
+<body class="h-full min-h-screen flex items-center justify-center p-4 antialiased selection:bg-blue-100 selection:text-blue-900 font-sans bg-bg-app text-text-main">
+    <div class="max-w-md w-full relative my-auto">
         <!-- Subtle branding accent -->
         <div class="absolute -top-12 -right-12 w-48 h-48 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
         <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-[var(--color-secondary)]/5 rounded-full blur-3xl"></div>

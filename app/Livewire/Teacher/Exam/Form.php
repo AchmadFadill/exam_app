@@ -14,6 +14,7 @@ class Form extends Component
 {
     public $examId = null;
     public $currentStep = 1;
+    public $step = 1; // Alias for currentStep (used in template)
 
     // Step 1: Basic Information
     public $name = '';
@@ -34,6 +35,7 @@ class Form extends Component
 
     // Step 3: Class Assignment & Settings
     public $selectedClasses = [];
+    public $classes = []; // Alias for selectedClasses (used in template)
     public $token = '';
     public $shuffle_questions = false;
     public $shuffle_answers = false;
@@ -49,11 +51,53 @@ class Form extends Component
             $this->examId = $id;
             $this->loadExam($id);
         } else {
-            // Initialize default values
-            $this->date = date('Y-m-d');
-            $this->start_time = '08:00';
-            $this->end_time = '09:30';
+            // Initialize default values with current date and time (timezone-aware)
+            $now = now(); // Uses Laravel's configured timezone
+            $this->date = $now->format('Y-m-d');
+            $this->start_time = $now->format('H:i');
+            // Set end time to current time + default duration (90 minutes)
+            $this->end_time = $now->addMinutes($this->duration_minutes)->format('H:i');
             $this->generateToken();
+        }
+        
+        // Initialize $classes to match $selectedClasses
+        $this->classes = $this->selectedClasses;
+    }
+
+    // Keep $classes and $selectedClasses synchronized
+    public function updatedClasses($value)
+    {
+        $this->selectedClasses = $value;
+    }
+
+    public function updatedSelectedClasses($value)
+    {
+        $this->classes = $value;
+    }
+
+    public function updatedStartTime($value)
+    {
+        if ($this->duration_minutes && $value) {
+            try {
+                // Parse start time and add duration
+                $start = \Carbon\Carbon::createFromFormat('H:i', $value);
+                $this->end_time = $start->addMinutes($this->duration_minutes)->format('H:i');
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+    }
+
+    public function updatedDurationMinutes($value)
+    {
+        if ($this->start_time && $value) {
+            try {
+                // Parse start time and add duration
+                $start = \Carbon\Carbon::createFromFormat('H:i', $this->start_time);
+                $this->end_time = $start->addMinutes($value)->format('H:i');
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
         }
     }
 
@@ -85,11 +129,22 @@ class Form extends Component
         $this->selectedClasses = $exam->classrooms->pluck('id')->toArray();
     }
 
+    // Computed property to expose $step for template compatibility
+    public function getStepProperty()
+    {
+        return $this->currentStep;
+    }
+
     public function generateToken()
     {
         do {
             $this->token = Exam::generateToken();
         } while (Exam::where('token', $this->token)->where('id', '!=', $this->examId)->exists());
+    }
+
+    public function regenerateToken()
+    {
+        $this->generateToken();
     }
 
     public function nextStep()
@@ -98,6 +153,7 @@ class Form extends Component
         
         if ($this->currentStep < 4) {
             $this->currentStep++;
+            $this->step = $this->currentStep;
         }
     }
 
@@ -105,7 +161,38 @@ class Form extends Component
     {
         if ($this->currentStep > 1) {
             $this->currentStep--;
+            $this->step = $this->currentStep;
         }
+    }
+
+    public function toggleLevel($level)
+    {
+        // Get all classrooms for this level (e.g., "X", "XI", "XII")
+        // Add space after level to prevent "X" from matching "XI" or "XII"
+        $levelClasses = Classroom::where('name', 'like', $level . ' %')->pluck('id')->toArray();
+        
+        // Check if all classes of this level are already selected
+        $allSelected = !empty($levelClasses) && count(array_intersect($levelClasses, $this->classes)) === count($levelClasses);
+        
+        if ($allSelected) {
+            // Deselect all classes of this level
+            $this->classes = array_values(array_diff($this->classes, $levelClasses));
+            $this->selectedClasses = $this->classes;
+        } else {
+            // Select all classes of this level
+            $this->classes = array_values(array_unique(array_merge($this->classes, $levelClasses)));
+            $this->selectedClasses = $this->classes;
+        }
+    }
+
+    public function isGroupSelected($title, $subjectId)
+    {
+        $groupQuestions = Question::where('title', $title)
+            ->where('subject_id', $subjectId)
+            ->pluck('id')
+            ->toArray();
+        
+        return !empty($groupQuestions) && count(array_intersect($groupQuestions, $this->selectedQuestions)) === count($groupQuestions);
     }
 
     protected function validateCurrentStep()
@@ -116,7 +203,7 @@ class Form extends Component
                 'subject_id' => 'required|exists:subjects,id',
                 'date' => 'required|date',
                 'start_time' => 'required',
-                'end_time' => 'required',
+                'end_time' => 'required|after:start_time',
                 'duration_minutes' => 'required|integer|min:10|max:300',
                 'passing_grade' => 'required|integer|min:0|max:100',
                 'default_score' => 'required|integer|min:1',
@@ -149,13 +236,16 @@ class Form extends Component
         }
     }
 
-    public function toggleQuestionGroup($title)
+    public function toggleQuestionGroup($title, $subjectId)
     {
-        // Get all questions with this title
-        $groupQuestions = Question::where('title', $title)->pluck('id')->toArray();
+        // Get all questions with this title and subject
+        $groupQuestions = Question::where('title', $title)
+            ->where('subject_id', $subjectId)
+            ->pluck('id')
+            ->toArray();
         
         // Check if all questions in group are already selected
-        $allSelected = count(array_intersect($groupQuestions, $this->selectedQuestions)) === count($groupQuestions);
+        $allSelected = !empty($groupQuestions) && count(array_intersect($groupQuestions, $this->selectedQuestions)) === count($groupQuestions);
         
         if ($allSelected) {
             // Remove all questions from this group
@@ -221,7 +311,7 @@ class Form extends Component
                 'shuffle_questions' => $this->shuffle_questions,
                 'shuffle_answers' => $this->shuffle_answers,
                 'tab_tolerance' => $this->tab_tolerance,
-                'status' => $this->status,
+                'status' => 'scheduled', // Force scheduled status
             ];
 
             if ($this->examId) {
@@ -295,7 +385,7 @@ class Form extends Component
 
         return view('teacher.exam.form', [
             'subjects' => $subjects,
-            'classrooms' => $classrooms,
+            'availableClasses' => $classrooms,
             'questionGroups' => $questionGroups,
         ])->layout('layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
     }

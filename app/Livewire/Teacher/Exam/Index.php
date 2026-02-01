@@ -81,7 +81,22 @@ class Index extends Component
                 'start_time' => $exam->start_time,
                 'end_time' => $exam->end_time,
                 'duration' => $exam->duration_minutes,
-                'status' => $exam->status,
+                'duration' => $exam->duration_minutes,
+                'status' => (function() use ($exam) {
+                    if ($exam->status === 'scheduled') {
+                        $now = now();
+                        $date = $exam->date->format('Y-m-d');
+                        $start = \Carbon\Carbon::parse($date . ' ' . $exam->start_time);
+                        $end = \Carbon\Carbon::parse($date . ' ' . $exam->end_time);
+                        
+                        if ($now->between($start, $end)) {
+                            return 'ongoing';
+                        } elseif ($now->gt($end)) {
+                            return 'completed';
+                        }
+                    }
+                    return $exam->status;
+                })(),
                 'questions_count' => $exam->questions->count(),
             ];
         });

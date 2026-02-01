@@ -90,15 +90,12 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group
     Route::get('/exams', App\Livewire\Student\ExamList::class)->name('exams.index');
     Route::get('/exam/{id}/start', App\Livewire\Student\ExamStart::class)->name('exam.start');
 
-    Route::get('/exam/{id}/take', function ($id) {
-        return view('student.exam.show');
-    })->name('exam.show');
+    Route::get('/exam/{id}/take', [App\Http\Controllers\Student\ExamController::class, 'show'])->name('exam.show');
+    Route::post('/exam/{id}/submit', [App\Http\Controllers\Student\ExamController::class, 'submit'])->name('exam.submit');
 
     Route::get('/results', function () {
         return view('student.exam.results');
     })->name('results');
 
-    Route::get('/results/{id}', function ($id) {
-        return view('student.exam.result_detail');
-    })->name('results.detail');
+    Route::get('/results/{id}', [App\Http\Controllers\Student\ExamController::class, 'result_detail'])->name('results.detail');
 });

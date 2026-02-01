@@ -116,7 +116,7 @@
 
             <!-- Quick Actions Grid -->
              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <a href="{{ route('teacher.question-bank.index') }}" class="group p-8 bg-gradient-to-br from-indigo-600 to-primary rounded-[2rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[1]">
+                <a href="{{ route('teacher.questions') }}" class="group p-8 bg-gradient-to-br from-indigo-600 to-primary rounded-[2rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[1]">
                     <div class="relative z-10">
                         <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:rotate-6 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -153,18 +153,22 @@
                      </x-button>
                 </div>
                 <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-4">
-                    @foreach($upcoming_exams as $exam)
+                    @forelse($upcoming_exams as $exam)
                     <div class="flex gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 rounded-2xl transition-all group cursor-pointer border border-transparent hover:border-border-subtle">
                         <div class="flex-shrink-0 w-16 h-16 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-primary/10 text-primary rounded-xl border border-primary/5 shadow-inner">
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ Str::substr($exam['date'], 0, 3) }}</span>
-                            <span class="text-xl font-black tracking-tighter">{{ filter_var($exam['date'], FILTER_SANITIZE_NUMBER_INT) ?: '03' }}</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ $exam['month'] }}</span>
+                            <span class="text-xl font-black tracking-tighter">{{ $exam['day'] }}</span>
                         </div>
                         <div class="flex-1 min-w-0 py-1">
                             <h5 class="text-sm font-black text-text-main truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $exam['name'] }}</h5>
                             <p class="text-xs text-text-muted mt-1 font-bold uppercase tracking-wider opacity-60">{{ $exam['class'] }} <span class="mx-1 opacity-20">•</span> {{ $exam['time'] }}</p>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="p-8 text-center text-text-muted font-bold italic opacity-60">
+                        <p class="text-sm">Belum ada jadwal ujian mendatang.</p>
+                    </div>
+                    @endforelse
                 </div>
             </section>
 
@@ -174,7 +178,7 @@
                 <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-8">
                     <div class="flow-root">
                         <ul role="list" class="-mb-8">
-                            @foreach($recent_activities as $activity)
+                            @forelse($recent_activities as $activity)
                             <li>
                                 <div class="relative pb-8">
                                     @if(!$loop->last)
@@ -187,7 +191,15 @@
                                                 @elseif($activity['type'] == 'warning') bg-amber-100 text-amber-600
                                                 @elseif($activity['type'] == 'info') bg-blue-100 text-blue-600
                                                 @else bg-gray-100 text-gray-500 @endif shadow-sm">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                                
+                                                @if(($activity['icon'] ?? '') == 'check-circle')
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                @elseif(($activity['icon'] ?? '') == 'plus-circle')
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                                                @else
+                                                    <!-- Default Icon (e.g. Activity) -->
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                                @endif
                                             </span>
                                         </div>
                                         <div class="min-w-0 flex-1 pt-1.5 flex flex-col">
@@ -197,10 +209,15 @@
                                     </div>
                                 </div>
                             </li>
-                            @endforeach
+                            @empty
+                            <li class="py-4 text-center">
+                                <p class="text-sm text-text-muted font-bold italic opacity-60">Belum ada aktivitas terkini.</p>
+                            </li>
+                            @endforelse
                         </ul>
                     </div>
                 </div>
+
             </section>
         </div>
     </div>

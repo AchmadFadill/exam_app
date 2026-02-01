@@ -231,16 +231,39 @@ class ManageStudent extends Component
             $this->showImportModal = false;
             $this->reset('importFile');
 
+            // Build detailed message
+            $message = "Import selesai: {$import->importedCount} siswa berhasil ditambahkan";
+            
+            if ($import->skippedCount > 0) {
+                $message .= ", {$import->skippedCount} baris kosong dilewati";
+            }
+            
             if (count($import->errors) > 0) {
+                $errorCount = count($import->errors);
+                $message .= ", {$errorCount} baris gagal";
+                
+                // Show first 3 errors as examples
                 $errorMsg = implode(' | ', array_slice($import->errors, 0, 3));
+                if ($errorCount > 3) {
+                    $errorMsg .= " (dan " . ($errorCount - 3) . " error lainnya)";
+                }
+                
                 $this->dispatch('notify', [
-                    'message' => "Berhasil import {$import->importedCount} siswa. Ada error: {$errorMsg}",
+                    'message' => $message . ". Error: {$errorMsg}",
                     'type' => 'warning'
                 ]);
             } else {
-                $this->dispatch('notify', ['message' => "Berhasil import {$import->importedCount} siswa!"]);
+                $this->dispatch('notify', ['message' => $message . "!"]);
             }
+            
+            \Log::info("Import summary displayed to user", [
+                'total_rows' => $import->totalRows,
+                'imported' => $import->importedCount,
+                'skipped' => $import->skippedCount,
+                'errors' => count($import->errors)
+            ]);
         } catch (\Exception $e) {
+            \Log::error("Import failed with exception", ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
         }
     }

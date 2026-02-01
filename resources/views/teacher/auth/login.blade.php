@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[var(--color-bg-app)]">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,8 +7,8 @@
     <link rel="icon" type="image/jpg" href="{{ asset('img/logo_school.jpg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full flex items-center justify-center p-4 antialiased selection:bg-blue-100 selection:text-blue-900">
-    <div class="max-w-md w-full relative">
+<body class="h-full min-h-screen flex items-center justify-center p-4 antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div class="max-w-md w-full relative my-auto">
         <!-- Subtle branding accent -->
         <div class="absolute -top-12 -right-12 w-48 h-48 bg-[var(--color-primary)]/5 rounded-full blur-3xl"></div>
         <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-[var(--color-secondary)]/5 rounded-full blur-3xl"></div>

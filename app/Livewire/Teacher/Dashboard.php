@@ -106,10 +106,13 @@ class Dashboard extends Component
             ->limit(5)
             ->get()
             ->map(function($exam) {
+                $date = \Carbon\Carbon::parse($exam->date);
                 return [
                     'name' => $exam->name,
                     'class' => $exam->classrooms->pluck('name')->join(', '),
-                    'date' => \Carbon\Carbon::parse($exam->date)->translatedFormat('d M'),
+                    'date_formatted' => $date->translatedFormat('d M Y'),
+                    'day' => $date->format('d'),
+                    'month' => $date->translatedFormat('M'),
                     'time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($exam->end_time)->format('H:i')
                 ];
             });
@@ -119,7 +122,7 @@ class Dashboard extends Component
             $q->where('teacher_id', $teacher->id);
         })
         ->whereNotNull('submitted_at')
-        ->with(['student', 'exam'])
+        ->with(['student.user', 'exam'])
         ->orderBy('submitted_at', 'desc')
         ->limit(5)
         ->get()
@@ -127,9 +130,27 @@ class Dashboard extends Component
             return [
                 'action' => "{$attempt->student->user->name} menyelesaikan {$attempt->exam->name}",
                 'time' => $attempt->submitted_at->diffForHumans(),
-                'type' => 'success'
+                'type' => 'success',
+                'icon' => 'check-circle' // Identifying icon type
             ];
         });
+        
+        // Add specific recent activity for Created Exams?
+        $recent_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(2)
+            ->get()
+            ->map(function($exam) {
+                 return [
+                    'action' => "Anda membuat ujian: {$exam->name}",
+                    'time' => $exam->created_at->diffForHumans(),
+                    'type' => 'info',
+                    'icon' => 'plus-circle',
+                    'sort_time' => $exam->created_at
+                 ];
+            });
+
+        // Merge and sort activities maybe? For now let's stick to students submitting exams as primary activity.
 
         return view('teacher.dashboard', [
             'stats' => $stats,

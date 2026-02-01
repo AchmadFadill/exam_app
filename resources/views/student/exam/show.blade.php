@@ -247,66 +247,17 @@
 
             Alpine.data('examData', () => ({
                 currentQuestion: 0,
-                answers: {},
+                answers: @json((object)$existingAnswers),
                 flags: {},
                 violations: 0,
                 violationMessage: '',
                 showWarningModal: false,
                 showFinishModal: false,
                 showStartOverlay: true,
-                questions: [
-                    {
-                        id: 1,
-                        type: 'multiple_choice',
-                        text: '<p>Jika seorang pedagang membeli barang seharga Rp 100.000 dan menjualnya dengan harga Rp 120.000, berapakah persentase keuntungannya?</p>',
-                        options: [
-                            { id: 'A', text: '10%' },
-                            { id: 'B', text: '15%' },
-                            { id: 'C', text: '20%' },
-                            { id: 'D', text: '25%' },
-                            { id: 'E', text: '30%' }
-                        ]
-                    },
-                    {
-                        id: 2,
-                        type: 'multiple_choice',
-                        text: '<p>Himpunan penyelesaian dari persamaan 2x + 5 = 11 adalah...</p>',
-                        options: [
-                            { id: 'A', text: '{2}' },
-                            { id: 'B', text: '{3}' },
-                            { id: 'C', text: '{4}' },
-                            { id: 'D', text: '{5}' },
-                            { id: 'E', text: '{6}' }
-                        ]
-                    },
-                    {
-                        id: 3,
-                        type: 'multiple_choice',
-                        text: '<p>Salah satu akar persamaan kuadrat x² - 5x + 6 = 0 adalah...</p>',
-                        options: [
-                            { id: 'A', text: '1' },
-                            { id: 'B', text: '2' },
-                            { id: 'C', text: '4' },
-                            { id: 'D', text: '5' },
-                            { id: 'E', text: '6' }
-                        ]
-                    },
-                     {
-                        id: 4,
-                        type: 'multiple_choice',
-                        text: '<p>Nilai dari 2⁵ adalah...</p>',
-                        options: [
-                            { id: 'A', text: '16' },
-                            { id: 'B', text: '25' },
-                            { id: 'C', text: '32' },
-                            { id: 'D', text: '64' },
-                            { id: 'E', text: '128' }
-                        ]
-                    }
-                ],
+                questions: @json($questions),
 
                 handleViolation(message) {
-                    if (this.showFinishModal) return; // Ignore violations if user is finishing
+                    if (this.showFinishModal) return; 
                     
                     this.violations++;
                     this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
@@ -316,8 +267,6 @@
                         this.submitExam();
                     } else {
                         this.showWarningModal = true;
-                        // For extra safety, ensure we exit fullscreen when showing warning 
-                        // so they can't bypass it easily, though normally they are already out
                         if (document.fullscreenElement) {
                             document.exitFullscreen().catch(() => {});
                         }
@@ -385,7 +334,7 @@
                     Alpine.store('exam').startTimer();
                     document.documentElement.requestFullscreen().catch((e) => {
                         console.log("Fullscreen blocked", e);
-                        alert("Mohon izinkan Fullscreen untuk melanjutkan ujian.");
+                        // alert("Mohon izinkan Fullscreen untuk melanjutkan ujian.");
                     });
                 },
 
@@ -411,10 +360,37 @@
                 },
 
                 submitExam() {
-                     // In real app, submit form here
-                     document.exitFullscreen();
-                     alert('Ujian Selesai! Jawaban tersimpan.');
-                     window.location.href = "{{ route('student.dashboard') }}";
+                     // Remove unload listener
+                     window.onbeforeunload = null;
+                     
+                     // Exit fullscreen first
+                     if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(() => {});
+                     }
+
+                     fetch('{{ route('student.exam.submit', $exam->id) }}', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                         },
+                         body: JSON.stringify({ answers: this.answers })
+                     })
+                     .then(response => {
+                         if (!response.ok) throw new Error('Network response was not ok');
+                         return response.json();
+                     })
+                     .then(data => {
+                         if(data.success) {
+                             window.location.href = data.redirect;
+                         } else {
+                             alert('Terjadi kesalahan saat menyimpan jawaban.');
+                         }
+                     })
+                     .catch(error => {
+                         console.error('Error:', error);
+                         alert('Gagal mengirim jawaban. Periksa koneksi internet Anda.');
+                     });
                 }
             }));
         });

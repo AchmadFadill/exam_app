@@ -1,5 +1,6 @@
 @section('title', $examId ? 'Edit Ujian'  : 'Buat Ujian Baru')
 
+<div>
 <div class="max-w-5xl mx-auto space-y-10 pb-20">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -34,29 +35,12 @@
                 </div>
                 <span class="text-[9px] font-black uppercase tracking-widest {{ $step >= 2 ? 'text-primary' : 'text-text-muted opacity-40' }}">Soal</span>
             </div>
-        </div>
-        @endif
-
-        {{-- Step 2: Question Selection --}}
-        @if($currentStep === 2)
-        <div class="p-8 space-y-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-text-main">Pilih Soal dari Bank Soal</h3>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm font-semibold text-primary">{{ count($selectedQuestions) }} Soal Dipilih</span>
-                    @php
-                        $totalScore = array_sum($questionScores);
-                    @endphp
-                    @if(count($selectedQuestions) > 0)
-                        <span class="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-bold text-sm">
-                            Total Skor: {{ $totalScore }}
-                        </span>
-                    @endif
-                </div>
             </div>
+        </div>
+    </div>
 
     <div class="relative">
-        <form wire:submit.prevent="save" class="space-y-10">
+        <form wire:submit.prevent="saveExam" class="space-y-10">
             
             <!-- Step 1: Basic Info & Settings -->
             @if($step === 1)
@@ -79,15 +63,14 @@
                                 <div>
                                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran</label>
                                     <div class="relative group">
-                                        <select wire:model="subject" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em] shadow-inner" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                                        <select wire:model="subject_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em] shadow-inner" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
                                             <option value="">Pilih Mata Pelajaran</option>
-                                            <option value="Matematika">Matematika</option>
-                                            <option value="Biologi">Biologi</option>
-                                            <option value="Sejarah">Sejarah</option>
-                                            <option value="Fisika">Fisika</option>
+                                            @foreach($subjects as $subject)
+                                                <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
-                                    @error('subject') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
+                                    @error('subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div>
@@ -126,10 +109,10 @@
                                 <div>
                                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Durasi Pengerjaan</label>
                                     <div class="relative">
-                                        <input type="number" wire:model="duration" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="90">
+                                        <input type="number" wire:model="duration_minutes" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="90">
                                         <span class="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-text-muted opacity-40 uppercase tracking-widest">Menit</span>
                                     </div>
-                                    @error('duration') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
+                                    @error('duration_minutes') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 </div>
                                 <div>
                                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Bobot Poin Default</label>
@@ -163,12 +146,12 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             @foreach($availableClasses as $class)
                             <label class="relative flex flex-col items-center justify-center p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group transition-all hover:scale-[1.05] active:scale-95 shadow-sm hover:shadow-xl hover:shadow-primary/5">
-                                <input type="checkbox" wire:model="classes" value="{{ $class }}" class="peer absolute inset-0 opacity-0 cursor-pointer">
+                                <input type="checkbox" wire:model="classes" value="{{ $class->id }}" class="peer absolute inset-0 opacity-0 cursor-pointer">
                                 
-                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 {{ in_array($class, $classes) ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30' : 'bg-white dark:bg-slate-800 text-text-muted opacity-40 shadow-inner' }}">
+                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 {{ in_array($class->id, $classes) ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30' : 'bg-white dark:bg-slate-800 text-text-muted opacity-40 shadow-inner' }}">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </div>
-                                <span class="text-xs font-black uppercase tracking-widest transition-colors duration-300 {{ in_array($class, $classes) ? 'text-text-main' : 'text-text-muted opacity-60' }}">{{ $class }}</span>
+                                <span class="text-xs font-black uppercase tracking-widest transition-colors duration-300 {{ in_array($class->id, $classes) ? 'text-text-main' : 'text-text-muted opacity-60' }}">{{ $class->name }}</span>
                                 
                                 <div class="absolute inset-0 rounded-[2rem] ring-2 ring-primary ring-offset-4 dark:ring-offset-slate-900 opacity-0 transition-opacity peer-checked:opacity-100"></div>
                             </label>
@@ -314,43 +297,67 @@
                         </x-card>
                     </div>
 
-                    <!-- Question List Column -->
+                    <!-- Question Groups Column -->
                     <div class="lg:col-span-3 space-y-6">
                         <div class="relative group">
-                            <input type="text" class="w-full pl-16 pr-10 py-6 bg-bg-surface dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] shadow-xl shadow-black/5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold text-lg tracking-tight" placeholder="Cari soal spesifik dari database bank soal...">
+                            <input type="text" wire:model.live="searchQuery" class="w-full pl-16 pr-10 py-6 bg-bg-surface dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] shadow-xl shadow-black/5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold text-lg tracking-tight" placeholder="Cari kelompok soal...">
                             <svg class="w-6 h-6 text-text-muted group-focus-within:text-primary transition-colors absolute left-6 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
 
-                        <div class="space-y-4">
-                            @for($i = 1; $i <= 5; $i++)
-                            <label class="relative flex items-start gap-8 p-8 bg-bg-surface dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[3rem] cursor-pointer group hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300">
-                                <input type="checkbox" class="hidden peer">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @forelse($questionGroups as $group)
+                            @php
+                                $isSelected = $this->isGroupSelected($group->title, $group->subject_id);
+                            @endphp
+                            <div wire:click="toggleQuestionGroup('{{ addslashes($group->title) }}', {{ $group->subject_id }})" 
+                                 class="relative p-8 rounded-[2.5rem] cursor-pointer group transition-all duration-300 border-2 {{ $isSelected ? 'bg-blue-50 border-blue-600 dark:bg-blue-900/10 dark:border-blue-500' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-blue-400 hover:shadow-lg' }}">
                                 
-                                <div class="mt-1 w-8 h-8 rounded-xl border-2 border-border-main dark:border-slate-800 flex items-center justify-center transition-all peer-checked:bg-primary peer-checked:border-primary peer-checked:scale-110 shadow-inner group-hover:border-primary/20">
-                                    <svg class="w-5 h-5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <!-- Header -->
+                                <div class="flex items-start justify-between mb-8">
+                                    <div class="flex-1 pr-4">
+                                        <h4 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight italic">{{ $group->title }}</h4>
+                                        <div class="mt-3">
+                                            <span class="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-[10px] font-black uppercase tracking-widest leading-none">
+                                                {{ $group->subject->name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Checkbox -->
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 {{ $isSelected ? 'bg-blue-600 shadow-md shadow-blue-600/30' : 'bg-gray-100 dark:bg-slate-800' }}">
+                                            <svg class="w-5 h-5 text-white transition-opacity duration-300 {{ $isSelected ? 'opacity-100' : 'opacity-0' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="flex-1 space-y-4">
-                                    <div class="flex items-center gap-4">
-                                        <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[9px] font-black uppercase tracking-[0.2em] shadow-inner">Pilihan Ganda</span>
-                                        <span class="w-1.5 h-1.5 rounded-full bg-border-main"></span>
-                                        <span class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] opacity-40 italic">#MATRIX_{{ 2548 + $i }}</span>
+                                <!-- Divider -->
+                                <div class="h-px w-full bg-gray-100 dark:bg-slate-800 mb-6"></div>
+
+                                <!-- Stats -->
+                                <div class="flex items-center gap-8">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ $group->question_count }} Soal</span>
                                     </div>
-                                    <p class="text-lg font-bold text-text-main tracking-tight leading-relaxed group-hover:text-primary transition-colors italic">"Ini adalah contoh konten pertanyaan ke {{ $i }} yang diambil secara dinamis dari infrastruktur bank soal anda..."</p>
-                                    <div class="flex items-center gap-6 pt-4 border-t border-border-subtle dark:border-slate-800 opacity-40 group-hover:opacity-100 transition-opacity">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                            <span class="text-[10px] font-black uppercase tracking-widest text-text-muted">10 Poin</span>
-                                        </div>
-                                         <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            <span class="text-[10px] font-black uppercase tracking-widest text-text-muted">Sulit</span>
-                                        </div>
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ $group->question_count * $default_score }} Poin</span>
                                     </div>
                                 </div>
-                                <div class="absolute inset-x-0 bottom-0 h-1.5 bg-primary transform scale-x-0 transition-transform duration-500 rounded-b-[3rem] peer-checked:scale-x-100"></div>
-                            </label>
-                            @endfor
+
+                                <!-- Selection Bottom Bar -->
+                                <div class="absolute inset-x-8 bottom-0 h-1.5 bg-blue-600 rounded-t-full transform transition-transform duration-300 origin-bottom {{ $isSelected ? 'scale-y-100' : 'scale-y-0' }}"></div>
+                            </div>
+                            @empty
+                            <div class="col-span-2 text-center py-20">
+                                <svg class="w-20 h-20 mx-auto text-text-muted opacity-20 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p class="text-text-muted font-bold uppercase tracking-widest text-sm">Belum ada kelompok soal</p>
+                                <p class="text-text-muted text-xs mt-2 opacity-60">Buat soal terlebih dahulu dari menu Bank Soal</p>
+                            </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -362,7 +369,7 @@
                 <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 @if($step > 1)
-                    <button type="button" wire:click="prevStep" class="relative z-10 px-8 py-4 bg-white dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-primary hover:border-primary/20 hover:-translate-x-2 transition-all active:scale-95 shadow-sm">
+                    <button type="button" wire:click="previousStep" class="relative z-10 px-8 py-4 bg-white dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-primary hover:border-primary/20 hover:-translate-x-2 transition-all active:scale-95 shadow-sm">
                         &larr; Tahap Sebelumnya
                     </button>
                 @else
@@ -379,10 +386,9 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                         Simpan & Jadwalkan
                     </button>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </div>
 </div>
-
-
+</div>
