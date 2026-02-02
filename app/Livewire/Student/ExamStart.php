@@ -11,6 +11,7 @@ class ExamStart extends Component
     use AuthorizesRequests;
 
     public $examId;
+    public $token = '';
     
     public function mount($id)
     {
@@ -47,6 +48,15 @@ class ExamStart extends Component
         if (!$this->canStart()) {
             $this->dispatch('notify', [
                 'message' => 'Ujian belum dimulai atau sudah berakhir.',
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        // Validate Token if exam has one
+        if ($this->exam->token && trim(strtoupper($this->token)) !== trim(strtoupper($this->exam->token))) {
+            $this->dispatch('notify', [
+                'message' => 'Token ujian tidak valid. Pastikan token yang dimasukkan benar.',
                 'type' => 'error'
             ]);
             return;

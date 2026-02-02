@@ -92,10 +92,10 @@
                                     <div class="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] opacity-60">Progress</div>
                                 </div>
                                 <div class="w-px h-12 bg-border-subtle dark:bg-slate-800 hidden sm:block"></div>
-                                <a href="#" class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-border-main text-text-main font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all text-xs uppercase tracking-widest shadow-sm">
+                                <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-border-main text-text-main font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all text-xs uppercase tracking-widest shadow-sm">
                                     Detail
                                 </a>
-                                <a href="#" class="px-6 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center gap-3">
+                                <a href="{{ route('teacher.monitoring.detail', $exam['id']) }}" class="px-6 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center gap-3">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     Pantau
                                 </a>

@@ -188,9 +188,10 @@
                                     </div>
                                     <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Acak Soal</span>
                                 </div>
-                                <input type="checkbox" wire:model="shuffle_questions" class="hidden peer">
-                                <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors peer-checked:bg-primary">
-                                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-md"></div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="shuffle_questions" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
                                 </div>
                             </label>
 
@@ -202,9 +203,10 @@
                                     </div>
                                     <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Acak Jawaban</span>
                                 </div>
-                                <input type="checkbox" wire:model="shuffle_answers" class="hidden peer">
-                                <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors peer-checked:bg-primary">
-                                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-md"></div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="shuffle_answers" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
                                 </div>
                             </label>
 
@@ -219,9 +221,10 @@
                                         <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Otomatis submit jika curang</span>
                                     </div>
                                 </div>
-                                <input type="checkbox" wire:model.live="enable_tab_tolerance" class="hidden peer">
-                                <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors peer-checked:bg-primary">
-                                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-md"></div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="enable_tab_tolerance" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
                                 </div>
                             </label>
 

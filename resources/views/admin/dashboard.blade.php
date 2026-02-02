@@ -95,7 +95,7 @@
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2 uppercase tracking-tight">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full {{ $stats['active_exams_count'] > 0 ? 'bg-red-500 animate-pulse' : 'bg-green-500' }}"></span>
                     Ujian Berjalan ({{ $stats['active_exams_count'] }})
                 </h3>
                 <x-button href="{{ route('admin.monitor') }}" variant="soft">

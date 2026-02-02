@@ -78,7 +78,20 @@
                 </div>
 
                 @if($this->canStart())
-                    <button wire:click="startExam" class="w-full py-3 px-4 bg-primary text-white font-medium rounded-xl hover:bg-primary-600 transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 group">
+                    @if($exam->token)
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Token Ujian</label>
+                        <input type="text" wire:model.live="token" 
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-mono text-center text-lg uppercase tracking-widest" 
+                            placeholder="W X Y Z 1 2" 
+                            maxlength="6">
+                        <p class="text-[10px] text-gray-400 mt-2 text-center">Minta token kepada pengawas ujian</p>
+                    </div>
+                    @endif
+
+                    <button wire:click="startExam" 
+                        @if($exam->token && strlen($token) < 1) disabled @endif
+                        class="w-full py-3 px-4 bg-primary text-white font-medium rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
                         <span>Mulai Ujian</span>
                         <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

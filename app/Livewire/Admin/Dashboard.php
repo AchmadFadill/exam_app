@@ -30,25 +30,42 @@ class Dashboard extends Component
             'status' => 'Healthy',
         ];
 
-        // Active Exams Feed
-        $active_exams = [
-            [
-                'subject' => 'Matematika Wajib',
-                'class' => 'XII IPA 1',
-                'teacher' => 'Pak Budi',
-                'progress' => 85,
-                'students_online' => 32,
-                'total_students' => 34,
-            ],
-            [
-                'subject' => 'Bahasa Inggris',
-                'class' => 'X IPS 2',
-                'teacher' => 'Bu Siti',
-                'progress' => 42,
-                'students_online' => 28,
-                'total_students' => 30,
-            ],
-        ];
+        // Active Exams Feed - REAL DATA
+        $activeExamsQuery = \App\Models\Exam::where('status', 'scheduled')
+            ->whereDate('date', now())
+            ->whereTime('start_time', '<=', now()->format('H:i'))
+            ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->with(['subject', 'classrooms', 'teacher.user', 'attempts' => function($q) {
+                $q->whereNotNull('started_at');
+            }])
+            ->get();
+
+        $active_exams = $activeExamsQuery->map(function($exam) {
+            // Calculate total students assigned to this exam (via classrooms)
+            $totalStudents = \App\Models\Student::whereIn('classroom_id', $exam->classrooms->pluck('id'))->count();
+            
+            // Students who have started (have an attempt record)
+            $studentsOnline = $exam->attempts->count();
+            
+            // Calculate progress based on time elapsed
+            $start = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->start_time);
+            $end = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
+            $totalDuration = $start->diffInMinutes($end);
+            $elapsed = $start->diffInMinutes(now());
+            $progress = $totalDuration > 0 ? min(100, round(($elapsed / $totalDuration) * 100)) : 0;
+
+            return [
+                'subject' => $exam->subject->name ?? 'Unknown Subject',
+                'class' => $exam->classrooms->pluck('name')->join(', '),
+                'teacher' => $exam->teacher->user->name ?? 'Unknown Teacher',
+                'progress' => $progress,
+                'students_online' => $studentsOnline,
+                'total_students' => $totalStudents,
+            ];
+        })->toArray();
+
+        // Update active exams count
+        $stats['active_exams_count'] = count($active_exams);
 
         // Security Alerts Feed
         $alerts = [

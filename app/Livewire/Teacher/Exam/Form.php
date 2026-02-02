@@ -39,7 +39,7 @@ class Form extends Component
     public $token = '';
     public $shuffle_questions = false;
     public $shuffle_answers = false;
-    public $enable_tab_tolerance = true;
+    public $enable_tab_tolerance = false;
     public $tab_tolerance = 3;
 
     // Step 4: Status

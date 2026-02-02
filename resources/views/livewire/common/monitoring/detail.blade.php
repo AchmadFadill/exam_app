@@ -7,18 +7,44 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
-                <h2 class="font-bold text-2xl text-text-main">Monitoring Ujian</h2>
-                <p class="text-text-muted text-sm">Ujian Harian Matematika</p>
+                <h2 class="font-bold text-2xl text-text-main">{{ $exam->name }}</h2>
+                <p class="text-text-muted text-sm">{{ $exam->subject->name }} • {{ $exam->classrooms->pluck('name')->join(', ') }}</p>
             </div>
         </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <x-monitor.summary-card label="Total Siswa" value="32" />
-        <x-monitor.summary-card label="Sedang Mengerjakan" value="25" variant="primary" />
-        <x-monitor.summary-card label="Selesai" value="6" variant="success" />
-        <x-monitor.summary-card label="Belum Mulai" value="1" variant="gray" />
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <!-- Token Card -->
+        @if($exam->token)
+        <div x-data="{ copied: false }" 
+             @click="navigator.clipboard.writeText('{{ $exam->token }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+             class="bg-gradient-to-br from-indigo-600 to-primary rounded-xl p-4 text-white shadow-lg shadow-primary/20 flex flex-col justify-center items-center relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all active:scale-95">
+            <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <!-- Default State -->
+            <div x-show="!copied" class="flex flex-col items-center">
+                <div class="text-[10px] uppercase tracking-widest font-bold opacity-80 mb-1 flex items-center gap-1">
+                    Token Ujian
+                    <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="font-mono text-3xl font-black tracking-wider group-hover:scale-110 transition-transform">{{ $exam->token }}</div>
+            </div>
+
+            <!-- Copied State -->
+            <div x-show="copied" x-cloak class="flex flex-col items-center animate-pulse">
+                <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <div class="text-xs font-black uppercase tracking-widest">Tersalin!</div>
+            </div>
+        </div>
+        @else
+        <x-monitor.summary-card label="Token" value="-" variant="gray" />
+        @endif
+
+        <x-monitor.summary-card label="Total Siswa" :value="$exam->classrooms->sum('students_count')" />
+        <x-monitor.summary-card label="Sedang Mengerjakan" :value="$students->where('status', 'in_progress')->count()" variant="primary" />
+        <x-monitor.summary-card label="Selesai" :value="$students->whereIn('status', ['completed', 'graded', 'submitted'])->count()" variant="success" />
+        <x-monitor.summary-card label="Belum Mulai" :value="$students->where('status', 'not_started')->count()" variant="gray" />
     </div>
 
     <!-- Filter Bar -->

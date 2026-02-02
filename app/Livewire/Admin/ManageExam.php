@@ -24,60 +24,70 @@ class ManageExam extends Component
 
     public function bulkDelete()
     {
-        // Dummy bulk delete logic
+        if (!empty($this->selectedExams)) {
+            \App\Models\Exam::destroy($this->selectedExams);
+            $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+        }
+        
         $this->showBulkDeleteModal = false;
         $this->selectedExams = [];
         $this->selectAll = false;
-        $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
     }
 
     public function updatedSelectAll($value)
     {
         if ($value) {
-            $this->selectedExams = [1, 2, 3];
+            // Select all IDs (Warning: if many exams, this might be heavy. 
+            // Better to select current page, but for now select all is expected behavior for "Select All")
+            $this->selectedExams = \App\Models\Exam::pluck('id')->map(fn($id) => (string)$id)->toArray();
         } else {
             $this->selectedExams = [];
         }
     }
+    use \Livewire\WithPagination;
+
+    // ... (keep existing properties)
+
     public function render()
     {
-        // Dummy Exams Data (Replicated from Teacher for Admin)
-        $exams = [
-            [
-                'id' => 1,
-                'name' => 'Ujian Harian Matematika',
-                'subject' => 'Matematika',
-                'class' => 'XI IPA 1',
-                'date' => '2025-12-23',
-                'start_time' => '',
-                'end_time' => '',
-                'token' => '',
-                'duration' => 60,
-                'default_score' => 5,
-                'status' => 'scheduled', // scheduled, ongoing, completed
-                'questions_count' => 30,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Ujian Akhir Semester Fisika',
-                'subject' => 'Fisika',
-                'class' => 'XII IPA 2',
-                'date' => '2025-12-22',
-                'duration' => 120,
-                'status' => 'ongoing',
-                'questions_count' => 45,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Kuis Sejarah Indonesia',
-                'subject' => 'Sejarah',
-                'class' => 'X IPS 1',
-                'date' => '2025-12-20',
-                'duration' => 45,
-                'status' => 'completed',
-                'questions_count' => 20,
-            ],
-        ];
+        $examsQuery = \App\Models\Exam::with(['subject', 'classrooms', 'questions'])
+            ->latest();
+
+        $exams = $examsQuery->paginate(10)->through(function ($exam) {
+            
+            // Dynamic Status Calculation
+            $status = $exam->status;
+            if ($status === 'scheduled') {
+                $now = now();
+                $date = $exam->date->format('Y-m-d');
+                // Handle potential null times if draft
+                $start = $exam->start_time ? \Carbon\Carbon::parse($date . ' ' . $exam->start_time) : null;
+                $end = $exam->end_time ? \Carbon\Carbon::parse($date . ' ' . $exam->end_time) : null;
+
+                if ($start && $end) {
+                    if ($now->between($start, $end)) {
+                        $status = 'ongoing';
+                    } elseif ($now->gt($end)) {
+                        $status = 'completed';
+                    }
+                }
+            }
+
+            return [
+                'id' => $exam->id,
+                'name' => $exam->name,
+                'subject' => $exam->subject->name ?? '-',
+                'class' => $exam->classrooms->pluck('name')->join(', '), // Comma separated classes
+                'date' => $exam->date->format('Y-m-d'),
+                'start_time' => $exam->start_time,
+                'end_time' => $exam->end_time,
+                'token' => $exam->token,
+                'duration' => $exam->duration_minutes,
+                'default_score' => $exam->default_score,
+                'status' => $status,
+                'questions_count' => $exam->questions->count(),
+            ];
+        });
 
         return view('admin.manage-exam', [
             'exams' => $exams

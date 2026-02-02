@@ -18,23 +18,76 @@ class Detail extends Component
 
     public function render()
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
         $isAdmin = request()->is('admin/*');
+        
+        $exam = \App\Models\Exam::with(['subject', 'classrooms', 'attempts.student.user'])
+            ->findOrFail($this->examId);
 
-        // Dummy Student Progress Data
-        $students = [
-            ['name' => 'Aditya Pratama', 'class' => 'XI IPA 1', 'status' => 'working', 'progress' => '15/30', 'w' => '50%', 'tab_alert' => 0],
-            ['name' => 'Bunga Citra', 'class' => 'XI IPA 2', 'status' => 'working', 'progress' => '28/30', 'w' => '93%', 'tab_alert' => 1],
-            ['name' => 'Chandra Wijaya', 'class' => 'XI IPA 1', 'status' => 'completed', 'progress' => '30/30', 'w' => '100%', 'tab_alert' => 0],
-            // ... more dummy data
-        ];
+        // Authorization Check
+        if (!$isAdmin && $user->role === 'teacher') {
+            if ($exam->teacher_id !== $user->teacher->id) {
+                abort(403, 'Anda tidak memiliki akses ke ujian ini.');
+            }
+        }
 
-        $live_logs = [
-            ['time' => '09:30:10', 'student' => 'Aditya Pratama', 'activity' => 'Menjawab Soal #15', 'type' => 'info'],
-            ['time' => '09:28:05', 'student' => 'Eko Kurniawan', 'activity' => 'Keluar Fullscreen', 'type' => 'warning'],
-            // ... more dummy data
-        ];
+        // Real Student Data
+        // Get all students from the assigned classrooms
+        $assignedStudents = \App\Models\Student::whereIn('classroom_id', $exam->classrooms->pluck('id'))
+            ->with('user', 'classroom')
+            ->get();
+            
+        $students = $assignedStudents->map(function($student) use ($exam) {
+            $attempt = $exam->attempts->where('student_id', $student->id)->first();
+            
+            $status = 'not_started';
+            $progress = '0/' . $exam->questions()->count(); // Simplified
+            $width = '0%';
+            $tab_alert = 0;
+            
+            if ($attempt) {
+                $status = $attempt->status;
+                // Calculate progress roughly based on answered questions if possible, 
+                // or just based on status. For now, we use status.
+                $tab_alert = $attempt->tab_switches;
+                
+                if ($status === 'completed' || $status === 'graded') {
+                    $width = '100%';
+                } elseif ($status === 'in_progress') {
+                    $width = '50%'; // Dynamic progress would need answer count
+                }
+            }
+
+            return [
+                'id' => $student->id,
+                'name' => $student->user->name,
+                'class' => $student->classroom->name,
+                'status' => $status,
+                'progress' => $progress,
+                'w' => $width,
+                'tab_alert' => $tab_alert,
+                'attempt_id' => $attempt ? $attempt->id : null
+            ];
+        });
+
+        // Real Logs (from attempts sorted by recent update)
+        $live_logs = \App\Models\ExamAttempt::where('exam_id', $this->examId)
+            ->where('status', 'in_progress')
+            ->with('student.user')
+            ->orderBy('updated_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function($attempt) {
+                return [
+                    'time' => $attempt->updated_at->format('H:i:s'),
+                    'student' => $attempt->student->user->name,
+                    'activity' => $attempt->tab_switches > 0 ? 'Terdeteksi pindah tab' : 'Sedang mengerjakan',
+                    'type' => $attempt->tab_switches > 0 ? 'warning' : 'info'
+                ];
+            });
 
         return $this->applyLayout('livewire.common.monitoring.detail', [
+            'exam' => $exam,
             'students' => $students,
             'live_logs' => $live_logs,
             'backRoute' => $isAdmin ? 'admin.monitor' : 'teacher.monitoring'

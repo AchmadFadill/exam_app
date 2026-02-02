@@ -93,9 +93,7 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group
     Route::get('/exam/{id}/take', [App\Http\Controllers\Student\ExamController::class, 'show'])->name('exam.show');
     Route::post('/exam/{id}/submit', [App\Http\Controllers\Student\ExamController::class, 'submit'])->name('exam.submit');
 
-    Route::get('/results', function () {
-        return view('student.exam.results');
-    })->name('results');
+    Route::get('/results', App\Livewire\Student\ExamResults::class)->name('results');
 
     Route::get('/results/{id}', [App\Http\Controllers\Student\ExamController::class, 'result_detail'])->name('results.detail');
 });
