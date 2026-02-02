@@ -18,7 +18,7 @@
             </x-table.tr>
         </x-table.thead>
         <tbody class="divide-y divide-gray-200">
-            @foreach($results as $result)
+            @forelse($results as $result)
             <x-table.tr>
                 <x-table.td>
                     <span class="font-black text-text-main uppercase tracking-tight group-hover:text-primary transition-colors">{{ $result['exam_name'] }}</span>
@@ -42,7 +42,13 @@
                     </div>
                 </x-table.td>
             </x-table.tr>
-            @endforeach
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="7" class="py-20 text-center text-text-muted italic font-bold">
+                    Belum ada laporan hasil ujian yang tersedia.
+                </x-table.td>
+            </x-table.tr>
+            @endforelse
         </tbody>
     </x-table>
 </div>

@@ -24,7 +24,7 @@
         <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Menampilkan {{ count($exams) }} Ujian Aktif</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        @foreach($exams as $exam)
+        @forelse($exams as $exam)
         <div class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden hover:border-primary/40 transition-all flex flex-col group">
             <div class="p-8 flex-1">
                 <div class="flex justify-between items-start mb-8">
@@ -98,7 +98,13 @@
                 @endif
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-span-full py-20 text-center text-text-muted bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] border border-dashed border-border-main dark:border-slate-800">
+            <svg class="w-16 h-16 mx-auto text-text-muted opacity-20 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+            <h3 class="text-xl font-black text-text-main mb-2">Belum ada ujian yang dibuat</h3>
+            <p class="font-bold">Mulai dengan membuat ujian baru! 🚀</p>
+        </div>
+        @endforelse
     </div>
     </div>
 

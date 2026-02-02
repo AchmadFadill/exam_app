@@ -105,7 +105,7 @@
             </div>
             
             <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
-                @foreach($active_exams as $exam)
+                @forelse($active_exams as $exam)
                 <div class="p-8 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
                     <div class="flex justify-between items-start mb-6">
                         <div>
@@ -126,7 +126,11 @@
                     </div>
                     
                 </div>
-                @endforeach
+                @empty
+                <div class="p-12 text-center text-text-muted font-bold italic opacity-60">
+                    <p>Sedang tidak ada ujian yang dilaksanakan saat ini. 🎉</p>
+                </div>
+                @endforelse
             </div>
         </section>
 
@@ -146,7 +150,7 @@
             
             <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden">
                 <div class="p-8 space-y-4">
-                    @foreach($alerts as $alert)
+                    @forelse($alerts as $alert)
                     <div class="flex items-start gap-5 p-5 rounded-2xl border border-border-subtle dark:border-border-subtle hover:border-red-500/30 hover:bg-red-50/30 dark:hover:bg-red-500/5 transition-all group cursor-pointer">
                         <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center 
                             @if($alert['severity'] == 'critical') bg-red-100 dark:bg-red-500/20 text-red-600 
@@ -165,7 +169,11 @@
                             </p>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="py-12 text-center text-text-muted font-bold italic opacity-60">
+                        <p>Tidak ada aktivitas mencurigakan. Sistem aman! ✅</p>
+                    </div>
+                    @endforelse
                 </div>
                  <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
                     
