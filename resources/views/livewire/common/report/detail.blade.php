@@ -68,7 +68,7 @@
                         wire:click="sortBySlowest" 
                         variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
                         size="sm"
-                        class="!rounded-xl uppercase tracking-widest !bg-purple-500 {{ $sortBy !== 'slowest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500' : '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' }}">
                         🐌 Terlambat
                     </x-button>
                 </div>
@@ -83,7 +83,7 @@
                         </x-table.tr>
                     </x-table.thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
-                        @foreach($students as $student)
+                        @forelse($students as $student)
                         <x-table.tr>
                             <x-table.td>
                                 <div class="font-black text-text-main uppercase tracking-tight">{{ $student['name'] }}</div>
@@ -102,7 +102,13 @@
                                 </div>
                             </x-table.td>
                         </x-table.tr>
-                        @endforeach
+                        @empty
+                        <x-table.tr>
+                            <x-table.td colspan="4" class="py-12 text-center text-text-muted italic font-bold">
+                                Belum ada data peserta untuk ujian ini.
+                            </x-table.td>
+                        </x-table.tr>
+                        @endforelse
                     </tbody>
                 </x-table>
             </x-card>
@@ -113,7 +119,7 @@
             <x-card title="Analisis Soal">
                 <p class="text-xs text-text-muted mb-4 uppercase tracking-widest font-bold">Soal Paling Banyak Salah</p>
                 <div class="space-y-4">
-                    @foreach($most_failed_questions as $q)
+                    @forelse($most_failed_questions as $q)
                     <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 group hover:border-red-100 transition-colors">
                         <div class="flex justify-between items-start mb-2">
                             <span class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center font-bold text-sm text-gray-900">#{{ $q['number'] }}</span>
@@ -124,7 +130,12 @@
                              Jawaban Benar: <span class="font-bold text-green-600">{{ $q['correct_answer'] }}</span>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="p-8 text-center text-text-muted bg-gray-50 rounded-xl border border-dashed border-gray-100">
+                        <p class="text-[10px] font-black uppercase tracking-widest mb-2 italic">Luar Biasa! ✨</p>
+                        <p class="text-xs font-bold leading-relaxed">Semua soal dijawab dengan baik oleh peserta.</p>
+                    </div>
+                    @endforelse
                 </div>
                 <x-button variant="primary" class="w-full mt-6">Lihat Analisis Lengkap</x-button>
             </x-card>

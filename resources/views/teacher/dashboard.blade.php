@@ -121,8 +121,8 @@
                         <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:rotate-6 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                         </div>
-                        <h4 class="font-black text-2xl tracking-tight italic">Create <span class="not-italic">Questions</span></h4>
-                        <p class="text-indigo-100 text-sm mt-2 font-bold opacity-80 uppercase tracking-widest">Bank Soal Konten</p>
+                        <h4 class="font-black text-2xl tracking-tight italic">Buat <span class="not-italic">Ujian</span></h4>
+                        <p class="text-indigo-100 text-sm mt-2 font-bold opacity-80 uppercase tracking-widest">Bank Soal</p>
                     </div>
                     <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4 rotate-12 pointer-events-none">
                         <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -134,7 +134,7 @@
                         <div class="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <h4 class="font-black text-2xl text-text-main tracking-tight italic">Schedule <span class="not-italic text-amber-600">Exam</span></h4>
+                        <h4 class="font-black text-2xl text-text-main tracking-tight italic">Jadwal <span class="not-italic text-amber-600">Ujian</span></h4>
                         <p class="text-text-muted text-sm mt-2 font-bold uppercase tracking-widest opacity-60">Jadwal & Kelas</p>
                     </div>
                 </a>

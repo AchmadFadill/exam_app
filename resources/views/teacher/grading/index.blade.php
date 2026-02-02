@@ -17,7 +17,7 @@
             </x-table.tr>
         </x-table.thead>
         <tbody class="bg-bg-surface divide-y divide-gray-200">
-            @foreach($exams as $exam)
+            @forelse($exams as $exam)
             <x-table.tr>
                 <x-table.td>
                     <div class="text-sm font-medium text-text-main">{{ $exam['name'] }}</div>
@@ -65,7 +65,13 @@
                     </div>
                 </x-table.td>
             </x-table.tr>
-            @endforeach
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="5" class="py-20 text-center text-text-muted italic font-bold">
+                    Tidak ada ujian yang memerlukan koreksi manual saat ini. Pekerjaan selesai! ☕
+                </x-table.td>
+            </x-table.tr>
+            @endforelse
         </tbody>
     </x-table>
 </div>
