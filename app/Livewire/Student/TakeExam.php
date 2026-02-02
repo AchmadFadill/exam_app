@@ -94,6 +94,11 @@ class TakeExam extends Component
 
     public function saveAnswer()
     {
+        // 1. Validate Time Server-Side
+        if ($this->hasTimeExpired()) {
+            return; // Silently fail or dispatch error
+        }
+
         $question = $this->currentQuestion;
         
         $data = [
@@ -153,7 +158,12 @@ class TakeExam extends Component
 
     public function submitExam()
     {
-        $this->saveAnswer(); // Save last question
+        // Ensure strictly one submission
+        if ($this->attempt->status === 'submitted' || $this->attempt->status === 'graded') {
+            return redirect()->route('student.exams.index');
+        }
+
+        $this->saveAnswer(); // Save last question (will be blocked if time expired)
         
         $attempt = $this->attempt;
         
@@ -175,6 +185,35 @@ class TakeExam extends Component
         ]);
 
         return redirect()->route('student.exams.index')->with('success', 'Ujian berhasil dikumpulkan!');
+    }
+
+    /**
+     * Server-side check if time has expired
+     * Allows a 2-minute buffer for network latency
+     */
+    protected function hasTimeExpired()
+    {
+        $exam = $this->exam;
+        $attempt = $this->attempt;
+        
+        $startedAt = \Carbon\Carbon::parse($attempt->started_at);
+        $allowedDuration = $exam->duration_minutes;
+        
+        // Theoretical end time
+        $endTime = $startedAt->copy()->addMinutes($allowedDuration);
+        
+        // Hard deadline (Exam End Time)
+        $examHardDeadline = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
+        
+        // The actual limit is the earliest of the two
+        $limit = $endTime->min($examHardDeadline);
+        
+        // Buffer: 60 seconds tolerance
+        if (now()->gt($limit->addSeconds(60))) {
+            return true;
+        }
+        
+        return false;
     }
 
     public function render()
