@@ -12,6 +12,10 @@ class Index extends Component
     public $selectedExams = [];
     public $selectAll = false;
     public $showBulkDeleteModal = false;
+    
+    // Individual Delete States
+    public $showDeleteModal = false;
+    public $selectedExamId = null;
 
     public function openBulkDeleteModal()
     {
@@ -30,6 +34,23 @@ class Index extends Component
         $this->selectedExams = [];
         $this->selectAll = false;
         $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+    }
+    
+    public function openDeleteModal($id)
+    {
+        $this->selectedExamId = $id;
+        $this->showDeleteModal = true;
+    }
+    
+    public function deleteExam()
+    {
+        if ($this->selectedExamId) {
+            Exam::destroy($this->selectedExamId);
+            
+            $this->showDeleteModal = false;
+            $this->selectedExamId = null;
+            $this->dispatch('notify', ['message' => 'Ujian berhasil dihapus!']);
+        }
     }
 
     public function duplicateExam($id)
