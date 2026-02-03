@@ -160,7 +160,7 @@ class TakeExam extends Component
     {
         // Ensure strictly one submission
         if ($this->attempt->status === 'submitted' || $this->attempt->status === 'graded') {
-            return redirect()->route('student.exams.index');
+            return $this->redirect(route('student.exams.index'));
         }
 
         $this->saveAnswer(); // Save last question (will be blocked if time expired)
@@ -184,7 +184,8 @@ class TakeExam extends Component
             'percentage' => $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0, 
         ]);
 
-        return redirect()->route('student.exams.index')->with('success', 'Ujian berhasil dikumpulkan!');
+        session()->flash('success', 'Ujian berhasil dikumpulkan!');
+        return $this->redirect(route('student.exams.index'));
     }
 
     /**

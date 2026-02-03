@@ -30,6 +30,15 @@
             </span>
             <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari NIS, nama, atau email siswa...">
         </div>
+
+        <!-- Classroom Filter -->
+        <div class="w-full sm:w-auto sm:min-w-[280px]">
+            <x-select 
+                wire:model.live="filterClassroom" 
+                :options="$classrooms->map(fn($c) => ['value' => $c->id, 'label' => $c->name . ' - ' . $c->level])->prepend(['value' => '', 'label' => 'Semua Kelas'])->toArray()" 
+                placeholder="Filter Kelas"
+            />
+        </div>
     </div>
 
     <!-- Student Table -->

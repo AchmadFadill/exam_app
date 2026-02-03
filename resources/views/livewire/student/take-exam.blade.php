@@ -1,5 +1,6 @@
 <div x-data="{ 
     remaining: {{ $remainingSeconds }},
+    submitted: false,
     formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -7,16 +8,41 @@
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     },
     initTimer() {
-        setInterval(() => {
+        const timer = setInterval(() => {
             if (this.remaining > 0) {
                 this.remaining--;
-            } else {
-                // Time's up! Trigger submission
+            } else if (!this.submitted) {
+                // Time's up! Trigger submission once
+                this.submitted = true;
+                clearInterval(timer);
+                console.log('Time expired - auto-submitting exam...');
                 $wire.submitExam();
             }
         }, 1000);
     }
 }" x-init="initTimer()" class="min-h-screen bg-gray-50 flex flex-col">
+    
+    <!-- Time's Up Overlay -->
+    <div x-show="remaining <= 0" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
+         style="display: none;">
+        <div class="bg-white rounded-2xl p-8 text-center max-w-md shadow-2xl">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Waktu Habis!</h3>
+            <p class="text-gray-600 mb-4">Ujian Anda telah berakhir dan sedang dikumpulkan...</p>
+            <div class="flex items-center justify-center gap-2">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                <span class="text-sm text-gray-500">Menyimpan jawaban...</span>
+            </div>
+        </div>
+    </div>
     
     <!-- Top Bar: Timer & Status -->
     <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">

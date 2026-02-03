@@ -14,7 +14,7 @@ class Index extends Component
         $user = \Illuminate\Support\Facades\Auth::user();
         $isAdmin = $user->isAdmin();
         
-        // Base query for active exams
+        // Base query for active exams - OPTIMIZED
         $query = \App\Models\Exam::where('status', 'scheduled')
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
@@ -25,14 +25,25 @@ class Index extends Component
             $query->where('teacher_id', $user->teacher->id);
         }
         
-        $activeExams = $query->with(['classrooms', 'attempts'])
+        $activeExams = $query->with([
+                'subject',
+                'classrooms' => function($q) {
+                    $q->withCount('students');
+                }
+            ])
+            ->withCount([
+                'attempts as working_count' => function($q) {
+                    $q->where('status', 'in_progress');
+                },
+                'attempts as finished_count' => function($q) {
+                    $q->whereIn('status', ['submitted', 'graded']);
+                },
+                'attempts as total_attempts'
+            ])
             ->get()
             ->map(function($exam) {
-                $totalStudents = $exam->classrooms->sum(function($c) { 
-                    return $c->students()->count(); 
-                });
+                $totalStudents = $exam->classrooms->sum('students_count');
                 
-                $attempts = $exam->attempts;
                 
                 return [
                     'id' => $exam->id,
@@ -42,9 +53,9 @@ class Index extends Component
                     'start_time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i'),
                     'end_time' => \Carbon\Carbon::parse($exam->end_time)->format('H:i'),
                     'total_students' => $totalStudents,
-                    'working' => $attempts->where('status', 'in_progress')->count(),
-                    'finished' => $attempts->whereIn('status', ['submitted', 'graded'])->count(),
-                    'not_started' => $totalStudents - $attempts->count(),
+                    'working' => $exam->working_count,
+                    'finished' => $exam->finished_count,
+                    'not_started' => $totalStudents - $exam->total_attempts,
                 ];
             });
 

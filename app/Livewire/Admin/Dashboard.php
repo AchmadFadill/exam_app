@@ -30,19 +30,26 @@ class Dashboard extends Component
             'status' => 'Healthy',
         ];
 
-        // Active Exams Feed - REAL DATA
+        // Active Exams Feed - REAL DATA - OPTIMIZED
         $activeExamsQuery = \App\Models\Exam::where('status', 'scheduled')
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
             ->whereTime('end_time', '>=', now()->format('H:i'))
-            ->with(['subject', 'classrooms', 'teacher.user', 'attempts' => function($q) {
-                $q->whereNotNull('started_at');
-            }])
+            ->with([
+                'subject', 
+                'classrooms' => function($q) {
+                    $q->withCount('students');
+                },
+                'teacher.user', 
+                'attempts' => function($q) {
+                    $q->whereNotNull('started_at');
+                }
+            ])
             ->get();
 
         $active_exams = $activeExamsQuery->map(function($exam) {
-            // Calculate total students assigned to this exam (via classrooms)
-            $totalStudents = \App\Models\Student::whereIn('classroom_id', $exam->classrooms->pluck('id'))->count();
+            // Calculate total students assigned to this exam (via classrooms) - OPTIMIZED
+            $totalStudents = $exam->classrooms->sum('students_count');
             
             // Students who have started (have an attempt record)
             $studentsOnline = $exam->attempts->count();

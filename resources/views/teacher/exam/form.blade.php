@@ -86,7 +86,35 @@
                     </x-card>
 
                     <x-card title="Jadwal Pelaksanaan">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" 
+                             x-data="{
+                                 startTime: @entangle('start_time'),
+                                 duration: @entangle('duration_minutes'),
+                                 endTime: @entangle('end_time'),
+                                 calculateEndTime() {
+                                     if (this.startTime && this.duration) {
+                                         // Parse start time (HH:MM format)
+                                         const [hours, minutes] = this.startTime.split(':').map(Number);
+                                         
+                                         // Create a date object for today with the start time
+                                         const startDate = new Date();
+                                         startDate.setHours(hours, minutes, 0, 0);
+                                         
+                                         // Add duration in milliseconds
+                                         const endDate = new Date(startDate.getTime() + (this.duration * 60 * 1000));
+                                         
+                                         // Format back to HH:MM
+                                         const endHours = String(endDate.getHours()).padStart(2, '0');
+                                         const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+                                         this.endTime = `${endHours}:${endMinutes}`;
+                                     }
+                                 }
+                             }"
+                             x-init="
+                                 $watch('startTime', () => calculateEndTime());
+                                 $watch('duration', () => calculateEndTime());
+                             "
+                        >
                             <div class="sm:col-span-2 lg:col-span-1">
                                 <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Tanggal Ujian</label>
                                 <input type="date" wire:model="date" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner">
@@ -95,13 +123,16 @@
 
                             <div>
                                 <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Waktu Mulai</label>
-                                <input type="time" wire:model="start_time" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner">
+                                <input type="time" x-model="startTime" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner">
                                 @error('start_time') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
-                                <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Waktu Selesai</label>
-                                <input type="time" wire:model="end_time" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner">
+                                <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic flex items-center gap-2">
+                                    Waktu Selesai
+                                    <span class="text-[9px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full">Auto</span>
+                                </label>
+                                <input type="time" x-model="endTime" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner">
                                 @error('end_time') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                             </div>
 
@@ -109,7 +140,7 @@
                                 <div>
                                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Durasi Pengerjaan</label>
                                     <div class="relative">
-                                        <input type="number" wire:model="duration_minutes" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="90">
+                                        <input type="number" x-model="duration" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="90">
                                         <span class="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-text-muted opacity-40 uppercase tracking-widest">Menit</span>
                                     </div>
                                     @error('duration_minutes') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror

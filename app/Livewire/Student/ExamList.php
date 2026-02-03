@@ -24,6 +24,7 @@ class ExamList extends Component
         $query = \App\Models\Exam::whereHas('classrooms', function($q) use ($student) {
             $q->where('classroom_id', $student->classroom_id);
         })
+        ->with('classrooms')
         ->with(['subject', 'teacher.user', 'attempts' => function($q) use ($student) {
             $q->where('student_id', $student->id);
         }]);

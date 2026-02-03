@@ -578,8 +578,8 @@ class ManageQuestion extends Component
             $query->where('type', $this->filterType);
         }
 
-        // Get all questions and group them
-        $allQuestions = $query->latest()->get();
+        // OPTIMIZED: Use pagination instead of loading all questions
+        $allQuestions = $query->latest()->paginate(15);
         
         // Group questions by title
         $groupedQuestions = $allQuestions->groupBy(function($question) {
@@ -591,6 +591,7 @@ class ManageQuestion extends Component
         return view('teacher.manage-question', [
             'groupedQuestions' => $groupedQuestions,
             'subjects' => $subjects,
+            'questions' => $allQuestions, // Pass paginated questions for pagination links
         ])->layout('layouts.teacher')->title('Bank Soal');
     }
 }

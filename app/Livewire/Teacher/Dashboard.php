@@ -63,19 +63,30 @@ class Dashboard extends Component
             'questions_count' => $questionsCount
         ];
 
-        // 2. Ongoing Exams
+        // 2. Ongoing Exams - OPTIMIZED
         $ongoing_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
             ->where('status', 'scheduled')
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
             ->whereTime('end_time', '>=', now()->format('H:i'))
-            ->withCount(['attempts' => function($q) {
-                $q->where('status', 'in_progress');
-            }])
+            ->with([
+                'subject',
+                'classrooms' => function($q) {
+                    $q->withCount('students');
+                }
+            ])
+            ->withCount([
+                'attempts as in_progress_count' => function($q) {
+                    $q->where('status', 'in_progress');
+                },
+                'attempts as finished_count' => function($q) {
+                    $q->whereIn('status', ['submitted', 'graded']);
+                }
+            ])
             ->get()
             ->map(function($exam) {
-                $totalStudents = $exam->classrooms->sum(function($c) { return $c->students()->count(); });
-                $finishedCount = $exam->attempts()->whereIn('status', ['submitted', 'graded'])->count();
+                $totalStudents = $exam->classrooms->sum('students_count');
+                $finishedCount = $exam->finished_count;
                 $percentage = $totalStudents > 0 ? round(($finishedCount / $totalStudents) * 100) : 0;
 
                 return [
@@ -83,7 +94,7 @@ class Dashboard extends Component
                     'subject' => $exam->subject->name,
                     'class' => $exam->classrooms->pluck('name')->join(', '),
                     'name' => $exam->name,
-                    'participants' => $exam->attempts_count, // Keeping just in case
+                    'participants' => $exam->in_progress_count,
                     'finished_students' => $finishedCount,
                     'total_students' => $totalStudents,
                     'percentage' => $percentage,
@@ -92,7 +103,7 @@ class Dashboard extends Component
                 ];
             });
 
-        // 3. Upcoming Exams
+        // 3. Upcoming Exams - OPTIMIZED
         $upcoming_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
             ->where('status', 'scheduled')
             ->where(function($q) {
@@ -102,6 +113,7 @@ class Dashboard extends Component
                          ->whereTime('start_time', '>', now()->format('H:i'));
                   });
             })
+            ->with('classrooms:id,name')
             ->orderBy('date')->orderBy('start_time')
             ->limit(5)
             ->get()

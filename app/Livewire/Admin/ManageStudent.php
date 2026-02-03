@@ -32,6 +32,7 @@ class ManageStudent extends Component
     public $importFile;
     public $selectedStudent = null;
     public $search = '';
+    public $filterClassroom = '';
 
     // Bulk Action States
     public $selectedStudents = [];
@@ -401,6 +402,11 @@ class ManageStudent extends Component
                         ->orWhere('email', 'like', '%' . $this->search . '%');
                   });
             });
+        }
+
+        // Filter by classroom
+        if ($this->filterClassroom) {
+            $studentsQuery->where('classroom_id', $this->filterClassroom);
         }
 
         // Use pagination for large datasets
