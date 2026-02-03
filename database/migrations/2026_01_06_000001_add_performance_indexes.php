@@ -3,15 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     /**
      * Performance indexes for frequently searched/filtered columns.
-     * This migration adds indexes to optimize query performance
-     * when the database grows to thousands of records.
-     * 
-     * UPDATED: Removed references to deprecated tables and added safety checks.
+     * UPDATED for Laravel 12 compatibility - removed Doctrine dependency
      */
     public function up(): void
     {
@@ -70,7 +68,6 @@ return new class extends Migration
         });
 
         // Index for exams table - filtered by subject and status
-        // Note: Additional composite index for active exams is in later migration
         Schema::table('exams', function (Blueprint $table) {
             if (!$this->hasIndex('exams', 'exams_subject_id_index')) {
                 $table->index('subject_id');
@@ -79,24 +76,26 @@ return new class extends Migration
                 $table->index('teacher_id');
             }
         });
-
-        // NOTE: Indexes for exam_attempts and student_answers are handled
-        // by migration 2026_02_03_000155_add_performance_indexes.php
     }
 
     /**
-     * Check if an index exists on a table
+     * Check if an index exists on a table (Laravel 12 compatible)
      */
     private function hasIndex(string $table, string $index): bool
     {
         try {
-            $indexes = Schema::getConnection()
-                ->getDoctrineSchemaManager()
-                ->listTableIndexes($table);
+            // Use raw SQL query to check for index existence
+            $connection = Schema::getConnection();
+            $databaseName = $connection->getDatabaseName();
             
-            return isset($indexes[$index]);
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM information_schema.statistics 
+                 WHERE table_schema = ? AND table_name = ? AND index_name = ?",
+                [$databaseName, $table, $index]
+            );
+            
+            return $result[0]->count > 0;
         } catch (\Exception $e) {
-            // If table doesn't exist or error checking, return false
             return false;
         }
     }

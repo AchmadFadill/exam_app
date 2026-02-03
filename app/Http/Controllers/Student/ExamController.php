@@ -59,13 +59,25 @@ class ExamController extends Controller
             })
             ->toArray();
 
+        // Calculate remaining time (same logic as Livewire TakeExam)
+        $endTime = Carbon::parse($attempt->started_at)->addMinutes($exam->duration_minutes);
+        $examEndTime = Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
+        $finalDeadline = $endTime->min($examEndTime);
+        $remainingSeconds = max(0, now()->diffInSeconds($finalDeadline, false));
+        
+        // Auto-submit if time already expired
+        if ($remainingSeconds <= 0) {
+            return redirect()->route('student.results.detail', $attempt->id);
+        }
+
         return view('student.exam.show', [
             'exam' => $exam,
             'attempt' => $attempt,
             'questions' => $questions,
             'existingAnswers' => $existingAnswers,
             'studentName' => $student->user->name,
-            'studentNis' => $student->nis
+            'studentNis' => $student->nis,
+            'remainingSeconds' => $remainingSeconds // Pass calculated remaining time
         ]);
     }
 

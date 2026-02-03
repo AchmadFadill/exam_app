@@ -225,7 +225,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('exam', {
-                timeLeft: 3600, // 60 minutes in seconds
+                timeLeft: \{\{ $remainingSeconds \}\}, // Dynamic - accounts for late starts
                 formattedTime: '01:00:00',
                 isActive: false,
                 
@@ -396,3 +396,5 @@
         });
     </script>
 </x-exam-layout>
+
+
