@@ -177,12 +177,12 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             @foreach($availableClasses as $class)
                             <label class="relative flex flex-col items-center justify-center p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group transition-all hover:scale-[1.05] active:scale-95 shadow-sm hover:shadow-xl hover:shadow-primary/5">
-                                <input type="checkbox" wire:model="classes" value="{{ $class->id }}" class="peer absolute inset-0 opacity-0 cursor-pointer">
+                                <input type="checkbox" wire:model.live="classes" value="{{ $class->id }}" class="peer absolute inset-0 opacity-0 cursor-pointer">
                                 
-                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 {{ in_array($class->id, $classes) ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30' : 'bg-white dark:bg-slate-800 text-text-muted opacity-40 shadow-inner' }}">
+                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 bg-white dark:bg-slate-800 text-text-muted opacity-40 shadow-inner peer-checked:bg-primary peer-checked:text-white peer-checked:scale-110 peer-checked:shadow-lg peer-checked:shadow-primary/30 peer-checked:opacity-100">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </div>
-                                <span class="text-xs font-black uppercase tracking-widest transition-colors duration-300 {{ in_array($class->id, $classes) ? 'text-text-main' : 'text-text-muted opacity-60' }}">{{ $class->name }}</span>
+                                <span class="text-xs font-black uppercase tracking-widest transition-colors duration-300 text-text-muted opacity-60 peer-checked:text-text-main peer-checked:opacity-100">{{ $class->name }}</span>
                                 
                                 <div class="absolute inset-0 rounded-[2rem] ring-2 ring-primary ring-offset-4 dark:ring-offset-slate-900 opacity-0 transition-opacity peer-checked:opacity-100"></div>
                             </label>
@@ -289,7 +289,7 @@
                     <div class="absolute top-0 right-0 -m-10 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div class="text-center md:text-left">
-                            <h3 class="text-white text-4xl font-black tracking-tighter italic">Pilih Matrix <span class="text-blue-200 not-italic">Pertanyaan</span></h3>
+                            <h3 class="text-white text-4xl font-black tracking-tighter italic">Pilih <span class="text-blue-200 not-italic">Pertanyaan</span></h3>
                             <p class="text-blue-100/60 text-[10px] font-black uppercase tracking-[0.3em] mt-3">Silahkan pilih soal yang akan diujikan pada sesi ini</p>
                         </div>
                         <div class="flex items-center gap-8 bg-white/10 backdrop-blur-md px-10 py-6 rounded-[2.5rem] border border-white/10 shadow-inner">
@@ -412,7 +412,7 @@
                 
                 @if($step < 2)
                     <button type="button" wire:click="nextStep" class="relative z-10 px-10 py-5 bg-primary hover:bg-blue-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all hover:scale-[1.05] hover:rotate-3 shadow-2xl shadow-primary/30 flex items-center gap-3 active:scale-95">
-                        Lanjut: Pilih Matrix Soal
+                        Lanjut: Pilih Soal
                         <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 @else
