@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Login' }} - CBT Exam</title>
-    <link rel="icon" type="image/jpg" href="{{ asset('img/logo_school.jpg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}?v=3">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
