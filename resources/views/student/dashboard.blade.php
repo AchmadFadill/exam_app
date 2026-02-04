@@ -10,6 +10,34 @@
         subtitle="Sudah siap untuk mengerjakan ujian hari ini?" 
     />
 
+    <!-- Student Info Card -->
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner">
+                    <span class="text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-text-main">{{ auth()->user()->name }}</h2>
+                    <p class="text-xs font-medium text-text-muted">NIS: {{ auth()->user()->student->nis ?? '-' }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 md:gap-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-4 md:pt-0 md:pl-8">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Kelas</p>
+                    <p class="text-sm font-black text-text-main">{{ auth()->user()->student->classroom->name ?? 'Belum ada kelas' }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Wali Kelas</p>
+                    <p class="text-sm font-black text-text-main">{{ auth()->user()->student->classroom->teacher->user->name ?? '-' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Active Exams (Ujian Tersedia) - HERO FEATURE -->
     <section class="mb-16">
         <div class="flex items-center justify-between mb-8">
