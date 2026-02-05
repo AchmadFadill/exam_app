@@ -9,6 +9,37 @@
     ];
     $roleKey = auth()->check() ? auth()->user()->role : null;
     $userRole = $roleKey && isset($roleLabels[$roleKey]) ? $roleLabels[$roleKey] : $userPrefix;
+
+    // Dynamic Title Mapping
+    $routeTitles = [
+        'admin.teachers' => 'Guru',
+        'admin.students' => 'Siswa',
+        'admin.classes' => 'Kelas',
+        'admin.subjects' => 'Pelajaran',
+        'admin.exams' => 'Ujian',
+        'admin.monitor' => 'Pantau Ujian',
+        'admin.reports' => 'Nilai Ujian',
+        'admin.settings' => 'Pengaturan',
+        'teacher.questions' => 'Bank Soal',
+        'teacher.exams' => 'Ujian',
+        'teacher.exams.index' => 'Ujian',
+        'teacher.monitoring' => 'Pantau Ujian',
+        'teacher.grading' => 'Beri Nilai',
+        'teacher.reports' => 'Nilai Ujian',
+        'teacher.reports.index' => 'Nilai Ujian',
+        'student.exams' => 'Daftar Ujian',
+        'student.results' => 'Hasil Ujian',
+    ];
+
+    $displayTitle = $title;
+    if (in_array($displayTitle, ['Beranda', 'Dashboard', 'Administrator', 'Guru', 'Siswa', 'User'])) {
+        foreach ($routeTitles as $route => $label) {
+            if (request()->routeIs($route . '*')) {
+                $displayTitle = $label;
+                break;
+            }
+        }
+    }
 @endphp
 
 <header 
@@ -18,7 +49,7 @@
     <div>
         <!-- Page Title -->
         <h2 class="text-xl font-bold text-text-main tracking-tight">
-            {{ $title }}
+            {{ $displayTitle }}
         </h2>
     </div>
 
