@@ -25,7 +25,7 @@
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($exams as $exam)
-        <div class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden hover:border-primary/40 transition-all flex flex-col group">
+        <div wire:key="{{ $exam['id'] }}" class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main hover:border-primary/40 transition-all flex flex-col group">
             <div class="p-8 flex-1">
                 <div class="flex justify-between items-start mb-8">
                     <div class="flex items-center gap-4">
@@ -43,11 +43,11 @@
                         <button @click="open = !open" @click.away="open = false" class="p-2 text-text-muted hover:text-text-main transition-colors opacity-40 group-hover:opacity-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
-                        <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
+                        <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-30 border border-border-main dark:border-slate-800 ring-1 ring-black/5">
                             <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Ujian</a>
-                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</button>
+                            <button type="button" wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</button>
                             <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
-                            <button wire:click="openDeleteModal({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus Ujian</button>
+                            <button type="button" wire:click="openDeleteModal({{ $exam['id'] }})" @click="open = false" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus Ujian</button>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,6 @@
         </div>
         @endforelse
     </div>
-    </div>
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedExams) > 0)
@@ -127,48 +126,110 @@
     </div>
     @endif
 
-    <!-- Bulk Delete Modal -->
-    @if($showBulkDeleteModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showBulkDeleteModal', false)"></div>
-        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Ujian Massal?</h3>
-                <p class="text-gray-500">Anda akan menghapus <span class="font-bold">{{ count($selectedExams) }}</span> ujian yang dipilih. Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-            <div class="p-6 bg-gray-50 flex justify-center gap-3">
-                <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
-                <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
-            </div>
-        </div>
-    </div>
-    @endif
+    <!-- Beautiful Bulk Delete Modal -->
+    <div 
+        x-data="{ show: @entangle('showBulkDeleteModal') }"
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 px-4 min-h-screen" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        style="display: none;">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="show = false"></div>
 
-    <!-- Individual Delete Modal -->
-    @if($showDeleteModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showDeleteModal', false)"></div>
-        <div class="relative bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-            <div class="p-6 text-center">
-                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <!-- Modal Panel -->
+        <div class="relative bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all ring-1 ring-black/5"
+             x-show="show" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            
+            <div class="p-8 text-center">
+                <div class="w-20 h-20 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/10 ring-1 ring-red-500/20">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-black text-text-main mb-3 leading-tight">Hapus {{ count($selectedExams) }} Ujian?</h3>
+                <p class="text-text-muted text-sm leading-relaxed px-4">
+                    Anda akan menghapus <span class="font-bold text-red-500 mx-1">{{ count($selectedExams) }}</span> ujian yang dipilih. <br>
+                    Tindakan ini <span class="font-bold text-text-main">tidak dapat dibatalkan</span> dan semua data siswa terkait akan hilang.
+                </p>
+            </div>
+            
+            <div class="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-border-subtle dark:border-slate-800 flex justify-center gap-4">
+                <button @click="show = false" class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-text-muted hover:bg-gray-200/50 dark:hover:bg-slate-800 transition-colors">
+                    Batalkan
+                </button>
+                <button wire:click="bulkDelete" class="px-8 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Ya, Hapus Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beautiful Individual Delete Modal -->
+    <div 
+        x-data="{ show: @entangle('showDeleteModal') }"
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 px-4 min-h-screen"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        style="display: none;">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="show = false"></div>
+
+        <!-- Modal Panel -->
+        <div class="relative bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all ring-1 ring-black/5"
+             x-show="show"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            
+            <div class="p-8 text-center">
+                <div class="w-20 h-20 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/10 ring-1 ring-red-500/20">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Ujian?</h3>
-                <p class="text-gray-500 dark:text-gray-400">Tindakan ini tidak dapat dibatalkan. Semua data terkait ujian ini akan dihapus permanen.</p>
+                <h3 class="text-2xl font-black text-text-main mb-3 leading-tight">Hapus Ujian Ini?</h3>
+                <p class="text-text-muted text-sm leading-relaxed px-4">
+                    Apakah Anda yakin ingin menghapus ujian ini? <br>
+                    Tindakan ini <span class="font-bold text-text-main">tidak dapat dibatalkan</span>.
+                </p>
             </div>
-            <div class="p-6 bg-gray-50 dark:bg-slate-800/50 flex justify-center gap-3">
-                <x-button variant="secondary" wire:click="$set('showDeleteModal', false)">Batal</x-button>
-                <x-button variant="danger" wire:click="deleteExam">Ya, Hapus</x-button>
+            
+            <div class="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-border-subtle dark:border-slate-800 flex justify-center gap-4">
+                <button @click="show = false" class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-text-muted hover:bg-gray-200/50 dark:hover:bg-slate-800 transition-colors">
+                    Batalkan
+                </button>
+                <button wire:click="deleteExam" class="px-8 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-red-500/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Ya, Hapus
+                </button>
             </div>
         </div>
     </div>
-    @endif
+
+
 </div>
 

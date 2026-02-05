@@ -273,7 +273,7 @@
                                     </span>
                                 </div>
                                 <div class="relative flex items-center gap-4 pt-2">
-                                    <input type="range" x-model="tolerance" min="0" max="10" class="w-full h-1.5 bg-gray-300 dark:bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary shadow-inner">
+                                    <input type="range" x-model.number="tolerance" min="0" max="10" class="w-full h-1.5 bg-gray-300 dark:bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary shadow-inner">
                                     <div class="flex justify-between absolute -bottom-7 w-full px-1">
                                         <span class="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-40">Ketat (0)</span>
                                         <span class="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-40">Longgar (10)</span>
@@ -288,7 +288,7 @@
 
             <!-- Step 2: Question Selection -->
             @if($step === 2)
-            <div class="space-y-10">
+            <div class="space-y-10 -mt-6">
                 <!-- Selection Status Card -->
                 <div class="bg-primary p-12 rounded-[3.5rem] shadow-2xl shadow-primary/20 relative overflow-hidden group">
                     <div class="absolute top-0 right-0 -m-10 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
@@ -299,12 +299,14 @@
                         </div>
                         <div class="flex items-center gap-8 bg-white/10 backdrop-blur-md px-10 py-6 rounded-[2.5rem] border border-white/10 shadow-inner">
                             <div class="text-center">
-                                <div class="text-4xl font-black text-white italic">0</div>
+                                <div class="text-4xl font-black text-white italic">{{ count($selectedQuestions) }}</div>
                                 <div class="text-[9px] font-black text-blue-200/60 uppercase tracking-widest mt-1">Soal Terpilih</div>
                             </div>
                             <div class="w-px h-12 bg-white/10"></div>
                             <div class="text-center">
-                                <div class="text-4xl font-black text-white italic">0</div>
+                                <div class="text-4xl font-black text-white italic">
+                                    {{ array_reduce($selectedQuestions, fn($carry, $id) => $carry + ($questionScores[$id] ?? 0), 0) }}
+                                </div>
                                 <div class="text-[9px] font-black text-blue-200/60 uppercase tracking-widest mt-1">Total Poin</div>
                             </div>
                         </div>
@@ -314,32 +316,50 @@
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
                     <!-- Filters Column -->
                     <div class="lg:col-span-1 space-y-8">
-                        <x-card title="Data Filter">
-                            <div class="space-y-8">
-                                <div>
-                                    <label class="block text-[10px] font-black text-text-muted mb-3 uppercase tracking-widest">Mata Pelajaran</label>
-                                    <select wire:model="filterSubject" class="w-full px-5 py-3.5 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.2rem_center] bg-[length:0.8em_0.8em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
-                                        <option value="">Semua Mapel</option>
-                                        <option value="Matematika">Matematika</option>
-                                        <option value="Biologi">Biologi</option>
-                                        <option value="Fisika">Fisika</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="pt-8 border-t border-border-subtle dark:border-slate-800">
+                    <div class="lg:col-span-1 space-y-8">
+                        @if($subject_id)
+                            <!-- Simplified Action Card when Subject is Locked -->
+                            <x-card title="Aksi">
+                                <div class="space-y-4">
+                                    <div class="text-xs text-text-muted">
+                                        Menampilkan soal untuk mata pelajaran terpilih.
+                                    </div>
                                     <x-button type="button" variant="soft" class="w-full py-4 text-[10px]">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                                         Buat Soal Instan
                                     </x-button>
                                 </div>
-                            </div>
-                        </x-card>
+                            </x-card>
+                        @else
+                            <!-- Full Filter Card -->
+                            <x-card title="Data Filter">
+                                <div class="space-y-8">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-text-muted mb-3 uppercase tracking-widest">Mata Pelajaran</label>
+                                        <select wire:model="filterSubject" class="w-full px-5 py-3.5 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.2rem_center] bg-[length:0.8em_0.8em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                                            <option value="">Semua Mapel</option>
+                                            @foreach($subjects as $subj)
+                                                <option value="{{ $subj->id }}">{{ $subj->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="pt-8 border-t border-border-subtle dark:border-slate-800">
+                                        <x-button type="button" variant="soft" class="w-full py-4 text-[10px]">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                                            Buat Soal Instan
+                                        </x-button>
+                                    </div>
+                                </div>
+                            </x-card>
+                        @endif
+                    </div>
                     </div>
 
                     <!-- Question Groups Column -->
                     <div class="lg:col-span-3 space-y-6">
                         <div class="relative group">
-                            <input type="text" wire:model.live="searchQuery" class="w-full pl-16 pr-10 py-6 bg-bg-surface dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] shadow-xl shadow-black/5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold text-lg tracking-tight" placeholder="Cari kelompok soal...">
+                            <input type="text" wire:model.live="searchQuery" class="w-full pl-16 pr-10 py-6 bg-bg-surface dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] shadow-xl shadow-black/5 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold text-lg tracking-tight" placeholder="Cari kelompok soal {{ $subjects->find($subject_id)->name ?? '' }}...">
                             <svg class="w-6 h-6 text-text-muted group-focus-within:text-primary transition-colors absolute left-6 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
 

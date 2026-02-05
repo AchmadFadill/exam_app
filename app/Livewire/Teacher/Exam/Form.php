@@ -205,7 +205,7 @@ class Form extends Component
                 'date' => 'required|date',
                 'start_time' => 'required',
                 'end_time' => 'required|after:start_time',
-                'duration_minutes' => 'required|integer|min:1|max:300', // TODO: Restore min:10 after testing
+                'duration_minutes' => 'required|integer|min:10|max:300',
                 'passing_grade' => 'required|integer|min:0|max:100',
                 'default_score' => 'required|integer|min:1',
             ],
@@ -374,8 +374,15 @@ class Form extends Component
             ->when($this->searchQuery, function ($q) {
                 $q->where('title', 'like', '%' . $this->searchQuery . '%');
             })
-            ->when($this->filterSubject, function ($q) {
-                $q->where('subject_id', $this->filterSubject);
+            // If subject_id is set (from Step 1), force filter by it.
+            // Otherwise fallback to the manual filter (though typically subject_id is required in Step 1)
+            ->when($this->subject_id, function($q) {
+                $q->where('subject_id', $this->subject_id);
+            }, function($q) {
+                // If no subject_id set (shouldn't happen in Step 2), use manual filter
+                return $q->when($this->filterSubject, function ($subQ) {
+                    $subQ->where('subject_id', $this->filterSubject);
+                });
             })
             ->when($this->filterType, function ($q) {
                 $q->where('type', $this->filterType);

@@ -11,6 +11,10 @@ class Detail extends Component
 
     public $examId;
 
+    public $search = '';
+    public $filterStatus = '';
+    public $filterClass = '';
+
     public function mount($id)
     {
         $this->examId = $id;
@@ -21,7 +25,7 @@ class Detail extends Component
         $user = \Illuminate\Support\Facades\Auth::user();
         $isAdmin = request()->is('admin/*');
         
-        $exam = \App\Models\Exam::with(['subject', 'classrooms', 'attempts.student.user'])
+        $exam = \App\Models\Exam::with(['subject', 'classrooms', 'attempts.student.user', 'attempts.answers'])
             ->findOrFail($this->examId);
 
         // Authorization Check
@@ -33,30 +37,51 @@ class Detail extends Component
 
         // Real Student Data
         // Get all students from the assigned classrooms
-        $assignedStudents = \App\Models\Student::whereIn('classroom_id', $exam->classrooms->pluck('id'))
-            ->with('user', 'classroom')
-            ->get();
+        $assignedStudentsQuery = \App\Models\Student::whereIn('classroom_id', $exam->classrooms->pluck('id'))
+            ->with('user', 'classroom');
+
+        // Apply Search Filter
+        if ($this->search) {
+            $assignedStudentsQuery->whereHas('user', function($q) {
+                $q->where('name', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // Apply Class Filter
+        if ($this->filterClass) {
+            $assignedStudentsQuery->whereHas('classroom', function($q) {
+                $q->where('name', $this->filterClass);
+            });
+        }
+
+        $assignedStudents = $assignedStudentsQuery->get();
             
-        $students = $assignedStudents->map(function($student) use ($exam) {
+        $totalQuestions = $exam->questions()->count();
+
+        $students = $assignedStudents->map(function($student) use ($exam, $totalQuestions) {
             $attempt = $exam->attempts->where('student_id', $student->id)->first();
             
             $status = 'not_started';
-            $progress = '0/' . $exam->questions()->count(); // Simplified
+            $ansCount = 0;
             $width = '0%';
             $tab_alert = 0;
             
             if ($attempt) {
                 $status = $attempt->status;
-                // Calculate progress roughly based on answered questions if possible, 
-                // or just based on status. For now, we use status.
                 $tab_alert = $attempt->tab_switches;
+                $ansCount = $attempt->answers->count();
                 
-                if ($status === 'completed' || $status === 'graded') {
+                if ($totalQuestions > 0) {
+                    $percent = ($ansCount / $totalQuestions) * 100;
+                    $width = round($percent) . '%';
+                }
+
+                if ($status === 'completed' || $status === 'graded' || $status === 'submitted') {
                     $width = '100%';
-                } elseif ($status === 'in_progress') {
-                    $width = '50%'; // Dynamic progress would need answer count
                 }
             }
+            
+            $progress = $ansCount . '/' . $totalQuestions;
 
             return [
                 'id' => $student->id,
@@ -70,19 +95,48 @@ class Detail extends Component
             ];
         });
 
+        // Apply Status Filter (Collection level)
+        if ($this->filterStatus) {
+            $students = $students->filter(function ($student) {
+                if ($this->filterStatus === 'working') {
+                    return $student['status'] === 'in_progress';
+                }
+                if ($this->filterStatus === 'completed') {
+                    return in_array($student['status'], ['completed', 'graded', 'submitted']);
+                }
+                if ($this->filterStatus === 'not_started') {
+                    return $student['status'] === 'not_started';
+                }
+                return true;
+            });
+        }
+
         // Real Logs (from attempts sorted by recent update)
         $live_logs = \App\Models\ExamAttempt::where('exam_id', $this->examId)
-            ->where('status', 'in_progress')
+            // Removed status filter to show ALL recent activity (start, progress, finish)
             ->with('student.user')
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get()
             ->map(function($attempt) {
+                $activity = 'Sedang mengerjakan';
+                $type = 'info';
+
+                if ($attempt->tab_switches > 0) {
+                    $activity = 'Terdeteksi pindah tab';
+                    $type = 'warning';
+                }
+
+                if (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
+                    $activity = 'Selesai Mengerjakan';
+                    $type = 'success';
+                }
+
                 return [
                     'time' => $attempt->updated_at->format('H:i:s'),
                     'student' => $attempt->student->user->name,
-                    'activity' => $attempt->tab_switches > 0 ? 'Terdeteksi pindah tab' : 'Sedang mengerjakan',
-                    'type' => $attempt->tab_switches > 0 ? 'warning' : 'info'
+                    'activity' => $activity,
+                    'type' => $type
                 ];
             });
 
@@ -90,12 +144,38 @@ class Detail extends Component
             'exam' => $exam,
             'students' => $students,
             'live_logs' => $live_logs,
-            'backRoute' => $isAdmin ? 'admin.monitor' : 'teacher.monitoring'
+            'backRoute' => $isAdmin ? 'admin.monitor' : 'teacher.monitoring',
+            'classes' => $exam->classrooms->pluck('name')->unique() // Pass classes for filter dropdown
         ]);
     }
 
     public function forceSubmit($studentId)
     {
-        $this->dispatch('notify', ['message' => 'Ujian siswa berhasil dihentikan (Simulasi)']);
+        $attempt = \App\Models\ExamAttempt::where('exam_id', $this->examId)
+            ->where('student_id', $studentId)
+            ->first();
+
+        if ($attempt) {
+            $attempt->update([
+                'status' => 'submitted', // Or 'completed' depending on logic
+                'submitted_at' => now()
+            ]);
+            
+            // Send Notification
+            try {
+                $teacher = $exam->teacher->user;
+                $teacher->notify(new \App\Notifications\ExamSubmitted($exam, $attempt->student->user));
+            } catch (\Exception $e) {}
+            
+            $this->dispatch('notify', [
+                'type' => 'success',
+                'message' => 'Ujian siswa berhasil dihentikan secara paksa.'
+            ]);
+        } else {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Siswa belum memulai ujian.'
+            ]);
+        }
     }
 }

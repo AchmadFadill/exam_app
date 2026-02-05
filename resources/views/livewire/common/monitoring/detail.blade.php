@@ -56,9 +56,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
-                    <x-button variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
-                    @if($student['status'] == 'working')
-                    <x-button wire:click="forceSubmit('mock_id')" variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
+                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $exam->id, 'student' => $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
+                    @if($student['status'] == 'working' || $student['status'] == 'in_progress')
+                    <x-button wire:click="forceSubmit({{ $student['id'] }})" wire:confirm="Apakah Anda yakin ingin menghentikan ujian siswa ini secara paksa?" variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @else
                     <x-button variant="secondary" size="xs" disabled class="!text-gray-300 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @endif

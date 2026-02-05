@@ -28,12 +28,17 @@ class Index extends Component
 
     public function bulkDelete()
     {
-        Exam::whereIn('id', $this->selectedExams)->delete();
-        
-        $this->showBulkDeleteModal = false;
-        $this->selectedExams = [];
-        $this->selectAll = false;
-        $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+        try {
+            Exam::whereIn('id', $this->selectedExams)->delete();
+            
+            $this->showBulkDeleteModal = false;
+            $this->selectedExams = [];
+            $this->selectAll = false;
+            $this->dispatch('notify', ['message' => 'Ujian terpilih berhasil dihapus!']);
+        } catch (\Exception $e) {
+            $this->showBulkDeleteModal = false;
+            $this->dispatch('notify', ['message' => 'Gagal menghapus ujian: ' . $e->getMessage(), 'type' => 'error']);
+        }
     }
     
     public function openDeleteModal($id)
@@ -45,11 +50,25 @@ class Index extends Component
     public function deleteExam()
     {
         if ($this->selectedExamId) {
-            Exam::destroy($this->selectedExamId);
+            try {
+                $exam = Exam::find($this->selectedExamId);
+                if ($exam) {
+                    $exam->delete();
+                    $this->dispatch('notify', ['message' => 'Ujian berhasil dihapus!']);
+                } else {
+                    $this->dispatch('notify', ['message' => 'Ujian tidak ditemukan.', 'type' => 'error']);
+                }
+            } catch (\Exception $e) {
+                // Check if it's a constraint violation
+                if (str_contains($e->getMessage(), 'ConstraintViolation')) {
+                     $this->dispatch('notify', ['message' => 'Gagal: Ujian ini memiliki data terkait yang tidak bisa dihapus.', 'type' => 'error']);
+                } else {
+                     $this->dispatch('notify', ['message' => 'Gagal menghapus: ' . $e->getMessage(), 'type' => 'error']);
+                }
+            }
             
             $this->showDeleteModal = false;
             $this->selectedExamId = null;
-            $this->dispatch('notify', ['message' => 'Ujian berhasil dihapus!']);
         }
     }
 
@@ -78,21 +97,44 @@ class Index extends Component
         $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi!']);
     }
 
-    public function render()
+    private function getExamsQuery()
     {
         $user = Auth::user();
         $teacherId = $user->isTeacher() ? $user->teacher->id : null;
 
-        $examsQuery = Exam::with(['subject', 'classrooms', 'questions', 'teacher.user'])
+        $query = Exam::with(['subject', 'classrooms', 'questions', 'teacher.user'])
             ->orderBy('date', 'desc')
             ->orderBy('start_time', 'desc');
 
         // Filter by teacher if not admin
         if ($teacherId) {
-            $examsQuery->where('teacher_id', $teacherId);
+            $query->where('teacher_id', $teacherId);
         }
+        return $query;
+    }
 
-        $exams = $examsQuery->get()->map(function ($exam) {
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedExams = $this->getExamsQuery()->pluck('id')->map(fn($id) => (string)$id)->toArray();
+        } else {
+            $this->selectedExams = [];
+        }
+    }
+
+    public function updatedSelectedExams()
+    {
+        $totalExams = $this->getExamsQuery()->count();
+        if (count($this->selectedExams) < $totalExams) {
+            $this->selectAll = false; // Uncheck "Select All" if not all are selected
+        } elseif (count($this->selectedExams) === $totalExams && $totalExams > 0) {
+            $this->selectAll = true;
+        }
+    }
+
+    public function render()
+    {
+        $exams = $this->getExamsQuery()->get()->map(function ($exam) {
             return [
                 'id' => $exam->id,
                 'name' => $exam->name,
@@ -101,7 +143,6 @@ class Index extends Component
                 'date' => $exam->date->format('Y-m-d'),
                 'start_time' => $exam->start_time,
                 'end_time' => $exam->end_time,
-                'duration' => $exam->duration_minutes,
                 'duration' => $exam->duration_minutes,
                 'status' => (function() use ($exam) {
                     if ($exam->status === 'scheduled') {

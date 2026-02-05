@@ -23,6 +23,10 @@ class QuestionGroupDetail extends Component
     public $selectedQuestion = null;
     public $optionCount = 4; // Number of options to show
     
+    // Check Renaming State
+    public $renamingTitle = false;
+    public $newGroupTitle = '';
+    
     public $questionImage;
     public $editingImagePath = null;
     
@@ -46,6 +50,8 @@ class QuestionGroupDetail extends Component
             'questionForm.text' => 'required|string|max:5000',
             'questionForm.explanation' => 'nullable|string|max:1000',
             'questionForm.score' => 'required|integer|min:1|max:100',
+            // Validation for renaming
+            'newGroupTitle' => 'required|string|max:255',
         ];
 
         if ($this->questionImage) {
@@ -66,6 +72,37 @@ class QuestionGroupDetail extends Component
     public function mount($title)
     {
         $this->title = urldecode($title);
+        $this->newGroupTitle = $this->title;
+    }
+
+    public function startRenaming()
+    {
+        $this->renamingTitle = true;
+        $this->newGroupTitle = $this->title;
+    }
+
+    public function cancelRenaming()
+    {
+        $this->renamingTitle = false;
+        $this->newGroupTitle = $this->title;
+    }
+
+    public function updateGroupTitle()
+    {
+        $this->validate(['newGroupTitle' => 'required|string|max:255']);
+
+        if ($this->newGroupTitle === $this->title) {
+            $this->renamingTitle = false;
+            return;
+        }
+
+        DB::transaction(function () {
+            Question::where('title', $this->title)->update(['title' => $this->newGroupTitle]);
+        });
+
+        // Redirect to new URL
+        return redirect()->route('teacher.questions.group', ['title' => urlencode($this->newGroupTitle)])
+            ->with('success', 'Nama kelompok soal berhasil diubah!');
     }
 
     public function toggleSelectAll()

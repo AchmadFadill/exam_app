@@ -11,6 +11,7 @@
             </div>
             <input 
                 type="text" 
+                wire:model.live.debounce.300ms="search"
                 placeholder="Cari nama siswa..." 
                 class="block w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200"
             >
@@ -20,7 +21,7 @@
         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <!-- Status Filter -->
             <div class="relative min-w-[160px]">
-                <select class="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 text-sm transition-all duration-200">
+                <select wire:model.live="filterStatus" class="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 text-sm transition-all duration-200">
                     <option value="">Status Pengerjaan</option>
                     <option value="working">Sedang Mengerjakan</option>
                     <option value="completed">Selesai</option>
@@ -33,12 +34,11 @@
 
             <!-- Class Filter -->
             <div class="relative min-w-[160px]">
-                <select class="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 text-sm transition-all duration-200">
-                    <option value="">Kelas</option>
-                    {{-- Dummy Data --}}
-                    <option value="XI IPA 1">XI IPA 1</option>
-                    <option value="XI IPA 2">XI IPA 2</option>
-                    <option value="XI IPS 1">XI IPS 1</option>
+                <select wire:model.live="filterClass" class="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 text-sm transition-all duration-200">
+                    <option value="">Semua Kelas</option>
+                    @foreach($classes as $class)
+                        <option value="{{ $class }}">{{ $class }}</option>
+                    @endforeach
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>

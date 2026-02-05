@@ -56,47 +56,7 @@
     <!-- Right Actions -->
     <div class="flex items-center gap-6">
         <!-- Notification Bell -->
-        <div class="relative">
-            <button 
-                @click="openNotifications = !openNotifications; openProfile = false"
-                class="relative p-2 text-text-muted hover:text-primary active:scale-95 transition-all duration-200 rounded-xl hover:bg-primary/10"
-            >
-                <span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-bg-surface"></span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-            </button>
-
-            <!-- Notification Dropdown -->
-            <div 
-                x-show="openNotifications"
-                @click.away="openNotifications = false"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                class="absolute right-0 mt-3 w-80 bg-bg-surface rounded-2xl shadow-2xl border border-border-main py-2 overflow-hidden z-50"
-                style="display: none;"
-            >
-                <div class="px-4 py-2 border-b border-border-subtle bg-bg-app/50">
-                    <h3 class="font-bold text-sm text-text-main">Notifikasi</h3>
-                </div>
-                <div class="max-h-64 overflow-y-auto">
-                    <a href="#" class="block px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border-subtle">
-                        <p class="text-xs font-semibold text-text-main">Ujian Matematika</p>
-                        <p class="text-[10px] text-text-muted mt-0.5">Andi Wijaya baru saja menyelesaikan ujian.</p>
-                        <span class="text-[9px] text-primary font-medium mt-1 inline-block">2 menit yang lalu</span>
-                    </a>
-                    <a href="#" class="block px-4 py-3 hover:bg-primary/5 transition-colors border-b border-border-subtle">
-                        <p class="text-xs font-semibold text-text-main">Peringatan Keamanan</p>
-                        <p class="text-[10px] text-text-muted mt-0.5">Terdeteksi perpindahan tab pada ujian Fisika.</p>
-                        <span class="text-[9px] text-primary font-medium mt-1 inline-block">15 menit yang lalu</span>
-                    </a>
-                </div>
-                <div class="px-4 py-2 bg-bg-app/50 text-center">
-                    <a href="#" class="text-[10px] font-bold text-primary hover:underline">Lihat Semua Notifikasi</a>
-                </div>
-            </div>
-        </div>
+        <livewire:common.navbar-notifications />
 
         <!-- User Profile Dropdown -->
         <div class="relative pl-6 border-l border-border-main">
