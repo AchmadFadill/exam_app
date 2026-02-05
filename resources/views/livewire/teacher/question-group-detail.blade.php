@@ -10,7 +10,30 @@
                 </svg>
             </a>
             <div>
-                <h2 class="text-2xl font-bold text-text-main">{{ $title }}</h2>
+                @if($renamingTitle)
+                    <div class="flex items-center gap-2">
+                        <input type="text" 
+                               wire:model="newGroupTitle" 
+                               wire:keydown.enter="updateGroupTitle"
+                               class="text-xl font-bold text-text-main border-b-2 border-primary focus:outline-none bg-transparent px-1 py-0.5"
+                               autofocus>
+                        <button wire:click="updateGroupTitle" class="p-1 hover:bg-green-100 text-green-600 rounded-md transition-colors" title="Simpan">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                        <button wire:click="cancelRenaming" class="p-1 hover:bg-red-100 text-red-600 rounded-md transition-colors" title="Batal">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                @else
+                    <div class="flex items-center gap-3 group">
+                        <h2 class="text-2xl font-bold text-text-main">{{ $title }}</h2>
+                        <button wire:click="startRenaming" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-primary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    </div>
+                @endif
                 <p class="text-sm text-gray-500 mt-1">{{ count($questions) }} Soal</p>
             </div>
         </div>

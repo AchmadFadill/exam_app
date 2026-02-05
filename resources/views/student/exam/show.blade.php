@@ -3,8 +3,8 @@
         <!-- Header Actions: User Info & Timer -->
         <div class="flex items-center space-x-4" x-data>
             <div class="hidden sm:flex flex-col items-end mr-4">
-                <span class="text-sm font-semibold text-gray-700">Ahmad Siswa</span>
-                <span class="text-xs text-gray-500">NIS: 123456</span>
+                <span class="text-sm font-semibold text-gray-700">{{ Auth::user()->name }}</span>
+                <span class="text-xs text-gray-500">NIS: {{ Auth::user()->student->nis ?? '-' }}</span>
             </div>
             
             <!-- Timer Badge -->
@@ -52,6 +52,7 @@
                                     :name="'question_' + questions[currentQuestion].id" 
                                     :value="option.id"
                                     x-model="answers[questions[currentQuestion].id]"
+                                    @change="saveProgress(questions[currentQuestion].id)"
                                     class="h-5 w-5 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300">
                                 <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
                                     :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}" 
@@ -173,9 +174,9 @@
             <h3 class="text-xl font-bold text-gray-900 mb-2">Peringatan Pelanggaran!</h3>
             <p class="text-gray-600 mb-6">
                 <span class="block text-lg font-semibold text-red-600 mb-2" x-text="violationMessage"></span>
-                Ini adalah pelanggaran <span class="font-bold text-red-600" x-text="violations"></span> dari <span class="font-bold">3</span>.
+                Ini adalah pelanggaran <span class="font-bold text-red-600" x-text="violations"></span> dari <span class="font-bold">{{ $exam->tab_tolerance ?? 3 }}</span>.
                 <br><br>
-                Jika Anda melanggar lebih dari 3 kali, ujian akan otomatis dihentikan.
+                Jika Anda melanggar lebih dari {{ $exam->tab_tolerance ?? 3 }} kali, ujian akan otomatis dihentikan.
             </p>
             <button @click="resumeExam()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                 Saya Mengerti, Kembali ke Ujian
@@ -404,8 +405,34 @@
                          console.error('Error:', error);
                          alert('Gagal mengirim jawaban. Periksa koneksi internet Anda.');
                      });
+                },
+
+                saveProgress(questionId) {
+                    const answer = this.answers[questionId];
+                    if (answer === undefined || answer === null) return;
+
+                    fetch('{{ route('student.exam.save-answer', $exam->id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ 
+                            question_id: questionId,
+                            answer: answer 
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            console.error('Auto-save failed:', data.message);
+                        }
+                    })
+                    .catch(e => console.error('Auto-save error:', e));
                 }
             }));
+            
+            // Watch logic moved outside or use x-init inside the component
         });
     </script>
 </x-exam-layout>
