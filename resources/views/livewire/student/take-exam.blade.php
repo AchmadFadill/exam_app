@@ -84,14 +84,13 @@
                     {!! nl2br(e($currentQuestion->text)) !!}
                 </div>
 
-                <!-- Answer Options -->
                 <div class="space-y-4">
                     @if($currentQuestion->type === 'multiple_choice')
-                        @foreach($currentQuestion->options as $option)
+                        @foreach($this->currentOptions as $index => $option)
                         <label class="flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer hover:bg-gray-50
-                            {{ $selectedOption === $option->label ? 'border-primary bg-blue-50/50' : 'border-gray-200' }}">
-                            <input type="radio" wire:model.live="selectedOption" value="{{ $option->label }}" class="mt-1 text-primary focus:ring-primary">
-                            <span class="font-bold min-w-[24px]">{{ $option->label }}.</span>
+                            {{ $selectedOption == $option->id ? 'border-primary bg-blue-50/50' : 'border-gray-200' }}">
+                            <input type="radio" wire:model.live="selectedOption" value="{{ $option->id }}" class="mt-1 text-primary focus:ring-primary">
+                            <span class="font-bold min-w-[24px]">{{ chr(65 + $index) }}.</span>
                             <span class="flex-1">{{ $option->text }}</span>
                         </label>
                         @endforeach
@@ -168,4 +167,53 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
+
+<!-- Anti-Cheat Scripts -->
+@if($this->exam->enable_tab_tolerance)
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('antiCheat', () => ({
+            violations: 0,
+            maxViolations: {{ $this->exam->tab_tolerance ?? 3 }},
+            
+            init() {
+                // Visibility Change (Tab Switching)
+                document.addEventListener('visibilitychange', () => {
+                   if (document.hidden && !this.submitted) {
+                       this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
+                   }
+                });
+                
+                // Fullscreen Exit
+                const onFullscreenChange = () => {
+                    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+                    if (!isFullscreen && !this.submitted) {
+                        this.handleViolation('Anda keluar dari mode layar penuh (fullscreen).');
+                    }
+                };
+                
+                ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'msfullscreenchange'].forEach(
+                    event => document.addEventListener(event, onFullscreenChange)
+                );
+            },
+            
+            handleViolation(message) {
+                this.violations++;
+                
+                if (this.violations >= this.maxViolations) {
+                    alert(`Batas pelanggaran tercapai (${this.maxViolations}x). Ujian Anda akan otomatis dikirim.`);
+                    // Call Livewire method
+                    @this.submitExam();
+                } else {
+                     alert(`PERINGATAN VIOLASI (${this.violations}/${this.maxViolations}):\n${message}`);
+                     // Try to re-enter fullscreen
+                     document.documentElement.requestFullscreen().catch(() => {});
+                }
+            }
+        }));
+    });
+</script>
+<div x-data="antiCheat" x-init="init()"></div>
+@endif

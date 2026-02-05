@@ -260,15 +260,20 @@
                             </label>
 
                             <!-- Tab Tolerance Slider (Visible only if enabled) -->
-                            <div x-show="$wire.enable_tab_tolerance" x-cloak x-transition class="p-8 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] transition-all">
+                            <!-- Tab Tolerance Slider (Visible only if enabled) -->
+                            <div x-show="$wire.enable_tab_tolerance" 
+                                 x-cloak 
+                                 x-transition 
+                                 x-data="{ tolerance: $wire.entangle('tab_tolerance') }"
+                                 class="p-8 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2.5rem] transition-all">
                                 <div class="flex justify-between items-center mb-6">
                                     <label class="text-[10px] font-black uppercase tracking-widest opacity-70">Toleransi Pelanggaran</label>
                                     <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.1em] bg-primary/10 text-primary border border-primary/20 shadow-inner">
-                                        {{ $tab_tolerance }}x Kesempatan
+                                        <span x-text="tolerance"></span>x Kesempatan
                                     </span>
                                 </div>
                                 <div class="relative flex items-center gap-4 pt-2">
-                                    <input type="range" wire:model.live="tab_tolerance" min="0" max="10" class="w-full h-1.5 bg-gray-300 dark:bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary shadow-inner">
+                                    <input type="range" x-model="tolerance" min="0" max="10" class="w-full h-1.5 bg-gray-300 dark:bg-slate-800 rounded-full appearance-none cursor-pointer accent-primary shadow-inner">
                                     <div class="flex justify-between absolute -bottom-7 w-full px-1">
                                         <span class="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-40">Ketat (0)</span>
                                         <span class="text-[8px] font-black text-text-muted uppercase tracking-widest opacity-40">Longgar (10)</span>
