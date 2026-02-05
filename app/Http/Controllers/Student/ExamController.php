@@ -31,19 +31,38 @@ class ExamController extends Controller
             return redirect()->route('student.results.detail', $attempt->id);
         }
         
+        // Get student for seeded shuffling
+        $student = Auth::user()->student;
+        
         // Transform questions for Front-end
-        $questions = $exam->questions->map(function($q, $index) {
-             return [
-                 'id' => $q->id,
-                 'type' => $q->type === 'essay' ? 'essay' : 'multiple_choice', 
-                 'text' => $q->text, // Changed from question_text which was wrong
-                 'options' => $q->options->map(function($opt) {
-                     return [
-                         'id' => $opt->id,
-                         'text' => $opt->text // Checked QuestionOption model, it is text
-                     ];
-                 })->toArray()
-             ];
+        $questionsCollection = $exam->questions;
+        
+        // Shuffle questions if enabled (seeded for consistency per student)
+        if ($exam->shuffle_questions) {
+            $seed = $student->id + $exam->id;
+            $questionsCollection = $questionsCollection->shuffle($seed);
+        }
+        
+        $questions = $questionsCollection->map(function($q, $index) use ($exam, $student) {
+            $options = $q->options;
+            
+            // Shuffle answer options if enabled (only for multiple choice)
+            if ($exam->shuffle_answers && $q->type === 'multiple_choice') {
+                $seed = $student->id + $exam->id + $q->id;
+                $options = $options->shuffle($seed);
+            }
+            
+            return [
+                'id' => $q->id,
+                'type' => $q->type === 'essay' ? 'essay' : 'multiple_choice', 
+                'text' => $q->text,
+                'options' => $options->map(function($opt) {
+                    return [
+                        'id' => $opt->id,
+                        'text' => $opt->text
+                    ];
+                })->toArray()
+            ];
         })->values()->toArray();
 
         // Load existing answers
@@ -63,7 +82,7 @@ class ExamController extends Controller
         $endTime = Carbon::parse($attempt->started_at)->addMinutes($exam->duration_minutes);
         $examEndTime = Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
         $finalDeadline = $endTime->min($examEndTime);
-        $remainingSeconds = max(0, now()->diffInSeconds($finalDeadline, false));
+        $remainingSeconds = (int) max(0, now()->diffInSeconds($finalDeadline, false));
         
         // Auto-submit if time already expired
         if ($remainingSeconds <= 0) {
@@ -71,13 +90,13 @@ class ExamController extends Controller
         }
 
         return view('student.exam.show', [
-            'exam' => $exam,
+            'exam' => $exam, // Pass full exam object for security settings
             'attempt' => $attempt,
             'questions' => $questions,
             'existingAnswers' => $existingAnswers,
             'studentName' => $student->user->name,
             'studentNis' => $student->nis,
-            'remainingSeconds' => $remainingSeconds // Pass calculated remaining time
+            'remainingSeconds' => $remainingSeconds
         ]);
     }
 
@@ -164,3 +183,4 @@ class ExamController extends Controller
         ]);
     }
 }
+

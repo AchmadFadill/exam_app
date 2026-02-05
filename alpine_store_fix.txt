@@ -1,0 +1,30 @@
+    <script>
+        document.addEventListener('alpine:init', () => {
+            @php
+                // Calculate formatted time from remaining seconds
+                $hours = floor($remainingSeconds / 3600);
+                $minutes = floor(($remainingSeconds % 3600) / 60);
+                $seconds = $remainingSeconds % 60;
+                $formattedTime = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            @endphp
+            
+            Alpine.store('exam', {
+                timeLeft: {{ $remainingSeconds }}, // Dynamic remaining time
+                formattedTime: '{{ $formattedTime }}', // Properly formatted
+                isActive: false,
+                
+                startTimer() {
+                    this.isActive = true;
+                    // Timer logic moved here or controlled by isActive
+                },
+
+                updateTime() {
+                    if (this.timeLeft > 0 && this.isActive) {
+                        this.timeLeft--;
+                        const h = Math.floor(this.timeLeft / 3600).toString().padStart(2, '0');
+                        const m = Math.floor((this.timeLeft % 3600) / 60).toString().padStart(2, '0');
+                        const s = (this.timeLeft % 60).toString().padStart(2, '0');
+                        this.formattedTime = `${h}:${m}:${s}`;
+                    }
+                }
+            });

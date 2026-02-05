@@ -68,12 +68,33 @@ class TakeExam extends Component
 
     public function getQuestionsProperty()
     {
-        return $this->exam->questions;
+        $questions = $this->exam->questions;
+        
+        if ($this->exam->shuffle_questions) {
+            $student = \Illuminate\Support\Facades\Auth::user()->student;
+            $seed = $student->id + $this->exam->id;
+            return $questions->shuffle($seed);
+        }
+        
+        return $questions;
     }
 
     public function getCurrentQuestionProperty()
     {
         return $this->questions[$this->currentQuestionIndex];
+    }
+
+    public function getCurrentOptionsProperty()
+    {
+        $options = $this->currentQuestion->options;
+        
+        if ($this->exam->shuffle_answers && $this->currentQuestion->type === 'multiple_choice') {
+            $student = \Illuminate\Support\Facades\Auth::user()->student;
+            $seed = $student->id + $this->exam->id + $this->currentQuestion->id;
+            return $options->shuffle($seed);
+        }
+        
+        return $options;
     }
 
     public function loadQuestionState()
@@ -84,7 +105,7 @@ class TakeExam extends Component
             ->first();
             
         if ($answer) {
-            $this->selectedOption = $answer->selected_option;
+            $this->selectedOption = $answer->selected_option_id;
             $this->essayAnswer = $answer->answer;
         } else {
             $this->selectedOption = null;
@@ -107,11 +128,12 @@ class TakeExam extends Component
         ];
 
         if ($question->type === 'multiple_choice') {
-            $data['selected_option'] = $this->selectedOption;
+            $data['selected_option_id'] = $this->selectedOption;
             
             // Auto-grade MC
-            $correctOption = $question->options->where('is_correct', true)->first();
-            $isCorrect = $correctOption && $correctOption->label === $this->selectedOption;
+            // Verify the selected option exists and check if it's correct
+            $selectedOptModel = $question->options->where('id', $this->selectedOption)->first();
+            $isCorrect = $selectedOptModel && $selectedOptModel->is_correct;
             
             $data['is_correct'] = $isCorrect;
             $data['score_awarded'] = $isCorrect ? $question->pivot->score : 0;

@@ -15,13 +15,14 @@ class Exam extends Model
     protected $fillable = [
         'teacher_id', 'subject_id', 'name', 'date', 'start_time', 'end_time',
         'duration_minutes', 'token', 'passing_grade', 'default_score',
-        'shuffle_questions', 'shuffle_answers', 'tab_tolerance', 'status',
+        'shuffle_questions', 'shuffle_answers', 'enable_tab_tolerance', 'tab_tolerance', 'status',
     ];
 
     protected $casts = [
         'date' => 'date',
         'shuffle_questions' => 'boolean',
         'shuffle_answers' => 'boolean',
+        'enable_tab_tolerance' => 'boolean',
     ];
 
     public function teacher(): BelongsTo

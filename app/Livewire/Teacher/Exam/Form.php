@@ -116,6 +116,7 @@ class Form extends Component
         $this->token = $exam->token;
         $this->shuffle_questions = $exam->shuffle_questions;
         $this->shuffle_answers = $exam->shuffle_answers;
+        $this->enable_tab_tolerance = $exam->enable_tab_tolerance;
         $this->tab_tolerance = $exam->tab_tolerance;
         $this->status = $exam->status;
 
@@ -310,6 +311,7 @@ class Form extends Component
                 'default_score' => $this->default_score,
                 'shuffle_questions' => $this->shuffle_questions,
                 'shuffle_answers' => $this->shuffle_answers,
+                'enable_tab_tolerance' => $this->enable_tab_tolerance,
                 'tab_tolerance' => $this->tab_tolerance,
                 'status' => 'scheduled', // Force scheduled status
             ];
@@ -390,3 +392,5 @@ class Form extends Component
         ])->layout('layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
     }
 }
+
+

@@ -1,0 +1,9 @@
+﻿@php
+    $hours = floor($remainingSeconds / 3600);
+    $minutes = floor(($remainingSeconds % 3600) / 60);
+    $seconds = $remainingSeconds % 60;
+    $formattedTime = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+@endphp
+Alpine.store('exam', {
+    timeLeft: {{ $remainingSeconds }},
+    formattedTime: '{{ $formattedTime }}',

@@ -224,9 +224,16 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
+            @php
+                $hours = floor($remainingSeconds / 3600);
+                $minutes = floor(($remainingSeconds % 3600) / 60);
+                $seconds = $remainingSeconds % 60;
+                $initialFormattedTime = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            @endphp
+            
             Alpine.store('exam', {
-                timeLeft: \{\{ $remainingSeconds \}\}, // Dynamic - accounts for late starts
-                formattedTime: '01:00:00',
+                timeLeft: {{ $remainingSeconds }}, // Dynamic - accounts for late starts
+                formattedTime: '{{ $initialFormattedTime }}',
                 isActive: false,
                 
                 startTimer() {
@@ -262,8 +269,10 @@
                     this.violations++;
                     this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
                     
-                    if (this.violations >= 3) {
-                        alert('Batas pelanggaran tercapai. Ujian Anda akan otomatis dikirim.');
+                    const maxViolations = {{ $exam->tab_tolerance ?? 3 }};
+                    
+                    if (this.violations >= maxViolations) {
+                        alert(`Batas pelanggaran tercapai (${maxViolations}x). Ujian Anda akan otomatis dikirim.`);
                         this.submitExam();
                     } else {
                         this.showWarningModal = true;
@@ -282,14 +291,17 @@
                         }
                     }, 1000);
 
-                    // Visibility Change (Anti-Cheat)
+                    // Visibility Change (Anti-Cheat) - Only if enabled
+                    @if($exam->enable_tab_tolerance)
                     document.addEventListener('visibilitychange', () => {
                          if (document.hidden && Alpine.store('exam').isActive) {
                             this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
                         }
                     });
+                    @endif
 
-                    // Fullscreen Exit Detection
+                    // Fullscreen Exit Detection - Only if enabled
+                    @if($exam->enable_tab_tolerance)
                     const onFullscreenChange = () => {
                         if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal) {
                             this.handleViolation('Anda keluar dari mode layar penuh (fullscreen).');
@@ -300,6 +312,7 @@
                     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
                     document.addEventListener('mozfullscreenchange', onFullscreenChange);
                     document.addEventListener('msfullscreenchange', onFullscreenChange);
+                    @endif
 
                     // Disable Right Click
                     document.addEventListener('contextmenu', (e) => {
@@ -396,5 +409,11 @@
         });
     </script>
 </x-exam-layout>
+
+
+
+
+
+
 
 
