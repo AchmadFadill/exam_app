@@ -1,8 +1,14 @@
-@props(['title' => 'Dashboard', 'userPrefix' => 'User'])
+@props(['title' => 'Beranda', 'userPrefix' => 'User'])
 
 @php
-    $userName = auth()->check() ? auth()->user()->name : 'Guest';
-    $userRole = auth()->check() ? ucfirst(auth()->user()->role) : $userPrefix;
+    $userName = auth()->check() ? auth()->user()->name : 'Tamu';
+    $roleLabels = [
+        'admin' => 'Administrator',
+        'teacher' => 'Guru',
+        'student' => 'Siswa'
+    ];
+    $roleKey = auth()->check() ? auth()->user()->role : null;
+    $userRole = $roleKey && isset($roleLabels[$roleKey]) ? $roleLabels[$roleKey] : $userPrefix;
 @endphp
 
 <header 

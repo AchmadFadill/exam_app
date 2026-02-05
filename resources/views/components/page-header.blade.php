@@ -27,7 +27,7 @@
         
         @if($date)
             <div class="px-5 py-2 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm text-[10px] font-black text-text-muted uppercase tracking-widest">
-                {{ now()->translatedFormat('l, d F Y') }}
+                {{ now()->locale('id')->translatedFormat('l, d F Y') }}
             </div>
         @endif
 

@@ -2,8 +2,8 @@
 
 <div class="space-y-8">
     <x-page-header 
-        title="Teacher" 
-        highlight="Dashboard" 
+        title="DASHBOARD" 
+        highlight="GURU" 
         subtitle="Ringkasan aktivitas dan kendali ujian hari ini" 
     />
 
