@@ -37,11 +37,17 @@
                 <!-- Question Content -->
                 <div class="flex-1 overflow-y-auto p-6">
                     <div class="prose max-w-none text-gray-800 text-lg mb-8">
+                        <!-- Image Rendering -->
+                        <template x-if="questions[currentQuestion].image_path">
+                            <img :src="questions[currentQuestion].image_path" class="max-w-md rounded-lg mb-4 mx-auto md:mx-0 shadow-sm border border-gray-100">
+                        </template>
+                        
                         <div x-html="questions[currentQuestion].text"></div>
                     </div>
 
                     <!-- Options -->
                     <div class="space-y-4">
+
                         <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
                             <label class="flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50"
                                 :class="{
@@ -283,10 +289,30 @@
                     }
                 },
 
+                checkStatus() {
+                   fetch('{{ route('student.exam.status_check', $exam->id) }}', { 
+                       headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                   })
+                   .then(res => res.json())
+                   .then(data => {
+                       if(data.force_stop) {
+                           alert('Ujian telah dihentikkan oleh pengawas.');
+                           window.location.href = data.redirect;
+                       }
+                   })
+                   .catch(() => {});
+                },
+
                 initExam() {
                     // Timer
                     setInterval(() => {
                         Alpine.store('exam').updateTime();
+                        
+                        // Force Submit Check (every 5s approx)
+                        if (Alpine.store('exam').timeLeft % 5 === 0) {
+                            this.checkStatus();
+                        }
+
                         if (Alpine.store('exam').timeLeft <= 0 && Alpine.store('exam').isActive) {
                             this.submitExam();
                         }

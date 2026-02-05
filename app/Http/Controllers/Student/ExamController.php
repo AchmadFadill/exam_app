@@ -56,6 +56,7 @@ class ExamController extends Controller
                 'id' => $q->id,
                 'type' => $q->type === 'essay' ? 'essay' : 'multiple_choice', 
                 'text' => $q->text,
+                'image_path' => $q->image_path ? \Illuminate\Support\Facades\Storage::url($q->image_path) : null,
                 'options' => $options->map(function($opt) {
                     return [
                         'id' => $opt->id,
@@ -259,6 +260,27 @@ class ExamController extends Controller
             'attempt' => $attempt,
             'exam' => $attempt->exam
         ]);
+    }
+
+    public function statusCheck($id)
+    {
+        $student = Auth::user()->student;
+        $attempt = ExamAttempt::where('exam_id', $id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        if (!$attempt) {
+            return response()->json(['force_stop' => false]);
+        }
+
+        if ($attempt->submitted_at || in_array($attempt->status, ['submitted', 'graded', 'completed'])) {
+            return response()->json([
+                'force_stop' => true,
+                'redirect' => route('student.results.detail', $attempt->id) // Or index
+            ]);
+        }
+
+        return response()->json(['force_stop' => false]);
     }
 }
 

@@ -20,7 +20,7 @@
             }
         }, 1000);
     }
-}" x-init="initTimer()" class="min-h-screen bg-gray-50 flex flex-col">
+}" x-init="initTimer()" wire:poll.5s="checkStatus" class="min-h-screen bg-gray-50 flex flex-col">
     
     <!-- Time's Up Overlay -->
     <div x-show="remaining <= 0" 

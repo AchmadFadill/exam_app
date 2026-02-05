@@ -96,5 +96,7 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group
 
     Route::get('/results', App\Livewire\Student\ExamResults::class)->name('results');
 
+    Route::get('/exam/{id}/status', [App\Http\Controllers\Student\ExamController::class, 'statusCheck'])->name('exam.status_check'); // New Route
+    
     Route::get('/results/{id}', [App\Http\Controllers\Student\ExamController::class, 'result_detail'])->name('results.detail');
 });

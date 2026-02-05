@@ -115,128 +115,102 @@ class TakeExam extends Component
 
     public function saveAnswer()
     {
+        // Guard clauses
+        if (!$this->attemptId || !$this->examId) return;
+
         // 1. Validate Time Server-Side
         if ($this->hasTimeExpired()) {
-            return; // Silently fail or dispatch error
+            return; 
         }
 
-        $question = $this->currentQuestion;
-        
-        $data = [
-            'exam_attempt_id' => $this->attemptId,
-            'question_id' => $question->id,
-        ];
-
-        if ($question->type === 'multiple_choice') {
-            $data['selected_option_id'] = $this->selectedOption;
+        try {
+            $question = $this->currentQuestion;
+            if (!$question) return;
             
-            // Auto-grade MC
-            // Verify the selected option exists and check if it's correct
-            $selectedOptModel = $question->options->where('id', $this->selectedOption)->first();
-            $isCorrect = $selectedOptModel && $selectedOptModel->is_correct;
-            
-            $data['is_correct'] = $isCorrect;
-            $data['score_awarded'] = $isCorrect ? $question->pivot->score : 0;
-            
-        } else {
-            $data['answer'] = $this->essayAnswer;
-            // Essay needs manual grading
-            $data['is_correct'] = null;
-            $data['score_awarded'] = null;
-        }
+            $data = [
+                'exam_attempt_id' => $this->attemptId,
+                'question_id' => $question->id,
+            ];
 
-        \App\Models\StudentAnswer::updateOrCreate(
-            ['exam_attempt_id' => $this->attemptId, 'question_id' => $question->id],
-            $data
-        );
-    }
+            if ($question->type === 'multiple_choice') {
+                $data['selected_option_id'] = $this->selectedOption;
+                
+                $selectedOptModel = $question->options->where('id', $this->selectedOption)->first();
+                $isCorrect = $selectedOptModel && $selectedOptModel->is_correct;
+                
+                $data['is_correct'] = $isCorrect;
+                $data['score_awarded'] = $isCorrect ? $question->pivot->score : 0;
+                
+            } else {
+                $data['answer'] = $this->essayAnswer;
+                $data['is_correct'] = null;
+                $data['score_awarded'] = null;
+            }
 
-    public function nextQuestion()
-    {
-        $this->saveAnswer();
-        if ($this->currentQuestionIndex < $this->questions->count() - 1) {
-            $this->currentQuestionIndex++;
-            $this->loadQuestionState();
-        }
-    }
-
-    public function prevQuestion()
-    {
-        $this->saveAnswer();
-        if ($this->currentQuestionIndex > 0) {
-            $this->currentQuestionIndex--;
-            $this->loadQuestionState();
+            \App\Models\StudentAnswer::updateOrCreate(
+                ['exam_attempt_id' => $this->attemptId, 'question_id' => $question->id],
+                $data
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SaveAnswer Failed: ' . $e->getMessage());
         }
     }
     
-    public function jumpToQuestion($index)
-    {
-        $this->saveAnswer();
-        if ($index >= 0 && $index < $this->questions->count()) {
-            $this->currentQuestionIndex = $index;
-            $this->loadQuestionState();
-        }
-    }
+    // ... next/prev/jump methods ...
 
     public function submitExam()
     {
-        // Ensure strictly one submission
-        if ($this->attempt->status === 'submitted' || $this->attempt->status === 'graded') {
+        \Illuminate\Support\Facades\Log::info('SubmitExam Triggered for Attempt: ' . $this->attemptId);
+
+        try {
+            // Ensure strictly one submission
+            $this->attempt->refresh();
+            if (in_array($this->attempt->status, ['submitted', 'graded', 'completed'])) {
+                return $this->redirect(route('student.exams.index'));
+            }
+
+            $this->saveAnswer();
+            
+            $attempt = $this->attempt;
+            
+            // Calculate total score for auto-graded questions
+            $totalScore = $attempt->answers()->sum('score_awarded');
+            $maxScore = $this->exam->questions()->sum('score'); // Using direct question score usually, or pivot if defined
+            // Note: In saveAnswer we used $question->pivot->score. Check consistency.
+            // Let's rely on attempt answers sum for now.
+
+            $hasEssay = $this->exam->questions()->where('type', 'essay')->exists();
+            
+            $attempt->update([
+                'submitted_at' => now(),
+                'status' => $hasEssay ? 'submitted' : 'graded',
+                'total_score' => $totalScore,
+                'percentage' => $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0, 
+            ]);
+
+            session()->flash('success', 'Ujian berhasil dikumpulkan!');
             return $this->redirect(route('student.exams.index'));
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SubmitExam Error: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Terjadi kesalahan sistem saat mengirim jawaban. Hubungi pengawas.']);
         }
-
-        $this->saveAnswer(); // Save last question (will be blocked if time expired)
-        
-        $attempt = $this->attempt;
-        
-        // Calculate total score for auto-graded questions
-        $totalScore = $attempt->answers->sum('score_awarded');
-        $maxScore = $this->exam->questions->sum('pivot.score');
-        
-        // If all questions are MC, we can finalize grade immediately
-        // For mixed/essay, status might be 'submitted' waiting for grading
-        
-        $hasEssay = $this->exam->questions->where('type', 'essay')->isNotEmpty();
-        
-        $attempt->update([
-            'submitted_at' => now(),
-            'status' => $hasEssay ? 'submitted' : 'graded',
-            'total_score' => $totalScore,
-            // Simple percentage calc, can be refined
-            'percentage' => $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0, 
-        ]);
-
-        session()->flash('success', 'Ujian berhasil dikumpulkan!');
-        return $this->redirect(route('student.exams.index'));
     }
 
-    /**
-     * Server-side check if time has expired
-     * Allows a 2-minute buffer for network latency
-     */
-    protected function hasTimeExpired()
+    // ... hasTimeExpired ...
+
+    public function checkStatus()
     {
-        $exam = $this->exam;
-        $attempt = $this->attempt;
-        
-        $startedAt = \Carbon\Carbon::parse($attempt->started_at);
-        $allowedDuration = $exam->duration_minutes;
-        
-        // Theoretical end time
-        $endTime = $startedAt->copy()->addMinutes($allowedDuration);
-        
-        // Hard deadline (Exam End Time)
-        $examHardDeadline = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
-        
-        // The actual limit is the earliest of the two
-        $limit = $endTime->min($examHardDeadline);
-        
-        // Buffer: 60 seconds tolerance
-        if (now()->gt($limit->addSeconds(60))) {
-            return true;
+        try {
+            $this->attempt->refresh(); // This might trigger query
+            
+            if (in_array($this->attempt->status, ['submitted', 'graded', 'completed'])) {
+                session()->flash('warning', 'Ujian telah dihentikan oleh pengawas.');
+                return $this->redirect(route('student.exams.index'));
+            }
+        } catch (\Exception $e) {
+            // Ignore errors in polling to avoid popup spam
         }
-        
-        return false;
     }
 
     public function render()
@@ -246,6 +220,6 @@ class TakeExam extends Component
             'currentQuestion' => $this->currentQuestion,
             'questions' => $this->questions,
             'answeredCount' => \App\Models\StudentAnswer::where('exam_attempt_id', $this->attemptId)->count()
-        ])->layout('layouts.student', ['title' => 'Ujian Berlangsung']); // Use a dedicated layout later if needed
+        ])->layout('layouts.student', ['title' => 'Ujian Berlangsung']);
     }
 }

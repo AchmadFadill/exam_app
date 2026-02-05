@@ -209,14 +209,8 @@ class QuestionGroupDetail extends Component
                     }
                 }
 
-                $updateData = [
-                    'title' => $this->questionForm['title'],
-                    'subject_id' => $this->questionForm['subject_id'],
-                    'type' => $this->questionForm['type'],
-                    'text' => $this->questionForm['text'],
-                    'explanation' => $this->questionForm['explanation'],
-                    'score' => $this->questionForm['score'],
-                ];
+                $updateData = $this->getQuestionData();
+                unset($updateData['teacher_id']); // Don't change teacher ownership
 
                 if ($this->questionImage) {
                     $updateData['image_path'] = $imagePath;
@@ -225,20 +219,7 @@ class QuestionGroupDetail extends Component
                 $question->update($updateData);
             } else {
                 // Create new question
-                $user = \Illuminate\Support\Facades\Auth::user();
-                $teacherId = $user->isTeacher() 
-                    ? $user->teacher->id 
-                    : \App\Models\Teacher::first()->id;
-
-                $createData = [
-                    'teacher_id' => $teacherId,
-                    'title' => $this->questionForm['title'],
-                    'subject_id' => $this->questionForm['subject_id'],
-                    'type' => $this->questionForm['type'],
-                    'text' => $this->questionForm['text'],
-                    'explanation' => $this->questionForm['explanation'],
-                    'score' => $this->questionForm['score'],
-                ];
+                $createData = $this->getQuestionData();
 
                 if ($this->questionImage) {
                     $createData['image_path'] = $imagePath;
@@ -269,26 +250,13 @@ class QuestionGroupDetail extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $user = \Illuminate\Support\Facades\Auth::user();
-            $teacherId = $user->isTeacher() 
-                ? $user->teacher->id 
-                : \App\Models\Teacher::first()->id;
-
             $imagePath = null;
             if ($this->questionImage) {
                 $fileName = time() . '_' . $this->questionImage->getClientOriginalName();
                 $imagePath = $this->questionImage->storeAs('questions', $fileName, 'public');
             }
 
-            $createData = [
-                'teacher_id' => $teacherId,
-                'title' => $this->questionForm['title'],
-                'subject_id' => $this->questionForm['subject_id'],
-                'type' => $this->questionForm['type'],
-                'text' => $this->questionForm['text'],
-                'explanation' => $this->questionForm['explanation'],
-                'score' => $this->questionForm['score'],
-            ];
+            $createData = $this->getQuestionData();
 
             if ($imagePath) {
                 $createData['image_path'] = $imagePath;
@@ -314,6 +282,22 @@ class QuestionGroupDetail extends Component
         $this->questionForm['subject_id'] = $keepSubject;
         $this->questionForm['type'] = $keepType;
         $this->optionCount = 4;
+    }
+
+    private function getQuestionData()
+    {
+        $user = Auth::user();
+        $teacherId = $user->isTeacher() ? $user->teacher->id : \App\Models\Teacher::first()->id;
+
+        return [
+            'teacher_id' => $teacherId,
+            'title' => $this->questionForm['title'],
+            'subject_id' => $this->questionForm['subject_id'],
+            'type' => $this->questionForm['type'],
+            'text' => $this->questionForm['text'],
+            'explanation' => $this->questionForm['explanation'],
+            'score' => $this->questionForm['score'],
+        ];
     }
 
     public function removeImage()

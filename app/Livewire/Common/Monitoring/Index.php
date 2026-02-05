@@ -16,6 +16,7 @@ class Index extends Component
         
         // Base query for active exams - OPTIMIZED
         $query = \App\Models\Exam::where('status', 'scheduled')
+            ->latest() // Sort by latest created
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
             ->whereTime('end_time', '>=', now()->format('H:i'));

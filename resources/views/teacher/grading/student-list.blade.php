@@ -30,40 +30,57 @@
                 <x-table.th>Nama Siswa</x-table.th>
                 <x-table.th>Waktu Submit</x-table.th>
                 <x-table.th>Status</x-table.th>
-                <x-table.th>Nilai</x-table.th>
+                <x-table.th>Nilai Akhir</x-table.th>
                 <x-table.th class="text-right">Aksi</x-table.th>
             </x-table.tr>
         </x-table.thead>
-        <tbody class="bg-bg-surface divide-y divide-gray-200">
-            @foreach($students as $student)
+        <tbody class="bg-bg-surface divide-y divide-border-subtle dark:divide-slate-800">
+            @forelse($attempts as $attempt)
             <x-table.tr>
                 <x-table.td>
-                    <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">{{ $student['name'] }}</div>
+                    <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">
+                        {{ $attempt->student->user->name ?? 'Siswa Tidak Dikenal' }}
+                    </div>
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap italic font-bold text-text-muted uppercase text-[10px] tracking-widest">
-                    {{ $student['submitted_at'] }}
+                    {{ $attempt->submitted_at ? $attempt->submitted_at->format('d M Y H:i') : '-' }}
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap">
-                    @if($student['status'] == 'Sudah Dinilai')
-                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
-                            {{ $student['status'] }}
+                    @if($attempt->status == 'graded')
+                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-green-100 text-green-700 ring-1 ring-green-500/20">
+                            Selesai Dinilai
                         </span>
                     @else
-                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                            {{ $student['status'] }}
+                        <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-100 text-amber-700 ring-1 ring-amber-500/20">
+                            Butuh Koreksi
                         </span>
                     @endif
                 </x-table.td>
                  <x-table.td class="whitespace-nowrap text-sm text-text-main font-black">
-                    {{ $student['score'] }}
+                    @if($attempt->status == 'graded')
+                        {{ number_format($attempt->total_score, 1) }}
+                    @else
+                        <span class="text-text-muted text-xs italic">Pending</span>
+                    @endif
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap text-right font-medium">
-                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $examId, 'student' => $student['id']]) }}" variant="soft" class="text-[10px] px-6">
-                        {{ $student['status'] == 'Sudah Dinilai' ? 'Edit Nilai' : 'Beri Nilai' }}
+                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) }}" 
+                              variant="{{ $attempt->status == 'graded' ? 'secondary' : 'primary' }}" 
+                              class="text-[10px] px-6">
+                        {{ $attempt->status == 'graded' ? 'Edit Nilai' : 'Beri Nilai' }}
                     </x-button>
                 </x-table.td>
             </x-table.tr>
-            @endforeach
+            @empty
+            <x-table.tr>
+                <x-table.td colspan="5" class="py-20 text-center text-text-muted italic font-bold">
+                    Belum ada siswa yang mengumpulkan ujian untuk sesi ini.
+                </x-table.td>
+            </x-table.tr>
+            @endforelse
         </tbody>
     </x-table>
-</div>
+    
+    <div class="mt-4">
+        {{ $attempts->links() }}
+    </div>

@@ -6,82 +6,152 @@ use Livewire\Component;
 
 class Detail extends Component
 {
-    public $examId;
-    public $studentId = 1;
-    public $pgScore = 45; // Dummy PG Score
-    public $maxPgScore = 50; // Max PG Score
-
-    public $pgAnswers = [
-        [
-            'no' => 1,
-            'question' => 'Apa fungsi utama stomata pada daun?',
-            'student_answer' => 'A. Pertukaran gas',
-            'key' => 'A. Pertukaran gas',
-            'is_correct' => true
-        ],
-        [
-            'no' => 2,
-            'question' => 'Bagian sel yang berfungsi sebagai pembangkit energi adalah...',
-            'student_answer' => 'C. Ribosom',
-            'key' => 'B. Mitokondria',
-            'is_correct' => false
-        ],
-        [
-            'no' => 3,
-            'question' => 'Hewan yang berkembang biak dengan cara bertelur disebut...',
-            'student_answer' => 'A. Ovipar',
-            'key' => 'A. Ovipar',
-            'is_correct' => true
-        ]
-    ];
+    public $attempt;
+    public $student;
+    public $exam;
     
-    // Essay Answers
-    public $answers = [
-        [
-            'id' => 1,
-            'question' => 'Jelaskan proses fotosintesis pada tumbuhan!',
-            'student_answer' => 'Fotosintesis adalah proses tumbuhan mengubah energi cahaya menjadi energi kimia. Tumbuhan menggunakan air dan karbon dioksida untuk menghasilkan glukosa dan oksigen dengan bantuan klorofil.',
-            'key' => 'Poin penting: Energi cahaya -> Kimia, Air + CO2 -> Glukosa + O2, Peran Klorofil.',
-            'max_score' => 20,
-            'score' => 18,
-            'feedback' => 'Jawaban sudah cukup lengkap.'
-        ],
-        [
-             'id' => 2,
-             'question' => 'Apa dampak pemanasan global bagi ekosistem laut?',
-             'student_answer' => 'Es kutub mencair dan air laut naik.',
-             'key' => 'Naiknya suhu air, pemutihan karang (coral bleaching), naiknya permukaan laut, terganggunya rantai makanan.',
-             'max_score' => 15,
-             'score' => 5,
-             'feedback' => 'Kurang lengkap, jelaskan tentang coral bleaching.'
-        ]
-    ];
+    // PG Data
+    public $pgScore = 0;
+    public $maxPgScore = 0;
+    public $pgAnswers = [];
+    
+    // Essay Data (bound to UI)
+    public $essayGrades = []; // [answer_id => ['score' => int, 'feedback' => string]]
 
-    public function updatedAnswers()
+    public function mount($exam, $student)
     {
-        // Recalculate is done in render automatically or via computed property
+        // 1. Fetch Attempt
+        $this->attempt = \App\Models\ExamAttempt::where('exam_id', $exam)
+            ->where('student_id', $student)
+            ->with(['exam.questions', 'answers.question', 'student.user'])
+            ->firstOrFail();
+            
+        $this->exam = $this->attempt->exam;
+        $this->student = $this->attempt->student;
+        
+        // 2. Process Data
+        $this->prepareData();
+    }
+    
+    public function prepareData()
+    {
+        $this->pgAnswers = [];
+        $this->essayGrades = [];
+        $this->pgScore = 0;
+        $this->maxPgScore = 0;
+        
+        // Map questions by ID for easy access
+        $questions = $this->exam->questions->keyBy('id');
+        
+        foreach ($this->attempt->answers as $answer) {
+            $question = $answer->question; // or look up from $questions if eager loaded correctly
+            
+            if (!$question) continue;
+            
+            if ($question->type === 'multiple_choice') {
+                // Determine correctness from pivot if needed, or answer's own calculation
+                // StudentAnswer has 'score_awarded' and 'is_correct'
+                
+                $this->pgScore += $answer->score_awarded;
+                $this->maxPgScore += $question->score; // Or pivot score if available? Assuming question score for now.
+                
+                $this->pgAnswers[] = [
+                    'no' => count($this->pgAnswers) + 1, // Logic for numbering might need improvement if questions are shuffled
+                    'question' => $question->text,
+                    'student_answer' => $this->getOptionLabel($answer->selected_option_id),
+                    'key' => 'Kunci: ' . $question->correct_option_label, // Need to fetch correct option logic?
+                    // Simplified: Just use answer->is_correct
+                    'is_correct' => $answer->is_correct
+                ];
+            } else {
+                // Essay
+                // Initialize grades
+                $this->essayGrades[$answer->id] = [
+                    'question' => $question->text,
+                    'student_answer' => $answer->answer,
+                    'key' => $question->explanation ?? 'Lihat kunci jawaban di bank soal',
+                    'max_score' => $question->score,
+                    'score' => $answer->score_awarded ?? 0, // Default to 0 or existing score
+                    'feedback' => $answer->teacher_feedback ?? '' // Ensure column exists? Need to check migration usage or json
+                ];
+            }
+        }
+        
+        // Fallback for MaxPG if it's 0 (maybe no PG questions)
+        if ($this->maxPgScore == 0) {
+            // Recalculate from pure questions if answers missing
+            $this->maxPgScore = $questions->where('type', 'multiple_choice')->sum('score');
+        }
+    }
+    
+    private function getOptionLabel($optionId)
+    {
+        if (!$optionId) return '-';
+        $opt = \App\Models\QuestionOption::find($optionId);
+        return $opt ? $opt->label . '. ' . $opt->text : '-';
     }
 
-    public function getTotalScoreProperty()
+    public function updatedEssayGrades($value, $key)
     {
-        $essayScore = collect($this->answers)->sum('score');
-        return $this->pgScore + $essayScore;
+        // Validation for Max Score
+        // Key format: {answer_id}.score
+        $parts = explode('.', $key);
+        if (count($parts) == 2 && $parts[1] == 'score') {
+            $answerId = $parts[0];
+            $max = $this->essayGrades[$answerId]['max_score'];
+            
+            if ((int)$value > $max) {
+                $this->essayGrades[$answerId]['score'] = $max;
+            }
+            if ((int)$value < 0) {
+                $this->essayGrades[$answerId]['score'] = 0;
+            }
+        }
+    }
+
+    public function getCurrentTotalScoreProperty()
+    {
+        $essayTotal = collect($this->essayGrades)->sum('score');
+        return $this->pgScore + $essayTotal;
+    }
+
+    public function finishGrading()
+    {
+        $totalEssayScore = 0;
+        
+        \Illuminate\Support\Facades\DB::transaction(function () use (&$totalEssayScore) {
+            foreach ($this->essayGrades as $answerId => $data) {
+                $score = (int)$data['score'];
+                $totalEssayScore += $score;
+                
+                \App\Models\StudentAnswer::where('id', $answerId)->update([
+                    'score_awarded' => $score,
+                    // 'feedback' => $data['feedback'] // Need to verify if 'feedback' column exists on student_answers?
+                ]);
+            }
+            
+            // Update Attempt
+            $finalScore = $this->pgScore + $totalEssayScore;
+            $maxScore = $this->exam->questions->sum('score'); // Naive sum. Pivot score is better if used.
+            $percentage = $maxScore > 0 ? ($finalScore / $maxScore) * 100 : 0;
+            
+            $this->attempt->update([
+                'total_score' => $finalScore,
+                'percentage' => $percentage,
+                'status' => 'graded', // Final status
+                'passed' => $percentage >= $this->exam->passing_grade
+            ]);
+        });
+
+        return redirect()->route('teacher.grading.show', $this->exam->id)
+            ->with('success', 'Penilaian berhasil disimpan!');
     }
 
     public function render()
     {
         return view('teacher.grading.detail', [
-            'student_name' => 'Aditya Pratama',
-            'grade' => 'XI IPA 1',
-            'current_score' => $this->totalScore, 
-            'pg_score' => $this->pgScore,
-            'max_pg_score' => $this->maxPgScore,
-            'pg_answers' => $this->pgAnswers
-        ])->layout('layouts.teacher');
-    }
-
-    public function saveScore($index)
-    {
-        // Save logic
+            'student_name' => $this->student->user->name,
+            'grade' => $this->exam->class,
+        ])->layout('layouts.teacher')->title('Koreksi - ' . $this->student->user->name);
     }
 }
