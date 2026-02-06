@@ -21,14 +21,21 @@
                         Dikerjakan pada {{ $attempt->started_at->translatedFormat('d F Y, H:i') }}
                     </div>
                 </div>
-                <div class="bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30">
-                    <div class="text-sm font-medium uppercase tracking-wider mb-1">Nilai Akhir</div>
-                    <div class="text-6xl font-black">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
-                    @if($attempt->passed)
-                        <div class="mt-2 text-xs font-semibold px-3 py-1 bg-green-500 rounded-full inline-block">LULUS KKM</div>
-                    @else
-                        <div class="mt-2 text-xs font-semibold px-3 py-1 bg-red-500 rounded-full inline-block">TIDAK LULUS</div>
-                    @endif
+                <div class="relative overflow-hidden bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30 group">
+                    <!-- Profile Photo Background -->
+                    <img src="{{ auth()->user()->profile_photo_url }}" alt="Profile" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/50"></div>
+
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <div class="text-sm font-medium uppercase tracking-wider mb-1 text-white">Nilai Akhir</div>
+                        <div class="text-6xl font-black text-white">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
+                        @if($attempt->passed)
+                            <div class="mt-2 text-xs font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
+                        @else
+                            <div class="mt-2 text-xs font-semibold px-3 py-1 bg-red-500 text-white rounded-full inline-block shadow-lg">TIDAK LULUS</div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

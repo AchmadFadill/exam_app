@@ -31,6 +31,10 @@ Route::middleware('guest')->group(function () {
     // Student Login
     Route::get('/student/login', [LoginController::class, 'showStudentLoginForm'])->name('student.login');
     Route::post('/student/login', [LoginController::class, 'studentLogin']);
+
+    // Password Reset Request
+    Route::get('/student/password-reset', App\Livewire\Auth\StudentPasswordReset::class)->name('student.password-reset');
+    Route::get('/teacher/forgot-password', App\Livewire\Auth\TeacherPasswordReset::class)->name('teacher.password-reset');
 });
 
 // Logout (Authenticated)
@@ -50,7 +54,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/monitor/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('admin.monitor.detail');
     Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('admin.reports.index');
     Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('admin.reports.detail');
+    Route::get('/reports/{examId}/student/{studentId}', App\Livewire\Common\Report\StudentDetail::class)->name('admin.reports.student');
+    Route::get('/reports/{examId}/analysis', App\Livewire\Common\Report\QuestionAnalysis::class)->name('admin.reports.analysis');
     Route::get('/settings', App\Livewire\Admin\Settings::class)->name('admin.settings');
+    Route::get('/password-requests', App\Livewire\Admin\PasswordRequests::class)->name('admin.password-requests');
 });
 
 // ============================================
@@ -78,6 +85,9 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(
     // Reports
     Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('reports.index');
     Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('reports.detail');
+    Route::get('/reports/{examId}/student/{studentId}', App\Livewire\Common\Report\StudentDetail::class)->name('reports.student');
+    Route::get('/reports/{examId}/analysis', App\Livewire\Common\Report\QuestionAnalysis::class)->name('reports.analysis');
+    Route::get('/settings', App\Livewire\Common\ProfileSettings::class)->name('settings');
 });
 
 // ============================================
@@ -99,4 +109,5 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group
     Route::get('/exam/{id}/status', [App\Http\Controllers\Student\ExamController::class, 'statusCheck'])->name('exam.status_check'); // New Route
     
     Route::get('/results/{id}', [App\Http\Controllers\Student\ExamController::class, 'result_detail'])->name('results.detail');
+    Route::get('/settings', App\Livewire\Common\ProfileSettings::class)->name('settings');
 });

@@ -13,6 +13,13 @@
         </x-button>
     </div>
 
+    @if (session('success'))
+        <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 font-bold flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="space-y-8 max-w-4xl mx-auto">
         <!-- Identitas Sekolah Card -->
         <div class="bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 transition-all">
@@ -37,15 +44,25 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="relative group">
                             <input type="file" wire:model="logo" id="logo-upload" class="hidden">
-                            <label for="logo-upload" class="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border-main dark:border-border-main rounded-[2rem] hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group">
+                            <label for="logo-upload" class="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border-main dark:border-border-main rounded-[2rem] hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group overflow-hidden relative">
                                 @if ($logo)
+                                    <!-- New Upload Preview -->
                                     <div class="relative w-full h-full p-4">
                                         <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-contain rounded-xl">
                                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-[1.8rem]">
                                             <span class="text-white text-xs font-bold uppercase tracking-widest">Ganti Logo</span>
                                         </div>
                                     </div>
+                                @elseif($existingLogo)
+                                    <!-- Existing Logo -->
+                                    <div class="relative w-full h-full p-4">
+                                        <img src="{{ asset('storage/' . $existingLogo) }}" class="w-full h-full object-contain rounded-xl">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-[1.8rem]">
+                                            <span class="text-white text-xs font-bold uppercase tracking-widest">Ganti Logo</span>
+                                        </div>
+                                    </div>
                                 @else
+                                    <!-- Default Placeholder -->
                                     <div class="text-center p-6">
                                         <div class="w-16 h-16 bg-bg-surface dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 mx-auto border border-border-subtle group-hover:scale-110 transition-transform shadow-lg shadow-black/5">
                                             <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>

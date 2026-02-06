@@ -21,7 +21,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo" class="w-10 h-10 rounded-full shadow-sm border border-slate-100 p-0.5">
+                    @if(isset($app_logo) && $app_logo)
+                        <img src="{{ asset('storage/' . $app_logo) }}" alt="Logo" class="w-10 h-10 rounded-full shadow-sm border border-slate-100 p-0.5 object-cover">
+                    @else
+                        <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo" class="w-10 h-10 rounded-full shadow-sm border border-slate-100 p-0.5">
+                    @endif
                     <span class="text-xl font-bold text-slate-900 tracking-tight">CBT System</span>
                 </div>
                 <div class="hidden md:flex items-center gap-8">
@@ -68,7 +72,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-white overflow-hidden">
+    <section class="relative pt-24 pb-20 lg:pt-36 lg:pb-32 bg-white overflow-hidden">
         <!-- Background Decoration -->
         <div class="absolute inset-0 z-0">
             <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-400/20 blur-[120px] rounded-full"></div>
@@ -79,8 +83,8 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-8 text-center lg:text-left">
                     <h1 class="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-tight">
-                        CBT SMAIT <br>
-                        <span class="text-primary">Baitul Muslim</span>
+                        CBT <br>
+                        <span class="text-primary">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</span>
                     </h1>
                     <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
                         Wujudkan evaluasi pembelajaran yang efisien, transparan, dan terintegrasi dengan sistem Computer Based Test tercanggih.
@@ -174,7 +178,7 @@
     <footer class="py-12 border-t border-white/10 bg-primary text-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-blue-200/60 text-sm font-medium">
-                &copy; {{ date('Y') }} CBT System SMAIT Baitul Muslim. All rights reserved.
+                &copy; {{ date('Y') }} CBT System {{ $app_name ?? 'SMAIT Baitul Muslim' }}. All rights reserved.
             </p>
         </div>
     </footer>

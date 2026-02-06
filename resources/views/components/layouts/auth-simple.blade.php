@@ -22,16 +22,24 @@
                 <div class="relative inline-block mb-6 group">
                     <div class="absolute inset-0 bg-[var(--color-primary)]/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div class="relative w-20 h-20 bg-white rounded-full flex items-center justify-center p-2 shadow-xl border border-gray-50 transition-transform duration-500 group-hover:scale-105">
-                        <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-cover">
+                        @if(isset($app_logo) && $app_logo)
+                            <img src="{{ asset('storage/' . $app_logo) }}" alt="Logo Sekolah" class="w-full h-full object-cover">
+                        @else
+                            <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-cover">
+                        @endif
                     </div>
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[var(--color-text-main)] tracking-tight">{{ $title }}</h1>
-                <p class="mt-1 text-xs text-[var(--color-text-muted)] font-medium">CBT SMAIT Baitul Muslim</p>
+                <p class="mt-1 text-xs text-[var(--color-text-muted)] font-medium">CBT {{ $app_name ?? 'SMAIT Baitul Muslim' }}</p>
             </div>
             
+            @if($action)
             <form class="mt-6 space-y-4" action="{{ $action }}" method="POST">
                 @csrf
+            @else
+            <div class="mt-6 space-y-4">
+            @endif
 
                 {{-- Global Error Message --}}
                 @if ($errors->any())
@@ -47,7 +55,11 @@
 
                 {{ $slot }}
 
+            @if($action)
             </form>
+            @else
+            </div>
+            @endif
 
             <!-- Alternative Login Links -->
             @if(isset($footer))
@@ -62,7 +74,7 @@
             <!-- Bottom Branding -->
             <div class="mt-6 text-center border-t border-gray-100 pt-5">
                 <p class="text-[9px] text-slate-400 font-bold tracking-[0.25em] uppercase opacity-70">
-                    &copy; 2025 CBT System &bull; SMAIT Baitul Muslim
+                    &copy; {{ date('Y') }} CBT {{ $app_name ?? 'SMAIT Baitul Muslim' }}
                 </p>
             </div>
         </div>

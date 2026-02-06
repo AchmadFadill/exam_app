@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Setting;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -12,53 +13,57 @@ class Settings extends Component
     public $schoolName;
     public $academicYear;
     public $semester;
-    public $logo; // For file upload
+    public $logo;
+    public $existingLogo;
 
     public function mount()
     {
-        // Initialize with default/dummy data
-        $this->schoolName = 'SMAIT Baitul Muslim';
-        $this->academicYear = '2025/2026';
-        $this->semester = 'Ganjil';
+        $this->schoolName = Setting::getValue('school_name', 'Sekolah CBT');
+        $this->academicYear = Setting::getValue('academic_year', date('Y') . '/' . (date('Y') + 1));
+        $this->semester = Setting::getValue('semester', 'Ganjil');
+        $this->existingLogo = Setting::getValue('school_logo');
     }
 
     public function save()
     {
-        // Validation (Simulated)
         $this->validate([
             'schoolName' => 'required|string|max:255',
-            'academicYear' => 'required|string|max:20',
+            'academicYear' => 'required|string',
             'semester' => 'required|in:Ganjil,Genap',
-            'logo' => 'nullable|image|max:1024', // 1MB Max
+            'logo' => 'nullable|image|max:2048', // 2MB Max
         ]);
 
-        // Logic to save settings would go here (Simulated)
+        Setting::setValue('school_name', $this->schoolName);
+        Setting::setValue('academic_year', $this->academicYear);
+        Setting::setValue('semester', $this->semester);
+
+        if ($this->logo) {
+            $path = $this->logo->store('settings', 'public');
+            Setting::setValue('school_logo', $path);
+            $this->existingLogo = $path;
+        }
+
+        session()->flash('success', 'Konfigurasi berhasil disimpan.');
         
-        $this->dispatch('notify', ['message' => 'Pengaturan sistem berhasil disimpan!']);
+        // Force refresh to update Sidebar/Layout global variables
+        return redirect()->route('admin.settings');
     }
 
     public function getAcademicYearOptions()
     {
         $currentYear = date('Y');
-        $years = [];
-        
-        // Generate academic years from current year to 5 years in the future
-        for ($i = 0; $i <= 5; $i++) {
-            $startYear = $currentYear + $i;
-            $endYear = $startYear + 1;
-            $yearStr = "$startYear/$endYear";
-            $years[] = [
-                'value' => $yearStr,
-                'label' => $yearStr
-            ];
+        $options = [];
+        for ($i = -2; $i < 3; $i++) {
+            $year = ($currentYear + $i);
+            $nextYear = $year + 1;
+            $value = "{$year}/{$nextYear}";
+            $options[] = ['value' => $value, 'label' => $value];
         }
-        
-        return $years;
+        return $options;
     }
 
     public function render()
     {
-        return view('admin.settings')
-            ->layout('layouts.admin', ['title' => 'Pengaturan Sistem']);
+        return view('admin.settings')->layout('layouts.admin');
     }
 }

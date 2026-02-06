@@ -8,25 +8,29 @@
             <div class="flex items-center gap-3">
                 <!-- Real Logo -->
                 <div class="bg-white p-1 rounded-full shadow-sm w-12 h-12 flex items-center justify-center overflow-hidden">
-                    <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-cover">
+                    @if(isset($app_logo) && $app_logo)
+                        <img src="{{ asset('storage/' . $app_logo) }}" alt="{{ $app_name ?? 'Logo Sekolah' }}" class="w-full h-full object-cover">
+                    @else
+                        <img src="{{ asset('img/logo_school.jpg') }}" alt="Logo Sekolah" class="w-full h-full object-cover">
+                    @endif
                 </div>
                 <div class="text-left leading-tight">
-                    <h1 class="font-bold text-lg tracking-wide text-white">CBT</h1>
-                    <p class="text-xs text-white/70 font-medium">SMAIT Baitul Muslim</p>
+                    <h1 class="font-bold text-lg tracking-wide text-white">CBT System</h1>
+                    <p class="text-xs text-white/70 font-medium">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-2">
+        <nav class="flex-1 overflow-y-auto py-2 px-3 space-y-2">
             {{ $slot }}
         </nav>
 
         <!-- Sidebar Footer with Logout -->
         <div class="p-4 border-t border-primary/10 bg-primary/20 space-y-3">
             <div class="flex flex-col items-center justify-center text-white/60 font-medium text-center">
-                <span class="text-xs">Tahun Ajaran 2025/2026</span>
-                <span class="text-[10px] opacity-75">Semester Ganjil</span>
+                <span class="text-xs">Tahun Ajaran {{ $app_academic_year ?? '2025/2026' }}</span>
+                <span class="text-[10px] opacity-75">Semester {{ $app_semester ?? 'Ganjil' }}</span>
             </div>
             
             <!-- Logout Button -->

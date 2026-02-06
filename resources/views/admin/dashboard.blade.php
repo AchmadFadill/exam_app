@@ -46,13 +46,13 @@
         <!-- School Info Card -->
         <div class="bg-gradient-to-br from-primary to-blue-700 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden flex flex-col justify-between">
              <div class="relative z-10">
-                <h3 class="text-xl font-bold">SMAIT Baitul Muslim</h3>
+                <h3 class="text-xl font-bold">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</h3>
                 <p class="text-blue-100 text-sm mt-1 opacity-80">Portal Administrasi Utama</p>
                 
                 <div class="mt-8 space-y-3">
                     <div class="flex items-center justify-between text-sm py-2 border-b border-white/10">
                         <span class="opacity-70">Semester</span>
-                         <span class="font-semibold">Ganjil 24/25</span>
+                         <span class="font-semibold">{{ $app_semester ?? 'Ganjil' }} {{ $app_academic_year ?? '' }}</span>
                     </div>
                      <div class="flex items-center justify-between text-sm py-2">
                         <span class="opacity-70">Tanggal</span>

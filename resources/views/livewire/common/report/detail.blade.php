@@ -98,7 +98,7 @@
                             </x-table.td>
                             <x-table.td class="text-right">
                                 <div class="flex justify-end">
-                                    <x-button variant="soft" class="px-6 text-[10px]">Detail</x-button>
+                                    <x-button variant="soft" href="{{ route($studentDetailRoute, ['examId' => $exam['id'], 'studentId' => $student['id']]) }}" class="px-6 text-[10px]">Detail</x-button>
                                 </div>
                             </x-table.td>
                         </x-table.tr>
@@ -137,7 +137,7 @@
                     </div>
                     @endforelse
                 </div>
-                <x-button variant="primary" class="w-full mt-6">Lihat Analisis Lengkap</x-button>
+                <x-button variant="primary" href="{{ route($analysisRoute, $exam['id']) }}" class="w-full mt-6">Lihat Analisis Lengkap</x-button>
             </x-card>
         </div>
     </div>
