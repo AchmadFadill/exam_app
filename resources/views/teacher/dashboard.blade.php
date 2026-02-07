@@ -107,8 +107,12 @@
                         </div>
                     </div>
                     @empty
-                    <div class="p-16 text-center text-text-muted font-bold italic">
-                        <p>Tidak ada aktivitas ujian yang terdeteksi.</p>
+                    <div class="p-12">
+                        <x-empty-state 
+                            title="Tidak Ada Aktivitas" 
+                            message="Tidak ada aktivitas ujian yang terdeteksi sedang berlangsung." 
+                            icon="coffee" 
+                        />
                     </div>
                     @endforelse
                 </div>
@@ -165,8 +169,12 @@
                         </div>
                     </div>
                     @empty
-                    <div class="p-8 text-center text-text-muted font-bold italic opacity-60">
-                        <p class="text-sm">Belum ada jadwal ujian mendatang.</p>
+                    <div class="p-8">
+                        <x-empty-state 
+                            title="Jadwal Kosong" 
+                            message="Belum ada jadwal ujian mendatang yang terdaftar." 
+                            icon="folder-open" 
+                        />
                     </div>
                     @endforelse
                 </div>
@@ -210,8 +218,12 @@
                                 </div>
                             </li>
                             @empty
-                            <li class="py-4 text-center">
-                                <p class="text-sm text-text-muted font-bold italic opacity-60">Belum ada aktivitas terkini.</p>
+                            <li class="py-10">
+                                <x-empty-state 
+                                    title="Tanpa Jejak" 
+                                    message="Belum ada aktivitas terkini yang tercatat hari ini." 
+                                    icon="folder-open" 
+                                />
                             </li>
                             @endforelse
                         </ul>

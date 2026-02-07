@@ -4,7 +4,7 @@
         subtitle="Kelola Profil Anda" 
     />
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 ">
         <!-- Profile Photo Section -->
         <div class="lg:col-span-4">
             <x-card title="Foto Profil">

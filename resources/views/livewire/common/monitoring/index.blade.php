@@ -50,9 +50,12 @@
         @endforeach
         
         @if(count($activeExams) === 0)
-        <div class="col-span-full py-12 text-center text-text-muted bg-gray-50 rounded-xl border border-dashed border-gray-200">
-            <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <p>Tidak ada ujian yang sedang berlangsung saat ini.</p>
+        <div class="col-span-full">
+            <x-empty-state 
+                title="Tidak ada Ujian Berlangsung" 
+                message="Tidak ada ujian yang sedang berlangsung saat ini" 
+                icon="coffee" 
+            />
         </div>
         @endif
     </div>

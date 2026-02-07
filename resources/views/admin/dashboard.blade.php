@@ -127,8 +127,12 @@
                     
                 </div>
                 @empty
-                <div class="p-12 text-center text-text-muted font-bold italic opacity-60">
-                    <p>Sedang tidak ada ujian yang dilaksanakan saat ini. 🎉</p>
+                <div class="p-8">
+                    <x-empty-state 
+                        title="Tidak Ada Ujian Aktif" 
+                        message="Sedang tidak ada ujian yang dilaksanakan saat ini" 
+                        icon="coffee" 
+                    />
                 </div>
                 @endforelse
             </div>
@@ -170,8 +174,12 @@
                         </div>
                     </div>
                     @empty
-                    <div class="py-12 text-center text-text-muted font-bold italic opacity-60">
-                        <p>Tidak ada aktivitas mencurigakan. Sistem aman! ✅</p>
+                    <div class="p-8">
+                        <x-empty-state 
+                            title="Keamanan Terkendali" 
+                            message="Tidak ada aktivitas mencurigakan yang terdeteksi. Sistem berjalan dengan aman! ✅" 
+                            icon="folder-open" 
+                        />
                     </div>
                     @endforelse
                 </div>

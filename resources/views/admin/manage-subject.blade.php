@@ -58,9 +58,12 @@
             </div>
         </x-card>
         @empty
-        <div class="col-span-full py-24 text-center text-text-muted font-bold italic opacity-40 bg-bg-surface dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-border-main dark:border-slate-800">
-            Mata pelajaran yang Anda cari tidak tersedia dalam database.
-        </div>
+        <x-empty-state 
+            colspan="full" 
+            title="Mata Pelajaran Tidak Ditemukan" 
+            message="Mata pelajaran yang Anda cari tidak tersedia dalam database atau kriteria pencarian." 
+            icon="folder-open" 
+        />
         @endforelse
     </div>
 
@@ -130,8 +133,13 @@
                         </div>
                     </div>
                     @empty
-                    <div class="p-12 text-center text-text-muted font-bold italic opacity-40 text-xs">Pengajar tidak teridentifikasi.</div>
-                    @endforelse
+            <x-empty-state 
+                colspan="4" 
+                title="Mata Pelajaran Belum Ada" 
+                message="Belum ada data mata pelajaran yang dikonfigurasi dalam sistem." 
+                icon="folder-open" 
+            />
+            @endforelse
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">

@@ -22,7 +22,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        @foreach($exams as $exam)
+        @forelse($exams as $exam)
         <div class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden hover:border-primary/40 transition-all flex flex-col group">
             <div class="p-8 flex-1">
                 <div class="flex justify-between items-start mb-8">
@@ -96,7 +96,15 @@
                 @endif
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-span-full">
+            <x-empty-state 
+                title="Daftar Ujian Kosong" 
+                message="Belum ada sesi ujian yang dijadwalkan" 
+                icon="folder-open" 
+            />
+        </div>
+        @endforelse
     </div>
 
     <!-- Pagination -->

@@ -72,11 +72,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="5" class="py-20 text-center text-text-muted italic font-bold">
-                    Belum ada siswa yang mengumpulkan ujian untuk sesi ini.
-                </x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="5" 
+                title="Menunggu Pengumpulan" 
+                message="Belum ada siswa yang mengumpulkan ujian untuk sesi ini." 
+                icon="coffee" 
+            />
             @endforelse
         </tbody>
     </x-table>

@@ -90,9 +90,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="5" class="py-20 text-center text-text-muted font-bold italic opacity-60">Tidak ada data koleksi pengajar ditemukan.</x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="5" 
+                title="Data Tidak Ditemukan" 
+                message="Tidak ada data koleksi pengajar ditemukan dalam sistem." 
+                icon="folder-open" 
+            />
             @endforelse
         </tbody>
         <x-slot name="after">

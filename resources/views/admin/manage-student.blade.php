@@ -102,9 +102,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="5" class="py-20 text-center text-text-muted font-bold italic opacity-60">Tidak ada data koleksi siswa ditemukan.</x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="6" 
+                title="Data Siswa Kosong" 
+                message="Tidak ada data siswa yang ditemukan untuk kriteria pencarian ini." 
+                icon="folder-open" 
+            />
             @endforelse
         </tbody>
         <x-slot name="after">

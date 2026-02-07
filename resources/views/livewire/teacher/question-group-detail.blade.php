@@ -120,11 +120,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="6" class="py-20 text-center text-text-muted font-bold italic opacity-40">
-                    Tidak ada soal ditemukan dalam kelompok ini.
-                </x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="6" 
+                title="Kelompok Kosong" 
+                message="Belum ada soal dalam kelompok ini. Mari tambah soal baru! 🚀" 
+                icon="folder-open" 
+            />
             @endforelse
         </tbody>
     </x-table>

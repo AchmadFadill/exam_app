@@ -42,11 +42,12 @@
                     <span class="text-[9px] text-primary font-medium mt-1 inline-block">{{ $notification->created_at->diffForHumans() }}</span>
                 </div>
             @empty
-                <div class="px-4 py-8 text-center text-text-muted">
-                    <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <p class="text-xs">Tidak ada notifikasi baru</p>
+                <div class="px-4 py-8">
+                    <x-empty-state 
+                        title="Hening..." 
+                        message="Tidak ada notifikasi baru saat ini." 
+                        icon="coffee" 
+                    />
                 </div>
             @endforelse
         </div>

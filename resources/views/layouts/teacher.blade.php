@@ -41,7 +41,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </x-slot>
                 Beri Nilai  
-                <span class="ml-auto bg-secondary text-primary text-xs font-bold px-2 py-0.5 rounded-full">2</span>
             </x-sidebar-link>
 
             <div class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mt-6 mb-2">Laporan</div>

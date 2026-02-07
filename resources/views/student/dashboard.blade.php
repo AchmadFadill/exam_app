@@ -101,12 +101,12 @@
                 </div>
             </div>
             @empty
-            <div class="col-span-full bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center">
-                <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900">Tidak ada ujian aktif</h3>
-                <p class="text-gray-500 mt-1">Anda bisa bersantai sejenak! 🎉</p>
+            <div class="col-span-full">
+                <x-empty-state 
+                    title="Tidak Ada Ujian Aktif" 
+                    message="Belum ada ujian yang dapat Anda kerjakan saat ini." 
+                    icon="coffee" 
+                />
             </div>
             @endforelse
         </div>
@@ -135,8 +135,12 @@
                     </div>
                 </div>
                 @empty
-                 <div class="p-10 text-center text-text-muted font-bold italic opacity-40 text-sm">
-                    Tidak ada jadwal ujian mendatang.
+                 <div class="p-10">
+                    <x-empty-state 
+                        title="Jadwal Kosong" 
+                        message="Tidak ada jadwal ujian mendatang dalam waktu dekat." 
+                        icon="folder-open" 
+                    />
                 </div>
                 @endforelse
             </div>

@@ -57,9 +57,12 @@
             </div>
         </x-card>
         @empty
-        <div class="col-span-full py-24 text-center text-text-muted font-bold italic opacity-40 bg-bg-surface dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-border-main dark:border-slate-800">
-            Unit rombongan belajar belum didefinisikan dalam sistem.
-        </div>
+        <x-empty-state 
+            colspan="full" 
+            title="Kelas Tidak Terdaftar" 
+            message="Unit rombongan belajar belum didefinisikan dalam sistem atau tidak ditemukan." 
+            icon="folder-open" 
+        />
         @endforelse
     </div>
 
@@ -150,8 +153,13 @@
                         </div>
                     </div>
                     @empty
-                    <div class="p-12 text-center text-text-muted font-bold italic opacity-40 text-xs">Peserta tidak teridentifikasi.</div>
-                    @endforelse
+            <x-empty-state 
+                colspan="5" 
+                title="Daftar Kelas Kosong" 
+                message="Belum ada data kelas yang ditambahkan ke dalam sistem." 
+                icon="folder-open" 
+            />
+            @endforelse
                 </div>
                 
                 @if(count($selectedStudents) > 0)

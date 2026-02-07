@@ -7,10 +7,7 @@
             title="Pengaturan" 
             subtitle="Konfigurasi pusat identitas dan pengaturan sistem CBT" 
         />
-        <x-button wire:click="save" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-            Simpan Konfigurasi
-        </x-button>
+
     </div>
 
     @if (session('success'))
@@ -130,5 +127,9 @@
                 </p>
             </div>
         </div>
+        <x-button wire:click="save" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5 align-right">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            Simpan Konfigurasi
+        </x-button>
     </div>
 </div>

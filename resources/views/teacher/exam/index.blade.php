@@ -99,10 +99,12 @@
             </div>
         </div>
         @empty
-        <div class="col-span-full py-20 text-center text-text-muted bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] border border-dashed border-border-main dark:border-slate-800">
-            <svg class="w-16 h-16 mx-auto text-text-muted opacity-20 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-            <h3 class="text-xl font-black text-text-main mb-2">Belum ada ujian yang dibuat</h3>
-            <p class="font-bold">Mulai dengan membuat ujian baru! 🚀</p>
+        <div class="col-span-full">
+            <x-empty-state 
+                title="Agenda Ujian Kosong" 
+                message="Mulai dengan membuat ujian baru untuk kelas Anda! 🚀" 
+                icon="folder-open" 
+            />
         </div>
         @endforelse
     </div>

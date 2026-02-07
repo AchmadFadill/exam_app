@@ -43,11 +43,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="7" class="py-20 text-center text-text-muted italic font-bold">
-                    Belum ada laporan hasil ujian yang tersedia.
-                </x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="7" 
+                title="Hasil ujian kosong" 
+                message="Belum ada hasil ujian yang dapat ditampilkan saat ini." 
+                icon="folder-open" 
+            />
             @endforelse
         </tbody>
     </x-table>

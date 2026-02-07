@@ -114,11 +114,11 @@
         </x-card>
         @empty
         <div class="col-span-full">
-            <x-card>
-                <div class="px-6 py-12 text-center text-text-muted italic">
-                    Tidak ada soal ditemukan. Klik "Tambah Soal" untuk membuat soal baru.
-                </div>
-            </x-card>
+            <x-empty-state 
+                title="Bank Soal Kosong" 
+                message="Tidak ada soal ditemukan. Klik 'Tambah Soal' untuk membuat soal baru." 
+                icon="document-text" 
+            />
         </div>
         @endforelse
     </div>

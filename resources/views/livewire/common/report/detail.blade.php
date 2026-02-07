@@ -103,11 +103,12 @@
                             </x-table.td>
                         </x-table.tr>
                         @empty
-                        <x-table.tr>
-                            <x-table.td colspan="4" class="py-12 text-center text-text-muted italic font-bold">
-                                Belum ada data peserta untuk ujian ini.
-                            </x-table.td>
-                        </x-table.tr>
+                        <x-empty-state 
+                            colspan="4" 
+                            title="Tidak Ada Peserta" 
+                            message="Belum ada data peserta yang menyelesaikan ujian ini." 
+                            icon="coffee" 
+                        />
                         @endforelse
                     </tbody>
                 </x-table>
@@ -131,9 +132,12 @@
                         </div>
                     </div>
                     @empty
-                    <div class="p-8 text-center text-text-muted bg-gray-50 rounded-xl border border-dashed border-gray-100">
-                        <p class="text-[10px] font-black uppercase tracking-widest mb-2 italic">Luar Biasa! ✨</p>
-                        <p class="text-xs font-bold leading-relaxed">Semua soal dijawab dengan baik oleh peserta.</p>
+                    <div class="py-8">
+                        <x-empty-state 
+                            title="Sempurna!" 
+                            message="Semua soal dijawab dengan baik oleh seluruh peserta. ✨" 
+                            icon="coffee" 
+                        />
                     </div>
                     @endforelse
                 </div>

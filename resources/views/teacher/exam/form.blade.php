@@ -411,10 +411,12 @@
                                 <div class="absolute inset-x-8 bottom-0 h-1.5 bg-blue-600 rounded-t-full transform transition-transform duration-300 origin-bottom {{ $isSelected ? 'scale-y-100' : 'scale-y-0' }}"></div>
                             </div>
                             @empty
-                            <div class="col-span-2 text-center py-20">
-                                <svg class="w-20 h-20 mx-auto text-text-muted opacity-20 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <p class="text-text-muted font-bold uppercase tracking-widest text-sm">Belum ada kelompok soal</p>
-                                <p class="text-text-muted text-xs mt-2 opacity-60">Buat soal terlebih dahulu dari menu Bank Soal</p>
+                            <div class="col-span-full">
+                                <x-empty-state 
+                                    title="Bank Soal Kosong" 
+                                    message="Tidak ada kelompok soal yang ditemukan. Buat soal terlebih dahulu di Bank Soal." 
+                                    icon="folder-open" 
+                                />
                             </div>
                             @endforelse
                         </div>

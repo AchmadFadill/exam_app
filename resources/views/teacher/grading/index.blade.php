@@ -60,12 +60,12 @@
                 </x-table.td>
             </x-table.tr>
             @empty
-            <x-table.tr>
-                <x-table.td colspan="5" class="py-20 text-center text-text-muted italic font-bold">
-                    Tidak ada ujian yang memerlukan koreksi manual saat ini. <br>
-                    <span class="text-primary not-italic mt-2 block">Pekerjaan selesai! ☕</span>
-                </x-table.td>
-            </x-table.tr>
+            <x-empty-state 
+                colspan="5" 
+                title="Pekerjaan Selesai!" 
+                message="Tidak ada ujian yang memerlukan koreksi manual saat ini.<br>Semua jawaban essay telah berhasil dinilai." 
+                icon="coffee" 
+            />
             @endforelse
         </tbody>
     </x-table>
