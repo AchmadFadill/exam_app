@@ -3,10 +3,9 @@
 <div class="container mx-auto px-6 py-8">
     <!-- Back Button -->
     <div class="mb-6">
-        <a href="{{ route('student.results') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-blue-600 transition">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7"></path></svg>
-            Kembali ke Riwayat
-        </a>
+            <x-button variant="soft" href="{{ route('student.results') }}" class="px-6 py-3 rounded-xl text-xs font-black bg-blue-100 hover:bg-blue-200 text-blue-600 hover:text-blue-700 border-none shadow-none">
+                &larr; KEMBALI 
+            </x-button>
     </div>
 
     <!-- Result Header Card -->

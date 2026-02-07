@@ -184,7 +184,7 @@
     <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200 p-4 lg:px-8 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
             <x-button variant="soft" href="{{ route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-6 py-3 rounded-xl text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
-                &larr; KEMBALI AJA
+                &larr; KEMBALI 
             </x-button>
             
             <div class="flex items-center gap-4">

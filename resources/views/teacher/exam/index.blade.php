@@ -114,7 +114,7 @@
     <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-10 py-5 rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-10 z-40 animate-bounce-in ring-4 ring-primary/20">
         <div class="flex items-center gap-4">
             <span class="bg-primary text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-lg">{{ count($selectedExams) }}</span>
-            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Mission Threads</span>
+            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Ujian Terpilih</span>
         </div>
         <div class="h-8 w-px bg-white/10"></div>
         <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
@@ -123,7 +123,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>
-            Purge
+            HAPUS
         </button>
     </div>
     @endif

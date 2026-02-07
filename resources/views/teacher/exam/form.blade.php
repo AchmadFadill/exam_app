@@ -156,27 +156,31 @@
                         </div>
                     </x-card>
 
-                    <x-card title="Kelas Peserta">
+                    <x-card title="Kelas Peserta" x-data="{ levelFilter: 'all' }">
                         <x-slot name="header_actions">
-                            <div class="flex gap-2">
-                                <button type="button" wire:click="toggleLevel('X')" class="group relative px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all overflow-hidden border border-primary/10">
-                                    <span class="relative z-10 text-[9px] font-black text-primary uppercase tracking-widest">Pilih Semua X</span>
-                                    <div class="absolute inset-0 bg-primary opacity-0 group-active:opacity-10 transition-opacity"></div>
-                                </button>
-                                <button type="button" wire:click="toggleLevel('XI')" class="group relative px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all overflow-hidden border border-primary/10">
-                                    <span class="relative z-10 text-[9px] font-black text-primary uppercase tracking-widest">Pilih Semua XI</span>
-                                    <div class="absolute inset-0 bg-primary opacity-0 group-active:opacity-10 transition-opacity"></div>
-                                </button>
-                                <button type="button" wire:click="toggleLevel('XII')" class="group relative px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all overflow-hidden border border-primary/10">
-                                    <span class="relative z-10 text-[9px] font-black text-primary uppercase tracking-widest">Pilih Semua XII</span>
-                                    <div class="absolute inset-0 bg-primary opacity-0 group-active:opacity-10 transition-opacity"></div>
-                                </button>
+                            <div class="flex items-center gap-3">
+                                <label class="text-[9px] font-black text-text-muted uppercase tracking-widest">Tampilkan:</label>
+                                <select x-model="levelFilter" class="px-4 py-2 bg-primary/5 border border-primary/10 rounded-xl text-[9px] font-black text-primary uppercase tracking-widest focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                                    <option value="all">Semua Tingkat</option>
+                                    <option value="X">Kelas X </option>
+                                    <option value="XI">Kelas XI </option>
+                                    <option value="XII">Kelas XII </option>
+                                </select>
+                                
                             </div>
                         </x-slot>
 
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             @foreach($availableClasses as $class)
-                            <label class="relative flex flex-col items-center justify-center p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group transition-all hover:scale-[1.05] active:scale-95 shadow-sm hover:shadow-xl hover:shadow-primary/5">
+                            <label 
+                                x-show="levelFilter === 'all' || '{{ $class->name }}'.startsWith(levelFilter + ' ')"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-90"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-90"
+                                class="relative flex flex-col items-center justify-center p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group transition-all hover:scale-[1.05] active:scale-95 shadow-sm hover:shadow-xl hover:shadow-primary/5">
                                 <input type="checkbox" wire:model.live="classes" value="{{ $class->id }}" class="peer absolute inset-0 opacity-0 cursor-pointer">
                                 
                                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 bg-white dark:bg-slate-800 text-text-muted opacity-40 shadow-inner peer-checked:bg-primary peer-checked:text-white peer-checked:scale-110 peer-checked:shadow-lg peer-checked:shadow-primary/30 peer-checked:opacity-100">
@@ -413,8 +417,8 @@
                             @empty
                             <div class="col-span-full">
                                 <x-empty-state 
-                                    title="Bank Soal Kosong" 
-                                    message="Tidak ada kelompok soal yang ditemukan. Buat soal terlebih dahulu di Bank Soal." 
+                                    title="Kelompok Soal Kosong" 
+                                    message="Tidak ada kelompok soal yang tersedia untuk Mata pelajaran yang anda Pilih. Buat kelompok soal terlebih dahulu di Bank Soal." 
                                     icon="folder-open" 
                                 />
                             </div>
