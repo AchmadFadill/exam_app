@@ -45,6 +45,9 @@ class Form extends Component
     // Step 4: Status
     public $status = 'draft';
 
+    // Instant Question Modal
+
+
     public function mount($id = null)
     {
         if ($id) {
@@ -58,6 +61,14 @@ class Form extends Component
             // Set end time to current time + default duration (90 minutes)
             $this->end_time = $now->addMinutes($this->duration_minutes)->format('H:i');
             $this->generateToken();
+            
+            // Set default subject for teacher
+            if (Auth::user()->isTeacher()) {
+                $teacher = \App\Models\Teacher::where('user_id', Auth::id())->first();
+                if ($teacher && $teacher->subject_id) {
+                    $this->subject_id = $teacher->subject_id;
+                }
+            }
         }
         
         // Initialize $classes to match $selectedClasses
@@ -224,6 +235,8 @@ class Form extends Component
         $this->validate($rules);
     }
 
+
+
     public function toggleQuestion($questionId)
     {
         if (in_array($questionId, $this->selectedQuestions)) {
@@ -356,6 +369,32 @@ class Form extends Component
     {
         $this->status = 'draft';
         $this->saveExam();
+    }
+
+
+
+    protected $listeners = [
+        'question-saved' => 'handleInstantQuestionSaved'
+    ];
+
+    public function handleInstantQuestionSaved($questionId)
+    {
+        // Automatically select the new question for this exam
+        $this->selectedQuestions[] = $questionId;
+        
+        // Get score from question
+        $question = \App\Models\Question::find($questionId);
+        $this->questionScores[$questionId] = $question->score ?? $this->default_score;
+
+        $this->dispatch('notify', ['message' => 'Soal instan berhasil dibuat dan dipilih!']);
+    }
+
+    public function openInstantQuestionModal()
+    {
+        $this->dispatch('openQuestionModal', [
+            'subject_id' => $this->subject_id,
+            'title' => 'Soal Instan - ' . now()->format('H:i')
+        ]);
     }
 
     public function publish()

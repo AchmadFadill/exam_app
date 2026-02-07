@@ -18,7 +18,7 @@ class Index extends Component
                 $query->where('status', 'submitted');
             }])
             ->with(['questions' => function ($query) {
-                $query->select('id', 'type')->where('type', 'essay');
+                $query->select('questions.id', 'questions.type')->where('questions.type', 'essay');
             }])
             ->latest('date')
             ->paginate(10);

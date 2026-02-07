@@ -1,8 +1,14 @@
-<div class="space-y-5">
+<div class="space-y-5" @if($isPending) wire:poll.3s="checkStatus" @endif>
     @if ($successMessage)
         <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
             {{ $successMessage }}
         </div>
+        
+        @if(!$isPending)
+            <x-button href="{{ route('teacher.login') }}" variant="primary" class="w-full py-3.5 px-6 !rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-blue-900/20 active:scale-[0.98]">
+                LOGIN SEKARANG
+            </x-button>
+        @endif
     @else
         @if ($errorMessage)
             <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
@@ -33,7 +39,7 @@
             </div>
 
             <x-button type="submit" variant="primary" class="w-full py-3.5 px-6 !rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl shadow-blue-900/20 active:scale-[0.98]">
-                KIRIM PERMINTAAN
+                KIRIM PERMINTAAN BARU
             </x-button>
 
             <div class="text-center mt-4">

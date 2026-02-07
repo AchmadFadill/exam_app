@@ -15,9 +15,100 @@ class Detail extends Component
     public $filterStatus = '';
     public $filterClass = '';
 
+    public $live_logs = [];
+
+    protected $listeners = ['echo:security-monitoring,.student-violation' => 'handleViolation'];
+
+    public function handleViolation($event)
+    {
+        // Only update if the violation belongs to the current exam
+        if ((int)$event['exam_id'] !== (int)$this->examId) {
+            return;
+        }
+
+        $statusType = 'info';
+        if (in_array($event['violation_type'], ['tab_switch', 'fullscreen_exit'])) {
+            $statusType = 'warning';
+        }
+
+        $newLog = [
+            'id' => uniqid(),
+            'timestamp' => $event['timestamp'],
+            'time' => \Carbon\Carbon::parse($event['timestamp'])->format('H:i:s'),
+            'student' => $event['student_name'],
+            'activity' => $event['message'] ?? $event['violation_type'],
+            'type' => $statusType
+        ];
+
+        // Add to logs
+        array_unshift($this->live_logs, $newLog);
+        $this->live_logs = array_slice($this->live_logs, 0, 20);
+    }
+
     public function mount($id)
     {
         $this->examId = $id;
+        $this->loadInitialLogs();
+    }
+
+    public function loadInitialLogs()
+    {
+         // 1. Violation Logs (from ExamActivity)
+        $violation_logs = \App\Models\ExamActivity::where('exam_id', $this->examId)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get()
+            ->map(function($activity) {
+                $statusType = 'info';
+                if ($activity->severity === 'warning') $statusType = 'warning';
+                if ($activity->severity === 'critical') $statusType = 'danger';
+                if ($activity->type === 'submit') $statusType = 'success';
+
+                return [
+                    'id' => $activity->id,
+                    'timestamp' => $activity->created_at,
+                    'time' => $activity->created_at->format('H:i:s'),
+                    'student' => $activity->user->name,
+                    'activity' => $activity->message ?? $activity->type,
+                    'type' => $statusType
+                ];
+            });
+
+        // 2. Progress Logs (from ExamAttempts updated recently)
+        $progress_logs = \App\Models\ExamAttempt::where('exam_id', $this->examId)
+            ->where('updated_at', '>=', now()->subMinutes(30))
+            ->with('student.user')
+            ->orderBy('updated_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function($attempt) {
+                $activity = 'Melanjutkan pengerjaan';
+                $type = 'info';
+
+                if ($attempt->created_at->diffInSeconds($attempt->updated_at) < 5) {
+                    $activity = 'Memulai ujian';
+                    $type = 'primary';
+                } elseif (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
+                    $activity = 'Selesai Mengerjakan';
+                    $type = 'success';
+                }
+
+                return [
+                    'timestamp' => $attempt->updated_at,
+                    'time' => $attempt->updated_at->format('H:i:s'),
+                    'student' => $attempt->student->user->name,
+                    'activity' => $activity,
+                    'type' => $type
+                ];
+            });
+
+        // 3. Merge and Sort
+        $this->live_logs = collect($violation_logs)->merge($progress_logs)
+            ->sortByDesc('timestamp')
+            ->take(20)
+            ->values()
+            ->toArray();
     }
 
     public function render()
@@ -111,40 +202,15 @@ class Detail extends Component
             });
         }
 
-        // Real Logs (from attempts sorted by recent update)
-        $live_logs = \App\Models\ExamAttempt::where('exam_id', $this->examId)
-            // Removed status filter to show ALL recent activity (start, progress, finish)
-            ->with('student.user')
-            ->orderBy('updated_at', 'desc')
-            ->take(10)
-            ->get()
-            ->map(function($attempt) {
-                $activity = 'Sedang mengerjakan';
-                $type = 'info';
+        // Logs loaded in mount/handleViolation
 
-                if ($attempt->tab_switches > 0) {
-                    $activity = 'Terdeteksi pindah tab';
-                    $type = 'warning';
-                }
-
-                if (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
-                    $activity = 'Selesai Mengerjakan';
-                    $type = 'success';
-                }
-
-                return [
-                    'time' => $attempt->updated_at->format('H:i:s'),
-                    'student' => $attempt->student->user->name,
-                    'activity' => $activity,
-                    'type' => $type
-                ];
-            });
 
         return $this->applyLayout('livewire.common.monitoring.detail', [
             'exam' => $exam,
             'students' => $students,
-            'live_logs' => $live_logs,
+            'live_logs' => $this->live_logs,
             'backRoute' => $isAdmin ? 'admin.monitor' : 'teacher.monitoring',
+            'studentDetailRoute' => $isAdmin ? 'admin.reports.student' : 'teacher.grading.detail', // Dynamic Route
             'classes' => $exam->classrooms->pluck('name')->unique() // Pass classes for filter dropdown
         ]);
     }
