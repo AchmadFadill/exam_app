@@ -132,5 +132,7 @@
             </div>
         </template>
     </div>
+
+    <x-confirm-modal />
 </body>
 </html>

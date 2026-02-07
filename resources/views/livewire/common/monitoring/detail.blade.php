@@ -1,6 +1,6 @@
 @section('title', 'Monitoring Ujian')
 
-<div wire:poll.10s class="space-y-6">
+<div wire:poll.10s class="space-y-6" x-on:confirmed-force-submit.window="$wire.forceSubmit($event.detail)">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
             <a href="{{ route($backRoute) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
@@ -58,7 +58,16 @@
                 <x-monitor.student-card :student="$student">
                     <x-button href="{{ route('teacher.grading.detail', ['exam' => $exam->id, 'student' => $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
                     @if($student['status'] == 'working' || $student['status'] == 'in_progress')
-                    <x-button wire:click="forceSubmit({{ $student['id'] }})" wire:confirm="Apakah Anda yakin ingin menghentikan ujian siswa ini secara paksa?" variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
+                    <x-button 
+                        @click="$dispatch('show-confirm-modal', [{ 
+                            title: 'Akhiri Ujian?', 
+                            message: 'Apakah Anda yakin ingin menghentikan ujian siswa ' + '{{ $student['name'] }}' + ' secara paksa? Tindakan ini tidak dapat dibatalkan.', 
+                            confirmText: 'Ya, Akhiri', 
+                            type: 'danger', 
+                            onConfirm: 'force-submit',
+                            onConfirmDetail: {{ $student['id'] }}
+                        }])" 
+                        variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @else
                     <x-button variant="secondary" size="xs" disabled class="!text-gray-300 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @endif

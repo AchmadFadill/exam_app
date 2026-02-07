@@ -20,7 +20,7 @@
             }
         }, 1000);
     }
-}" x-init="initTimer()" wire:poll.5s="checkStatus" class="min-h-screen bg-gray-50 flex flex-col">
+}" x-on:confirmed-submit-exam.window="$wire.submitExam()" x-init="initTimer()" wire:poll.5s="checkStatus" class="min-h-screen bg-gray-50 flex flex-col">
     
     <!-- Time's Up Overlay -->
     <div x-show="remaining <= 0" 
@@ -112,9 +112,15 @@
                 </button>
                 
                 @if($currentQuestionIndex === $questions->count() - 1)
-                    <button wire:click="submitExam" 
-                        onclick="confirm('Apakah Anda yakin ingin mengumpulkan ujian? Pastikan semua jawaban sudah terisi.') || event.stopImmediatePropagation()"
-                        class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 shadow-lg shadow-green-600/20">
+                    <button 
+                        @click="$dispatch('show-confirm-modal', [{ 
+                            title: 'Kumpulkan Ujian?', 
+                            message: 'Apakah Anda yakin ingin mengumpulkan ujian sekarang? Pastikan semua jawaban sudah Anda tinjau kembali.', 
+                            confirmText: 'Ya, Kumpulkan', 
+                            type: 'primary', 
+                            onConfirm: 'submit-exam' 
+                        }])"
+                        class="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:shadow-xl hover:shadow-green-500/20 transition-all transform hover:-translate-y-0.5 active:scale-95">
                         Selesai & Kumpulkan
                     </button>
                 @else

@@ -27,12 +27,14 @@
         'teacher.grading' => 'Beri Nilai',
         'teacher.reports' => 'Nilai Ujian',
         'teacher.reports.index' => 'Nilai Ujian',
+        'teacher.settings' => 'Pengaturan Profil',
         'student.exams' => 'Daftar Ujian',
         'student.results' => 'Hasil Ujian',
+        'student.settings' => 'Pengaturan Profil',
     ];
 
     $displayTitle = $title;
-    if (in_array($displayTitle, ['Beranda', 'Dashboard', 'Administrator', 'Guru', 'Siswa', 'User'])) {
+    if (in_array($displayTitle, ['Beranda', 'Dashboard', 'Administrator', 'Guru', 'Siswa', 'User', ''])) {
         foreach ($routeTitles as $route => $label) {
             if (request()->routeIs($route . '*')) {
                 $displayTitle = $label;
