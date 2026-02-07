@@ -6,6 +6,112 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public $live_logs = [];
+
+    protected $listeners = [
+        'echo:security-monitoring,.student-violation' => 'handleViolation',
+        'manual-violation' => 'handleViolation' 
+    ];
+
+    public function handleViolation($event)
+    {
+        \Illuminate\Support\Facades\Log::info("⚡ [DASHBOARD] handleViolation Triggered", ['event' => $event]);
+
+        // Unpack if wrapped (from manual dispatch)
+        if (isset($event['event'])) {
+             $event = $event['event'];
+        }
+        
+        $statusType = 'info';
+        if (in_array($event['violation_type'], ['tab_switch', 'fullscreen_exit'])) {
+            $statusType = 'warning';
+        }
+        if ($event['violation_type'] === 'submit') {
+            $statusType = 'success';
+        }
+
+        $newLog = [
+            'id' => uniqid(),
+            'timestamp' => $event['timestamp'],
+            'time' => \Carbon\Carbon::parse($event['timestamp'])->format('H:i:s'),
+            'student' => $event['student_name'],
+            'exam' => \App\Models\Exam::find($event['exam_id'])->name ?? 'Ujian', // Added Exam Name for global context
+            'activity' => $event['message'] ?? $event['violation_type'],
+            'type' => $statusType
+        ];
+
+        array_unshift($this->live_logs, $newLog);
+        $this->live_logs = array_slice($this->live_logs, 0, 20);
+    }
+    
+    public function mount()
+    {
+        $this->loadInitialLogs();
+    }
+
+    public function loadInitialLogs()
+    {
+        // 1. Violation/Activity Logs (Global)
+        $violation_logs = \App\Models\ExamActivity::with(['user', 'exam'])
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function($activity) {
+                $statusType = 'info';
+                if ($activity->severity === 'warning') $statusType = 'warning';
+                if ($activity->severity === 'critical') $statusType = 'danger';
+                if ($activity->type === 'submit') $statusType = 'success';
+
+                return [
+                    'id' => 'act-' . $activity->id,
+                    'timestamp' => $activity->created_at,
+                    'time' => $activity->created_at->format('H:i:s'),
+                    'student' => $activity->user->name,
+                    'exam' => $activity->exam->name ?? '-',
+                    'activity' => $activity->message ?? $activity->type,
+                    'type' => $statusType
+                ];
+            });
+
+        // 2. Progress Logs (ExamAttempts) - Global
+        $progress_logs = \App\Models\ExamAttempt::with(['student.user', 'exam'])
+            ->where('updated_at', '>=', now()->subHours(24)) // Last 24 hours
+            ->orderBy('updated_at', 'desc')
+            ->take(10)
+            ->get()
+            ->map(function($attempt) {
+                // Determine status/activity text
+                $activity = 'Melanjutkan pengerjaan';
+                $type = 'info';
+
+                // Check if just started (created within 10s of updated)
+                if ($attempt->created_at->diffInSeconds($attempt->updated_at) < 10 && $attempt->status === 'in_progress') {
+                    $activity = 'Memulai ujian';
+                    $type = 'primary';
+                } elseif (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
+                    $activity = 'Selesai Mengerjakan';
+                    $type = 'success';
+                }
+
+                return [
+                    'id' => 'att-' . $attempt->id . '-' . $attempt->updated_at->timestamp,
+                    'timestamp' => $attempt->updated_at,
+                    'time' => $attempt->updated_at->format('H:i:s'),
+                    'student' => $attempt->student->user->name ?? 'Unknown',
+                    'exam' => $attempt->exam->name ?? '-',
+                    'activity' => $activity,
+                    'type' => $type
+                ];
+            });
+
+        // 3. Merge and Sort
+        $this->live_logs = collect($violation_logs)->merge($progress_logs)
+            ->sortByDesc('timestamp')
+            ->take(20)
+            ->values()
+            ->toArray();
+    }
+
     public function render()
     {
         // Global Stats
@@ -74,32 +180,12 @@ class Dashboard extends Component
         // Update active exams count
         $stats['active_exams_count'] = count($active_exams);
 
-        // Security Alerts Feed
-        $alerts = [
-            [
-                'user' => 'Andi Wijaya',
-                'class' => 'XII IPA 1',
-                'exam' => 'Matematika Wajib',
-                'event' => 'Pindah Tab Aler',
-                'time' => '2 menit yang lalu',
-                'severity' => 'critical',
-            ],
-            [
-                'user' => 'Siska Pratama',
-                'class' => 'X IPS 2',
-                'exam' => 'Bahasa Inggris',
-                'event' => 'Keluar Fullscreen',
-                'time' => '15 menit yang lalu',
-                'severity' => 'warning',
-            ],
-        ];
-
         return view('admin.dashboard', [
             'greeting' => $this->getGreeting(),
             'stats' => $stats,
             'system_health' => $system_health,
             'active_exams' => $active_exams,
-            'alerts' => $alerts,
+            'live_logs' => $this->live_logs, // Updated variable
         ])->layout('layouts.admin', ['title' => 'Dashboard']);
     }
 

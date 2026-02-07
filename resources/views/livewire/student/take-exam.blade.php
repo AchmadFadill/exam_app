@@ -168,52 +168,6 @@
         </div>
     </div>
     </div>
-</div>
+    <!-- Anti-Cheat Scripts REMOVED as per user request -->
 
-<!-- Anti-Cheat Scripts -->
-@if($this->exam->enable_tab_tolerance)
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('antiCheat', () => ({
-            violations: 0,
-            maxViolations: {{ $this->exam->tab_tolerance ?? 3 }},
-            
-            init() {
-                // Visibility Change (Tab Switching)
-                document.addEventListener('visibilitychange', () => {
-                   if (document.hidden && !this.submitted) {
-                       this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
-                   }
-                });
-                
-                // Fullscreen Exit
-                const onFullscreenChange = () => {
-                    const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-                    if (!isFullscreen && !this.submitted) {
-                        this.handleViolation('Anda keluar dari mode layar penuh (fullscreen).');
-                    }
-                };
-                
-                ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'msfullscreenchange'].forEach(
-                    event => document.addEventListener(event, onFullscreenChange)
-                );
-            },
-            
-            handleViolation(message) {
-                this.violations++;
-                
-                if (this.violations >= this.maxViolations) {
-                    alert(`Batas pelanggaran tercapai (${this.maxViolations}x). Ujian Anda akan otomatis dikirim.`);
-                    // Call Livewire method
-                    @this.submitExam();
-                } else {
-                     alert(`PERINGATAN VIOLASI (${this.violations}/${this.maxViolations}):\n${message}`);
-                     // Try to re-enter fullscreen
-                     document.documentElement.requestFullscreen().catch(() => {});
-                }
-            }
-        }));
-    });
-</script>
-<div x-data="antiCheat" x-init="init()"></div>
-@endif
+</div>

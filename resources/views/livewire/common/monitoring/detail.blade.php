@@ -1,6 +1,6 @@
 @section('title', 'Monitoring Ujian')
 
-<div wire:poll.10s class="space-y-6">
+<div class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
             <a href="{{ route($backRoute) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
@@ -56,7 +56,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
-                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $exam->id, 'student' => $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
+                    <x-button href="{{ route($studentDetailRoute, [$exam->id, $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
                     @if($student['status'] == 'working' || $student['status'] == 'in_progress')
                     <x-button wire:click="forceSubmit({{ $student['id'] }})" wire:confirm="Apakah Anda yakin ingin menghentikan ujian siswa ini secara paksa?" variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @else
@@ -81,8 +81,10 @@
                     <span class="text-[10px] text-gray-400 font-mono">Live Update</span>
                 </div>
                 <div class="p-4 overflow-y-auto space-y-4 flex-1">
-                    @foreach($live_logs as $log)
-                    <div class="flex gap-3">
+                    @forelse($live_logs as $log)
+                    <div wire:key="log-{{ $log['id'] ?? $log['timestamp'] }}" 
+                         wire:transition.slide.down
+                         class="flex gap-3">
                         <div class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full
                             {{ $log['type'] === 'warning' ? 'bg-amber-500' : '' }}
                             {{ $log['type'] === 'success' ? 'bg-green-500' : '' }}
@@ -97,7 +99,9 @@
                             <p class="text-[10px] text-gray-500">{{ $log['activity'] }}</p>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center text-xs text-gray-400 py-4">Belum ada aktivitas.</div>
+                    @endforelse
                 </div>
                 <div class="p-3 bg-gray-50 border-t border-gray-100 text-center">
                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Historical Logs available in Reports</span>
@@ -106,3 +110,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        console.log("🔊 Monitoring Detail Listener Initiated");
+        
+        if (typeof Echo !== 'undefined') {
+            Echo.channel('security-monitoring')
+                .listen('.student-violation', (e) => {
+                    console.log("🔥 [FIRE] Detail Event Received:", e);
+                });
+        }
+    });
+</script>

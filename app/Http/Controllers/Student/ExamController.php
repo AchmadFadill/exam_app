@@ -282,5 +282,49 @@ class ExamController extends Controller
 
         return response()->json(['force_stop' => false]);
     }
+
+    public function logViolation(Request $request, $id)
+    {
+        try {
+            $student = Auth::user()->student;
+            // 1. Validate Attempt Exists and is In Progress
+            $attempt = ExamAttempt::where('exam_id', $id)
+                ->where('student_id', $student->id)
+                ->whereNull('submitted_at')
+                ->first();
+
+            if (!$attempt) {
+                return response()->json(['success' => false, 'message' => 'No active attempt'], 404);
+            }
+
+            $type = $request->input('type', 'tab_switch');
+            $message = $request->input('message', 'Violation detected');
+
+            // 2. Create Activity Log
+            \App\Models\ExamActivity::create([
+                'user_id' => Auth::id(),
+                'exam_id' => $id,
+                'exam_attempt_id' => $attempt->id,
+                'type' => $type,
+                'severity' => in_array($type, ['tab_switch', 'fullscreen_exit']) ? 'warning' : 'info',
+                'message' => $message,
+                'metadata' => [
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]
+            ]);
+
+            // 3. Increment Counter
+            if ($type === 'tab_switch' || $type === 'fullscreen_exit') {
+                $attempt->increment('tab_switches');
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("API Log Violation Failed: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }
 

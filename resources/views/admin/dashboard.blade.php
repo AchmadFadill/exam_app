@@ -1,6 +1,6 @@
 @section('title', 'Admin Dashboard')
 
-<div class="space-y-8" wire:poll.10s>
+<div class="space-y-8">
     <!-- Hero & System Health Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
@@ -138,8 +138,8 @@
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    Aktivitas Keamanan
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Aktivitas Terbaru
                 </h3>
                 <x-button href="{{ route('admin.monitor') }}" variant="soft">
                         Selengkapnya
@@ -147,36 +147,46 @@
                 </x-button>
             </div>
             
-            
-            <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden">
-                <div class="p-8 space-y-4">
-                    @forelse($alerts as $alert)
-                    <div class="flex items-start gap-5 p-5 rounded-2xl border border-border-subtle dark:border-border-subtle hover:border-red-500/30 hover:bg-red-50/30 dark:hover:bg-red-500/5 transition-all group cursor-pointer">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center 
-                            @if($alert['severity'] == 'critical') bg-red-100 dark:bg-red-500/20 text-red-600 
-                            @elseif($alert['severity'] == 'warning') bg-amber-100 dark:bg-amber-500/20 text-amber-600 
-                            @elseif($alert['severity'] == 'success') bg-green-100 dark:bg-green-500/20 text-green-600
-                            @else bg-blue-100 dark:bg-blue-500/20 text-blue-600 @endif font-black shadow-sm">
-                            @if($alert['severity'] == 'critical' || $alert['severity'] == 'warning') ! @else <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> @endif
-                        </div>
+            <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden flex flex-col h-[500px]">
+                <div class="p-6 border-b border-border-subtle dark:border-border-subtle bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-text-main flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        Live Feed
+                    </h3>
+                    <span class="text-[10px] text-text-muted font-mono">Real-time Updates</span>
+                </div>
+
+                <div class="p-6 overflow-y-auto space-y-4 flex-1">
+                    @forelse($live_logs as $log)
+                    <div wire:key="log-{{ $log['id'] ?? $log['timestamp'] }}" 
+                         wire:transition.slide.down
+                         class="flex gap-4 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                        <div class="mt-1 flex-shrink-0 w-2 h-2 rounded-full ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 
+                            {{ $log['type'] === 'warning' ? 'bg-amber-500 ring-amber-200' : '' }}
+                            {{ $log['type'] === 'success' ? 'bg-green-500 ring-green-200' : '' }}
+                            {{ $log['type'] === 'info' ? 'bg-blue-500 ring-blue-200' : '' }}
+                            {{ $log['type'] === 'primary' ? 'bg-indigo-500 ring-indigo-200' : '' }}
+                        "></div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start gap-4">
-                                <h5 class="text-sm font-black text-text-main truncate uppercase tracking-tight">{{ $alert['user'] }}</h5>
-                                <span class="text-[10px] text-text-muted font-black uppercase tracking-widest whitespace-nowrap opacity-60">{{ $alert['time'] }}</span>
+                            <div class="flex justify-between items-start mb-1">
+                                <h5 class="text-sm font-black text-text-main truncate">{{ $log['student'] }}</h5>
+                                <span class="text-[10px] font-mono text-text-muted flex-shrink-0 opacity-70">{{ $log['time'] }}</span>
                             </div>
-                            <p class="text-[11px] text-text-muted mt-1 uppercase tracking-widest font-black opacity-70 group-hover:text-red-600 transition-colors">
-                                {{ $alert['event'] }} <span class="mx-1">•</span> {{ $alert['exam'] }} <span class="mx-1">•</span> {{ $alert['class'] }}
-                            </p>
+                            <p class="text-xs text-text-muted line-clamp-2">{{ $log['activity'] }}</p>
+                            <div class="mt-1.5 flex items-center gap-2">
+                                <span class="text-[9px] uppercase font-black tracking-widest text-text-muted opacity-50">{{ $log['exam'] ?? 'Unknown Exam' }}</span>
+                            </div>
                         </div>
                     </div>
                     @empty
-                    <div class="py-12 text-center text-text-muted font-bold italic opacity-60">
-                        <p>Tidak ada aktivitas mencurigakan. Sistem aman! ✅</p>
+                    <div class="flex flex-col items-center justify-center h-full text-center opacity-50">
+                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-sm font-bold text-gray-400">Tidak ada aktivitas terbaru.</p>
                     </div>
                     @endforelse
-                </div>
-                 <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 text-center border-t border-border-subtle dark:border-border-subtle">
-                    
                 </div>
             </div>
         </section>
@@ -221,3 +231,15 @@
         <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-600 opacity-10 blur-[120px] rounded-full"></div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        if (typeof Echo !== 'undefined') {
+            Echo.channel('security-monitoring')
+                .listen('.student-violation', (e) => {
+                    console.log("🔥 [FIRE] Dashboard Received & Dispatching:", e);
+                    Livewire.dispatch('manual-violation', { event: e });
+                });
+        }
+    });
+</script>

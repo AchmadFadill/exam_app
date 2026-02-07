@@ -188,6 +188,23 @@ class TakeExam extends Component
                 'percentage' => $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0, 
             ]);
 
+            // Broadcast Submission Event (Reusing StudentViolationEvent for simplicity to trigger dashboard update)
+            $studentUser = \Illuminate\Support\Facades\Auth::user();
+            $classroom = $studentUser->student->classroom->name ?? 'Unknown Class';
+            
+            try {
+                broadcast(new \App\Events\StudentViolationEvent(
+                    $studentUser->id,
+                    $studentUser->name,
+                    'submit', // Type
+                    $this->examId,
+                    'Selesai Mengerjakan', // Message
+                    $classroom
+                ));
+            } catch (\Exception $e) {
+                // Ignore broadcast errors
+            }
+
             session()->flash('success', 'Ujian berhasil dikumpulkan!');
             return $this->redirect(route('student.exams.index'));
 
@@ -210,6 +227,48 @@ class TakeExam extends Component
             }
         } catch (\Exception $e) {
             // Ignore errors in polling to avoid popup spam
+        }
+    }
+
+    public function handleViolation($type, $message)
+    {
+        \Illuminate\Support\Facades\Log::info("🛡️ [STUDENT-SIDE] handleViolation CALLED: {$type} - {$message}");
+
+        // 1. Log to Activities Table (Atomic Operation)
+        try {
+            \App\Models\ExamActivity::create([
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'exam_id' => $this->examId,
+                'exam_attempt_id' => $this->attemptId,
+                'type' => $type,
+                'severity' => in_array($type, ['tab_switch', 'fullscreen_exit']) ? 'warning' : 'info',
+                'message' => $message,
+                'metadata' => [
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent()
+                ]
+            ]);
+
+            // 2. Update Attempt Counter
+            if ($type === 'tab_switch' || $type === 'fullscreen_exit') {
+                $this->attempt->increment('tab_switches');
+            }
+
+            // 3. Broadcast Event (Real-time)
+            $student = \Illuminate\Support\Facades\Auth::user();
+            $classroom = $student->student->classroom->name ?? 'Unknown Class';
+            
+            broadcast(new \App\Events\StudentViolationEvent(
+                $student->id,
+                $student->name,
+                $type,
+                $this->examId,
+                $message,
+                $classroom
+            ));
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("handleViolation FAILED: " . $e->getMessage());
         }
     }
 

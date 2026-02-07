@@ -324,7 +324,7 @@
                                     <div class="text-xs text-text-muted">
                                         Menampilkan soal untuk mata pelajaran terpilih.
                                     </div>
-                                    <x-button type="button" variant="soft" class="w-full py-4 text-[10px]">
+                                    <x-button type="button" wire:click="openInstantQuestionModal" variant="soft" class="w-full py-4 text-[10px]">
                                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                                         Buat Soal Instan
                                     </x-button>
@@ -345,7 +345,7 @@
                                     </div>
                                     
                                     <div class="pt-8 border-t border-border-subtle dark:border-slate-800">
-                                        <x-button type="button" variant="soft" class="w-full py-4 text-[10px]">
+                                        <x-button type="button" wire:click="openInstantQuestionModal" variant="soft" class="w-full py-4 text-[10px]">
                                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                                             Buat Soal Instan
                                         </x-button>
@@ -448,6 +448,8 @@
                 @endif
             </div>
         </div>
-    </div>
+    </form>
+    
+    <livewire:teacher.question.question-form />
 </div>
 </div>
