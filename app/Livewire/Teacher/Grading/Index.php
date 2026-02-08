@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Teacher\Grading;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 
 class Index extends Component
@@ -15,7 +16,7 @@ class Index extends Component
 
         $exams = \App\Models\Exam::where('teacher_id', $teacherId)
             ->withCount(['attempts' => function ($query) {
-                $query->where('status', 'submitted');
+                $query->where('status', ExamAttemptStatus::Submitted->value);
             }])
             ->with(['questions' => function ($query) {
                 $query->select('questions.id', 'questions.type')->where('questions.type', 'essay');

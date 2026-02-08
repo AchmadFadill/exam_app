@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ExamAttemptStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class ExamAttempt extends Model
@@ -22,6 +23,7 @@ class ExamAttempt extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'status' => ExamAttemptStatus::class,
         'passed' => 'boolean',
         'percentage' => 'decimal:2',
     ];

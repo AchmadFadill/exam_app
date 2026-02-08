@@ -2,7 +2,7 @@
 
 <div class="space-y-6">
     <div class="flex items-center gap-4">
-        <a href="{{ route('teacher.grading.index') }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.exams') : route('teacher.grading.index') }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </a>
         <div class="flex-1">
@@ -36,6 +36,9 @@
         </x-table.thead>
         <tbody class="bg-bg-surface divide-y divide-border-subtle dark:divide-slate-800">
             @forelse($attempts as $attempt)
+            @php
+                $attemptStatus = $attempt->status instanceof \App\Enums\ExamAttemptStatus ? $attempt->status->value : $attempt->status;
+            @endphp
             <x-table.tr>
                 <x-table.td>
                     <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">
@@ -46,7 +49,7 @@
                     {{ $attempt->submitted_at ? $attempt->submitted_at->format('d M Y H:i') : '-' }}
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap">
-                    @if($attempt->status == 'graded')
+                    @if($attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value)
                         <span class="px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-green-100 text-green-700 ring-1 ring-green-500/20">
                             Selesai Dinilai
                         </span>
@@ -57,17 +60,17 @@
                     @endif
                 </x-table.td>
                  <x-table.td class="whitespace-nowrap text-sm text-text-main font-black">
-                    @if($attempt->status == 'graded')
+                    @if($attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value)
                         {{ number_format($attempt->total_score, 1) }}
                     @else
                         <span class="text-text-muted text-xs italic">Pending</span>
                     @endif
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap text-right font-medium">
-                    <x-button href="{{ route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) }}" 
-                              variant="{{ $attempt->status == 'graded' ? 'secondary' : 'primary' }}" 
+                    <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) : route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) }}"
+                              variant="{{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'secondary' : 'primary' }}"
                               class="text-[10px] px-6">
-                        {{ $attempt->status == 'graded' ? 'Edit Nilai' : 'Beri Nilai' }}
+                        {{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'Edit Nilai' : 'Beri Nilai' }}
                     </x-button>
                 </x-table.td>
             </x-table.tr>

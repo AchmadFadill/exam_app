@@ -47,7 +47,7 @@
                 <!-- Question Text -->
                 <div class="pr-12">
                      <div class="prose prose-sm max-w-none text-text-main">
-                        {!! $answer->question->text !!}
+                        {!! \App\Support\HtmlSanitizer::clean($answer->question->text) !!}
                     </div>
                 </div>
 

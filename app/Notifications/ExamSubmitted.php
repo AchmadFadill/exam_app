@@ -42,7 +42,7 @@ class ExamSubmitted extends Notification
     {
         return [
             'title' => 'Ujian Selesai',
-            'message' => "{$this->student->name} telah menyelesaikan {$this->exam->title}.",
+            'message' => "{$this->student->name} telah menyelesaikan {$this->exam->name}.",
             'exam_id' => $this->exam->id,
             'student_id' => $this->student->id,
             'type' => 'submission'

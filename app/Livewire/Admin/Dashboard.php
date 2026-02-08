@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -85,10 +86,10 @@ class Dashboard extends Component
                 $type = 'info';
 
                 // Check if just started (created within 10s of updated)
-                if ($attempt->created_at->diffInSeconds($attempt->updated_at) < 10 && $attempt->status === 'in_progress') {
+                if ($attempt->created_at->diffInSeconds($attempt->updated_at) < 10 && $attempt->status === ExamAttemptStatus::InProgress) {
                     $activity = 'Memulai ujian';
                     $type = 'primary';
-                } elseif (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
+                } elseif (($attempt->status instanceof ExamAttemptStatus ? $attempt->status : ExamAttemptStatus::tryFrom((string) $attempt->status))?->isFinalized()) {
                     $activity = 'Selesai Mengerjakan';
                     $type = 'success';
                 }

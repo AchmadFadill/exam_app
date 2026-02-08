@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -27,7 +28,7 @@ class ExamStart extends Component
             ->first();
             
         if ($attempt) {
-            if ($attempt->status === 'in_progress') {
+            if ($attempt->status === ExamAttemptStatus::InProgress) {
                 return redirect()->route('student.exam.show', $id);
             }
             // If submitted/graded, maybe show result later
@@ -68,7 +69,7 @@ class ExamStart extends Component
                 'exam_id' => $this->examId,
                 'student_id' => $student->id,
                 'started_at' => now(),
-                'status' => 'in_progress'
+                'status' => ExamAttemptStatus::InProgress
             ]);
             
             return redirect()->route('student.exam.show', $this->examId);

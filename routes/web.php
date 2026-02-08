@@ -50,7 +50,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/classes', App\Livewire\Admin\ManageClass::class)->name('admin.classes');
     Route::get('/subjects', App\Livewire\Admin\ManageSubject::class)->name('admin.subjects');
     Route::get('/exams', App\Livewire\Admin\ManageExam::class)->name('admin.exams');
+    Route::get('/exams/{id}/edit', \App\Livewire\Teacher\Exam\Form::class)->name('admin.exams.edit');
     Route::get('/monitor', App\Livewire\Common\Monitoring\Index::class)->name('admin.monitor');
+    // Admin Grading Routes (Alias to Teacher Components)
+    Route::get('/grading/{exam}', \App\Livewire\Teacher\Grading\StudentList::class)->name('admin.grading.show');
+    Route::get('/grading/{exam}/student/{student}', \App\Livewire\Teacher\Grading\Detail::class)->name('admin.grading.detail');
     Route::get('/monitor/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('admin.monitor.detail');
     Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('admin.reports.index');
     Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('admin.reports.detail');

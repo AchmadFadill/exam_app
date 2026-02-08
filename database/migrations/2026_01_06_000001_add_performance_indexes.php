@@ -86,15 +86,26 @@ return new class extends Migration
         try {
             // Use raw SQL query to check for index existence
             $connection = Schema::getConnection();
+            $driver = $connection->getDriverName();
+
+            if ($driver === 'sqlite') {
+                $result = DB::select(
+                    "SELECT COUNT(*) as count FROM sqlite_master WHERE type = 'index' AND tbl_name = ? AND name = ?",
+                    [$table, $index]
+                );
+
+                return ($result[0]->count ?? 0) > 0;
+            }
+
             $databaseName = $connection->getDatabaseName();
-            
+
             $result = DB::select(
                 "SELECT COUNT(*) as count FROM information_schema.statistics 
                  WHERE table_schema = ? AND table_name = ? AND index_name = ?",
                 [$databaseName, $table, $index]
             );
-            
-            return $result[0]->count > 0;
+
+            return ($result[0]->count ?? 0) > 0;
         } catch (\Exception $e) {
             return false;
         }

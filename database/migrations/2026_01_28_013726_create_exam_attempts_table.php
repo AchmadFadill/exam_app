@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->dateTime('started_at');
             $table->dateTime('submitted_at')->nullable();
-            $table->enum('status', ['in_progress', 'submitted', 'graded', 'abandoned'])->default('in_progress');
+            $table->enum('status', ['in_progress', 'submitted', 'graded', 'abandoned', 'completed', 'ongoing', 'timed_out'])->default('in_progress');
             $table->integer('tab_switches')->default(0);
             $table->integer('total_score')->nullable();
             $table->decimal('percentage', 5, 2)->nullable();

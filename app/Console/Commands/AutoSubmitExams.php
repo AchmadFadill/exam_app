@@ -2,12 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\ExamAttemptStatus;
 use Illuminate\Console\Command;
 use App\Models\ExamAttempt;
+use App\Services\ScoringService;
 use Carbon\Carbon;
 
 class AutoSubmitExams extends Command
 {
+    public function __construct(private readonly ScoringService $scoringService)
+    {
+        parent::__construct();
+    }
+
     /**
      * The name and signature of the console command.
      *
@@ -30,7 +37,7 @@ class AutoSubmitExams extends Command
         $this->info('Starting auto-submission check...');
 
         $attempts = ExamAttempt::with('exam.questions')
-            ->where('status', 'in_progress')
+            ->where('status', ExamAttemptStatus::InProgress->value)
             ->get();
 
         $count = 0;
@@ -68,16 +75,14 @@ class AutoSubmitExams extends Command
 
     protected function submitAttempt($attempt, $reason)
     {
-        // Calculate scores similar to TakeExam logic
-        $totalScore = $attempt->answers->sum('score_awarded');
-        $maxScore = $attempt->exam->questions->sum('pivot.score');
-        $hasEssay = $attempt->exam->questions->where('type', 'essay')->count() > 0;
+        $summary = $this->scoringService->recalculateAttempt($attempt->exam, $attempt);
 
         $attempt->update([
             'submitted_at' => now(),
-            'status' => $hasEssay ? 'submitted' : 'graded',
-            'total_score' => $totalScore,
-            'percentage' => $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0,
+            'status' => $summary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
+            'total_score' => $summary['total_score'],
+            'percentage' => $summary['percentage'],
+            'passed' => $summary['passed'],
             'teacher_notes' => "Auto-submitted by system: {$reason}"
         ]);
 

@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Form extends Component
@@ -64,9 +65,10 @@ class Form extends Component
             
             // Set default subject for teacher
             if (Auth::user()->isTeacher()) {
-                $teacher = \App\Models\Teacher::where('user_id', Auth::id())->first();
-                if ($teacher && $teacher->subject_id) {
-                    $this->subject_id = $teacher->subject_id;
+                $teacher = \App\Models\Teacher::with('subjects')->where('user_id', Auth::id())->first();
+                if ($teacher && $teacher->subjects->count() === 1) {
+                    // Pre-fill only if teacher has exactly one subject
+                    $this->subject_id = $teacher->subjects->first()->id;
                 }
             }
         }
@@ -115,6 +117,7 @@ class Form extends Component
     protected function loadExam($id)
     {
         $exam = Exam::with(['questions', 'classrooms'])->findOrFail($id);
+        Gate::authorize('update', $exam);
 
         $this->name = $exam->name;
         $this->subject_id = $exam->subject_id;
@@ -331,6 +334,7 @@ class Form extends Component
 
             if ($this->examId) {
                 $exam = Exam::findOrFail($this->examId);
+                Gate::authorize('update', $exam);
                 $exam->update($examData);
             } else {
                 $exam = Exam::create($examData);
@@ -354,6 +358,12 @@ class Form extends Component
             $this->dispatch('notify', [
                 'message' => $this->examId ? 'Ujian berhasil diperbarui!' : 'Ujian berhasil dibuat!',
             ]);
+
+
+
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.exams');
+            }
 
             return redirect()->route('teacher.exams.index');
         } catch (\Exception $e) {
@@ -435,8 +445,6 @@ class Form extends Component
             'subjects' => $subjects,
             'availableClasses' => $classrooms,
             'questionGroups' => $questionGroups,
-        ])->layout('layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
+        ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
     }
 }
-
-

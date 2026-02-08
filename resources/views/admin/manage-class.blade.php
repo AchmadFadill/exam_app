@@ -69,8 +69,8 @@
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="closeModal"></div>
-        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
-            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5 max-h-[85vh] flex flex-col">
+            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30 shrink-0">
                 <div>
                      <h3 class="text-xl font-black text-text-main tracking-tight uppercase">{{ $showAddModal ? 'Tambah kelas' : 'Edit Kelas' }}</h3>
                     
@@ -79,7 +79,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                 </x-button>
             </div>
-            <div class="p-10 space-y-8">
+            <div class="p-10 space-y-8 overflow-y-auto">
                 <div>
                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Identitas Kelas</label>
                     <input type="text" wire:model="classForm.name" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Contoh: XII - TEKNIK INFORMATIKA">
@@ -114,8 +114,8 @@
     @if($showAssignModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAssignModal', false)"></div>
-        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
-            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5 max-h-[85vh] flex flex-col">
+            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30 shrink-0">
                 <div>
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase">Kelola Anggota Kelas</h3>
                     <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60"></p>
@@ -124,7 +124,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                 </x-button>
             </div>
-            <div class="p-10 space-y-8">
+            <div class="p-10 space-y-8 overflow-y-auto flex-1">
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-5 flex items-center text-text-muted group-focus-within:text-primary transition-colors">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -169,7 +169,7 @@
                 </div>
                 @endif
             </div>
-            <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
+            <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4 shrink-0">
                 <x-button variant="secondary" wire:click="$set('showAssignModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
                 <x-button variant="primary" wire:click="assignStudents" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Perubahan</x-button>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Teacher;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -40,7 +41,7 @@ class Dashboard extends Component
         // 4. Pending Grading (status = submitted)
         $gradingNeeded = \App\Models\ExamAttempt::whereHas('exam', function($q) use ($teacher) {
             $q->where('teacher_id', $teacher->id);
-        })->where('status', 'submitted')->count();
+        })->where('status', ExamAttemptStatus::Submitted->value)->count();
 
         // 5. Completed Exams (status = finished OR time passed)
         $completedExams = \App\Models\Exam::where('teacher_id', $teacher->id)
@@ -77,10 +78,15 @@ class Dashboard extends Component
             ])
             ->withCount([
                 'attempts as in_progress_count' => function($q) {
-                    $q->where('status', 'in_progress');
+                    $q->where('status', ExamAttemptStatus::InProgress->value);
                 },
                 'attempts as finished_count' => function($q) {
-                    $q->whereIn('status', ['submitted', 'graded']);
+                    $q->whereIn('status', [
+                        ExamAttemptStatus::Submitted->value,
+                        ExamAttemptStatus::Graded->value,
+                        ExamAttemptStatus::Completed->value,
+                        ExamAttemptStatus::TimedOut->value,
+                    ]);
                 }
             ])
             ->get()

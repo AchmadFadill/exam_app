@@ -7,11 +7,23 @@ use Livewire\Component;
 class ManageExam extends Component
 {
     // Bulk Action States
+    // Bulk Action States
     public $selectedExams = [];
     public $selectAll = false;
     public $showBulkDeleteModal = false;
 
+    // Delete Modal State
+    public $examToDelete = null;
+    public $showDeleteModal = false;
 
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            $this->selectedExams = \App\Models\Exam::pluck('id')->map(fn($id) => (string)$id)->toArray();
+        } else {
+            $this->selectedExams = [];
+        }
+    }
 
     public function openBulkDeleteModal()
     {
@@ -34,19 +46,52 @@ class ManageExam extends Component
         $this->selectAll = false;
     }
 
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            // Select all IDs (Warning: if many exams, this might be heavy. 
-            // Better to select current page, but for now select all is expected behavior for "Select All")
-            $this->selectedExams = \App\Models\Exam::pluck('id')->map(fn($id) => (string)$id)->toArray();
-        } else {
-            $this->selectedExams = [];
-        }
-    }
     use \Livewire\WithPagination;
 
-    // ... (keep existing properties)
+    public function duplicateExam($id)
+    {
+        $originalExam = \App\Models\Exam::with(['questions', 'classrooms'])->findOrFail($id);
+
+        $newExam = $originalExam->replicate();
+        $newExam->name = $originalExam->name . ' (Copy)';
+        $newExam->token = \App\Models\Exam::generateToken();
+        $newExam->status = 'draft';
+        $newExam->created_at = now();
+        $newExam->updated_at = now();
+        $newExam->save();
+
+        // Attach questions with pivot data
+        $questionsData = [];
+        foreach ($originalExam->questions as $question) {
+            $questionsData[$question->id] = [
+                'order' => $question->pivot->order,
+                'score' => $question->pivot->score,
+            ];
+        }
+        $newExam->questions()->attach($questionsData);
+
+        // Attach classrooms
+        $newExam->classrooms()->attach($originalExam->classrooms->pluck('id'));
+
+        $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi! Status: Draft']);
+    }
+
+    public function confirmDelete($id)
+    {
+        $this->examToDelete = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteExam()
+    {
+        if ($this->examToDelete) {
+            \App\Models\Exam::destroy($this->examToDelete);
+            $this->dispatch('notify', ['message' => 'Ujian berhasil dihapus!']);
+        }
+        
+        $this->showDeleteModal = false;
+        $this->examToDelete = null;
+    }
 
     public function render()
     {

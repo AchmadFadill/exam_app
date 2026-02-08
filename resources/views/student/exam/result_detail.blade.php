@@ -92,7 +92,7 @@
                     @endif
                 </div>
                 <div class="prose max-w-none text-text-main mb-4">
-                    {!! $question->text !!}
+                    {!! \App\Support\HtmlSanitizer::clean($question->text) !!}
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">

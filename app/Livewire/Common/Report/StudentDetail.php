@@ -4,6 +4,7 @@ namespace App\Livewire\Common\Report;
 
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
+use Illuminate\Support\Facades\Gate;
 
 class StudentDetail extends Component
 {
@@ -16,7 +17,8 @@ class StudentDetail extends Component
     public function mount($examId, $studentId)
     {
         $this->exam = \App\Models\Exam::findOrFail($examId);
-        $this->student = \App\Models\Student::findOrFail($studentId);
+        Gate::authorize('viewReport', $this->exam);
+        $this->student = \App\Models\Student::with('user:id,name')->findOrFail($studentId);
         
         $this->attempt = \App\Models\ExamAttempt::where('exam_id', $examId)
             ->where('student_id', $studentId)
@@ -33,4 +35,5 @@ class StudentDetail extends Component
             'backParam' => $this->exam->id
         ]);
     }
+
 }

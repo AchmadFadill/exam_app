@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Common\Monitoring;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
 
@@ -34,10 +35,15 @@ class Index extends Component
             ])
             ->withCount([
                 'attempts as working_count' => function($q) {
-                    $q->where('status', 'in_progress');
+                    $q->where('status', ExamAttemptStatus::InProgress->value);
                 },
                 'attempts as finished_count' => function($q) {
-                    $q->whereIn('status', ['submitted', 'graded']);
+                    $q->whereIn('status', [
+                        ExamAttemptStatus::Submitted->value,
+                        ExamAttemptStatus::Graded->value,
+                        ExamAttemptStatus::Completed->value,
+                        ExamAttemptStatus::TimedOut->value,
+                    ]);
                 },
                 'attempts as total_attempts'
             ])

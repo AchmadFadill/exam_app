@@ -24,11 +24,14 @@ class ManageClass extends Component
     public $studentSearch = '';
     public $selectedStudents = [];
 
-    protected $rules = [
-        'classForm.name' => 'required|string|max:50',
-        'classForm.level' => 'required|in:X,XI,XII',
-        'classForm.teacher_id' => 'nullable|exists:teachers,id',
-    ];
+    protected function rules()
+    {
+        return [
+            'classForm.name' => 'required|string|max:50',
+            'classForm.level' => 'required|in:X,XI,XII',
+            'classForm.teacher_id' => 'nullable|exists:teachers,id|unique:classrooms,teacher_id,' . $this->selectedClass,
+        ];
+    }
 
     protected $messages = [
         'classForm.name.required' => 'Nama kelas wajib diisi.',
@@ -84,15 +87,17 @@ class ManageClass extends Component
     public function saveClass()
     {
         $this->validate();
+        $data = $this->classForm;
+        $data['teacher_id'] = !empty($data['teacher_id']) ? (int) $data['teacher_id'] : null;
 
         if ($this->showEditModal && $this->selectedClass) {
             // Update existing class
             $class = Classroom::findOrFail($this->selectedClass);
-            $class->update($this->classForm);
+            $class->update($data);
             $message = 'Data kelas berhasil diperbarui!';
         } else {
             // Create new class
-            Classroom::create($this->classForm);
+            Classroom::create($data);
             $message = 'Kelas baru berhasil ditambahkan!';
         }
 
@@ -140,6 +145,18 @@ class ManageClass extends Component
         $this->dispatch('notify', ['message' => 'Penempatan siswa berhasil diperbarui!']);
     }
 
+    public function getAvailableTeachersProperty()
+    {
+        return \App\Models\Teacher::with('user')
+            ->whereDoesntHave('classroom')
+            ->when($this->selectedClass, function ($query) {
+                $query->orWhereHas('classroom', function ($q) {
+                    $q->where('id', $this->selectedClass);
+                });
+            })
+            ->get();
+    }
+
     public function render()
     {
         // Query classes with student count
@@ -182,7 +199,7 @@ class ManageClass extends Component
         return view('admin.manage-class', [
             'classes' => $classes,
             'allStudents' => $allStudents,
-            'teachers' => \App\Models\Teacher::with('user')->get(),
+            'teachers' => $this->availableTeachers,
         ])->layout('layouts.admin', ['title' => 'Data Kelas']);
     }
 }

@@ -11,16 +11,16 @@ class Teacher extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'nip', 'subject_id'];
+    protected $fillable = ['user_id', 'nip'];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function subject(): BelongsTo
+    public function subjects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsToMany(Subject::class, 'subject_teacher');
     }
 
     public function questions(): HasMany
@@ -31,6 +31,11 @@ class Teacher extends Model
     public function exams(): HasMany
     {
         return $this->hasMany(Exam::class);
+    }
+
+    public function classroom(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Classroom::class);
     }
 
     public function getNameAttribute(): string

@@ -2,13 +2,20 @@
 
 @php
     $userName = auth()->check() ? auth()->user()->name : 'Tamu';
-    $roleLabels = [
-        'admin' => 'Administrator',
-        'teacher' => 'Guru',
-        'student' => 'Siswa'
-    ];
     $roleKey = auth()->check() ? auth()->user()->role : null;
-    $userRole = $roleKey && isset($roleLabels[$roleKey]) ? $roleLabels[$roleKey] : $userPrefix;
+    $authUser = auth()->user();
+
+    if ($roleKey === 'teacher') {
+        $subjectText = $authUser?->teacher?->subjects?->pluck('name')->join(', ') ?: '-';
+        $userRole = 'TEACHER - ' . $subjectText;
+    } elseif ($roleKey === 'student') {
+        $classText = $authUser?->student?->classroom?->name ?: '-';
+        $userRole = 'STUDENT - ' . $classText;
+    } elseif ($roleKey === 'admin') {
+        $userRole = 'ADMIN';
+    } else {
+        $userRole = $userPrefix;
+    }
 
     // Dynamic Title Mapping
     $routeTitles = [
@@ -127,4 +134,3 @@
         </div>
     </div>
 </header>
-

@@ -44,15 +44,19 @@
                     
                     <div class="flex items-center gap-2.5 text-sm text-text-muted mb-6 font-bold">
                         <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        @if($subject['teacher'] !== '-')
-                            <span class="text-text-main truncate">{{ $subject['teacher'] }}</span>
-                        @else
-                            <span class="text-red-500 text-[10px] font-black uppercase tracking-widest">Belum Ada Guru Pengampu</span>
-                        @endif
+                        <div class="flex flex-wrap gap-1">
+                            @forelse($subject['teachers'] as $teacherName)
+                                <span class="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                                    {{ $teacherName }}
+                                </span>
+                            @empty
+                                <span class="text-red-500 text-[10px] font-black uppercase tracking-widest">Belum Ada Guru</span>
+                            @endforelse
+                        </div>
                     </div>
 
                     <x-button wire:click="openAssignModal({{ $subject['id'] }})" variant="secondary" class="w-full font-black uppercase text-[10px] tracking-[0.2em] py-3 rounded-xl border-dashed">
-                        {{ $subject['teacher'] !== '-' ? 'Ganti  Guru Pengampu' : 'Tetapkan Guru Pengampu' }}
+                        {{ count($subject['teachers']) > 0 ? 'Kelola Guru Pengampu' : 'Tetapkan Guru Pengampu' }}
                     </x-button>
                 </div>
             </div>
@@ -121,11 +125,9 @@
 
                 <div class="max-h-64 overflow-y-auto border border-border-main dark:border-slate-700 rounded-2xl divide-y divide-border-subtle dark:divide-slate-800 shadow-inner">
                     @forelse($teachers as $teacher)
-                    <div class="flex items-center gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all cursor-pointer group" wire:click="$set('selectedTeacher', {{ $teacher['id'] }})">
-                        <div class="flex items-center justify-center h-6 w-6 rounded-full border-2 transition-all {{ $selectedTeacher === $teacher['id'] ? 'border-primary bg-primary text-white' : 'border-border-main dark:border-slate-600 group-hover:border-primary/50' }}">
-                            @if($selectedTeacher === $teacher['id'])
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                            @endif
+                    <div class="flex items-center gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all cursor-pointer group {{ is_array($selectedTeachers) && in_array($teacher['id'], $selectedTeachers) ? 'bg-primary/5' : '' }}">
+                        <div class="flex items-center justify-center">
+                             <input type="checkbox" wire:model.live="selectedTeachers" value="{{ $teacher['id'] }}" class="w-6 h-6 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">{{ $teacher['name'] }}</div>
@@ -144,7 +146,7 @@
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
                 <x-button variant="secondary" wire:click="$set('showAssignModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="assignTeacher" :disabled="!$selectedTeacher" class="font-black text-[10px] uppercase tracking-widest px-8">Tetapkan Guru</x-button>
+                <x-button variant="primary" wire:click="assignTeacher" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Penugasan</x-button>
             </div>
         </div>
     </div>

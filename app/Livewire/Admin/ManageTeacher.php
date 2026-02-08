@@ -23,11 +23,12 @@ class ManageTeacher extends Component
         'name' => '',
         'email' => '',
         'password' => '',
-        'subject_id' => ''
+        'subject_ids' => []
     ];
 
     public $selectedTeacher = null;
     public $search = '';
+    public $filterSubject = '';
 
     // Bulk Action States
     public $selectedTeachers = [];
@@ -42,7 +43,8 @@ class ManageTeacher extends Component
         $rules = [
             'teacherForm.name' => 'required|string|max:100',
             'teacherForm.email' => 'required|email|max:100',
-            'teacherForm.subject_id' => 'nullable|exists:subjects,id',
+            'teacherForm.subject_ids' => 'nullable|array',
+            'teacherForm.subject_ids.*' => 'exists:subjects,id',
         ];
 
         if ($this->showAddModal) {
@@ -82,11 +84,11 @@ class ManageTeacher extends Component
 
     public function openEditModal($teacherId)
     {
-        $teacher = Teacher::with('user', 'subject')->findOrFail($teacherId);
+        $teacher = Teacher::with('user', 'subjects')->findOrFail($teacherId);
         $this->teacherForm = [
             'name' => $teacher->user->name,
             'email' => $teacher->user->email,
-            'subject_id' => $teacher->subject_id ?? '',
+            'subject_ids' => $teacher->subjects->pluck('id')->toArray(),
             'password' => ''
         ];
         $this->selectedTeacher = $teacherId;
@@ -109,8 +111,9 @@ class ManageTeacher extends Component
     public function saveTeacher()
     {
         $this->validate();
+        $subjectIds = $this->normalizeSubjectIds($this->teacherForm['subject_ids'] ?? []);
 
-        DB::transaction(function () {
+        DB::transaction(function () use ($subjectIds) {
             if ($this->showEditModal && $this->selectedTeacher) {
                 // Update existing teacher
                 $teacher = Teacher::with('user')->findOrFail($this->selectedTeacher);
@@ -118,9 +121,7 @@ class ManageTeacher extends Component
                     'name' => $this->teacherForm['name'],
                     'email' => $this->teacherForm['email'],
                 ]);
-                $teacher->update([
-                    'subject_id' => $this->teacherForm['subject_id'] ?: null,
-                ]);
+                $teacher->subjects()->sync($subjectIds);
                 $message = 'Data guru berhasil diperbarui!';
             } else {
                 // Create new user and teacher
@@ -131,10 +132,12 @@ class ManageTeacher extends Component
                     'role' => 'teacher',
                 ]);
 
-                Teacher::create([
+                $teacher = Teacher::create([
                     'user_id' => $user->id,
-                    'subject_id' => $this->teacherForm['subject_id'] ?: null,
                 ]);
+                
+                $teacher->subjects()->sync($subjectIds);
+                
                 $message = 'Guru baru berhasil ditambahkan!';
             }
 
@@ -144,6 +147,26 @@ class ManageTeacher extends Component
         $this->showAddModal = false;
         $this->showEditModal = false;
         $this->reset('teacherForm', 'selectedTeacher');
+    }
+
+    public function removeSubject(int $subjectId): void
+    {
+        $current = $this->normalizeSubjectIds($this->teacherForm['subject_ids'] ?? []);
+
+        $this->teacherForm['subject_ids'] = array_values(array_filter(
+            $current,
+            fn (int $id) => $id !== $subjectId
+        ));
+    }
+
+    private function normalizeSubjectIds(array $subjectIds): array
+    {
+        return collect($subjectIds)
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     public function deleteTeacher()
@@ -232,7 +255,10 @@ class ManageTeacher extends Component
     public function exportTeachers()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\TeachersExport(),
+            new \App\Exports\TeachersExport(
+                search: $this->search ?: null,
+                subjectId: $this->filterSubject ?: null,
+            ),
             'data_guru_' . now()->format('Y-m-d') . '.xlsx'
         );
     }
@@ -304,13 +330,19 @@ class ManageTeacher extends Component
         // Query teachers with relationships - optimized with select
         $teachersQuery = Teacher::with([
             'user:id,name,email',
-            'subject:id,name'
-        ])->select('id', 'user_id', 'subject_id');
+            'subjects:id,name'
+        ])->select('id', 'user_id');
 
         if ($this->search) {
             $teachersQuery->whereHas('user', function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('email', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        if ($this->filterSubject) {
+            $teachersQuery->whereHas('subjects', function ($q) {
+                $q->where('subjects.id', $this->filterSubject);
             });
         }
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Common\Report;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class QuestionAnalysis extends Component
 {
@@ -16,44 +17,58 @@ class QuestionAnalysis extends Component
     public function mount($examId)
     {
         $this->exam = \App\Models\Exam::findOrFail($examId);
-        
-        // Fetch all questions for this exam
-        // Calculate statistics for each
-        // Fetch all questions for this exam
-        // Calculate statistics for each
-        $this->questions = $this->exam->questions()
+        Gate::authorize('viewReport', $this->exam);
+
+        $questions = $this->exam->questions()
             ->with(['options'])
+            ->get();
+
+        $questionIds = $questions->pluck('id');
+
+        $statsByQuestion = DB::table('student_answers')
+            ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
+            ->where('exam_attempts.exam_id', $examId)
+            ->whereIn('student_answers.question_id', $questionIds)
+            ->whereNotNull('exam_attempts.submitted_at')
+            ->groupBy('student_answers.question_id')
+            ->select(
+                'student_answers.question_id',
+                DB::raw('count(*) as total_answers'),
+                DB::raw('sum(case when student_answers.is_correct = 1 then 1 else 0 end) as correct_count'),
+                DB::raw('sum(case when student_answers.is_correct = 0 then 1 else 0 end) as wrong_count')
+            )
             ->get()
-            ->map(function($q) use ($examId) {
-                // Get all answers for this question in this exam
-                $stats = DB::table('student_answers')
-                    ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
-                    ->where('exam_attempts.exam_id', $examId)
-                    ->where('student_answers.question_id', $q->id)
-                    ->whereNotNull('exam_attempts.submitted_at')
-                    ->select(
-                        DB::raw('count(*) as total_answers'),
-                        DB::raw('sum(case when student_answers.is_correct = 1 then 1 else 0 end) as correct_count'),
-                        DB::raw('sum(case when student_answers.is_correct = 0 then 1 else 0 end) as wrong_count')
-                    )
-                    ->first();
+            ->keyBy('question_id');
 
-                // Option Distribution
-                $distribution = DB::table('student_answers')
-                    ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
-                    ->where('exam_attempts.exam_id', $examId)
-                    ->where('student_answers.question_id', $q->id)
-                    ->whereNotNull('exam_attempts.submitted_at')
-                    ->select('selected_option_id', DB::raw('count(*) as count'))
-                    ->groupBy('selected_option_id')
-                    ->pluck('count', 'selected_option_id')
-                    ->toArray();
-
-                $q->stats = $stats;
-                $q->distribution = $distribution;
-                
-                return $q;
+        $distributionByQuestion = DB::table('student_answers')
+            ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
+            ->where('exam_attempts.exam_id', $examId)
+            ->whereIn('student_answers.question_id', $questionIds)
+            ->whereNotNull('exam_attempts.submitted_at')
+            ->whereNotNull('student_answers.selected_option_id')
+            ->groupBy('student_answers.question_id', 'student_answers.selected_option_id')
+            ->select(
+                'student_answers.question_id',
+                'student_answers.selected_option_id',
+                DB::raw('count(*) as count')
+            )
+            ->get()
+            ->groupBy('question_id')
+            ->map(function ($rows) {
+                return $rows->pluck('count', 'selected_option_id')->toArray();
             });
+
+        $this->questions = $questions->map(function ($question) use ($statsByQuestion, $distributionByQuestion) {
+            $question->stats = $statsByQuestion->get($question->id) ?? (object) [
+                'total_answers' => 0,
+                'correct_count' => 0,
+                'wrong_count' => 0,
+            ];
+
+            $question->distribution = $distributionByQuestion->get($question->id, []);
+
+            return $question;
+        });
     }
 
     public function render()
@@ -65,4 +80,5 @@ class QuestionAnalysis extends Component
             'backParam' => $this->exam->id
         ]);
     }
+
 }

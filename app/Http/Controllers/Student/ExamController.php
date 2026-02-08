@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\ExamAttemptStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
+use App\Models\Question;
 use App\Models\StudentAnswer;
+use App\Services\ScoringService;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ExamController extends Controller
@@ -55,12 +60,12 @@ class ExamController extends Controller
             return [
                 'id' => $q->id,
                 'type' => $q->type === 'essay' ? 'essay' : 'multiple_choice', 
-                'text' => $q->text,
+                'text' => HtmlSanitizer::clean($q->text),
                 'image_path' => $q->image_path ? \Illuminate\Support\Facades\Storage::url($q->image_path) : null,
                 'options' => $options->map(function($opt) {
                     return [
                         'id' => $opt->id,
-                        'text' => $opt->text
+                        'text' => strip_tags(HtmlSanitizer::clean($opt->text))
                     ];
                 })->toArray()
             ];
@@ -101,71 +106,49 @@ class ExamController extends Controller
         ]);
     }
 
-    public function submit(Request $request, $id)
+    public function submit(Request $request, $id, ScoringService $scoringService)
     {
         $student = Auth::user()->student;
-        $exam = Exam::with(['questions'])->findOrFail($id);
+        $exam = Exam::with(['questions', 'teacher.user'])->findOrFail($id);
         
         $attempt = ExamAttempt::where('exam_id', $id)
             ->where('student_id', $student->id)
+            ->where('status', ExamAttemptStatus::InProgress->value)
             ->whereNull('submitted_at')
             ->firstOrFail();
 
         $answers = $request->input('answers', []);
-        $totalScore = 0;
         
-        // Map questions to easily access pivot score and options
-        // We need options to check correctness
-        $examQuestions = $exam->questions->keyBy('id');
-        
-        foreach ($answers as $questionId => $answerValue) {
-            $question = $examQuestions[$questionId] ?? null;
-            if (!$question) continue;
+        DB::transaction(function () use ($answers, $exam, $attempt, $scoringService): void {
+            $examQuestions = $exam->questions->keyBy('id');
 
-            $isOptionId = is_numeric($answerValue);
-            $selectedOptionId = $isOptionId ? $answerValue : null;
-            
-            $isCorrect = false;
-            $scoreAwarded = 0;
-            
-            // Check correctness for Multiple Choice
-            if ($question->type !== 'essay' && $selectedOptionId) {
-                $option = \App\Models\QuestionOption::find($selectedOptionId);
-                if ($option && $option->question_id == $question->id && $option->is_correct) {
-                    $isCorrect = true;
-                    // Get score from Pivot (exam_questions)
-                    $scoreAwarded = $question->pivot->score ?? 0;
+            foreach ($answers as $questionId => $answerValue) {
+                $question = $examQuestions[(int) $questionId] ?? null;
+                if (!$question) {
+                    continue;
                 }
+
+                $scored = $scoringService->scoreSingleAnswer($exam, $question, $answerValue);
+
+                StudentAnswer::updateOrCreate(
+                    [
+                        'exam_attempt_id' => $attempt->id,
+                        'question_id' => (int) $questionId,
+                    ],
+                    $scored
+                );
             }
-            
-            StudentAnswer::updateOrCreate(
-                [
-                    'exam_attempt_id' => $attempt->id,
-                    'question_id' => $questionId
-                ],
-                [
-                    'answer' => (string)$answerValue,
-                    'selected_option_id' => $selectedOptionId,
-                    'is_correct' => $isCorrect,
-                    'score_awarded' => $scoreAwarded
-                ]
-            );
-            
-            $totalScore += $scoreAwarded;
-        }
 
-        // Calculate Final Results
-        $maxScore = $exam->questions->sum('pivot.score');
-        $percentage = $maxScore > 0 ? ($totalScore / $maxScore) * 100 : 0;
-        $passed = $percentage >= $exam->passing_grade;
+            $attemptSummary = $scoringService->recalculateAttempt($exam, $attempt);
 
-        $attempt->update([
-            'submitted_at' => now(),
-            'status' => 'submitted', // or 'graded'
-            'total_score' => $totalScore,
-            'percentage' => $percentage,
-            'passed' => $passed
-        ]);
+            $attempt->update([
+                'submitted_at' => now(),
+                'status' => $attemptSummary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
+                'total_score' => $attemptSummary['total_score'],
+                'percentage' => $attemptSummary['percentage'],
+                'passed' => $attemptSummary['passed'],
+            ]);
+        });
 
         // Send Notification to Teacher
         try {
@@ -181,11 +164,12 @@ class ExamController extends Controller
         ]);
     }
 
-    public function saveAnswer(Request $request, $id)
+    public function saveAnswer(Request $request, $id, ScoringService $scoringService)
     {
         $student = Auth::user()->student;
         $attempt = ExamAttempt::where('exam_id', $id)
             ->where('student_id', $student->id)
+            ->where('status', ExamAttemptStatus::InProgress->value)
             ->whereNull('submitted_at')
             ->firstOrFail();
             
@@ -202,47 +186,27 @@ class ExamController extends Controller
         $endTime = Carbon::parse($attempt->started_at)->addMinutes($exam->duration_minutes);
         // Add a small buffer (e.g. 1-2 mins) for latency
         if (now()->diffInSeconds($endTime, false) < -60) {
-             return response()->json(['success' => false, 'message' => 'Time is up']);
+             return response()->json(['success' => false, 'message' => 'Time is up'], 403);
         }
 
-        $question = \App\Models\Question::find($questionId);
+        $question = Question::where('id', $questionId)
+            ->whereHas('exams', function ($query) use ($attempt) {
+                $query->where('exams.id', $attempt->exam_id);
+            })
+            ->first();
+
         if (!$question) {
-            return response()->json(['success' => false, 'message' => 'Question not found']);
+            return response()->json(['success' => false, 'message' => 'Invalid question for this exam'], 403);
         }
-        
-        $isOptionId = is_numeric($answerValue);
-        $selectedOptionId = $isOptionId ? $answerValue : null;
-        
-        $isCorrect = false;
-        $scoreAwarded = 0;
-        
-        // Auto-grade MC immediately if we want (or can just save raw)
-        // Let's do it immediately so data is ready
-        if ($question->type !== 'essay' && $selectedOptionId) {
-            $option = \App\Models\QuestionOption::find($selectedOptionId);
-            // Verify option belongs to question
-            if ($option && $option->question_id == $question->id && $option->is_correct) {
-                // We need to fetch pivot score if we want precise score now, 
-                // but usually pivot is on Exam-Question.
-                // For speed, let's look up pivot or just save correctness.
-                // Accessing pivot via exam relation is safest.
-                $examQuestion = $exam->questions()->where('question_id', $question->id)->first();
-                $isCorrect = true;
-                $scoreAwarded = $examQuestion->pivot->score ?? 0;
-            }
-        }
+
+        $scored = $scoringService->scoreSingleAnswer($exam, $question, $answerValue);
 
         StudentAnswer::updateOrCreate(
             [
                 'exam_attempt_id' => $attempt->id,
                 'question_id' => $questionId
             ],
-            [
-                'answer' => (string)$answerValue,
-                'selected_option_id' => $selectedOptionId,
-                'is_correct' => $isCorrect,
-                'score_awarded' => $scoreAwarded
-            ]
+            $scored
         );
         
         // touch the attempt to update 'updated_at' for live monitoring sorting
@@ -273,7 +237,11 @@ class ExamController extends Controller
             return response()->json(['force_stop' => false]);
         }
 
-        if ($attempt->submitted_at || in_array($attempt->status, ['submitted', 'graded', 'completed'])) {
+        $attemptStatus = $attempt->status instanceof ExamAttemptStatus
+            ? $attempt->status
+            : ExamAttemptStatus::tryFrom((string) $attempt->status);
+
+        if ($attempt->submitted_at || ($attemptStatus?->isFinalized() ?? false)) {
             return response()->json([
                 'force_stop' => true,
                 'redirect' => route('student.results.detail', $attempt->id) // Or index
@@ -290,6 +258,7 @@ class ExamController extends Controller
             // 1. Validate Attempt Exists and is In Progress
             $attempt = ExamAttempt::where('exam_id', $id)
                 ->where('student_id', $student->id)
+                ->where('status', ExamAttemptStatus::InProgress->value)
                 ->whereNull('submitted_at')
                 ->first();
 
@@ -327,4 +296,3 @@ class ExamController extends Controller
         }
     }
 }
-

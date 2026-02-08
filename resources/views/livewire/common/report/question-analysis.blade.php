@@ -30,7 +30,7 @@
                     </div>
                     
                     <div class="prose prose-sm max-w-none text-text-main mb-6">
-                        {!! $question->text !!}
+                        {!! \App\Support\HtmlSanitizer::clean($question->text) !!}
                     </div>
 
                     @if($question->type === 'multiple_choice')
