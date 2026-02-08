@@ -3,7 +3,7 @@
     <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-4 mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all">
         <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
             <div class="flex items-center gap-4">
-                <a href="{{ route('teacher.grading.show', ['exam' => $exam->id]) }}" class="p-2 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-transparent hover:border-gray-200">
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="p-2 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-transparent hover:border-gray-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
@@ -73,13 +73,13 @@
                             @foreach($pgAnswers as $pg)
                             <tr class="hover:bg-gray-50/80 transition-colors {{ $pg['is_correct'] ? '' : 'bg-red-50/30' }}">
                                 <td class="py-4 pl-8 pr-4 text-center font-bold text-text-muted opacity-60">{{ $pg['no'] }}</td>
-                                <td class="py-4 px-4 text-sm font-medium text-text-main leading-relaxed min-w-[300px]">{!! $pg['question'] !!}</td>
+                                <td class="py-4 px-4 text-sm font-medium text-text-main leading-relaxed min-w-[300px]">{!! \App\Support\HtmlSanitizer::clean($pg['question']) !!}</td>
                                 <td class="py-4 px-4">
                                     <span class="text-xs font-black uppercase tracking-widest {{ $pg['is_correct'] ? 'text-green-600' : 'text-red-600' }}">
                                         {{ $pg['student_answer'] }}
                                     </span>
                                 </td>
-                                <td class="py-4 px-4 text-xs font-bold text-text-muted uppercase tracking-widest opacity-60">{!! $pg['key'] !!}</td>
+                                <td class="py-4 px-4 text-xs font-bold text-text-muted uppercase tracking-widest opacity-60">{!! \App\Support\HtmlSanitizer::clean($pg['key']) !!}</td>
                                 <td class="py-4 pl-4 pr-8 text-center">
                                     <div class="flex justify-center">
                                         @if($pg['is_correct'])
@@ -116,7 +116,7 @@
                  </div>
 
                  <div class="p-8 pt-20 sm:pt-8 sm:pl-24">
-                     <h4 class="text-lg font-bold text-text-main mb-8 leading-relaxed">{!! $data['question'] !!}</h4>
+                     <h4 class="text-lg font-bold text-text-main mb-8 leading-relaxed">{!! \App\Support\HtmlSanitizer::clean($data['question']) !!}</h4>
                      
                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                          <!-- Student Answer Column -->
@@ -145,7 +145,7 @@
                                      Kunci Jawaban / Penjelasan
                                  </label>
                                  <div class="p-4 bg-green-50/50 rounded-2xl text-green-800 text-xs font-medium border border-green-100/50 leading-relaxed shadow-inner">
-                                     {!! $data['key'] !!}
+                                     {!! \App\Support\HtmlSanitizer::clean($data['key']) !!}
                                  </div>
                              </div>
                              
@@ -183,7 +183,7 @@
     <!-- Fixed Bottom Actions -->
     <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200 p-4 lg:px-8 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
-            <x-button variant="soft" href="{{ route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-6 py-3 rounded-xl text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
+            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-6 py-3 rounded-xl text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
                 &larr; KEMBALI AJA
             </x-button>
             
@@ -201,4 +201,3 @@
         </div>
     </div>
 </div>
-

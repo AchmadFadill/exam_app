@@ -42,10 +42,10 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </x-button>
                         <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
-                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit ujian</a>
-                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</a>
+                            <a href="{{ route('admin.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit ujian</a>
+                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left">Duplikat Ujian</button>
                             <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
-                            <a href="#" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus</a>
+                            <button wire:click="confirmDelete({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left">Hapus</button>
                         </div>
                     </div>
                 </div>
@@ -82,14 +82,15 @@
                         MONITOR UJIAN 
                     </x-button>
                 @elseif($exam['status'] == 'completed')
-                    <x-button href="#" variant="soft" class="text-[10px] py-3 tracking-widest">
+                    <x-button href="{{ route('admin.reports.detail', $exam['id']) }}" variant="soft" class="text-[10px] py-3 tracking-widest">
                         Lihat Hasil
                     </x-button>
-                    <x-button href="#" variant="soft" class="text-[10px] py-3 tracking-widest">
+                    <!-- Note: Adjusted Grading route to point to teacher route which is accessible by admin role via IsGuru middleware -->
+                    <x-button href="{{ route('admin.grading.show', $exam['id']) }}" variant="soft" class="text-[10px] py-3 tracking-widest">
                         Daftar Nilai
                     </x-button>
                 @else
-                    <x-button href="#" variant="soft" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
+                    <x-button href="{{ route('admin.exams.edit', $exam['id']) }}" variant="soft" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3 opacity-40 transition-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Atur Jadwal
                     </x-button>
@@ -140,6 +141,28 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
                 <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Single Delete Modal -->
+    @if($showDeleteModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showDeleteModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Ujian?</h3>
+                <p class="text-gray-500">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('showDeleteModal', false)">Batal</x-button>
+                <x-button variant="danger" wire:click="deleteExam">Ya, Hapus</x-button>
             </div>
         </div>
     </div>

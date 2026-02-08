@@ -2,8 +2,12 @@
 
 namespace App\Livewire\Common\Report;
 
+use App\Models\ExamAttempt;
+use App\Models\Student;
+use App\Models\StudentAnswer;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
+use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
 {
@@ -47,11 +51,16 @@ class Detail extends Component
     {
         $isAdmin = request()->is('admin/*');
 
-        $examModel = \App\Models\Exam::with(['subject', 'classrooms', 'attempts' => function($q) {
-            $q->whereNotNull('submitted_at');
-        }])->findOrFail($this->examId);
+        $examModel = \App\Models\Exam::with(['subject', 'classrooms'])->findOrFail($this->examId);
+        Gate::authorize('viewReport', $examModel);
 
-        $submittedAttempts = $examModel->attempts;
+        $submittedAttempts = ExamAttempt::query()
+            ->where('exam_id', $this->examId)
+            ->whereNotNull('submitted_at')
+            ->get(['student_id', 'total_score', 'started_at', 'submitted_at'])
+            ->keyBy('student_id');
+
+        $submittedAttemptsCollection = $submittedAttempts->values();
 
         // Exam Summary
         $exam = [
@@ -60,21 +69,22 @@ class Detail extends Component
             'class' => $examModel->classrooms->pluck('name')->join(', '),
             'subject' => $examModel->subject->name ?? '-',
             'date' => $examModel->date ? $examModel->date->format('d M Y') : '-',
-            'avg_score' => $submittedAttempts->count() > 0 ? number_format($submittedAttempts->avg('total_score'), 1) : 0,
-            'highest' => $submittedAttempts->max('total_score') ?? 0,
-            'lowest' => $submittedAttempts->min('total_score') ?? 0,
-            'participants' => $submittedAttempts->count()
+            'avg_score' => $submittedAttemptsCollection->count() > 0 ? number_format($submittedAttemptsCollection->avg('total_score'), 1) : 0,
+            'highest' => $submittedAttemptsCollection->max('total_score') ?? 0,
+            'lowest' => $submittedAttemptsCollection->min('total_score') ?? 0,
+            'participants' => $submittedAttemptsCollection->count()
         ];
 
         // Fetch All Students in Exam Classrooms
         $classIds = $examModel->classrooms->pluck('id');
-        $allStudents = \App\Models\Student::whereHas('classroom', function($q) use ($classIds) {
-            $q->whereIn('id', $classIds);
-        })->get();
+        $allStudents = Student::query()
+            ->with('user:id,name')
+            ->whereIn('classroom_id', $classIds)
+            ->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
         $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel) {
-            $attempt = $submittedAttempts->firstWhere('student_id', $student->id);
+            $attempt = $submittedAttempts->get($student->id);
             
             return [
                 'id' => $student->id,
@@ -112,18 +122,19 @@ class Detail extends Component
 
         // Most Failed Questions Analysis
         // Logic: Get wrong answers for this exam, group by question_id, count
-        $most_failed_questions = \App\Models\StudentAnswer::query()
+        $most_failed_questions = StudentAnswer::query()
             ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
             ->join('questions', 'student_answers.question_id', '=', 'questions.id')
             ->where('exam_attempts.exam_id', $this->examId)
+            ->whereNotNull('exam_attempts.submitted_at')
             ->where('student_answers.is_correct', false) // Provided grading sets this
             ->selectRaw('questions.id, questions.text, questions.answer_key, count(*) as failed_count')
             ->groupBy('questions.id', 'questions.text', 'questions.answer_key')
             ->orderByDesc('failed_count')
             ->limit(5)
             ->get()
-            ->map(function($q) use ($submittedAttempts) {
-                $totalAttempts = $submittedAttempts->count();
+            ->map(function($q) use ($submittedAttemptsCollection) {
+                $totalAttempts = $submittedAttemptsCollection->count();
                 $percentage = $totalAttempts > 0 ? round(($q->failed_count / $totalAttempts) * 100) : 0;
                 
                 return [
@@ -144,4 +155,5 @@ class Detail extends Component
             'analysisRoute' => $isAdmin ? 'admin.reports.analysis' : 'teacher.reports.analysis'
         ]);
     }
+
 }

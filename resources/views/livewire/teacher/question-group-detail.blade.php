@@ -34,15 +34,27 @@
                         </button>
                     </div>
                 @endif
-                <p class="text-sm text-gray-500 mt-1">{{ count($questions) }} Soal</p>
+                <div class="flex items-center gap-3 mt-1">
+                    <p class="text-sm text-gray-500">{{ count($questions) }} Soal</p>
+                    <span class="text-gray-300">•</span>
+                    <p class="text-sm font-bold text-primary">Total Poin: {{ $totalScore }}</p>
+                </div>
             </div>
         </div>
-        <x-button variant="primary" wire:click="openAddModal">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Soal
-        </x-button>
+        <div class="flex gap-2">
+            <x-button variant="secondary" wire:click="distributeScores" title="Otomatis bagi rata nilai soal jadi total 100">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                Distribusi Nilai (100)
+            </x-button>
+            <x-button variant="primary" wire:click="openAddModal">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Soal
+            </x-button>
+        </div>
     </div>
 
     <!-- Bulk Action Bar -->
@@ -76,6 +88,7 @@
                 <x-table.th class="w-16">#</x-table.th>
                 <x-table.th>Pertanyaan</x-table.th>
                 <x-table.th>Tipe</x-table.th>
+                <x-table.th>Bobot</x-table.th>
                 <x-table.th>Mata Pelajaran</x-table.th>
                 <x-table.th class="text-right">Aksi</x-table.th>
             </x-table.tr>
@@ -103,6 +116,7 @@
                         {{ $question->type === 'multiple_choice' ? 'PILIHAN GANDA' : 'ESSAY' }}
                     </span>
                 </x-table.td>
+                <x-table.td class="text-sm font-bold text-gray-700">{{ $question->score }}</x-table.td>
                 <x-table.td class="text-xs font-black text-text-muted uppercase tracking-widest">{{ $question->subject->name }}</x-table.td>
                 <x-table.td class="text-right">
                     <div class="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">

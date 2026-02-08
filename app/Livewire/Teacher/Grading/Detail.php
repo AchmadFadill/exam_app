@@ -2,10 +2,21 @@
 
 namespace App\Livewire\Teacher\Grading;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
+use App\Services\ScoringService;
+use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->scoringService = app(ScoringService::class);
+    }
+
+    private ScoringService $scoringService;
+
     public $attempt;
     public $student;
     public $exam;
@@ -25,7 +36,9 @@ class Detail extends Component
             ->where('student_id', $student)
             ->with(['exam.questions', 'answers.question', 'student.user'])
             ->firstOrFail();
-            
+
+        Gate::authorize('grade', $this->attempt->exam);
+
         $this->exam = $this->attempt->exam;
         $this->student = $this->attempt->student;
         
@@ -117,33 +130,33 @@ class Detail extends Component
 
     public function finishGrading()
     {
-        $totalEssayScore = 0;
-        
-        \Illuminate\Support\Facades\DB::transaction(function () use (&$totalEssayScore) {
+        Gate::authorize('grade', $this->exam);
+
+        \Illuminate\Support\Facades\DB::transaction(function () {
             foreach ($this->essayGrades as $answerId => $data) {
                 $score = (int)$data['score'];
-                $totalEssayScore += $score;
                 
                 \App\Models\StudentAnswer::where('id', $answerId)->update([
                     'score_awarded' => $score,
                     // 'feedback' => $data['feedback'] // Need to verify if 'feedback' column exists on student_answers?
                 ]);
             }
-            
-            // Update Attempt
-            $finalScore = $this->pgScore + $totalEssayScore;
-            $maxScore = $this->exam->questions->sum('score'); // Naive sum. Pivot score is better if used.
-            $percentage = $maxScore > 0 ? ($finalScore / $maxScore) * 100 : 0;
-            
+
+            $summary = $this->scoringService->recalculateAttempt($this->exam, $this->attempt);
+
             $this->attempt->update([
-                'total_score' => $finalScore,
-                'percentage' => $percentage,
-                'status' => 'graded', // Final status
-                'passed' => $percentage >= $this->exam->passing_grade
+                'total_score' => $summary['total_score'],
+                'percentage' => $summary['percentage'],
+                'status' => ExamAttemptStatus::Graded, // Final status
+                'passed' => $summary['passed'],
             ]);
         });
 
-        return redirect()->route('teacher.grading.show', $this->exam->id)
+        $route = \Illuminate\Support\Facades\Auth::user()->isAdmin() 
+            ? 'admin.grading.show' 
+            : 'teacher.grading.show';
+
+        return redirect()->route($route, $this->exam->id)
             ->with('success', 'Penilaian berhasil disimpan!');
     }
 
@@ -152,6 +165,6 @@ class Detail extends Component
         return view('teacher.grading.detail', [
             'student_name' => $this->student->user->name,
             'grade' => $this->exam->class,
-        ])->layout('layouts.teacher')->title('Koreksi - ' . $this->student->user->name);
+        ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Koreksi - ' . $this->student->user->name);
     }
 }

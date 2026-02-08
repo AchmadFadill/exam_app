@@ -7,6 +7,7 @@ use App\Models\QuestionOption;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -73,6 +74,20 @@ class QuestionGroupDetail extends Component
     {
         $this->title = urldecode($title);
         $this->newGroupTitle = $this->title;
+        Gate::allowIf(function ($user) {
+            if ($user->isAdmin()) {
+                return true;
+            }
+
+            if (!$user->isTeacher()) {
+                return false;
+            }
+
+            return Question::query()
+                ->where('title', $this->title)
+                ->where('teacher_id', $user->teacher?->id)
+                ->exists();
+        });
     }
 
     public function startRenaming()
@@ -97,7 +112,7 @@ class QuestionGroupDetail extends Component
         }
 
         DB::transaction(function () {
-            Question::where('title', $this->title)->update(['title' => $this->newGroupTitle]);
+            $this->groupQuestionsQuery()->update(['title' => $this->newGroupTitle]);
         });
 
         // Redirect to new URL
@@ -107,10 +122,11 @@ class QuestionGroupDetail extends Component
 
     public function toggleSelectAll()
     {
-        if (count($this->selectedQuestions) === Question::where('title', $this->title)->count()) {
+        $groupCount = $this->groupQuestionsQuery()->count();
+        if (count($this->selectedQuestions) === $groupCount) {
             $this->selectedQuestions = [];
         } else {
-            $this->selectedQuestions = Question::where('title', $this->title)->pluck('id')->toArray();
+            $this->selectedQuestions = $this->groupQuestionsQuery()->pluck('id')->toArray();
         }
     }
 
@@ -120,7 +136,7 @@ class QuestionGroupDetail extends Component
         $this->questionForm['title'] = $this->title; // Pre-fill with current group title
         
         // Auto-fill subject from first question in this group
-        $firstQuestion = Question::where('title', $this->title)->first();
+        $firstQuestion = $this->groupQuestionsQuery()->first();
         if ($firstQuestion) {
             $this->questionForm['subject_id'] = $firstQuestion->subject_id;
         }
@@ -156,7 +172,7 @@ class QuestionGroupDetail extends Component
     public function openEditModal($questionId)
     {
         $this->selectedQuestion = $questionId;
-        $question = Question::with('options')->findOrFail($questionId);
+        $question = $this->ownedQuestion($questionId);
 
         $this->questionForm = [
             'title' => $question->title ?? '',
@@ -360,6 +376,7 @@ class QuestionGroupDetail extends Component
 
     public function openDeleteModal($questionId)
     {
+        $this->ownedQuestion($questionId);
         $this->selectedQuestion = $questionId;
         $this->showDeleteModal = true;
     }
@@ -369,6 +386,7 @@ class QuestionGroupDetail extends Component
         if ($this->selectedQuestion) {
             DB::transaction(function () {
                 $question = Question::findOrFail($this->selectedQuestion);
+                $this->ownedQuestion($question->id);
                 $question->options()->delete();
                 $question->delete();
             });
@@ -384,7 +402,12 @@ class QuestionGroupDetail extends Component
     {
         if (!empty($this->selectedQuestions)) {
             DB::transaction(function () {
-                $questions = Question::with('options')->whereIn('id', $this->selectedQuestions)->get();
+                $questions = Question::with('options')
+                    ->whereIn('id', $this->selectedQuestions)
+                    ->when(\Illuminate\Support\Facades\Auth::user()->isTeacher(), function ($query) {
+                        $query->where('teacher_id', \Illuminate\Support\Facades\Auth::user()->teacher->id);
+                    })
+                    ->get();
                 
                 foreach ($questions as $question) {
                     $question->options()->delete();
@@ -401,18 +424,51 @@ class QuestionGroupDetail extends Component
         $this->showBulkDeleteModal = false;
     }
 
+    public function distributeScores()
+    {
+        Question::distributeScoresByTitle($this->title);
+        $this->dispatch('notify', ['message' => 'Bobot nilai semua soal berhasil disesuaikan menjadi total 100!']);
+    }
+
     public function render()
     {
-        $questions = Question::with(['subject', 'options'])
-            ->where('title', $this->title)
+        $questions = $this->groupQuestionsQuery()
+            ->with(['subject', 'options'])
             ->latest()
             ->get();
+        
+        $totalScore = $questions->sum('score');
         
         $subjects = Subject::orderBy('name')->get();
 
         return view('livewire.teacher.question-group-detail', [
             'questions' => $questions,
             'subjects' => $subjects,
+            'totalScore' => $totalScore,
         ])->layout('layouts.teacher')->title('Detail Soal - ' . $this->title);
+    }
+
+    private function groupQuestionsQuery()
+    {
+        return Question::query()
+            ->where('title', $this->title)
+            ->when(\Illuminate\Support\Facades\Auth::user()->isTeacher(), function ($query) {
+                $query->where('teacher_id', \Illuminate\Support\Facades\Auth::user()->teacher->id);
+            });
+    }
+
+    private function ownedQuestion(int $questionId): Question
+    {
+        $question = Question::with('options')->findOrFail($questionId);
+
+        Gate::allowIf(function ($user) use ($question) {
+            if ($user->isAdmin()) {
+                return true;
+            }
+
+            return $user->isTeacher() && (int) $question->teacher_id === (int) $user->teacher?->id;
+        });
+
+        return $question;
     }
 }

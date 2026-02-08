@@ -30,6 +30,15 @@
             </span>
             <input type="text" wire:model.live="search" class="pl-14 w-full px-6 py-4 bg-bg-surface dark:bg-slate-800/50 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold tracking-tight shadow-sm" placeholder="Cari nama atau email pengajar...">
         </div>
+
+        <!-- Subject Filter -->
+        <div class="w-full sm:w-auto sm:min-w-[280px]">
+            <x-select
+                wire:model.live="filterSubject"
+                :options="$subjects->map(fn($s) => ['value' => $s->id, 'label' => $s->name])->prepend(['value' => '', 'label' => 'Semua Mata Pelajaran'])->toArray()"
+                placeholder="Filter Mata Pelajaran"
+            />
+        </div>
     </div>
 
     <!-- Teacher Table -->
@@ -65,9 +74,15 @@
                 </x-table.td>
                 <x-table.td class="font-bold text-text-muted">{{ $teacher->user->email }}</x-table.td>
                 <x-table.td>
-                    <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
-                        {{ $teacher->subject?->name ?? '-' }}
-                    </span>
+                    <div class="flex flex-wrap gap-1">
+                        @forelse($teacher->subjects as $subject)
+                        <span class="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                            {{ $subject->name }}
+                        </span>
+                        @empty
+                        <span class="text-[10px] text-text-muted italic">-</span>
+                        @endforelse
+                    </div>
                 </x-table.td>
                 <x-table.td class="text-right">
                     <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
@@ -106,10 +121,15 @@
 
     <!-- Modals -->
     @if($showAddModal || $showEditModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)"></div>
-        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5">
-            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30">
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)" aria-hidden="true"></div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="relative inline-block align-bottom bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-white/5">
+                <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30 rounded-t-[2.5rem]">
                 <div>
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Guru' : 'Edit Data Guru' }}</h3>
                     
@@ -137,19 +157,76 @@
                 @endif
                 <div>
                     <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Mata Pelajaran yang Diampu</label>
-                    <select wire:model="teacherForm.subject_id" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
-                        <option value="">Pilih Mata Pelajaran</option>
-                        @foreach($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                        @endforeach
-                    </select>
+                    @php
+                        $selectedSubjectIds = collect($teacherForm['subject_ids'] ?? [])->map(fn($id) => (int) $id)->toArray();
+                    @endphp
+
+                    <div x-data="{ search: '' }" class="space-y-3">
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                x-model="search"
+                                placeholder="Cari mata pelajaran..."
+                                class="w-full pl-11 pr-4 py-3 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-sm font-bold"
+                            >
+                        </div>
+
+                        <div class="p-3 bg-gray-100/40 dark:bg-slate-800/40 border border-border-main dark:border-border-main rounded-2xl max-h-44 overflow-y-auto">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($subjects as $subject)
+                                    <label
+                                        x-show="'{{ strtolower($subject->name) }}'.includes(search.toLowerCase())"
+                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-black uppercase tracking-wide cursor-pointer transition-all"
+                                        :class="$el.querySelector('input')?.checked
+                                            ? 'bg-primary text-white border-primary shadow-sm'
+                                            : 'bg-white dark:bg-slate-900 text-text-main border-border-main hover:border-primary/50'"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            class="sr-only"
+                                            wire:model.live="teacherForm.subject_ids"
+                                            value="{{ $subject->id }}"
+                                        >
+                                        <span>{{ $subject->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($subjects->whereIn('id', $selectedSubjectIds) as $selectedSubject)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/10">
+                                    <span>{{ $selectedSubject->name }}</span>
+                                    <button
+                                        type="button"
+                                        wire:click="removeSubject({{ $selectedSubject->id }})"
+                                        class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
+                                        title="Batalkan mapel"
+                                    >
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </span>
+                            @endforeach
+                            @if(empty($selectedSubjectIds))
+                                <span class="text-xs text-text-muted italic">Belum ada mata pelajaran dipilih.</span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
-                <x-button variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
+                <x-button type="button" variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
                 <x-button variant="primary" wire:click="saveTeacher" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Data</x-button>
             </div>
         </div>
+    </div>
     </div>
     @endif
 

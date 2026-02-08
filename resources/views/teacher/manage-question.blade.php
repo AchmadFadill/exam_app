@@ -209,6 +209,7 @@
                     @error('importFile') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
             </div>
+            </div>
             <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('showImportModal', false)">Batal</x-button>
                 <x-button variant="primary" wire:click="importQuestions">Import</x-button>
@@ -216,4 +217,9 @@
         </div>
     </div>
     @endif
+
+    <!-- Pagination -->
+    <div class="mt-6">
+        {{ $paginatedTitles->links() }}
+    </div>
 </div>

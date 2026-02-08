@@ -107,9 +107,12 @@ class ManageQuestion extends Component
         try {
             Excel::import(new QuestionsImport($this->importTitle), $this->importFile->getRealPath());
             
+            // Auto-distribute scores to 100
+            Question::distributeScoresByTitle($this->importTitle);
+            
             $this->showImportModal = false;
             $this->reset(['importFile', 'importTitle']);
-            $this->dispatch('notify', ['message' => 'Soal berhasil diimport!']);
+            $this->dispatch('notify', ['message' => 'Soal berhasil diimport dan bobot nilai disesuaikan!']);
         } catch (\Exception $e) {
             $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
         }
@@ -168,10 +171,10 @@ class ManageQuestion extends Component
 
     public function render()
     {
-        $query = Question::with(['subject', 'options']);
-        
+        // 1. Base query for filtering
+        $query = Question::query();
+
         // For teachers, only show their own questions
-        // For admins, show all questions
         if (Auth::user()->isTeacher()) {
             $teacherId = $this->getTeacherId();
             if ($teacherId) {
@@ -179,27 +182,49 @@ class ManageQuestion extends Component
             }
         }
 
-        // Apply search
+        // Apply filters
         if ($this->search) {
             $query->where('text', 'like', '%' . $this->search . '%');
         }
 
-        // Apply subject filter
         if ($this->filterSubject) {
             $query->where('subject_id', $this->filterSubject);
         }
 
-        // Apply type filter
         if ($this->filterType) {
             $query->where('type', $this->filterType);
         }
 
-        // OPTIMIZED: Use pagination instead of loading all questions
-        $allQuestions = $query->latest()->paginate(15);
-        
-        // Group questions by title
-        $groupedQuestions = $allQuestions->groupBy(function($question) {
+        // 2. Paginate distinct titles (groups)
+        // Fix: Use groupBy instead of distinct() + latest() to avoid SQL error 3065
+        $paginatedTitles = $query->select('title')
+            ->groupBy('title')
+            ->orderByRaw('MAX(created_at) DESC')
+            ->paginate(9); // 9 groups per page
+
+        // 3. Fetch ALL questions for these titles
+        // This ensures we get the FULL count (e.g., 40) for each group, not just a slice
+        $questionsInPage = Question::with(['subject', 'options'])
+            ->whereIn('title', $paginatedTitles->pluck('title'))
+            // Apply same teacher filter again to ensure safety if needed, 
+            // though title check usually suffices if titles are unique to teachers or global
+            ->when(Auth::user()->isTeacher(), function($q) {
+                $teacherId = $this->getTeacherId();
+                 if ($teacherId) {
+                    $q->where('teacher_id', $teacherId);
+                }
+            })
+            ->latest()
+            ->get();
+
+        // 4. Group by title
+        $groupedQuestions = $questionsInPage->groupBy(function($question) {
             return $question->title ?: 'Tanpa Kelompok';
+        });
+
+        // Sort groups to match pagination order (latest first)
+        $groupedQuestions = $groupedQuestions->sortByDesc(function ($questions) {
+            return $questions->first()->created_at;
         });
 
         $subjects = Subject::orderBy('name')->get();
@@ -207,7 +232,7 @@ class ManageQuestion extends Component
         return view('teacher.manage-question', [
             'groupedQuestions' => $groupedQuestions,
             'subjects' => $subjects,
-            'questions' => $allQuestions, // Pass paginated questions for pagination links
+            'paginatedTitles' => $paginatedTitles, // Pass this for pagination links
         ])->layout('layouts.teacher')->title('Bank Soal');
     }
 }

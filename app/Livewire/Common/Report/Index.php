@@ -16,9 +16,17 @@ class Index extends Component
         $user = auth()->user();
 
         $query = \App\Models\Exam::query()
-            ->with(['subject', 'classrooms', 'attempts' => function($q) {
-                $q->whereNotNull('submitted_at');
-            }]);
+            ->with(['subject', 'classrooms'])
+            ->withCount([
+                'attempts as participants_count' => function ($q) {
+                    $q->whereNotNull('submitted_at');
+                },
+            ])
+            ->withAvg([
+                'attempts as avg_total_score' => function ($q) {
+                    $q->whereNotNull('submitted_at');
+                },
+            ], 'total_score');
 
         // Teacher only sees their own exams
         if (!$isAdmin && $user->isTeacher()) {
@@ -29,18 +37,16 @@ class Index extends Component
 
         // Transform collection for view
         $results = $exams->getCollection()->map(function ($exam) {
-            $submittedAttempts = $exam->attempts;
-            
             return [
                 'id' => $exam->id,
                 'exam_name' => $exam->name,
                 'class' => $exam->classrooms->pluck('name')->join(', '),
                 'subject' => $exam->subject->name ?? '-',
                 'date' => $exam->date ? $exam->date->format('d M Y') : '-',
-                'participants' => $submittedAttempts->count(),
-                'avg_score' => $submittedAttempts->count() > 0 
-                    ? number_format($submittedAttempts->avg('total_score'), 1) 
-                    : 0
+                'participants' => (int) ($exam->participants_count ?? 0),
+                'avg_score' => $exam->participants_count > 0
+                    ? number_format((float) ($exam->avg_total_score ?? 0), 1)
+                    : 0,
             ];
         });
 

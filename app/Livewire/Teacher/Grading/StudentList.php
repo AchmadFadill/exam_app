@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Teacher\Grading;
 
+use App\Enums\ExamAttemptStatus;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class StudentList extends Component
@@ -22,14 +24,15 @@ class StudentList extends Component
     {
         $this->examId = $exam;
         $this->exam = \App\Models\Exam::findOrFail($exam);
+        Gate::authorize('grade', $this->exam);
     }
 
     public function render()
     {
         $attempts = \App\Models\ExamAttempt::where('exam_id', $this->examId)
-            ->whereIn('status', ['submitted', 'graded'])
+            ->whereIn('status', [ExamAttemptStatus::Submitted->value, ExamAttemptStatus::Graded->value])
             ->with('student.user')
-            ->orderByRaw("FIELD(status, 'submitted', 'graded')") // Prioritize submitted
+            ->orderByRaw("FIELD(status, ?, ?)", [ExamAttemptStatus::Submitted->value, ExamAttemptStatus::Graded->value]) // Prioritize submitted
             ->latest('submitted_at')
             ->paginate(10);
 
@@ -38,6 +41,7 @@ class StudentList extends Component
             'examName' => $this->exam->name,
             'className' => $this->exam->class, // Assuming class is a string on Exam, or relation
             'isPublished' => $this->exam->is_published
-        ])->layout('layouts.teacher')->title('Daftar Siswa - ' . $this->exam->name);
+        ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Daftar Siswa - ' . $this->exam->name);
     }
+
 }

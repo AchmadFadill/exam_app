@@ -4,6 +4,7 @@ namespace App\Livewire\Teacher\Exam;
 
 use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Index extends Component
@@ -29,7 +30,13 @@ class Index extends Component
     public function bulkDelete()
     {
         try {
-            Exam::whereIn('id', $this->selectedExams)->delete();
+            $exams = Exam::whereIn('id', $this->selectedExams)->get();
+
+            foreach ($exams as $exam) {
+                Gate::authorize('delete', $exam);
+            }
+
+            $exams->each->delete();
             
             $this->showBulkDeleteModal = false;
             $this->selectedExams = [];
@@ -43,6 +50,9 @@ class Index extends Component
     
     public function openDeleteModal($id)
     {
+        $exam = Exam::findOrFail($id);
+        Gate::authorize('delete', $exam);
+
         $this->selectedExamId = $id;
         $this->showDeleteModal = true;
     }
@@ -53,6 +63,7 @@ class Index extends Component
             try {
                 $exam = Exam::find($this->selectedExamId);
                 if ($exam) {
+                    Gate::authorize('delete', $exam);
                     $exam->delete();
                     $this->dispatch('notify', ['message' => 'Ujian berhasil dihapus!']);
                 } else {
@@ -75,6 +86,7 @@ class Index extends Component
     public function duplicateExam($id)
     {
         $original = Exam::with(['questions', 'classrooms'])->findOrFail($id);
+        Gate::authorize('view', $original);
 
         $newExam = $original->replicate();
         $newExam->name = 'Salinan - ' . $original->name;

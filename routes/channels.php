@@ -11,5 +11,5 @@ Broadcast::channel('exam-monitor', function ($user) {
 });
 
 Broadcast::channel('security-monitoring', function ($user) {
-    return true; // BULLETPROOF BYPASS
+    return $user->role === 'admin' || $user->role === 'teacher';
 });

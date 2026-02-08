@@ -288,7 +288,10 @@ class ManageStudent extends Component
     public function exportStudents()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\StudentsExport(),
+            new \App\Exports\StudentsExport(
+                search: $this->search ?: null,
+                classroomId: $this->filterClassroom ?: null,
+            ),
             'data_siswa_' . now()->format('Y-m-d') . '.xlsx'
         );
     }

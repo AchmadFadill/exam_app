@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 
 class ExamList extends Component
@@ -87,8 +88,11 @@ class ExamList extends Component
         $attempt = $exam->attempts->where('student_id', $student->id)->first();
 
         if ($attempt) {
-            if ($attempt->submitted_at) return 'submitted';
-            return 'in_progress';
+            if ($attempt->submitted_at) {
+                return ExamAttemptStatus::Submitted->value;
+            }
+
+            return ExamAttemptStatus::InProgress->value;
         }
 
         $now = now();

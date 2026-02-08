@@ -57,20 +57,18 @@ class TeachersImport implements ToCollection, WithHeadingRow
                         'role' => 'teacher',
                     ]);
 
-                    // Find subject by code if provided
-                    $subjectId = null;
+                    // Create teacher record
+                    $teacher = Teacher::create([
+                        'user_id' => $user->id,
+                    ]);
+
+                    // Find subject by code if provided and attach through pivot
                     if (!empty($mataPelajaran)) {
                         $subject = Subject::where('code', strtoupper($mataPelajaran))->first();
                         if ($subject) {
-                            $subjectId = $subject->id;
+                            $teacher->subjects()->sync([$subject->id]);
                         }
                     }
-
-                    // Create teacher record
-                    Teacher::create([
-                        'user_id' => $user->id,
-                        'subject_id' => $subjectId,
-                    ]);
 
                     $this->importedCount++;
                 });

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ class ExamResults extends Component
                     'submitted_at' => $attempt->submitted_at->translatedFormat('d M Y, H:i'),
                     'score' => $attempt->percentage ?? 0,
                     'passed' => $attempt->passed,
-                    'status' => $attempt->status, // 'submitted' or 'graded'
+                    'status' => $attempt->status instanceof ExamAttemptStatus ? $attempt->status->value : $attempt->status,
                 ];
             });
 

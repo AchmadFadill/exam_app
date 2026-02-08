@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Common\Monitoring;
 
+use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
+use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
 {
@@ -89,7 +91,7 @@ class Detail extends Component
                 if ($attempt->created_at->diffInSeconds($attempt->updated_at) < 5) {
                     $activity = 'Memulai ujian';
                     $type = 'primary';
-                } elseif (in_array($attempt->status, ['submitted', 'completed', 'graded'])) {
+                } elseif (($attempt->status instanceof ExamAttemptStatus ? $attempt->status : ExamAttemptStatus::tryFrom((string) $attempt->status))?->isFinalized()) {
                     $activity = 'Selesai Mengerjakan';
                     $type = 'success';
                 }
@@ -113,18 +115,11 @@ class Detail extends Component
 
     public function render()
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
         $isAdmin = request()->is('admin/*');
         
         $exam = \App\Models\Exam::with(['subject', 'classrooms', 'attempts.student.user', 'attempts.answers'])
             ->findOrFail($this->examId);
-
-        // Authorization Check
-        if (!$isAdmin && $user->role === 'teacher') {
-            if ($exam->teacher_id !== $user->teacher->id) {
-                abort(403, 'Anda tidak memiliki akses ke ujian ini.');
-            }
-        }
+        Gate::authorize('view', $exam);
 
         // Real Student Data
         // Get all students from the assigned classrooms
@@ -167,7 +162,7 @@ class Detail extends Component
                     $width = round($percent) . '%';
                 }
 
-                if ($status === 'completed' || $status === 'graded' || $status === 'submitted') {
+                if (($status instanceof ExamAttemptStatus ? $status : ExamAttemptStatus::tryFrom((string) $status))?->isFinalized()) {
                     $width = '100%';
                 }
             }
@@ -178,7 +173,7 @@ class Detail extends Component
                 'id' => $student->id,
                 'name' => $student->user->name,
                 'class' => $student->classroom->name,
-                'status' => $status,
+                'status' => $status instanceof ExamAttemptStatus ? $status->value : $status,
                 'progress' => $progress,
                 'w' => $width,
                 'tab_alert' => $tab_alert,
@@ -190,10 +185,11 @@ class Detail extends Component
         if ($this->filterStatus) {
             $students = $students->filter(function ($student) {
                 if ($this->filterStatus === 'working') {
-                    return $student['status'] === 'in_progress';
+                    return $student['status'] === ExamAttemptStatus::InProgress->value;
                 }
                 if ($this->filterStatus === 'completed') {
-                    return in_array($student['status'], ['completed', 'graded', 'submitted']);
+                    $status = ExamAttemptStatus::tryFrom((string) $student['status']);
+                    return $status?->isFinalized() ?? false;
                 }
                 if ($this->filterStatus === 'not_started') {
                     return $student['status'] === 'not_started';
@@ -217,13 +213,16 @@ class Detail extends Component
 
     public function forceSubmit($studentId)
     {
+        $exam = \App\Models\Exam::findOrFail($this->examId);
+        Gate::authorize('grade', $exam);
+
         $attempt = \App\Models\ExamAttempt::where('exam_id', $this->examId)
             ->where('student_id', $studentId)
             ->first();
 
         if ($attempt) {
             $attempt->update([
-                'status' => 'submitted', // Or 'completed' depending on logic
+                'status' => ExamAttemptStatus::Submitted,
                 'submitted_at' => now()
             ]);
             
@@ -244,4 +243,5 @@ class Detail extends Component
             ]);
         }
     }
+
 }

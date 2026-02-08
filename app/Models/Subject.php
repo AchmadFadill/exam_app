@@ -12,9 +12,9 @@ class Subject extends Model
 
     protected $fillable = ['name', 'code'];
 
-    public function teachers(): HasMany
+    public function teachers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(Teacher::class);
+        return $this->belongsToMany(Teacher::class, 'subject_teacher');
     }
 
     public function questions(): HasMany
