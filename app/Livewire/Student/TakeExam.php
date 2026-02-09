@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student;
 
+use App\Actions\Exam\ProcessExamSubmissionAction;
 use App\Enums\ExamAttemptStatus;
 use App\Models\Exam;
 use App\Models\ExamActivity;
@@ -11,7 +12,6 @@ use App\Services\ScoringService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -31,12 +31,17 @@ class TakeExam extends Component
     public $remainingSeconds;
 
     private ScoringService $scoringService;
+    private ProcessExamSubmissionAction $processExamSubmissionAction;
 
     protected $listeners = ['timeExpired' => 'submitExam'];
 
-    public function boot(ScoringService $scoringService): void
+    public function boot(
+        ScoringService $scoringService,
+        ProcessExamSubmissionAction $processExamSubmissionAction
+    ): void
     {
         $this->scoringService = $scoringService;
+        $this->processExamSubmissionAction = $processExamSubmissionAction;
     }
 
     public function mount($id)
@@ -187,30 +192,15 @@ class TakeExam extends Component
                 return $this->redirect(route('student.exams.index'));
             }
 
-            DB::transaction(function (): void {
-                $lockedAttempt = ExamAttempt::query()
-                    ->whereKey($this->attemptId)
-                    ->where('exam_id', $this->examId)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (!$lockedAttempt || $this->isAttemptFinalized($lockedAttempt->status)) {
-                    return;
+            $this->processExamSubmissionAction->execute(
+                $this->exam,
+                $attempt,
+                [],
+                function (ExamAttempt $lockedAttempt): void {
+                    // On final submit (including timeout), persist current answer before scoring.
+                    $this->persistCurrentAnswer(false, $lockedAttempt);
                 }
-
-                // On final submit (including timeout), persist current answer before scoring.
-                $this->persistCurrentAnswer(false, $lockedAttempt);
-
-                $summary = $this->scoringService->recalculateAttempt($this->exam, $lockedAttempt);
-
-                $lockedAttempt->update([
-                    'submitted_at' => now(),
-                    'status' => $summary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
-                    'total_score' => $summary['total_score'],
-                    'percentage' => $summary['percentage'],
-                    'passed' => $summary['passed'],
-                ]);
-            });
+            );
 
             // Broadcast submission event for dashboard update
             $studentUser = Auth::user();
@@ -317,6 +307,10 @@ class TakeExam extends Component
             }
 
             $this->attempt->refresh();
+
+            if ($this->attempt->status === ExamAttemptStatus::InProgress) {
+                $this->attempt->forceFill(['last_seen_at' => now()])->save();
+            }
 
             if ($this->isAttemptFinalized($this->attempt->status)) {
                 session()->flash('warning', 'Ujian telah dihentikan oleh pengawas.');

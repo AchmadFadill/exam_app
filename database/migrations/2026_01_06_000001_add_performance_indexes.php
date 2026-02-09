@@ -135,7 +135,10 @@ return new class extends Migration
             if ($this->hasIndex('teachers', 'teachers_user_id_index')) {
                 $table->dropIndex(['user_id']);
             }
-            if ($this->hasIndex('teachers', 'teachers_subject_id_index')) {
+            if (
+                $this->hasIndex('teachers', 'teachers_subject_id_index') &&
+                !$this->hasForeignOnColumn('teachers', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
         });
@@ -172,5 +175,32 @@ return new class extends Migration
                 $table->dropIndex(['teacher_id']);
             }
         });
+    }
+
+    /**
+     * Check if a foreign key exists on a given table column (Laravel 12 compatible).
+     */
+    private function hasForeignOnColumn(string $table, string $column): bool
+    {
+        try {
+            $connection = Schema::getConnection();
+            $driver = $connection->getDriverName();
+
+            if ($driver === 'sqlite') {
+                return false;
+            }
+
+            $databaseName = $connection->getDatabaseName();
+
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM information_schema.KEY_COLUMN_USAGE
+                 WHERE table_schema = ? AND table_name = ? AND column_name = ? AND referenced_table_name IS NOT NULL",
+                [$databaseName, $table, $column]
+            );
+
+            return ($result[0]->count ?? 0) > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 };

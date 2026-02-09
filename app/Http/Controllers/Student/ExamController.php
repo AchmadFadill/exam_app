@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Actions\Exam\ProcessExamSubmissionAction;
 use App\Enums\ExamAttemptStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
@@ -12,7 +13,6 @@ use App\Services\ScoringService;
 use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ExamController extends Controller
@@ -106,7 +106,7 @@ class ExamController extends Controller
         ]);
     }
 
-    public function submit(Request $request, $id, ScoringService $scoringService)
+    public function submit(Request $request, $id, ProcessExamSubmissionAction $processExamSubmission)
     {
         $student = Auth::user()->student;
         $exam = Exam::with(['questions', 'teacher.user'])->findOrFail($id);
@@ -118,37 +118,8 @@ class ExamController extends Controller
             ->firstOrFail();
 
         $answers = $request->input('answers', []);
-        
-        DB::transaction(function () use ($answers, $exam, $attempt, $scoringService): void {
-            $examQuestions = $exam->questions->keyBy('id');
 
-            foreach ($answers as $questionId => $answerValue) {
-                $question = $examQuestions[(int) $questionId] ?? null;
-                if (!$question) {
-                    continue;
-                }
-
-                $scored = $scoringService->scoreSingleAnswer($exam, $question, $answerValue);
-
-                StudentAnswer::updateOrCreate(
-                    [
-                        'exam_attempt_id' => $attempt->id,
-                        'question_id' => (int) $questionId,
-                    ],
-                    $scored
-                );
-            }
-
-            $attemptSummary = $scoringService->recalculateAttempt($exam, $attempt);
-
-            $attempt->update([
-                'submitted_at' => now(),
-                'status' => $attemptSummary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
-                'total_score' => $attemptSummary['total_score'],
-                'percentage' => $attemptSummary['percentage'],
-                'passed' => $attemptSummary['passed'],
-            ]);
-        });
+        $attempt = $processExamSubmission->execute($exam, $attempt, is_array($answers) ? $answers : []);
 
         // Send Notification to Teacher
         try {
@@ -249,6 +220,28 @@ class ExamController extends Controller
         }
 
         return response()->json(['force_stop' => false]);
+    }
+
+    public function heartbeat(Request $request, $id)
+    {
+        $student = Auth::user()->student;
+
+        $attempt = ExamAttempt::where('exam_id', $id)
+            ->where('student_id', $student->id)
+            ->where('status', ExamAttemptStatus::InProgress->value)
+            ->whereNull('submitted_at')
+            ->first();
+
+        if (!$attempt) {
+            return response()->json(['success' => false, 'message' => 'No active attempt'], 404);
+        }
+
+        $attempt->forceFill(['last_seen_at' => now()])->save();
+
+        return response()->json([
+            'success' => true,
+            'server_time' => now()->toIso8601String(),
+        ]);
     }
 
     public function logViolation(Request $request, $id)

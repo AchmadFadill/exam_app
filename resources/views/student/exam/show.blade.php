@@ -19,6 +19,21 @@
 
     <!-- Main Exam UI -->
     <div x-data="examData()" x-init="initExam()" class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 h-full">
+        <div x-cloak x-show="isOffline || saveErrorMessage || lastHeartbeatFailed" class="mb-4 rounded-lg border px-4 py-3 text-sm"
+            :class="isOffline ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-red-50 border-red-300 text-red-800'">
+            <template x-if="isOffline">
+                <div>Koneksi internet terputus. Jawaban akan disimpan otomatis saat koneksi kembali.</div>
+            </template>
+            <template x-if="!isOffline && saveErrorMessage">
+                <div x-text="saveErrorMessage"></div>
+            </template>
+            <template x-if="!isOffline && !saveErrorMessage && lastHeartbeatFailed">
+                <div>Koneksi ke server tidak stabil. Sistem sedang mencoba terhubung ulang.</div>
+            </template>
+            <template x-if="Object.keys(pendingSaves).length > 0">
+                <div class="mt-1 font-semibold" x-text="`Jawaban tertunda: ${Object.keys(pendingSaves).length}`"></div>
+            </template>
+        </div>
         
         <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
             
@@ -269,6 +284,98 @@
                 showFinishModal: false,
                 showStartOverlay: true,
                 questions: @json($questions),
+                pendingSaves: {},
+                isOffline: !navigator.onLine,
+                saveErrorMessage: '',
+                lastHeartbeatFailed: false,
+                isRetryingSaves: false,
+
+                async postJson(url, payload) {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    let data = {};
+                    try {
+                        data = await response.json();
+                    } catch (e) {
+                        // Ignore parse failure, handled by status check below.
+                    }
+
+                    if (!response.ok || data.success === false) {
+                        const message = data.message || `Request failed (${response.status})`;
+                        throw new Error(message);
+                    }
+
+                    return data;
+                },
+
+                markSaveFailed(questionId, answer, message) {
+                    this.pendingSaves[questionId] = answer;
+                    this.saveErrorMessage = message || 'Gagal menyimpan jawaban. Akan dicoba lagi otomatis.';
+                },
+
+                async flushPendingSaves() {
+                    if (this.isRetryingSaves || this.showFinishModal) return;
+                    if (!navigator.onLine) {
+                        this.isOffline = true;
+                        return;
+                    }
+
+                    const entries = Object.entries(this.pendingSaves);
+                    if (entries.length === 0) {
+                        this.saveErrorMessage = '';
+                        return;
+                    }
+
+                    this.isRetryingSaves = true;
+
+                    try {
+                        for (const [questionId, answer] of entries) {
+                            await this.postJson('{{ route('student.exam.save-answer', $exam->id) }}', {
+                                question_id: Number(questionId),
+                                answer: answer
+                            });
+                            delete this.pendingSaves[questionId];
+                        }
+
+                        this.saveErrorMessage = '';
+                    } catch (error) {
+                        this.saveErrorMessage = 'Gagal menyimpan jawaban. Akan dicoba lagi otomatis.';
+                    } finally {
+                        this.isRetryingSaves = false;
+                    }
+                },
+
+                async sendHeartbeat() {
+                    if (!Alpine.store('exam').isActive || !navigator.onLine) {
+                        return;
+                    }
+
+                    try {
+                        await this.postJson('{{ route('student.exam.heartbeat', $exam->id) }}', {});
+                        this.lastHeartbeatFailed = false;
+                    } catch (e) {
+                        this.lastHeartbeatFailed = true;
+                    }
+                },
+
+                async handleOnline() {
+                    this.isOffline = false;
+                    await this.flushPendingSaves();
+                    await this.sendHeartbeat();
+                },
+
+                handleOffline() {
+                    this.isOffline = true;
+                    this.saveErrorMessage = 'Koneksi internet terputus. Jawaban disimpan lokal sementara.';
+                },
 
                 handleViolation(message) {
                     if (this.showFinishModal) return; 
@@ -304,6 +411,9 @@
                 },
 
                 initExam() {
+                    window.addEventListener('online', () => this.handleOnline());
+                    window.addEventListener('offline', () => this.handleOffline());
+
                     // Timer
                     setInterval(() => {
                         Alpine.store('exam').updateTime();
@@ -317,6 +427,16 @@
                             this.submitExam();
                         }
                     }, 1000);
+
+                    // Retry failed saves periodically.
+                    setInterval(() => {
+                        this.flushPendingSaves();
+                    }, 5000);
+
+                    // Heartbeat to keep session/attempt presence fresh.
+                    setInterval(() => {
+                        this.sendHeartbeat();
+                    }, 15000);
 
                     // Visibility Change (Anti-Cheat) - Only if enabled
                     @if($exam->enable_tab_tolerance)
@@ -372,6 +492,7 @@
                 beginExam() {
                     this.showStartOverlay = false;
                     Alpine.store('exam').startTimer();
+                    this.sendHeartbeat();
                     document.documentElement.requestFullscreen().catch((e) => {
                         console.log("Fullscreen blocked", e);
                         // alert("Mohon izinkan Fullscreen untuk melanjutkan ujian.");
@@ -399,7 +520,9 @@
                     this.showFinishModal = true;
                 },
 
-                submitExam() {
+                async submitExam() {
+                     await this.flushPendingSaves();
+
                      // Remove unload listener
                      window.onbeforeunload = null;
                      
@@ -408,18 +531,7 @@
                         document.exitFullscreen().catch(() => {});
                      }
 
-                     fetch('{{ route('student.exam.submit', $exam->id) }}', {
-                         method: 'POST',
-                         headers: {
-                             'Content-Type': 'application/json',
-                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                         },
-                         body: JSON.stringify({ answers: this.answers })
-                     })
-                     .then(response => {
-                         if (!response.ok) throw new Error('Network response was not ok');
-                         return response.json();
-                     })
+                     this.postJson('{{ route('student.exam.submit', $exam->id) }}', { answers: this.answers })
                      .then(data => {
                          if(data.success) {
                              window.location.href = data.redirect;
@@ -437,24 +549,11 @@
                     const answer = this.answers[questionId];
                     if (answer === undefined || answer === null) return;
 
-                    fetch('{{ route('student.exam.save-answer', $exam->id) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ 
-                            question_id: questionId,
-                            answer: answer 
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            console.error('Auto-save failed:', data.message);
-                        }
-                    })
-                    .catch(e => console.error('Auto-save error:', e));
+                    this.pendingSaves[questionId] = answer;
+
+                    this.flushPendingSaves().catch(() => {
+                        this.markSaveFailed(questionId, answer, 'Gagal menyimpan jawaban. Akan dicoba lagi otomatis.');
+                    });
                 }
             }));
             
@@ -462,8 +561,6 @@
         });
     </script>
 </x-exam-layout>
-
-
 
 
 

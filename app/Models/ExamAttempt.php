@@ -3,14 +3,18 @@
 namespace App\Models;
 
 use App\Enums\ExamAttemptStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ExamAttempt extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'exam_id',
         'student_id',
         'started_at',
+        'last_seen_at',
         'submitted_at',
         'status',
         'tab_switches',
@@ -22,6 +26,7 @@ class ExamAttempt extends Model
 
     protected $casts = [
         'started_at' => 'datetime',
+        'last_seen_at' => 'datetime',
         'submitted_at' => 'datetime',
         'status' => ExamAttemptStatus::class,
         'passed' => 'boolean',

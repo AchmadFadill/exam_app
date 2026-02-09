@@ -29,7 +29,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Sejarah', 'code' => 'SEJ'],
             ['name' => 'Geografi', 'code' => 'GEO'],
         ];
-        foreach ($subjects as $s) Subject::create($s);
+        foreach ($subjects as $s) {
+            Subject::updateOrCreate(['code' => $s['code']], ['name' => $s['name']]);
+        }
 
         // Classrooms
         $classrooms = [
@@ -43,25 +45,40 @@ class DatabaseSeeder extends Seeder
             ['name' => 'XII IPA 2', 'level' => 'XII'],
             ['name' => 'XII IPS 1', 'level' => 'XII'],
         ];
-        foreach ($classrooms as $c) Classroom::create($c);
+        foreach ($classrooms as $c) {
+            Classroom::updateOrCreate(['name' => $c['name']], ['level' => $c['level']]);
+        }
 
         // Admin
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@smait-baitulmuslim.sch.id',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@smait-baitulmuslim.sch.id'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
 
         // Teachers
         $teachers = [
-            ['name' => 'Bu Siti Matematika', 'email' => 'siti@smait-baitulmuslim.sch.id', 'subject_id' => 1],
-            ['name' => 'Pak Ahmad Fisika', 'email' => 'ahmad@smait-baitulmuslim.sch.id', 'subject_id' => 4],
-            ['name' => 'Bu Fatimah Biologi', 'email' => 'fatimah@smait-baitulmuslim.sch.id', 'subject_id' => 6],
+            ['name' => 'Bu Siti Matematika', 'email' => 'siti@smait-baitulmuslim.sch.id', 'subject_code' => 'MTK'],
+            ['name' => 'Pak Ahmad Fisika', 'email' => 'ahmad@smait-baitulmuslim.sch.id', 'subject_code' => 'FIS'],
+            ['name' => 'Bu Fatimah Biologi', 'email' => 'fatimah@smait-baitulmuslim.sch.id', 'subject_code' => 'BIO'],
         ];
         foreach ($teachers as $t) {
-            $user = User::create(['name' => $t['name'], 'email' => $t['email'], 'password' => Hash::make('password'), 'role' => 'teacher']);
-            Teacher::create(['user_id' => $user->id, 'nip' => '19' . rand(70, 99) . rand(10000000, 99999999), 'subject_id' => $t['subject_id']]);
+            $user = User::updateOrCreate(
+                ['email' => $t['email']],
+                ['name' => $t['name'], 'password' => Hash::make('password'), 'role' => 'teacher']
+            );
+            $teacher = Teacher::firstOrCreate(
+                ['user_id' => $user->id],
+                ['nip' => '19' . rand(70, 99) . rand(10000000, 99999999)]
+            );
+
+            $subject = Subject::where('code', $t['subject_code'])->first();
+            if ($subject) {
+                $teacher->subjects()->sync([$subject->id]);
+            }
         }
 
         // Students
@@ -73,8 +90,14 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Eko Prasetyo', 'nis' => '2024005', 'classroom_id' => 2],
         ];
         foreach ($students as $s) {
-            $user = User::create(['name' => $s['name'], 'email' => strtolower(str_replace(' ', '.', $s['name'])) . '@siswa.smait-baitulmuslim.sch.id', 'password' => Hash::make($s['nis']), 'role' => 'student']);
-            Student::create(['user_id' => $user->id, 'nis' => $s['nis'], 'classroom_id' => $s['classroom_id']]);
+            $user = User::updateOrCreate(
+                ['email' => strtolower(str_replace(' ', '.', $s['name'])) . '@siswa.smait-baitulmuslim.sch.id'],
+                ['name' => $s['name'], 'password' => Hash::make($s['nis']), 'role' => 'student']
+            );
+            Student::updateOrCreate(
+                ['user_id' => $user->id],
+                ['nis' => $s['nis'], 'classroom_id' => $s['classroom_id']]
+            );
         }
 
         // Sample Questions

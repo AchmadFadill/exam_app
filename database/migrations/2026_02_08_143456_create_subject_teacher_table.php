@@ -33,17 +33,17 @@ return new class extends Migration
         // Drop old column
         Schema::table('teachers', function (Blueprint $table) {
             if (Schema::hasColumn('teachers', 'subject_id')) {
-                // Ensure no stale index references subject_id (important for sqlite and migrate:fresh)
-                try {
-                    $table->dropIndex('teachers_subject_id_index');
-                } catch (\Throwable $e) {
-                    // ignore when index does not exist
-                }
-
+                // MySQL requires dropping the FK before dropping index/column.
                 try {
                     $table->dropForeign(['subject_id']);
                 } catch (\Throwable $e) {
                     // ignore when foreign key does not exist
+                }
+
+                try {
+                    $table->dropIndex('teachers_subject_id_index');
+                } catch (\Throwable $e) {
+                    // ignore when index does not exist
                 }
 
                 $table->dropColumn('subject_id');
@@ -56,6 +56,33 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasColumn('teachers', 'subject_id')) {
+            Schema::table('teachers', function (Blueprint $table) {
+                $table->foreignId('subject_id')->nullable()->after('user_id');
+            });
+        }
+
+        // Restore a single subject_id per teacher from the pivot (first mapped subject).
+        $teacherSubjects = DB::table('subject_teacher')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('teacher_id')
+            ->map(fn ($rows) => $rows->first());
+
+        foreach ($teacherSubjects as $teacherId => $pivot) {
+            DB::table('teachers')
+                ->where('id', $teacherId)
+                ->update(['subject_id' => $pivot->subject_id]);
+        }
+
+        Schema::table('teachers', function (Blueprint $table) {
+            try {
+                $table->foreign('subject_id')->references('id')->on('subjects')->nullOnDelete();
+            } catch (\Throwable $e) {
+                // ignore if FK already exists
+            }
+        });
+
         Schema::dropIfExists('subject_teacher');
     }
 };
