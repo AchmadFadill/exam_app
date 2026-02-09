@@ -49,6 +49,9 @@
     
     @livewireScripts
 
+    <!-- Global confirm modal used by pages dispatching `show-confirm-modal` events -->
+    <x-confirm-modal />
+
     <!-- Notification System -->
     <div x-data="{ 
         notifications: [],
@@ -130,7 +133,6 @@
                     </button>
                 </div>
             </div>
-        </template>
         </template>
     </div>
     @stack('scripts')

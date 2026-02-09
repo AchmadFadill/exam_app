@@ -190,7 +190,7 @@
                     </svg>
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
-                        <p class="text-sm">Pastikan format Excel sesuai dengan template. Kolom wajib: Mata Pelajaran, Tipe, Pertanyaan, Opsi A-D, Jawaban Benar, Pembahasan. <span class="font-semibold">Opsi E opsional</span> (kosongkan jika hanya butuh A-D).</p>
+                        <p class="text-sm">Pastikan format file sesuai template. Format didukung: .xlsx, .xls, .csv. Kolom wajib: Mata Pelajaran, Tipe, Pertanyaan, Opsi A-D, Jawaban Benar, Pembahasan. <span class="font-semibold">Opsi E opsional</span> (kosongkan jika hanya butuh A-D).</p>
                         <button type="button" wire:click="downloadTemplate" class="mt-2 inline-block font-bold underline text-sm">Download Template Excel</button>
                     </div>
                 </div>
@@ -204,15 +204,17 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload File Excel</label>
-                    <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload File (.xlsx, .xls, .csv)</label>
+                    <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv,text/csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-700 cursor-pointer">
                     @error('importFile') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
             </div>
-            </div>
             <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
                 <x-button variant="secondary" wire:click="$set('showImportModal', false)">Batal</x-button>
-                <x-button variant="primary" wire:click="importQuestions">Import</x-button>
+                <x-button variant="primary" wire:click="importQuestions" wire:loading.attr="disabled" wire:target="importQuestions">
+                    <span wire:loading.remove wire:target="importQuestions">Import</span>
+                    <span wire:loading wire:target="importQuestions">Mengimpor...</span>
+                </x-button>
             </div>
         </div>
     </div>

@@ -166,7 +166,7 @@ class Form extends Component
     {
         $this->validateCurrentStep();
         
-        if ($this->currentStep < 4) {
+        if ($this->currentStep < 2) {
             $this->currentStep++;
             $this->step = $this->currentStep;
         }
@@ -222,15 +222,13 @@ class Form extends Component
                 'duration_minutes' => 'required|integer|min:10|max:300',
                 'passing_grade' => 'required|integer|min:0|max:100',
                 'default_score' => 'required|integer|min:1',
+                'classes' => 'required|array|min:1',
+                'token' => 'required|string|size:6|unique:exams,token,' . $this->examId,
+                'tab_tolerance' => 'required|integer|min:0|max:10',
             ],
             2 => [
                 'selectedQuestions' => 'required|array|min:1',
                 'questionScores.*' => 'required|integer|min:1',
-            ],
-            3 => [
-                'selectedClasses' => 'required|array|min:1',
-                'token' => 'required|string|size:6|unique:exams,token,' . $this->examId,
-                'tab_tolerance' => 'required|integer|min:0|max:10',
             ],
             default => [],
         };
@@ -247,35 +245,38 @@ class Form extends Component
             $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, [$questionId]));
             unset($this->questionScores[$questionId]);
         } else {
-            // Add question with default score
+            // Add question with its own configured score from bank soal
             $this->selectedQuestions[] = $questionId;
-            $this->questionScores[$questionId] = $this->default_score;
+            $question = Question::select('id', 'score')->find($questionId);
+            $this->questionScores[$questionId] = $question?->score ?? $this->default_score;
         }
     }
 
     public function toggleQuestionGroup($title, $subjectId)
     {
-        // Get all questions with this title and subject
+        // Get all questions with this title and subject (including score)
         $groupQuestions = Question::where('title', $title)
             ->where('subject_id', $subjectId)
-            ->pluck('id')
-            ->toArray();
+            ->get(['id', 'score']);
+
+        $groupQuestionIds = $groupQuestions->pluck('id')->toArray();
         
         // Check if all questions in group are already selected
-        $allSelected = !empty($groupQuestions) && count(array_intersect($groupQuestions, $this->selectedQuestions)) === count($groupQuestions);
+        $allSelected = !empty($groupQuestionIds) && count(array_intersect($groupQuestionIds, $this->selectedQuestions)) === count($groupQuestionIds);
         
         if ($allSelected) {
             // Remove all questions from this group
-            $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, $groupQuestions));
-            foreach ($groupQuestions as $qId) {
+            $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, $groupQuestionIds));
+            foreach ($groupQuestionIds as $qId) {
                 unset($this->questionScores[$qId]);
             }
         } else {
             // Add all questions from this group
-            foreach ($groupQuestions as $qId) {
+            foreach ($groupQuestions as $question) {
+                $qId = $question->id;
                 if (!in_array($qId, $this->selectedQuestions)) {
                     $this->selectedQuestions[] = $qId;
-                    $this->questionScores[$qId] = $this->default_score;
+                    $this->questionScores[$qId] = $question->score ?? $this->default_score;
                 }
             }
         }
@@ -283,14 +284,17 @@ class Form extends Component
 
     public function saveExam()
     {
-        // Validate all steps
+        // Keep aliases synchronized before validation/save.
+        $this->selectedClasses = $this->classes;
+
+        // Validate all visible steps in this form (Step 1 and Step 2).
+        $originalStep = $this->currentStep;
         $this->currentStep = 1;
         $this->validateCurrentStep();
         $this->currentStep = 2;
         $this->validateCurrentStep();
-        $this->currentStep = 3;
-        $this->validateCurrentStep();
-        $this->currentStep = 4;
+        $this->currentStep = $originalStep;
+        $this->step = $this->currentStep;
 
         try {
             DB::beginTransaction();
@@ -436,7 +440,13 @@ class Form extends Component
             ->when($this->filterType, function ($q) {
                 $q->where('type', $this->filterType);
             })
-            ->select('title', 'subject_id', \DB::raw('COUNT(*) as question_count'), \DB::raw('MIN(id) as first_id'))
+            ->select(
+                'title',
+                'subject_id',
+                \DB::raw('COUNT(*) as question_count'),
+                \DB::raw('MIN(id) as first_id'),
+                \DB::raw('COALESCE(SUM(score), 0) as total_points')
+            )
             ->groupBy('title', 'subject_id')
             ->orderBy('title')
             ->get();

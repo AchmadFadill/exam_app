@@ -12,19 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subject_teacher', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('subject_teacher')) {
+            Schema::create('subject_teacher', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+                $table->timestamps();
+            });
+        }
 
         // Migrate existing data
         $teachers = DB::table('teachers')->whereNotNull('subject_id')->get();
         foreach ($teachers as $teacher) {
-            DB::table('subject_teacher')->insert([
+            DB::table('subject_teacher')->updateOrInsert([
                 'teacher_id' => $teacher->id,
                 'subject_id' => $teacher->subject_id,
+            ], [
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -33,13 +36,6 @@ return new class extends Migration
         // Drop old column
         Schema::table('teachers', function (Blueprint $table) {
             if (Schema::hasColumn('teachers', 'subject_id')) {
-                // Ensure no stale index references subject_id (important for sqlite and migrate:fresh)
-                try {
-                    $table->dropIndex('teachers_subject_id_index');
-                } catch (\Throwable $e) {
-                    // ignore when index does not exist
-                }
-
                 try {
                     $table->dropForeign(['subject_id']);
                 } catch (\Throwable $e) {

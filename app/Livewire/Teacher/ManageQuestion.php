@@ -32,7 +32,8 @@ class ManageQuestion extends Component
     public $filterType = '';
     
     protected $listeners = [
-        'question-saved' => 'handleQuestionSaved'
+        'question-saved' => 'handleQuestionSaved',
+        'open-import-modal' => 'openImportModal',
     ];
     
     // ... [Validation rules removed as they are now in the child component] ...
@@ -96,23 +97,42 @@ class ManageQuestion extends Component
     public function importQuestions()
     {
         $this->validate([
-            'importFile' => 'required|file|mimes:xlsx,xls|max:2048',
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:2048',
             'importTitle' => 'required|string|max:255',
         ], [
             'importFile.required' => 'File Excel wajib dipilih.',
-            'importFile.mimes' => 'File harus berformat Excel (.xlsx atau .xls).',
+            'importFile.mimes' => 'File harus berformat .xlsx, .xls, atau .csv.',
             'importTitle.required' => 'Judul kelompok soal wajib diisi.',
         ]);
 
         try {
-            Excel::import(new QuestionsImport($this->importTitle), $this->importFile->getRealPath());
+            $import = new QuestionsImport($this->importTitle);
+            Excel::import($import, $this->importFile->getRealPath());
             
-            // Auto-distribute scores to 100
-            Question::distributeScoresByTitle($this->importTitle);
+            if ($import->importedCount > 0) {
+                // Auto-distribute scores to 100 only when records exist
+                Question::distributeScoresByTitle($this->importTitle);
+            }
             
             $this->showImportModal = false;
             $this->reset(['importFile', 'importTitle']);
-            $this->dispatch('notify', ['message' => 'Soal berhasil diimport dan bobot nilai disesuaikan!']);
+
+            $message = "Import selesai: {$import->importedCount} soal berhasil ditambahkan";
+            if ($import->skippedCount > 0) {
+                $message .= ", {$import->skippedCount} baris dilewati";
+            }
+
+            if (count($import->errors) > 0) {
+                $message .= ", " . count($import->errors) . " baris gagal";
+                $sampleErrors = implode(' | ', array_slice($import->errors, 0, 3));
+                $this->dispatch('notify', [
+                    'message' => $message . ". Error: {$sampleErrors}",
+                    'type' => $import->importedCount > 0 ? 'warning' : 'error',
+                ]);
+            } else {
+                $suffix = $import->importedCount > 0 ? ' dan bobot nilai disesuaikan!' : '.';
+                $this->dispatch('notify', ['message' => $message . $suffix]);
+            }
         } catch (\Exception $e) {
             $this->dispatch('notify', ['message' => 'Gagal import: ' . $e->getMessage(), 'type' => 'error']);
         }

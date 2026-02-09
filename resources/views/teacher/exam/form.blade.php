@@ -407,7 +407,7 @@
                                     </div>
                                     <div class="flex items-center gap-2.5">
                                         <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                        <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ $group->question_count * $default_score }} Poin</span>
+                                        <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ (int) $group->total_points }} Poin</span>
                                     </div>
                                 </div>
 

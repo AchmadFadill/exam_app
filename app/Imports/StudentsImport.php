@@ -20,7 +20,10 @@ class StudentsImport implements ToCollection, WithHeadingRow
 
     /**
      * Process the imported collection.
-     * Expected columns: nis, nama, email, kelas (optional - class name)
+     * Expected columns: nis, nama, email, kelas, password
+     * Aliases are supported, e.g.:
+     * - nama/name
+     * - kelas/class/classroom
      */
     public function collection(Collection $rows)
     {
@@ -32,13 +35,14 @@ class StudentsImport implements ToCollection, WithHeadingRow
             
             try {
                 // Cast all values to strings to handle Excel numeric cells
-                $nis = trim((string) ($row['nis'] ?? ''));
-                $nama = trim((string) ($row['nama'] ?? ''));
-                $email = trim((string) ($row['email'] ?? ''));
-                $kelas = trim((string) ($row['kelas'] ?? ''));
+                $nis = $this->valueFromRow($row, ['nis', 'no_induk', 'nomor_induk']);
+                $nama = $this->valueFromRow($row, ['nama', 'name']);
+                $email = $this->valueFromRow($row, ['email', 'e_mail']);
+                $kelas = $this->valueFromRow($row, ['kelas', 'class', 'classroom']);
+                $password = $this->valueFromRow($row, ['password', 'pass']);
 
                 // Check for completely empty row
-                if (empty($nis) && empty($nama) && empty($email) && empty($kelas)) {
+                if (empty($nis) && empty($nama) && empty($email) && empty($kelas) && empty($password)) {
                     $this->skippedCount++;
                     \Log::debug("Row {$rowNumber}: Completely empty, skipping");
                     continue;
@@ -80,19 +84,19 @@ class StudentsImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                DB::transaction(function () use ($nis, $nama, $email, $kelas, $rowNumber) {
+                DB::transaction(function () use ($nis, $nama, $email, $kelas, $password, $rowNumber) {
                     // Create user account
                     $user = User::create([
                         'name' => $nama,
                         'email' => $email,
-                        'password' => Hash::make($nis), // Default password = NIS
+                        'password' => Hash::make($password !== '' ? $password : $nis), // Default password = NIS
                         'role' => 'student',
                     ]);
 
                     // Find classroom by name if provided
                     $classroomId = null;
                     if (!empty($kelas)) {
-                        $classroom = Classroom::where('name', $kelas)->first();
+                        $classroom = $this->resolveClassroom($kelas);
                         if ($classroom) {
                             $classroomId = $classroom->id;
                         } else {
@@ -120,5 +124,49 @@ class StudentsImport implements ToCollection, WithHeadingRow
         }
 
         \Log::info("Import completed - Total: {$this->totalRows}, Imported: {$this->importedCount}, Errors: " . count($this->errors) . ", Skipped: {$this->skippedCount}");
+    }
+
+    private function valueFromRow($row, array $keys): string
+    {
+        foreach ($keys as $key) {
+            $value = trim((string) ($row[$key] ?? ''));
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+
+    private function resolveClassroom(string $kelas): ?Classroom
+    {
+        $exact = Classroom::where('name', $kelas)->first();
+        if ($exact) {
+            return $exact;
+        }
+
+        $normalizedInput = $this->normalizeClassName($kelas);
+        if ($normalizedInput === '') {
+            return null;
+        }
+
+        return Classroom::all()->first(function (Classroom $classroom) use ($normalizedInput) {
+            return $this->normalizeClassName($classroom->name) === $normalizedInput;
+        });
+    }
+
+    private function normalizeClassName(string $name): string
+    {
+        $value = strtoupper(trim($name));
+
+        // Convert common numeric level notation: 10/11/12 -> X/XI/XII
+        $value = preg_replace('/^10\b/', 'X', $value);
+        $value = preg_replace('/^11\b/', 'XI', $value);
+        $value = preg_replace('/^12\b/', 'XII', $value);
+
+        // Normalize separators
+        $value = preg_replace('/[^A-Z0-9]+/', ' ', $value);
+
+        return trim(preg_replace('/\s+/', ' ', $value));
     }
 }

@@ -271,7 +271,7 @@ class ManageStudent extends Component
 
     public function downloadTemplate()
     {
-        $headers = ['nis', 'nama', 'email', 'kelas'];
+        $headers = ['nis', 'nama', 'email', 'kelas', 'password'];
         $filename = 'template_siswa.xlsx';
         
         return \Maatwebsite\Excel\Facades\Excel::download(

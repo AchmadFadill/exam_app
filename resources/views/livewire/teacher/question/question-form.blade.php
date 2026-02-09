@@ -213,6 +213,9 @@
 
                 <!-- Actions -->
                 <div class="bg-gray-50 dark:bg-slate-800/50 px-8 py-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-gray-100 dark:border-slate-800">
+                    <button type="button" wire:click="openImportFromForm" class="w-full sm:w-auto px-6 py-3.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl text-xs font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all shadow-sm">
+                        Import Excel
+                    </button>
                      <button type="button" wire:click="closeQuestionModal" class="w-full sm:w-auto px-6 py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-gray-500 uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
                         Batal
                     </button>

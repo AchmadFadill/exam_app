@@ -74,6 +74,12 @@ class QuestionForm extends Component
         $this->resetForm();
     }
 
+    public function openImportFromForm()
+    {
+        $this->closeQuestionModal();
+        $this->dispatch('open-import-modal');
+    }
+
     public function loadQuestion($id)
     {
         $this->questionId = $id;

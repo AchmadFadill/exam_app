@@ -126,7 +126,7 @@
     @if($showAddModal || $showEditModal)
     <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAddModal', false); $set('showEditModal', false)" aria-hidden="true"></div>
+            <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="closeModal" aria-hidden="true"></div>
 
             <!-- This element is to trick the browser into centering the modal contents. -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -137,7 +137,7 @@
                     <h3 class="text-xl font-black text-text-main tracking-tight uppercase italic">{{ $showAddModal ? 'Tambah Guru' : 'Edit Data Guru' }}</h3>
                     
                  </div>
-                <x-button wire:click="$set('showAddModal', false); $set('showEditModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
+                <x-button wire:click="closeModal" variant="secondary" size="sm" square="true" class="!rounded-xl">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -225,7 +225,7 @@
                 </div>
             </div>
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
-                <x-button type="button" variant="secondary" wire:click="$set('showAddModal', false); $set('showEditModal', false)" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
+                <x-button type="button" variant="secondary" wire:click="closeModal" class="font-black uppercase text-[10px] tracking-widest">Batal</x-button>
                 <x-button variant="primary" wire:click="saveTeacher" class="font-black uppercase text-[10px] tracking-widest px-8">Simpan Data</x-button>
             </div>
         </div>

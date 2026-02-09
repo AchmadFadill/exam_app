@@ -13,6 +13,9 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class QuestionsImport implements ToCollection, WithHeadingRow
 {
     protected $title;
+    public int $importedCount = 0;
+    public int $skippedCount = 0;
+    public array $errors = [];
 
     public function __construct($title)
     {
@@ -23,26 +26,36 @@ class QuestionsImport implements ToCollection, WithHeadingRow
     {
         // Get teacher_id properly
         $user = Auth::user();
-        $teacherId = $user->isTeacher() 
-            ? $user->teacher->id 
-            : \App\Models\Teacher::first()->id;
+        $teacherId = $user->isTeacher()
+            ? optional($user->teacher)->id
+            : optional(\App\Models\Teacher::first())->id;
 
-        foreach ($rows as $row) {
+        if (!$teacherId) {
+            $this->errors[] = 'Teacher tidak ditemukan untuk user saat ini.';
+            return;
+        }
+
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 2; // Heading row offset
+
             // Skip empty rows
-            if (empty($row['pertanyaan']) || empty($row['mata_pelajaran'])) {
+            $pertanyaan = $this->valueFromRow($row, ['pertanyaan', 'question']);
+            $mataPelajaran = $this->valueFromRow($row, ['mata_pelajaran', 'mapel', 'subject']);
+            $tipe = strtolower($this->valueFromRow($row, ['tipe', 'type']) ?: 'multiple_choice');
+            $pembahasan = $this->valueFromRow($row, ['pembahasan', 'explanation']);
+
+            if (empty($pertanyaan) || empty($mataPelajaran)) {
+                $this->skippedCount++;
                 continue;
             }
 
-            // Cast all data to string to avoid type errors
-            $pertanyaan = (string) ($row['pertanyaan'] ?? '');
-            $mataPelajaran = (string) ($row['mata_pelajaran'] ?? '');
-            $tipe = strtolower((string) ($row['tipe'] ?? 'multiple_choice'));
-            $pembahasan = (string) ($row['pembahasan'] ?? '');
-            
-            // Find subject by name
-            $subject = Subject::where('name', 'LIKE', '%' . $mataPelajaran . '%')->first();
+            // Find subject by code or name
+            $subject = Subject::where('code', strtoupper($mataPelajaran))
+                ->orWhere('name', 'LIKE', '%' . $mataPelajaran . '%')
+                ->first();
             
             if (!$subject) {
+                $this->errors[] = "Baris {$rowNumber}: Mata pelajaran '{$mataPelajaran}' tidak ditemukan.";
                 continue; // Skip if subject not found
             }
 
@@ -64,11 +77,11 @@ class QuestionsImport implements ToCollection, WithHeadingRow
             // For multiple choice, create options
             if ($tipe === 'multiple_choice') {
                 $labels = ['A', 'B', 'C', 'D', 'E'];
-                $correctAnswer = strtoupper((string) ($row['jawaban_benar'] ?? 'A'));
+                $correctAnswer = strtoupper($this->valueFromRow($row, ['jawaban_benar', 'correct_answer']) ?: 'A');
                 
                 foreach ($labels as $label) {
                     $optionKey = 'opsi_' . strtolower($label);
-                    $optionText = (string) ($row[$optionKey] ?? '');
+                    $optionText = $this->valueFromRow($row, [$optionKey, 'option_' . strtolower($label)]);
                     
                     // Skip if option is empty
                     if (empty($optionText)) {
@@ -83,6 +96,20 @@ class QuestionsImport implements ToCollection, WithHeadingRow
                     ]);
                 }
             }
+
+            $this->importedCount++;
         }
+    }
+
+    private function valueFromRow($row, array $keys): string
+    {
+        foreach ($keys as $key) {
+            $value = trim((string) ($row[$key] ?? ''));
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
     }
 }

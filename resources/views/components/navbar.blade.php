@@ -6,8 +6,10 @@
     $authUser = auth()->user();
 
     if ($roleKey === 'teacher') {
-        $subjectText = $authUser?->teacher?->subjects?->pluck('name')->join(', ') ?: '-';
-        $userRole = 'TEACHER - ' . $subjectText;
+        $teacherName = $authUser?->name ?: '-';
+        $waliClassName = $authUser?->teacher?->classroom?->name;
+        $waliText = $waliClassName ? ('Wali Kelas ' . $waliClassName) : 'Bukan Wali Kelas';
+        $userRole = $teacherName . ' - ' . $waliText;
     } elseif ($roleKey === 'student') {
         $classText = $authUser?->student?->classroom?->name ?: '-';
         $userRole = 'STUDENT - ' . $classText;

@@ -82,6 +82,14 @@ class ManageTeacher extends Component
         $this->showAddModal = true;
     }
 
+    public function closeModal()
+    {
+        $this->showAddModal = false;
+        $this->showEditModal = false;
+        $this->reset('teacherForm', 'selectedTeacher');
+        $this->resetValidation();
+    }
+
     public function openEditModal($teacherId)
     {
         $teacher = Teacher::with('user', 'subjects')->findOrFail($teacherId);

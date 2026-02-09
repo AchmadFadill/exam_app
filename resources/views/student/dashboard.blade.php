@@ -162,35 +162,6 @@
                 <div class="absolute right-0 top-0 w-48 h-48 bg-white rounded-full opacity-5 blur-[80px] -mr-16 -mt-16 group-hover:opacity-10 transition-opacity"></div>
             </div>
 
-            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 p-10">
-                <h4 class="text-[10px] font-black text-text-main mb-8 uppercase tracking-[0.2em] opacity-60">Indikator Performa</h4>
-                <div class="space-y-8">
-                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Tingkat Penyelesaian</span>
-                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['completed_exams'] }} Ujian</span>
-                        </div>
-                        <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
-                            <div class="bg-green-500 h-2 rounded-full shadow-lg shadow-green-500/20" style="width: 80%"></div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">Indeks Kehadiran</span>
-                            <span class="text-xs font-black text-text-main uppercase tracking-widest">{{ $stats['attendance'] }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
-                            <div class="bg-amber-500 h-2 rounded-full shadow-lg shadow-amber-500/20" style="width: {{ $stats['attendance'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-                <x-button href="{{ route('student.results') }}" variant="soft" class="w-full mt-12">
-                    Lihat Riwayat Lengkap
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </x-button>
-            </div>
         </div>
     </div>
 </div>
-
