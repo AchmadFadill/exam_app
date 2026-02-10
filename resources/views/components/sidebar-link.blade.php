@@ -2,8 +2,8 @@
 
 @php
 $classes = $active
-            ? 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 bg-white/10 text-white font-bold shadow-sm'
-            : 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-white/70 hover:bg-white/5 hover:text-white font-medium';
+            ? 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 bg-white/10 text-white font-bold shadow-sm active:scale-[0.98]'
+            : 'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-white/70 hover:bg-white/5 hover:text-white font-medium active:scale-[0.98]';
 
 $iconClasses = $active
             ? 'w-5 h-5 text-secondary transition-colors duration-200'

@@ -16,7 +16,7 @@
 @endphp
 
 @if($variant === 'stat')
-    <div {{ $attributes->merge(['class' => "$baseClasses border-l-[6px] " . $theme['border'] . " p-8 flex justify-between items-center hover:scale-[1.02] active:scale-[1] transition-all duration-300 group cursor-default"]) }}>
+    <div {{ $attributes->merge(['class' => "$baseClasses border-l-[6px] " . $theme['border'] . " p-8 flex justify-between items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group cursor-default shadow-lg hover:shadow-xl"]) }}>
         <div>
             <p class="text-xs font-black uppercase tracking-[0.2em] text-text-muted">{{ $title }}</p>
             <h3 class="text-4xl font-black text-text-main mt-2 tracking-tighter">{{ $value }}</h3>

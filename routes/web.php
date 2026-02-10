@@ -53,6 +53,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/exams/{id}/edit', \App\Livewire\Teacher\Exam\Form::class)->name('admin.exams.edit');
     Route::get('/monitor', App\Livewire\Common\Monitoring\Index::class)->name('admin.monitor');
     // Admin Grading Routes (Alias to Teacher Components)
+    Route::get('/grading', \App\Livewire\Teacher\Grading\Index::class)->name('admin.grading.index');
     Route::get('/grading/{exam}', \App\Livewire\Teacher\Grading\StudentList::class)->name('admin.grading.show');
     Route::get('/grading/{exam}/student/{student}', \App\Livewire\Teacher\Grading\Detail::class)->name('admin.grading.detail');
     Route::get('/monitor/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('admin.monitor.detail');

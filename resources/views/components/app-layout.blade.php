@@ -20,7 +20,7 @@
                     {{ $app_name ?? 'CBT' }}
                 </div>
             </div>
-            <button @click="sidebarOpen = !sidebarOpen" class="text-text-muted hover:text-primary focus:outline-none">
+            <button @click="sidebarOpen = !sidebarOpen" class="text-text-muted hover:text-primary focus:outline-none transition-all active:scale-90">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path x-show="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     <path x-show="sidebarOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -127,7 +127,7 @@
                     <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm leading-relaxed">
                         Anda sudah tidak aktif dalam waktu lama. Sistem akan mengeluarkan Anda secara otomatis dalam <span class="font-bold text-red-600 dark:text-red-400" x-text="countdown"></span> detik.
                     </p>
-                    <button @click="resetTimer()" class="w-full bg-primary hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none transform hover:-translate-y-0.5">
+                    <button @click="resetTimer()" class="w-full bg-primary hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none transform hover:-translate-y-0.5 active:scale-[0.98]">
                         Lanjutkan Sesi
                     </button>
                 </div>

@@ -3,9 +3,9 @@
 <div class="space-y-6">
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
         <div class="flex items-center gap-3 sm:gap-4">
-            <a href="{{ route($backRoute) }}" class="p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+            <x-button href="{{ route($backRoute) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
+            </x-button>
             <div class="min-w-0">
                 <h2 class="font-black text-xl sm:text-2xl text-text-main leading-tight truncate uppercase tracking-tight italic">{{ $exam->name }}</h2>
                 <div class="flex items-center gap-2 mt-0.5">

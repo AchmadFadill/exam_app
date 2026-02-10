@@ -64,6 +64,14 @@
                 </x-slot>
                 Pantau Ujian
             </x-sidebar-link>
+
+            <!-- Grading -->
+            <x-sidebar-link href="{{ route('admin.grading.index') }}" :active="request()->routeIs('admin.grading.*')">
+                <x-slot name="icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </x-slot>
+                Beri Nilai
+            </x-sidebar-link>
             
             <!-- Laporan -->
             <div class="px-4 py-2 text-xs uppercase text-blue-300 font-semibold mt-4">Laporan</div>

@@ -1,11 +1,11 @@
 @section('title', 'Laporan Hasil Ujian')
 
-<div class="space-y-6">
+<div class="space-y-8">
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
         <div class="flex items-center gap-3 sm:gap-4">
-            <a href="{{ route($backRoute) }}" class="p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+            <x-button href="{{ route($backRoute) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            </a>
+            </x-button>
             <div class="min-w-0">
                 <h2 class="font-black text-xl sm:text-2xl text-text-main leading-tight truncate uppercase tracking-tight italic">Detail Laporan</h2>
                 <div class="flex items-center gap-2 mt-0.5">
@@ -51,28 +51,28 @@
                         wire:click="sortByHighest"
                         variant="{{ $sortBy === 'highest' ? 'success' : 'secondary' }}"
                         size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
                         Tertinggi
                     </x-button>
                     <x-button
                         wire:click="sortByLowest"
                         variant="{{ $sortBy === 'lowest' ? 'warning' : 'secondary' }}"
                         size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
                         Terendah
                     </x-button>
                     <x-button
                         wire:click="sortByFastest"
                         variant="{{ $sortBy === 'fastest' ? 'primary' : 'secondary' }}"
                         size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
                         Tercepat
                     </x-button>
                     <x-button
                         wire:click="sortBySlowest"
                         variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
                         size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500' : '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' }}">
+                        class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500 shadow-purple-500/20 shadow-lg' : 'opacity-60 grayscale-[0.5]' }}">
                         Terlambat
                     </x-button>
                     @if($sortBy !== 'default')
@@ -80,8 +80,8 @@
                             wire:click="resetFilter"
                             variant="secondary"
                             size="sm"
-                            class="!rounded-xl uppercase tracking-widest !bg-red-50 !text-red-600 hover:!bg-red-100 dark:!bg-red-900/20 dark:!text-red-300 dark:hover:!bg-red-900/30">
-                            Bersihkan Filter
+                            class="!rounded-xl uppercase tracking-widest !bg-red-50 !border-red-500/10 !text-red-600 hover:!bg-red-500/10 active:!bg-red-500/20">
+                            Nonaktifkan Filter
                         </x-button>
                     @endif
                 </div>

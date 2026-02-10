@@ -20,15 +20,11 @@
                         Dikerjakan pada {{ $attempt->started_at->translatedFormat('d F Y, H:i') }}
                     </div>
                 </div>
-                <div class="relative overflow-hidden bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-white/30 group w-full sm:w-auto min-w-[160px]">
-                    <!-- Profile Photo Background -->
-                    <img src="{{ auth()->user()->profile_photo_url }}" alt="Profile" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute inset-0 bg-black/50"></div>
-
+                <div class="relative overflow-hidden bg-white/10 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-white/20 group w-full sm:w-auto min-w-[160px]">
                     <!-- Content -->
                     <div class="relative z-10 text-center">
-                        <div class="text-[10px] sm:text-sm font-medium uppercase tracking-wider mb-1 text-white">Nilai Akhir</div>
-                        <div class="text-5xl sm:text-6xl font-black text-white">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
+                        <div class="text-[10px] sm:text-sm font-medium uppercase tracking-wider mb-1 text-white opacity-80">Nilai Akhir</div>
+                        <div class="text-5xl sm:text-6xl font-black text-white drop-shadow-sm">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
                         @if($attempt->passed)
                             <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
                         @else

@@ -6,7 +6,7 @@
         subtitle="Kelola Ujian Anda Disini"
     >
         <x-button href="{{ route('teacher.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
-            <svg class="w-5 h-5 transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+            <svg class="w-5 h-5 group-hover:rotate-90 transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
             BUAT UJIAN BARU 
         </x-button>
     </x-header>
@@ -23,71 +23,24 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($exams as $exam)
-        <div class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main overflow-hidden hover:border-primary/40 transition-all flex flex-col group">
-            <div class="p-8 flex-1">
-                <div class="flex justify-between items-start mb-8">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-6 h-6 rounded-xl text-primary border-border-main dark:border-slate-700 focus:ring-primary/20 bg-gray-50/50 dark:bg-slate-900">
-                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-inner
-                            @if($exam['status'] == 'completed') bg-gray-100 text-gray-500
-                            @elseif($exam['status'] == 'ongoing') bg-green-500/10 text-green-600 animate-pulse border border-green-500/20
-                            @else bg-primary/10 text-primary border border-primary/20 @endif">
-                            @if($exam['status'] == 'completed') SELESAI
-                            @elseif($exam['status'] == 'ongoing') BERJALAN
-                            @else AKAN DATANG @endif
-                        </span>
-                    </div>
-                    <div class="relative" x-data="{ open: false }">
-                        <x-button @click="open = !open" @click.away="open = false" variant="secondary" size="sm" square="true" class="!bg-transparent !border-transparent !shadow-none text-text-muted hover:text-text-main opacity-40 group-hover:opacity-100">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                        </x-button>
-                        <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-20 border border-border-main dark:border-slate-800 ring-1 ring-black/5 overflow-hidden">
-                            <a href="{{ route('admin.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit ujian</a>
-                            <button wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left">Duplikat Ujian</button>
-                            <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
-                            <button wire:click="confirmDelete({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left">Hapus</button>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="font-black text-2xl text-text-main mb-2 tracking-tight group-hover:text-primary transition-colors italic leading-tight">{{ $exam['name'] }}</h3>
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="text-[10px] font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
-                    <span class="w-1 h-1 rounded-full bg-border-main"></span>
-                    <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">{{ $exam['class'] }}</span>
-                </div>
-
-                <div class="space-y-4 pt-6 border-t border-border-subtle dark:border-slate-800/50">
-                    <div class="flex items-center text-[10px] font-black uppercase tracking-[0.2em]">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        {{ date('d M Y', strtotime($exam['date'])) }}
-                        <span class="mx-3 opacity-20">|</span>
-                        {{ $exam['start_time'] ?? '08:00' }} - {{ $exam['end_time'] ?? '09:30' }}
-                    </div>
-                    <div class="flex items-center text-[10px] font-black uppercase tracking-[0.2em]">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {{ $exam['duration'] }} Menit 
-                    </div>
-                    <div class="flex items-center text-[10px] font-black uppercase tracking-[0.2em]">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                        {{ $exam['questions_count'] }} Soal
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-8 py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-slate-800 grid grid-cols-2 gap-4 mt-auto">
+        <x-exam-card 
+            :exam="$exam"
+            :edit-route="route('admin.exams.edit', $exam['id'])"
+            duplicate-action="duplicateExam"
+            delete-action="confirmDelete"
+        >
+            <x-slot name="footer">
                 @if($exam['status'] == 'ongoing')
                     <x-button href="{{ route('admin.monitor.detail', $exam['id']) }}" variant="primary" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         MONITOR UJIAN 
                     </x-button>
                 @elseif($exam['status'] == 'completed')
-                    <x-button href="{{ route('admin.reports.detail', $exam['id']) }}" variant="soft" class="text-[10px] py-3 tracking-widest">
-                        Lihat Hasil
+                    <x-button href="{{ route('admin.grading.index') }}" variant="soft" class="text-[10px] py-3 tracking-widest">
+                        Beri Nilai
                     </x-button>
-                    <!-- Note: Adjusted Grading route to point to teacher route which is accessible by admin role via IsGuru middleware -->
-                    <x-button href="{{ route('admin.grading.show', $exam['id']) }}" variant="soft" class="text-[10px] py-3 tracking-widest">
-                        Daftar Nilai
+                    <x-button href="{{ route('admin.reports.index') }}" variant="soft" class="text-[10px] py-3 tracking-widest">
+                        Laporan Ujian
                     </x-button>
                 @else
                     <x-button href="{{ route('admin.exams.edit', $exam['id']) }}" variant="soft" class="col-span-2 py-4 text-[10px] tracking-[0.2em]">
@@ -95,8 +48,8 @@
                         Atur Jadwal
                     </x-button>
                 @endif
-            </div>
-        </div>
+            </x-slot>
+        </x-exam-card>
         @empty
         <div class="col-span-full">
             <x-empty-state 

@@ -3,9 +3,9 @@
     <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-3 sm:py-4 mb-6 sm:mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all overflow-hidden">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
             <div class="flex items-center gap-3 sm:gap-4">
-                <a href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+                <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
                     <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </a>
+                </x-button>
                 <div class="min-w-0">
                     <h2 class="font-black text-lg sm:text-xl text-text-main tracking-tight leading-none truncate uppercase italic">{{ $student_name }}</h2>
                     <div class="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1.5 opacity-60 italic">
@@ -43,7 +43,7 @@
         @else
         <!-- PG Answers Accordion -->
         <div x-data="{ expanded: false }" class="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-border-main overflow-hidden group hover:border-primary/20 transition-all">
-            <button @click="expanded = !expanded" class="w-full px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+            <button @click="expanded = !expanded" class="w-full px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer active:scale-[0.99] origin-center">
                 <div class="flex items-center gap-3 sm:gap-4">
                     <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shadow-inner">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -162,9 +162,9 @@
                                      <div class="flex items-center gap-2">
                                          <input type="number" x-model="score" max="{{ $data['max_score'] }}" class="w-20 px-3 py-2 text-center bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary font-black text-lg shadow-inner outline-none transition-all">
                                          <div class="flex flex-1 gap-1">
-                                             <button type="button" @click="score = 0" class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-[10px] font-black uppercase transition-colors" title="Nol">0</button>
-                                             <button type="button" @click="score = {{ ceil($data['max_score'] / 2) }}" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-lg text-[10px] font-black uppercase transition-colors" title="Setengah">½</button>
-                                             <button type="button" @click="score = {{ $data['max_score'] }}" class="flex-1 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg text-[10px] font-black uppercase transition-colors" title="Maksimal">Max</button>
+                                             <button type="button" @click="score = 0" class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-[10px] font-black uppercase transition-all active:scale-90" title="Nol">0</button>
+                                             <button type="button" @click="score = {{ ceil($data['max_score'] / 2) }}" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-lg text-[10px] font-black uppercase transition-all active:scale-90" title="Setengah">½</button>
+                                             <button type="button" @click="score = {{ $data['max_score'] }}" class="flex-1 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg text-[10px] font-black uppercase transition-all active:scale-90" title="Maksimal">Max</button>
                                          </div>
                                      </div>
                                  </div>

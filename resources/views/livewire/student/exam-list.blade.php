@@ -15,7 +15,7 @@
                     'history' => 'Riwayat'
                 ] as $key => $label)
                 <button wire:click="setFilter('{{ $key }}')" 
-                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap {{ $filter === $key ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap active:scale-95 {{ $filter === $key ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
                     {{ $label }}
                 </button>
                 @endforeach
@@ -92,11 +92,11 @@
                     <!-- Right: Action -->
                     <div class="flex items-center gap-3">
                         @if($status === 'submitted')
-                            <a href="{{ route('student.results.detail', $exam->attempts->where('student_id', auth()->user()->student->id)->first()->id ?? 0) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm">
+                            <a href="{{ route('student.results.detail', $exam->attempts->where('student_id', auth()->user()->student->id)->first()->id ?? 0) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm active:scale-[0.98]">
                                 Lihat Hasil
                             </a>
                         @elseif($status === 'active' || $status === 'in_progress')
-                            <a href="{{ route('student.exam.show', $exam->id) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-600 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                            <a href="{{ route('student.exam.show', $exam->id) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-xs sm:text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-600 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98]">
                                 <span>{{ $status === 'in_progress' ? 'Lanjutkan' : 'Mulai Ujian' }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
