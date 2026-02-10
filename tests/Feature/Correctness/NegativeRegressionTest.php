@@ -301,6 +301,156 @@ it('recalculates total score using latest exam question pivot scores', function 
     ]);
 });
 
+it('updates last_seen_at through heartbeat for active attempt', function () {
+    $this->withoutVite();
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.heartbeat.neg@example.test');
+    [$studentUser, $student] = makeStudentUserForNegativeTests('Student', 'student.heartbeat.neg@example.test', 'NEG005');
+    $subject = Subject::create(['name' => 'Chemistry', 'code' => 'NEG-CHEM']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Heartbeat Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA06',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now()->subMinutes(5),
+        'status' => ExamAttemptStatus::InProgress,
+        'last_seen_at' => null,
+    ]);
+
+    $this->actingAs($studentUser)
+        ->postJson(route('student.exam.heartbeat', $exam->id))
+        ->assertOk()
+        ->assertJson(['success' => true]);
+
+    $attempt->refresh();
+    expect($attempt->last_seen_at)->not->toBeNull();
+});
+
+it('rejects heartbeat for non-active attempt', function () {
+    $this->withoutVite();
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.heartbeat2.neg@example.test');
+    [$studentUser, $student] = makeStudentUserForNegativeTests('Student', 'student.heartbeat2.neg@example.test', 'NEG006');
+    $subject = Subject::create(['name' => 'Geography', 'code' => 'NEG-GEO']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Heartbeat Finalized Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA07',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now()->subMinutes(30),
+        'submitted_at' => now()->subMinute(),
+        'status' => ExamAttemptStatus::Submitted,
+    ]);
+
+    $this->actingAs($studentUser)
+        ->postJson(route('student.exam.heartbeat', $exam->id))
+        ->assertStatus(404)
+        ->assertJson(['success' => false]);
+});
+
+it('scores text answers case-insensitively and with trimmed whitespace', function () {
+    $this->withoutVite();
+
+    $scoringService = app(ScoringService::class);
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.normalize.neg@example.test');
+    [, $student] = makeStudentUserForNegativeTests('Student', 'student.normalize.neg@example.test', 'NEG007');
+    $subject = Subject::create(['name' => 'Language', 'code' => 'NEG-LNG']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Normalize Answer Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA08',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $question = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set A',
+        'type' => 'multiple_choice',
+        'text' => 'Pilih jawaban benar',
+        'score' => 10,
+    ]);
+
+    QuestionOption::create([
+        'question_id' => $question->id,
+        'label' => 'A',
+        'text' => 'Benar',
+        'is_correct' => true,
+    ]);
+
+    $exam->questions()->attach($question->id, ['order' => 1, 'score' => 25]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now(),
+        'status' => ExamAttemptStatus::InProgress,
+    ]);
+
+    StudentAnswer::create(array_merge([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $question->id,
+    ], $scoringService->scoreSingleAnswer($exam, $question, '  benar  ')));
+
+    $result = $scoringService->recalculateAttempt($exam, $attempt->fresh());
+
+    expect((int) $result['total_score'])->toBe(25);
+
+    $this->assertDatabaseHas('student_answers', [
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $question->id,
+        'is_correct' => true,
+        'score_awarded' => 25,
+    ]);
+});
+
 function makeTeacherUserForNegativeTests(string $name, string $email): array
 {
     $user = User::create([

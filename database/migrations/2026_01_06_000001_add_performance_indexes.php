@@ -126,16 +126,25 @@ return new class extends Migration
             if ($this->hasIndex('students', 'students_nis_index')) {
                 $table->dropIndex(['nis']);
             }
-            if ($this->hasIndex('students', 'students_classroom_id_index')) {
+            if (
+                $this->hasIndex('students', 'students_classroom_id_index') &&
+                !$this->hasForeignOnColumn('students', 'classroom_id')
+            ) {
                 $table->dropIndex(['classroom_id']);
             }
         });
 
         Schema::table('teachers', function (Blueprint $table) {
-            if ($this->hasIndex('teachers', 'teachers_user_id_index')) {
+            if (
+                $this->hasIndex('teachers', 'teachers_user_id_index') &&
+                !$this->hasForeignOnColumn('teachers', 'user_id')
+            ) {
                 $table->dropIndex(['user_id']);
             }
-            if ($this->hasIndex('teachers', 'teachers_subject_id_index')) {
+            if (
+                $this->hasIndex('teachers', 'teachers_subject_id_index') &&
+                !$this->hasForeignOnColumn('teachers', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
         });
@@ -153,10 +162,16 @@ return new class extends Migration
         });
 
         Schema::table('questions', function (Blueprint $table) {
-            if ($this->hasIndex('questions', 'questions_subject_id_index')) {
+            if (
+                $this->hasIndex('questions', 'questions_subject_id_index') &&
+                !$this->hasForeignOnColumn('questions', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
-            if ($this->hasIndex('questions', 'questions_teacher_id_index')) {
+            if (
+                $this->hasIndex('questions', 'questions_teacher_id_index') &&
+                !$this->hasForeignOnColumn('questions', 'teacher_id')
+            ) {
                 $table->dropIndex(['teacher_id']);
             }
             if ($this->hasIndex('questions', 'questions_type_index')) {
@@ -165,12 +180,45 @@ return new class extends Migration
         });
 
         Schema::table('exams', function (Blueprint $table) {
-            if ($this->hasIndex('exams', 'exams_subject_id_index')) {
+            if (
+                $this->hasIndex('exams', 'exams_subject_id_index') &&
+                !$this->hasForeignOnColumn('exams', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
-            if ($this->hasIndex('exams', 'exams_teacher_id_index')) {
+            if (
+                $this->hasIndex('exams', 'exams_teacher_id_index') &&
+                !$this->hasForeignOnColumn('exams', 'teacher_id')
+            ) {
                 $table->dropIndex(['teacher_id']);
             }
         });
+    }
+
+    /**
+     * Check if a foreign key exists on a given table column (Laravel 12 compatible).
+     */
+    private function hasForeignOnColumn(string $table, string $column): bool
+    {
+        try {
+            $connection = Schema::getConnection();
+            $driver = $connection->getDriverName();
+
+            if ($driver === 'sqlite') {
+                return false;
+            }
+
+            $databaseName = $connection->getDatabaseName();
+
+            $result = DB::select(
+                "SELECT COUNT(*) as count FROM information_schema.KEY_COLUMN_USAGE
+                 WHERE table_schema = ? AND table_name = ? AND column_name = ? AND referenced_table_name IS NOT NULL",
+                [$databaseName, $table, $column]
+            );
+
+            return ($result[0]->count ?? 0) > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 };

@@ -10,7 +10,10 @@ class Dashboard extends Component
     public function render()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
-        $teacher = $user->teacher;
+        $teacher = $user->teacher()->with([
+            'classroom:id,name,teacher_id',
+            'subjects:id,name',
+        ])->first();
         
         if (!$teacher) {
             return view('teacher.dashboard', [
@@ -23,7 +26,9 @@ class Dashboard extends Component
                 'ongoing_exams' => [],
                 'upcoming_exams' => [],
                 'recent_activities' => [],
-                'greeting' => $this->getGreeting()
+                'greeting' => $this->getGreeting(),
+                'homeroom_class' => null,
+                'taught_subjects' => [],
             ])->layout('layouts.teacher', ['title' => 'Dashboard Guru']);
         }
 
@@ -97,15 +102,19 @@ class Dashboard extends Component
 
                 return [
                     'id' => $exam->id,
+                    'status' => $exam->status,
                     'subject' => $exam->subject->name,
                     'class' => $exam->classrooms->pluck('name')->join(', '),
                     'name' => $exam->name,
                     'participants' => $exam->in_progress_count,
+                    'students_online' => $exam->in_progress_count,
                     'finished_students' => $finishedCount,
                     'total_students' => $totalStudents,
                     'percentage' => $percentage,
+                    'progress' => $percentage,
                     'start_time' => \Carbon\Carbon::parse($exam->start_time)->format('H:i'),
-                    'end_time' => \Carbon\Carbon::parse($exam->end_time)->format('H:i')
+                    'end_time' => \Carbon\Carbon::parse($exam->end_time)->format('H:i'),
+                    'monitor_url' => route('teacher.monitoring.detail', $exam->id),
                 ];
             });
 
@@ -175,7 +184,9 @@ class Dashboard extends Component
             'ongoing_exams' => $ongoing_exams,
             'upcoming_exams' => $upcoming_exams,
             'recent_activities' => $recent_activities,
-            'greeting' => $this->getGreeting()
+            'greeting' => $this->getGreeting(),
+            'homeroom_class' => $teacher->classroom?->name,
+            'taught_subjects' => $teacher->subjects->pluck('name')->values()->all(),
         ])->layout('layouts.teacher');
     }
 

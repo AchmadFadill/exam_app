@@ -43,36 +43,44 @@
             <x-card title="Hasil Per Siswa">
                 <!-- Filter Buttons -->
                 <div class="flex flex-wrap gap-2 mb-6 -mt-2">
-                    <x-button 
-                        wire:click="sortByHighest" 
+                    <x-button
+                        wire:click="sortByHighest"
                         variant="{{ $sortBy === 'highest' ? 'success' : 'secondary' }}"
                         size="sm"
                         class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
-                        🏆 Tertinggi
+                        Tertinggi
                     </x-button>
-                    <x-button 
-                        wire:click="sortByLowest" 
+                    <x-button
+                        wire:click="sortByLowest"
                         variant="{{ $sortBy === 'lowest' ? 'warning' : 'secondary' }}"
                         size="sm"
                         class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
-                        📉 Terendah
+                        Terendah
                     </x-button>
-                    <x-button 
-                        wire:click="sortByFastest" 
+                    <x-button
+                        wire:click="sortByFastest"
                         variant="{{ $sortBy === 'fastest' ? 'primary' : 'secondary' }}"
                         size="sm"
                         class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' : '' }}">
-                        ⚡ Tercepat
+                        Tercepat
                     </x-button>
-                    <x-button 
-                        wire:click="sortBySlowest" 
+                    <x-button
+                        wire:click="sortBySlowest"
                         variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
                         size="sm"
                         class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500' : '!bg-gray-100 !text-gray-600 hover:!bg-gray-200 dark:!bg-slate-800 dark:!text-slate-300 dark:hover:!bg-slate-700' }}">
-                        🐌 Terlambat
+                        Terlambat
                     </x-button>
+                    @if($sortBy !== 'default')
+                        <x-button
+                            wire:click="resetFilter"
+                            variant="secondary"
+                            size="sm"
+                            class="!rounded-xl uppercase tracking-widest !bg-red-50 !text-red-600 hover:!bg-red-100 dark:!bg-red-900/20 dark:!text-red-300 dark:hover:!bg-red-900/30">
+                            Bersihkan Filter
+                        </x-button>
+                    @endif
                 </div>
-
                 <x-table>
                     <x-table.thead>
                         <x-table.tr>

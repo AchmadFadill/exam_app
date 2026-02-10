@@ -38,6 +38,11 @@ class ManageTeacher extends Component
     public $showImportModal = false;
     public $importFile;
 
+    public function mount(): void
+    {
+        $this->repairMissingTeacherProfiles();
+    }
+
     protected function rules()
     {
         $rules = [
@@ -102,6 +107,14 @@ class ManageTeacher extends Component
         $this->selectedTeacher = $teacherId;
         $this->resetValidation();
         $this->showEditModal = true;
+    }
+
+    public function closeTeacherFormModal(): void
+    {
+        $this->showAddModal = false;
+        $this->showEditModal = false;
+        $this->resetValidation();
+        $this->reset('teacherForm', 'selectedTeacher');
     }
 
     public function openDeleteModal($teacherId)
@@ -364,5 +377,24 @@ class ManageTeacher extends Component
             'teachers' => $teachers,
             'subjects' => $subjects,
         ])->layout('layouts.admin', ['title' => 'Data Guru']);
+    }
+
+    private function repairMissingTeacherProfiles(): void
+    {
+        User::query()
+            ->where('role', 'teacher')
+            ->whereDoesntHave('teacher')
+            ->select('id')
+            ->chunkById(200, function ($users): void {
+                $rows = $users->map(fn ($user) => [
+                    'user_id' => $user->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ])->all();
+
+                if (!empty($rows)) {
+                    Teacher::insert($rows);
+                }
+            });
     }
 }

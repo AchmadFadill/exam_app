@@ -41,6 +41,11 @@ class Detail extends Component
         $this->sortBy = 'slowest';
     }
 
+    public function resetFilter()
+    {
+        $this->sortBy = 'default';
+    }
+
     private function calculateDuration($start, $end)
     {
         if (!$start || !$end) return 0;

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Teacher\Exam;
 
+use App\Actions\Exam\DuplicateExamAction;
 use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -88,23 +89,7 @@ class Index extends Component
         $original = Exam::with(['questions', 'classrooms'])->findOrFail($id);
         Gate::authorize('view', $original);
 
-        $newExam = $original->replicate();
-        $newExam->name = 'Salinan - ' . $original->name;
-        $newExam->status = 'draft';
-        $newExam->date = date('Y-m-d');
-        $newExam->token = Exam::generateToken();
-        $newExam->save();
-
-        // Copy question relationships
-        foreach ($original->questions as $question) {
-            $newExam->questions()->attach($question->id, [
-                'order' => $question->pivot->order,
-                'score' => $question->pivot->score,
-            ]);
-        }
-
-        // Copy classroom relationships
-        $newExam->classrooms()->sync($original->classrooms->pluck('id')->toArray());
+        app(DuplicateExamAction::class)->execute($original);
 
         $this->dispatch('notify', ['message' => 'Ujian berhasil diduplikasi!']);
     }

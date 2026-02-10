@@ -77,17 +77,21 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->dropIndex('exams_active_lookup');
+            if ($this->hasIndex('exams', 'exams_active_lookup')) {
+                $table->dropIndex('exams_active_lookup');
+            }
         });
 
         Schema::table('exam_attempts', function (Blueprint $table) {
-            $table->dropIndex('attempts_lookup');
-            $table->dropIndex(['submitted_at']);
+            if ($this->hasIndex('exam_attempts', 'attempts_lookup')) {
+                $table->dropIndex('attempts_lookup');
+            }
+            if ($this->hasIndex('exam_attempts', 'exam_attempts_submitted_at_index')) {
+                $table->dropIndex(['submitted_at']);
+            }
         });
 
-        Schema::table('student_answers', function (Blueprint $table) {
-            $table->dropIndex(['exam_attempt_id']);
-            $table->dropIndex(['question_id']);
-        });
+        // No-op for student_answers rollback: these columns are used in FK constraints and
+        // dropping their indexes can fail on MySQL (1553) during repeated migrate/rollback cycles.
     }
 };

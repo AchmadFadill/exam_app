@@ -9,14 +9,6 @@ use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->scoringService = app(ScoringService::class);
-    }
-
-    private ScoringService $scoringService;
-
     public $attempt;
     public $student;
     public $exam;
@@ -132,7 +124,9 @@ class Detail extends Component
     {
         Gate::authorize('grade', $this->exam);
 
-        \Illuminate\Support\Facades\DB::transaction(function () {
+        $scoringService = app(ScoringService::class);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($scoringService) {
             foreach ($this->essayGrades as $answerId => $data) {
                 $score = (int)$data['score'];
                 
@@ -142,7 +136,7 @@ class Detail extends Component
                 ]);
             }
 
-            $summary = $this->scoringService->recalculateAttempt($this->exam, $this->attempt);
+            $summary = $scoringService->recalculateAttempt($this->exam, $this->attempt);
 
             $this->attempt->update([
                 'total_score' => $summary['total_score'],

@@ -74,9 +74,10 @@ class DatabaseSeeder extends Seeder
                 ['user_id' => $user->id],
                 ['nip' => '19' . rand(70, 99) . rand(10000000, 99999999)]
             );
+
             $subject = Subject::where('code', $t['subject_code'])->first();
             if ($subject) {
-                $teacher->subjects()->syncWithoutDetaching([$subject->id]);
+                $teacher->subjects()->sync([$subject->id]);
             }
         }
 
@@ -89,18 +90,14 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Eko Prasetyo', 'nis' => '2024005', 'classroom_name' => 'X IPA 2'],
         ];
         foreach ($students as $s) {
-            $email = strtolower(str_replace(' ', '.', $s['name'])) . '@siswa.smait-baitulmuslim.sch.id';
             $user = User::updateOrCreate(
-                ['email' => $email],
+                ['email' => strtolower(str_replace(' ', '.', $s['name'])) . '@siswa.smait-baitulmuslim.sch.id'],
                 ['name' => $s['name'], 'password' => Hash::make($s['nis']), 'role' => 'student']
             );
-            $classroom = Classroom::where('name', $s['classroom_name'])->first();
-            if ($classroom) {
-                Student::updateOrCreate(
-                    ['user_id' => $user->id],
-                    ['nis' => $s['nis'], 'classroom_id' => $classroom->id]
-                );
-            }
+            Student::updateOrCreate(
+                ['user_id' => $user->id],
+                ['nis' => $s['nis'], 'classroom_id' => $s['classroom_id']]
+            );
         }
 
         // Sample Questions

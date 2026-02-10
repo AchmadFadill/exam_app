@@ -108,6 +108,7 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'siswa'])->group
     Route::post('/exam/{id}/submit', [App\Http\Controllers\Student\ExamController::class, 'submit'])->name('exam.submit');
     Route::post('/exam/{id}/log-violation', [App\Http\Controllers\Student\ExamController::class, 'logViolation'])->name('exam.log-violation');
     Route::post('/exam/{id}/save-answer', [App\Http\Controllers\Student\ExamController::class, 'saveAnswer'])->name('exam.save-answer');
+    Route::post('/exam/{id}/heartbeat', [App\Http\Controllers\Student\ExamController::class, 'heartbeat'])->name('exam.heartbeat');
 
     Route::get('/results', App\Livewire\Student\ExamResults::class)->name('results');
 
