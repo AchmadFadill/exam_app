@@ -1,4 +1,4 @@
-<x-app-layout title="Guru">
+<x-app-layout :title="$title ?? 'Guru'">
     <!-- Sidebar -->
     <x-slot name="sidebar">
         <x-sidebar>

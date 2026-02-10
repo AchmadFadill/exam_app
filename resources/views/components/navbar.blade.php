@@ -19,38 +19,8 @@
         $userRole = $userPrefix;
     }
 
-    // Dynamic Title Mapping
-    $routeTitles = [
-        'admin.teachers' => 'Guru',
-        'admin.students' => 'Siswa',
-        'admin.classes' => 'Kelas',
-        'admin.subjects' => 'Pelajaran',
-        'admin.exams' => 'Ujian',
-        'admin.monitor' => 'Pantau Ujian',
-        'admin.reports' => 'Nilai Ujian',
-        'admin.settings' => 'Pengaturan',
-        'teacher.questions' => 'Bank Soal',
-        'teacher.exams' => 'Ujian',
-        'teacher.exams.index' => 'Ujian',
-        'teacher.monitoring' => 'Pantau Ujian',
-        'teacher.grading' => 'Beri Nilai',
-        'teacher.reports' => 'Nilai Ujian',
-        'teacher.reports.index' => 'Nilai Ujian',
-        'teacher.settings' => 'Pengaturan Profil',
-        'student.exams' => 'Daftar Ujian',
-        'student.results' => 'Hasil Ujian',
-        'student.settings' => 'Pengaturan Profil',
-    ];
+    $displayTitle = View::hasSection('title') ? View::yieldContent('title') : $title;
 
-    $displayTitle = $title;
-    if (in_array($displayTitle, ['Beranda', 'Dashboard', 'Administrator', 'Guru', 'Siswa', 'User', ''])) {
-        foreach ($routeTitles as $route => $label) {
-            if (request()->routeIs($route . '*')) {
-                $displayTitle = $label;
-                break;
-            }
-        }
-    }
     // Determine Settings Route
     $settingsRoute = match($roleKey) {
         'admin' => route('admin.settings'),
@@ -67,7 +37,7 @@
     <div>
         <!-- Page Title -->
         <h2 class="text-xl font-bold text-text-main tracking-tight">
-            {{ $displayTitle }}
+            <x-title-resolver :title="$displayTitle" />
         </h2>
     </div>
 

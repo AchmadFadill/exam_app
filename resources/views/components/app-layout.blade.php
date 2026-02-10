@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Laravel') }} - {{ $title ?? 'Dashboard' }}</title>
+    <title>{{ config('app.name', 'Laravel') }} - <x-title-resolver :title="$title" /></title>
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}?v=3">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">

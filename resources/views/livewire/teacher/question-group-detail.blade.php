@@ -27,7 +27,7 @@
                 @else
                     <div class="flex items-center gap-3 group">
                         <h2 class="text-2xl font-bold text-text-main">{{ $title }}</h2>
-                        <button wire:click="startRenaming" class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-primary">
+                        <button wire:click="startRenaming" class="transition-opacity p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-primary" title="Ubah Nama">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
@@ -144,213 +144,20 @@
         </tbody>
     </x-table>
 
-    <!-- Add/Edit Modal -->
-    @if($showAddModal || $showEditModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="closeModal"></div>
-        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 class="text-lg font-bold text-text-main">{{ $showAddModal ? 'Tambah Soal' : 'Edit Soal' }}</h3>
-                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <!-- Question Group/Title (only show when editing) -->
-                @if($showEditModal)
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Kelompok Soal <span class="text-red-500">*</span></label>
-                    <input type="text" wire:model.live="questionForm.title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.title') border-red-500 @enderror" placeholder="Contoh: Aljabar Dasar, Geometri, Trigonometri">
-                    @error('questionForm.title') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
-                @else
-                <!-- Hidden input to maintain title value when adding -->
-                <input type="hidden" wire:model="questionForm.title">
-                @endif
-
-
-                <!-- Subject Selection (only show when editing) -->
-                @if($showEditModal)
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran <span class="text-red-500">*</span></label>
-                    <select wire:model="questionForm.subject_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.subject_id') border-red-500 @enderror">
-                        <option value="">Pilih Mata Pelajaran</option>
-                        @foreach($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('questionForm.subject_id') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
-                @else
-                <!-- Hidden input to maintain subject value when adding -->
-                <input type="hidden" wire:model="questionForm.subject_id">
-                @endif
-
-                <!-- Question Type -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Soal <span class="text-red-500">*</span></label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $questionForm['type'] === 'multiple_choice' ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300' }}">
-                            <input type="radio" wire:model.live="questionForm.type" value="multiple_choice" class="mr-3">
-                            <span class="font-medium">Pilihan Ganda</span>
-                        </label>
-                        <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all {{ $questionForm['type'] === 'essay' ? 'border-primary bg-blue-50' : 'border-gray-200 hover:border-gray-300' }}">
-                            <input type="radio" wire:model.live="questionForm.type" value="essay" class="mr-3">
-                            <span class="font-medium">Essay</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Question Text -->
-                <div x-data="latexPreview(@js($questionForm['text'] ?? ''))" x-init="init()">
-                    <div class="flex items-center justify-between gap-3 mb-2">
-                        <label class="block text-sm font-medium text-gray-700">Pertanyaan <span class="text-red-500">*</span></label>
-                        <button type="button"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-xs font-semibold hover:bg-primary/10"
-                                @click="$dispatch('open-latex-guide')">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M9 9h6m-8.25 9h10.5A2.25 2.25 0 0019.5 15.75V8.25A2.25 2.25 0 0017.25 6H6.75A2.25 2.25 0 004.5 8.25v7.5A2.25 2.25 0 006.75 18z" />
-                            </svg>
-                            Panduan Rumus
-                        </button>
-                    </div>
-                    <textarea wire:model.live.debounce.300ms="questionForm.text"
-                              rows="4"
-                              data-latex-enabled="1"
-                              @focus="window.setLatexActiveInput($event.target)"
-                              @input="update($event.target.value)"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.text') border-red-500 @enderror"
-                              placeholder="Tulis pertanyaan di sini..."></textarea>
-                    @error('questionForm.text') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    <p class="mt-1 text-xs text-gray-500">{{ strlen($questionForm['text']) }}/5000 karakter</p>
-                    <div class="mt-3 rounded-lg border border-blue-100 bg-blue-50 p-3">
-                        <p class="text-[11px] font-bold text-blue-700 mb-2">Pratinjau Rumus</p>
-                        <div x-ref="preview" class="text-sm text-slate-700 min-h-8 break-words"></div>
-                    </div>
-                </div>
-
-                <!-- Question Image -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Soal (Opsional)</label>
-                    
-                    @if($showEditModal && $editingImagePath)
-                    <div class="mb-3 relative inline-block">
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($editingImagePath) }}" 
-                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
-                        <button type="button" 
-                                wire:click="removeImage" 
-                                class="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition-colors"
-                                title="Hapus Gambar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                    @endif
-                    
-                    <input type="file" 
-                           wire:model="questionImage" 
-                           accept="image/*"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg @error('questionImage') border-red-500 @enderror text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
-                    
-                    @error('questionImage') 
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p> 
-                    @enderror
-                    
-                    @if($questionImage)
-                    <div class="mt-2">
-                        <p class="text-xs text-gray-500 mb-1">Preview:</p>
-                        <img src="{{ $questionImage->temporaryUrl() }}" 
-                             class="max-w-xs rounded-lg border border-gray-300 shadow-sm">
-                    </div>
-                    @endif
-                    
-                    <p class="mt-1 text-xs text-gray-500">Max 5MB. Format: JPG, PNG, GIF, SVG</p>
-                </div>
-
-                <!-- Multiple Choice Options -->
-                @if($questionForm['type'] === 'multiple_choice')
-                <div class="space-y-3" x-data="latexPreview('')" x-init="init()">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <label class="block text-sm font-medium text-gray-700">Opsi Jawaban <span class="text-red-500">*</span></label>
-                            <button type="button"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-xs font-semibold hover:bg-primary/10"
-                                    @click="$dispatch('open-latex-guide')">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M9 9h6m-8.25 9h10.5A2.25 2.25 0 0019.5 15.75V8.25A2.25 2.25 0 0017.25 6H6.75A2.25 2.25 0 004.5 8.25v7.5A2.25 2.25 0 006.75 18z" />
-                                </svg>
-                                Panduan Rumus
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            @if($optionCount < 4)
-                            <button type="button" wire:click="addOption" class="text-xs px-3 py-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors">
-                                + Tambah Opsi
-                            </button>
-                            @endif
-                            @if($optionCount > 2)
-                            <button type="button" wire:click="removeOption" class="text-xs px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
-                                - Hapus Opsi
-                            </button>
-                            @endif
-                        </div>
-                    </div>
-                    @php $labels = ['A', 'B', 'C', 'D', 'E']; @endphp
-                    @for($index = 0; $index < $optionCount; $index++)
-                    <div class="flex items-start gap-3">
-                        <input type="radio" wire:model="questionForm.correct_option" value="{{ $labels[$index] }}" class="mt-3 text-primary focus:ring-primary" title="Pilih sebagai jawaban benar">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full text-xs font-bold">{{ $labels[$index] }}</span>
-                                <input type="text"
-                                       wire:model.live.debounce.300ms="questionForm.options.{{ $index }}"
-                                       data-latex-enabled="1"
-                                       @focus="window.setLatexActiveInput($event.target); update($event.target.value)"
-                                       @input="update($event.target.value)"
-                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.options.'.$index) border-red-500 @enderror"
-                                       placeholder="Tulis opsi {{ $labels[$index] }}...">
-                            </div>
-                            @error('questionForm.options.'.$index) <p class="text-xs text-red-500">{{ $message }}</p> @enderror
-                        </div>
-                    </div>
-                    @endfor
-                    @error('questionForm.correct_option') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                    <p class="text-xs text-gray-500">Pilih radio button di sebelah kiri untuk menandai jawaban yang benar</p>
-                    <div class="rounded-lg border border-blue-100 bg-blue-50 p-3">
-                        <p class="text-[11px] font-bold text-blue-700 mb-2">Pratinjau Rumus</p>
-                        <div x-ref="preview" class="text-sm text-slate-700 min-h-8 break-words"></div>
-                    </div>
-                </div>
-                @endif
-
-                {{-- Question Score --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Skor/Bobot Soal <span class="text-red-500">*</span></label>
-                    <input type="number" wire:model="questionForm.score" class="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all @error('questionForm.score') border-red-500 @enderror" placeholder="10" min="1" max="100">
-                    <p class="mt-1 text-xs text-gray-500">Nilai default untuk soal ini saat ditambahkan ke ujian (1-100)</p>
-                    @error('questionForm.score') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
-                </div>
-
-                <!-- Explanation -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pembahasan (Opsional)</label>
-                    <textarea wire:model="questionForm.explanation" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Tulis pembahasan untuk membantu siswa memahami jawaban..."></textarea>
-                    <p class="mt-1 text-xs text-gray-500">{{ strlen($questionForm['explanation'] ?? '') }}/1000 karakter</p>
-                </div>
-            </div>
-            <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-                <x-button variant="secondary" wire:click="closeModal">Batal</x-button>
-                @if($showAddModal)
-                <x-button variant="secondary" wire:click="saveAndAddAnother">Simpan & Tambah Lagi</x-button>
-                @endif
-                <x-button variant="primary" wire:click="saveQuestion">{{ $showAddModal ? 'Simpan' : 'Update' }}</x-button>
-            </div>
-        </div>
-    </div>
-    @endif
+    <!-- Question Modals (Add & Edit) -->
+    @foreach(['showAddModal' => false, 'showEditModal' => true] as $model => $isEdit)
+        <x-question-modal 
+            wire:model="{{ $model }}"
+            :is-edit="$isEdit"
+            :subjects="$subjects"
+            :option-count="$optionCount"
+            :editing-image-path="$editingImagePath"
+            :question-image="$questionImage"
+            :type="$questionForm['type']"
+            :question-text="$questionForm['text']"
+            :readonly-group="true"
+        />
+    @endforeach
 
     <!-- Delete Modal -->
     @if($showDeleteModal)
@@ -395,7 +202,6 @@
         </div>
     </div>
     @endif
+    <x-latex-guide-modal />
 </div>
-
-<x-latex-guide-modal />
 
