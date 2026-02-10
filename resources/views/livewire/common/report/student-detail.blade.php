@@ -2,31 +2,31 @@
 
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="{{ route($backRoute, $backParam) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="{{ route($backRoute, $backParam) }}" class="p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
-            <div>
-                <h2 class="font-bold text-2xl text-text-main">Detail Jawaban Siswa</h2>
-                <div class="flex items-center gap-2 text-text-muted text-sm">
-                    <span class="font-semibold text-primary">{{ $student->name }}</span>
-                    <span>•</span>
-                    <span>{{ $exam->name }}</span>
+            <div class="min-w-0">
+                <h2 class="font-black text-xl sm:text-2xl text-text-main leading-tight truncate uppercase tracking-tight italic">Hasil Siswa</h2>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <p class="text-[10px] sm:text-sm font-bold text-primary truncate max-w-[150px] sm:max-w-none">{{ $student->name }}</p>
+                    <span class="text-gray-300">•</span>
+                    <p class="text-[10px] sm:text-sm font-black text-text-muted truncate max-w-[150px] sm:max-w-none uppercase tracking-widest italic">{{ $exam->name }}</p>
                 </div>
             </div>
         </div>
 
         @if($attempt)
-        <div class="flex items-center gap-3">
-             <div class="px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
-                <div class="text-[10px] text-text-muted uppercase tracking-widest font-bold">Total Nilai</div>
-                <div class="text-xl font-black {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }}">{{ $attempt->total_score }}</div>
+        <div class="flex items-center gap-2 sm:gap-3">
+             <div class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
+                <div class="text-[8px] sm:text-[10px] text-text-muted uppercase tracking-widest font-black leading-tight">Total Nilai</div>
+                <div class="text-lg sm:text-xl font-black {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }} mt-0.5 sm:mt-1">{{ $attempt->total_score }}</div>
             </div>
-             <div class="px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
-                <div class="text-[10px] text-text-muted uppercase tracking-widest font-bold">Status</div>
-                <div class="text-sm font-bold {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }}">
-                    {{ $attempt->passed ? 'LULUS' : 'TIDAK LULUS' }}
+             <div class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
+                <div class="text-[8px] sm:text-[10px] text-text-muted uppercase tracking-widest font-black leading-tight">Status</div>
+                <div class="text-[10px] sm:text-sm font-black {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }} mt-1 sm:mt-1.5 px-2 py-0.5 bg-gray-50 rounded-lg">
+                    {{ $attempt->passed ? 'LULUS' : 'GAGAL' }}
                 </div>
             </div>
         </div>
@@ -37,10 +37,10 @@
     <!-- Answers List -->
     <div class="max-w-4xl mx-auto space-y-6">
         @foreach($attempt->answers as $index => $answer)
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden">
+        <div class="bg-white rounded-[1.5rem] sm:rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <!-- Question Number -->
-            <div class="absolute top-0 right-0 px-4 py-2 bg-gray-50 rounded-bl-2xl text-xs font-bold text-gray-500 border-l border-b border-gray-100">
-                Soal #{{ $index + 1 }}
+            <div class="absolute top-0 right-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-bl-xl sm:rounded-bl-2xl text-[10px] sm:text-xs font-black text-gray-400 border-l border-b border-gray-100 group-hover:text-primary transition-colors">
+                #{{ $index + 1 }}
             </div>
 
             <div class="space-y-4">

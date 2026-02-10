@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CBT SMAIT Baitul Muslim</title>
+    <title>{{ $app_name ?? 'CBT System' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}?v=3">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,7 +84,7 @@
                 <div class="space-y-8 text-center lg:text-left">
                     <h1 class="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-tight">
                         CBT <br>
-                        <span class="text-primary">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</span>
+                        <span class="text-primary">{{ $app_name ?? 'Digital Learning' }}</span>
                     </h1>
                     <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
                         Wujudkan evaluasi pembelajaran yang efisien, transparan, dan terintegrasi dengan sistem Computer Based Test tercanggih.
@@ -178,7 +178,7 @@
     <footer class="py-12 border-t border-white/10 bg-primary text-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-blue-200/60 text-sm font-medium">
-                &copy; {{ date('Y') }} CBT System {{ $app_name ?? 'SMAIT Baitul Muslim' }}. All rights reserved.
+                &copy; {{ date('Y') }} CBT {{ $app_name ?? 'System' }}. All rights reserved.
             </p>
         </div>
     </footer>

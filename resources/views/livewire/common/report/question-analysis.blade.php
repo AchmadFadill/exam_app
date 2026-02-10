@@ -2,31 +2,31 @@
 
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="{{ route($backRoute, $backParam) }}" class="p-2 rounded-full hover:bg-gray-100 text-text-muted transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="{{ route($backRoute, $backParam) }}" class="p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
-            <div>
-                <h2 class="font-bold text-2xl text-text-main">Analisis Butir Soal</h2>
-                <div class="flex items-center gap-2 text-text-muted text-sm">
-                    <span class="font-semibold text-primary">{{ $exam->name }}</span>
-                    <span>•</span>
-                    <span>{{ $questions->count() }} Soal</span>
+            <div class="min-w-0">
+                <h2 class="font-black text-xl sm:text-2xl text-text-main leading-tight truncate uppercase tracking-tight italic">Analisis Soal</h2>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <p class="text-[10px] sm:text-sm font-bold text-primary truncate max-w-[150px] sm:max-w-none">{{ $exam->name }}</p>
+                    <span class="text-gray-300">•</span>
+                    <p class="text-[10px] sm:text-sm font-black text-text-muted truncate max-w-[150px] sm:max-w-none uppercase tracking-widest italic">{{ $questions->count() }} Butir Soal</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6">
+    <div class="grid grid-cols-1 gap-6 sm:gap-8">
         @foreach($questions as $index => $question)
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-[2rem] shadow-sm border border-border-main overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <div class="grid grid-cols-1 lg:grid-cols-3">
                 <!-- Question Content -->
-                <div class="lg:col-span-2 p-6 border-b lg:border-b-0 lg:border-r border-gray-100">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="px-3 py-1 rounded-lg bg-gray-100 text-xs font-bold text-gray-600 uppercase tracking-wide">Soal #{{ $index + 1 }}</span>
-                        <span class="px-3 py-1 rounded-lg bg-blue-50 text-xs font-bold text-blue-600 uppercase tracking-wide">{{ $question->type === 'multiple_choice' ? 'Pilihan Ganda' : 'Essay' }}</span>
+                <div class="lg:col-span-2 p-5 sm:p-8 border-b lg:border-b-0 lg:border-r border-gray-100">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                        <span class="px-3 py-1 rounded-lg bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border border-gray-100 shadow-inner italic">Soal #{{ $index + 1 }}</span>
+                        <span class="px-3 py-1 rounded-lg bg-blue-50 text-[10px] font-black text-blue-600 uppercase tracking-widest border border-blue-100 italic">{{ $question->type === 'multiple_choice' ? 'PG' : 'ESSAY' }}</span>
                     </div>
                     
                     <div class="prose prose-sm max-w-none text-text-main mb-6">
@@ -55,8 +55,8 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="p-6 bg-gray-50/50">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Statistik Jawaban</h4>
+                <div class="p-5 sm:p-8 bg-gray-50/30">
+                    <h4 class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4 sm:mb-6 opacity-60">Statistik Jawaban</h4>
                     
                     @php
                         $total = $question->stats->total_answers ?? 0;

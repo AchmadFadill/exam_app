@@ -1,37 +1,32 @@
 <div class="relative pb-32">
     <!-- Sticky Header -->
-    <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-4 mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all">
-        <div class="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-            <div class="flex items-center gap-4">
-                <a href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="p-2 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-transparent hover:border-gray-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-3 sm:py-4 mb-6 sm:mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 text-text-muted transition-colors border border-border-subtle group">
+                    <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
-                <div>
-                    <h2 class="font-black text-xl text-text-main tracking-tight leading-none">Koreksi Jawaban</h2>
-                    <div class="flex items-center gap-2 text-xs font-bold text-text-muted uppercase tracking-widest mt-1.5 opacity-60">
-                        <span>{{ $student_name }}</span>
-                        <span>&bull;</span>
+                <div class="min-w-0">
+                    <h2 class="font-black text-lg sm:text-xl text-text-main tracking-tight leading-none truncate uppercase italic">{{ $student_name }}</h2>
+                    <div class="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1.5 opacity-60 italic">
                         <span>{{ $grade }}</span>
                     </div>
                 </div>
             </div>
             
-            <div class="flex items-center gap-3">
-                <div class="hidden md:block text-right mr-2">
-                    <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-50">Progres Nilai</p>
-                </div>
-                <div class="flex gap-2">
-                    <div class="bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 text-center min-w-[80px]">
-                        <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-0.5">PG (Auto)</p>
-                        <p class="text-sm font-black text-blue-600">{{ $pgScore }}<span class="text-[10px] font-bold text-blue-300">/{{ $maxPgScore }}</span></p>
+            <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+                <div class="flex gap-1.5 sm:gap-2">
+                    <div class="bg-blue-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-blue-100 text-center min-w-[60px] sm:min-w-[80px]">
+                        <p class="text-[7px] sm:text-[9px] font-black text-blue-400 uppercase tracking-widest mb-0.5">PG</p>
+                        <p class="text-xs sm:text-sm font-black text-blue-600">{{ $pgScore }}<span class="text-[8px] sm:text-[10px] font-bold text-blue-300">/{{ $maxPgScore }}</span></p>
                     </div>
-                    <div class="bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 text-center min-w-[80px]">
-                        <p class="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-0.5">Essay</p>
-                        <p class="text-sm font-black text-amber-600">{{ $this->currentTotalScore - $pgScore }}</p>
+                    <div class="bg-amber-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-amber-100 text-center min-w-[60px] sm:min-w-[80px]">
+                        <p class="text-[7px] sm:text-[9px] font-black text-amber-400 uppercase tracking-widest mb-0.5">Essay</p>
+                        <p class="text-xs sm:text-sm font-black text-amber-600">{{ $this->currentTotalScore - $pgScore }}</p>
                     </div>
-                    <div class="bg-green-50 px-4 py-1.5 rounded-lg border border-green-100 text-center min-w-[90px] shadow-sm">
-                        <p class="text-[9px] font-black text-green-400 uppercase tracking-widest mb-0.5">Total</p>
-                        <p class="text-lg font-black text-green-600 leading-none">{{ $this->currentTotalScore }}</p>
+                    <div class="bg-green-50 px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg border border-green-100 text-center min-w-[70px] sm:min-w-[90px] shadow-sm">
+                        <p class="text-[7px] sm:text-[9px] font-black text-green-400 uppercase tracking-widest mb-0.5">Total</p>
+                        <p class="text-base sm:text-lg font-black text-green-600 leading-none">{{ $this->currentTotalScore }}</p>
                     </div>
                 </div>
             </div>
@@ -47,20 +42,20 @@
             </div>
         @else
         <!-- PG Answers Accordion -->
-        <div x-data="{ expanded: false }" class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden group hover:border-blue-200 transition-colors">
-            <button @click="expanded = !expanded" class="w-full px-8 py-6 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div x-data="{ expanded: false }" class="bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-sm border border-border-main overflow-hidden group hover:border-primary/20 transition-all">
+            <button @click="expanded = !expanded" class="w-full px-5 sm:px-8 py-4 sm:py-6 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shadow-inner">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="text-left">
-                        <h3 class="text-sm font-black text-text-main uppercase tracking-widest">Rincian Jawaban Pilihan Ganda</h3>
-                        <p class="text-[10px] font-bold text-text-muted mt-1">Klik untuk melihat detail {{ count($pgAnswers) }} soal otomatis</p>
+                        <h3 class="text-[10px] sm:text-sm font-black text-text-main uppercase tracking-widest">Rincian Jawaban PG</h3>
+                        <p class="text-[8px] sm:text-[10px] font-bold text-text-muted mt-0.5 sm:mt-1 italic">Klik untuk melihat detail {{ count($pgAnswers) }} soal otomatis</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="bg-gray-100 text-text-muted text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{{ count($pgAnswers) }} Soal</span>
-                    <svg class="w-5 h-5 text-gray-400 transform transition-transform duration-300" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <span class="hidden sm:inline-block bg-gray-100 text-text-muted text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Detail</span>
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 transform transition-transform duration-300" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
             </button>
             
@@ -116,13 +111,13 @@
             </div>
 
             @foreach($essayGrades as $answerId => $data)
-            <div class="bg-white rounded-[2.5rem] shadow-lg shadow-black/5 border border-gray-100 overflow-hidden relative group hover:border-primary/30 transition-all duration-300">
+            <div class="bg-white rounded-[2rem] shadow-lg shadow-black/5 border border-border-main overflow-hidden relative group hover:border-primary/30 transition-all duration-300">
                  <!-- Number Badge -->
-                 <div class="absolute top-0 left-0 bg-gray-50 border-r border-b border-gray-100 rounded-br-[2rem] px-6 py-4 z-10">
-                     <span class="text-xl font-black text-gray-300 group-hover:text-primary transition-colors italic">#{{ $loop->iteration }}</span>
+                 <div class="absolute top-0 left-0 bg-gray-50 border-r border-b border-gray-100 rounded-br-[1.5rem] px-4 sm:px-6 py-2 sm:py-4 z-10">
+                     <span class="text-base sm:text-xl font-black text-gray-300 group-hover:text-primary transition-colors italic">#{{ $loop->iteration }}</span>
                  </div>
 
-                 <div class="p-8 pt-20 sm:pt-8 sm:pl-24">
+                 <div class="p-6 sm:p-8 pt-16 sm:pt-8 sm:pl-24">
                      <h4 class="text-lg font-bold text-text-main mb-8 leading-relaxed">{!! \App\Support\HtmlSanitizer::clean($data['question']) !!}</h4>
                      
                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -189,22 +184,24 @@
     </div>
 
     <!-- Fixed Bottom Actions -->
-    <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-gray-200 p-4 lg:px-8 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
-            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-6 py-3 rounded-xl text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
-                &larr; KEMBALI AJA
+    <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 sm:px-8 py-4 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
+                <span class="hidden sm:inline">KEMBALI KE DAFTAR</span>
+                <span class="sm:hidden">KEMBALI</span>
             </x-button>
             
-            <div class="flex items-center gap-4">
-                <div class="hidden sm:block text-right">
-                    <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Total Nilai Akhir</p>
-                    <p class="text-xl font-black text-primary">{{ $this->currentTotalScore }}</p>
+            <div class="flex items-center gap-3 sm:gap-6">
+                <div class="text-right">
+                    <p class="text-[8px] sm:text-[10px] font-bold text-text-muted uppercase tracking-widest leading-tight">Total Nilai</p>
+                    <p class="text-lg sm:text-2xl font-black text-primary leading-none mt-0.5 sm:mt-1">{{ $this->currentTotalScore }}</p>
                 </div>
                 @if(!$attempt->answers->isEmpty())
                     <!-- Save Button -->
-                    <x-button wire:click="finishGrading" variant="primary" class="px-8 py-3.5 rounded-xl text-xs font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-                        SIMPAN & SELESAI
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <x-button wire:click="finishGrading" variant="primary" class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs font-black shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
+                        <span class="hidden sm:inline">SIMPAN & SELESAI</span>
+                        <span class="sm:hidden">SIMPAN</span>
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </x-button>
                 @endif
             </div>

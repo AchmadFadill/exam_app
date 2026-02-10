@@ -2,54 +2,56 @@
     <x-slot name="title">{{ $title }}</x-slot>
 
     <!-- Header with Back Button -->
-    <div class="mb-6 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('teacher.questions') }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    <div class="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="{{ route('teacher.questions') }}" class="p-2 hover:bg-gray-100 rounded-xl transition-colors shrink-0 border border-border-subtle">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
-            <div>
+            <div class="min-w-0">
                 @if($renamingTitle)
                     <div class="flex items-center gap-2">
                         <input type="text" 
                                wire:model="newGroupTitle" 
                                wire:keydown.enter="updateGroupTitle"
-                               class="text-xl font-bold text-text-main border-b-2 border-primary focus:outline-none bg-transparent px-1 py-0.5"
+                               class="text-lg sm:text-xl font-black text-text-main border-b-2 border-primary focus:outline-none bg-transparent px-1 py-0.5 w-full max-w-[200px] sm:max-w-none"
                                autofocus>
-                        <button wire:click="updateGroupTitle" class="p-1 hover:bg-green-100 text-green-600 rounded-md transition-colors" title="Simpan">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        </button>
-                        <button wire:click="cancelRenaming" class="p-1 hover:bg-red-100 text-red-600 rounded-md transition-colors" title="Batal">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+                        <div class="flex gap-1 shrink-0">
+                            <button wire:click="updateGroupTitle" class="p-1.5 hover:bg-green-100 text-green-600 rounded-lg transition-colors" title="Simpan">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                            <button wire:click="cancelRenaming" class="p-1.5 hover:bg-red-100 text-red-600 rounded-lg transition-colors" title="Batal">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
                     </div>
                 @else
-                    <div class="flex items-center gap-3 group">
-                        <h2 class="text-2xl font-bold text-text-main">{{ $title }}</h2>
-                        <button wire:click="startRenaming" class="transition-opacity p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-primary" title="Ubah Nama">
+                    <div class="flex items-center gap-2 sm:gap-3 group">
+                        <h2 class="text-xl sm:text-2xl font-black text-text-main truncate uppercase tracking-tight">{{ $title }}</h2>
+                        <button wire:click="startRenaming" class="transition-opacity p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-primary" title="Ubah Nama">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </button>
                     </div>
                 @endif
-                <div class="flex items-center gap-3 mt-1">
-                    <p class="text-sm text-gray-500">{{ count($questions) }} Soal</p>
+                <div class="flex items-center gap-2.5 mt-0.5">
+                    <div class="text-[10px] sm:text-sm font-bold text-gray-400 italic">{{ count($questions) }} Soal</div>
                     <span class="text-gray-300">•</span>
-                    <p class="text-sm font-bold text-primary">Total Poin: {{ $totalScore }}</p>
+                    <div class="text-[10px] sm:text-sm font-black text-primary uppercase tracking-widest">Total: {{ $totalScore }} Poin</div>
                 </div>
             </div>
         </div>
-        <div class="flex gap-2">
-            <x-button variant="secondary" wire:click="distributeScores" title="Otomatis bagi rata nilai soal jadi total 100">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex gap-2 w-full lg:w-auto">
+            <x-button variant="secondary" wire:click="distributeScores" class="flex-1 lg:flex-none flex items-center justify-center py-2.5 sm:py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest" title="Otomatis bagi rata nilai soal jadi total 100">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
-                Distribusi Nilai (100)
+                Distribusi (100)
             </x-button>
-            <x-button variant="primary" wire:click="openAddModal">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <x-button variant="primary" wire:click="openAddModal" class="flex-1 lg:flex-none flex items-center justify-center py-2.5 sm:py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Tambah Soal
@@ -59,18 +61,19 @@
 
     <!-- Bulk Action Bar -->
     @if(count($selectedQuestions) > 0)
-    <div class="bg-primary text-white px-6 py-4 rounded-lg shadow-lg flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-primary text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-lg shadow-lg flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="font-medium">{{ count($selectedQuestions) }} soal dipilih</span>
+            <span class="text-xs sm:text-sm font-medium">{{ count($selectedQuestions) }} soal dipilih</span>
         </div>
-        <button wire:click="$set('showBulkDeleteModal', true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button wire:click="$set('showBulkDeleteModal', true)" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Hapus Terpilih
+            <span class="hidden sm:inline">Hapus Terpilih</span>
+            <span class="sm:hidden">Hapus</span>
         </button>
     </div>
     @endif

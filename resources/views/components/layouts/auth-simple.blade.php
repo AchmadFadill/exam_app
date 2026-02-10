@@ -31,7 +31,7 @@
                 </div>
 
                 <h1 class="text-2xl font-extrabold text-[var(--color-text-main)] tracking-tight">{{ $title }}</h1>
-                <p class="mt-1 text-xs text-[var(--color-text-muted)] font-medium">CBT {{ $app_name ?? 'SMAIT Baitul Muslim' }}</p>
+                <p class="mt-1 text-xs text-[var(--color-text-muted)] font-medium">CBT {{ $app_name ?? 'Sistem' }}</p>
             </div>
             
             @if($action)
@@ -74,7 +74,7 @@
             <!-- Bottom Branding -->
             <div class="mt-6 text-center border-t border-gray-100 pt-5">
                 <p class="text-[9px] text-slate-400 font-bold tracking-[0.25em] uppercase opacity-70">
-                    &copy; {{ date('Y') }} CBT {{ $app_name ?? 'SMAIT Baitul Muslim' }}
+                    &copy; {{ date('Y') }} CBT {{ $app_name ?? 'Sistem' }}
                 </p>
             </div>
         </div>

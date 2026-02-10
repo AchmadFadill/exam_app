@@ -15,22 +15,22 @@
     </div>
 
     <!-- Exam Filter/Select All -->
-    <div class="flex items-center gap-4 mb-8">
-        <div class="flex items-center gap-3 px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-2xl shadow-sm">
-            <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-5 h-5 rounded-lg text-primary border-border-main dark:border-slate-600 focus:ring-primary/20 bg-bg-surface dark:bg-slate-900">
-            <label for="selectAllExams" class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] cursor-pointer">Pilih Semua</label>
+    <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-slate-700 rounded-xl sm:rounded-2xl shadow-sm">
+            <input type="checkbox" wire:model.live="selectAll" id="selectAllExams" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-primary border-border-main dark:border-slate-600 focus:ring-primary/20 bg-bg-surface dark:bg-slate-900">
+            <label for="selectAllExams" class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest cursor-pointer">Pilih Semua</label>
         </div>
-        <div class="h-6 w-px bg-border-subtle dark:bg-slate-800"></div>
-        <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Menampilkan {{ count($exams) }} Ujian Aktif</p>
+        <div class="hidden sm:block h-6 w-px bg-border-subtle dark:bg-slate-800"></div>
+        <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Showing {{ count($exams) }} Exams</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($exams as $exam)
-        <div wire:key="{{ $exam['id'] }}" class="bg-bg-surface dark:bg-bg-surface rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main hover:border-primary/40 transition-all flex flex-col group">
-            <div class="p-8 flex-1">
-                <div class="flex justify-between items-start mb-8">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-6 h-6 rounded-xl text-primary border-border-main dark:border-slate-700 focus:ring-primary/20 bg-gray-50/50 dark:bg-slate-900">
-                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-inner
+        <div wire:key="{{ $exam['id'] }}" class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main hover:border-primary/40 transition-all flex flex-col group overflow-hidden">
+            <div class="p-6 sm:p-8 flex-1">
+                <div class="flex justify-between items-start mb-6 sm:mb-8">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <input type="checkbox" wire:model.live="selectedExams" value="{{ $exam['id'] }}" class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg sm:rounded-xl text-primary border-border-main dark:border-slate-700 focus:ring-primary/20 bg-gray-50/50 dark:bg-slate-900">
+                        <span class="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-inner
                         @if($exam['status'] == 'completed') bg-gray-100 text-gray-500
                         @elseif($exam['status'] == 'ongoing') bg-green-500/10 text-green-600 animate-pulse border border-green-500/20
                         @else bg-primary/10 text-primary border border-primary/20 @endif">
@@ -40,44 +40,44 @@
                         </span>
                     </div>
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" @click.away="open = false" class="p-2 text-text-muted hover:text-text-main transition-colors opacity-40 group-hover:opacity-100">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                        <button @click="open = !open" @click.away="open = false" class="p-1 sm:p-2 text-text-muted hover:text-text-main transition-colors opacity-40 group-hover:opacity-100">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                         </button>
-                        <div x-show="open" class="absolute right-0 mt-4 w-56 bg-bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl py-3 z-30 border border-border-main dark:border-slate-800 ring-1 ring-black/5">
-                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Ujian</a>
-                            <button type="button" wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</button>
-                            <div class="h-px bg-border-subtle dark:bg-slate-800 my-2"></div>
-                            <button type="button" wire:click="openDeleteModal({{ $exam['id'] }})" @click="open = false" class="w-full flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus Ujian</button>
+                        <div x-show="open" class="absolute right-0 mt-2 sm:mt-4 w-48 sm:w-56 bg-bg-surface dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl py-2 sm:py-3 z-30 border border-border-main dark:border-slate-800 ring-1 ring-black/5">
+                            <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="flex items-center gap-3 px-5 sm:px-6 py-2.5 sm:py-3 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Edit Ujian</a>
+                            <button type="button" wire:click="duplicateExam({{ $exam['id'] }})" class="w-full flex items-center gap-3 px-5 sm:px-6 py-2.5 sm:py-3 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">Duplikat Ujian</button>
+                            <div class="h-px bg-border-subtle dark:bg-slate-800 my-1.5 sm:my-2"></div>
+                            <button type="button" wire:click="openDeleteModal({{ $exam['id'] }})" @click="open = false" class="w-full flex items-center gap-3 px-5 sm:px-6 py-2.5 sm:py-3 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">Hapus Ujian</button>
                         </div>
                     </div>
                 </div>
 
-                <h3 class="font-black text-2xl text-text-main mb-2 tracking-tight group-hover:text-primary transition-colors italic leading-tight">{{ $exam['name'] }}</h3>
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="text-[10px] font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
+                <h3 class="font-black text-xl sm:text-2xl text-text-main mb-1.5 sm:mb-2 tracking-tight group-hover:text-primary transition-colors italic leading-tight">{{ $exam['name'] }}</h3>
+                <div class="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+                    <span class="text-[9px] sm:text-[10px] font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
                     <span class="w-1 h-1 rounded-full bg-border-main"></span>
-                    <span class="text-[10px] font-black text-text-muted uppercase tracking-widest">{{ $exam['class'] }}</span>
+                    <span class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest truncate max-w-[120px]">{{ $exam['class'] }}</span>
                 </div>
 
-                <div class="space-y-4 pt-6 border-t border-border-subtle dark:border-slate-800/50">
-                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="space-y-3 sm:space-y-4 pt-5 sm:pt-6 border-t border-border-subtle dark:border-slate-800/50">
+                    <div class="flex items-center text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 sm:mr-3 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         {{ date('d M Y', strtotime($exam['date'])) }} 
-                        <span class="mx-3 opacity-20">|</span> 
+                        <span class="mx-2 sm:mx-3 opacity-20">|</span> 
                         {{ $exam['start_time'] ?? '08:00' }} - {{ $exam['end_time'] ?? '09:30' }}
                     </div>
-                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="flex items-center text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 sm:mr-3 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         {{ $exam['duration'] }} Menit
                     </div>
-                    <div class="flex items-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-60">
-                        <svg class="w-4 h-4 mr-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    <div class="flex items-center text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2 sm:mr-3 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                         {{ $exam['questions_count'] }} Butir Soal
                     </div>
                 </div>
             </div>
 
-            <div class="px-8 py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-slate-800 grid grid-cols-2 gap-4 mt-auto">
+            <div class="px-6 sm:px-8 py-4 sm:py-6 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-slate-800 grid grid-cols-2 gap-3 sm:gap-4 mt-auto">
                 @if($exam['status'] == 'ongoing')
                     <a href="{{ route('teacher.monitoring.detail', $exam['id']) }}" class="col-span-2 flex justify-center items-center gap-3 bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -111,15 +111,15 @@
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedExams) > 0)
-    <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-10 py-5 rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-10 z-40 animate-bounce-in ring-4 ring-primary/20">
-        <div class="flex items-center gap-4">
-            <span class="bg-primary text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-lg">{{ count($selectedExams) }}</span>
-            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Ujian Terpilih</span>
+    <div class="fixed bottom-6 sm:bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-6 sm:px-10 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-6 sm:gap-10 z-40 ring-4 ring-primary/20">
+        <div class="flex items-center gap-3 sm:gap-4">
+            <span class="bg-primary text-white text-[10px] sm:text-xs font-black px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl shadow-lg">{{ count($selectedExams) }}</span>
+            <span class="text-[9px] sm:text-xs font-black text-white uppercase tracking-widest opacity-80 whitespace-nowrap">Terpilih</span>
         </div>
-        <div class="h-8 w-px bg-white/10"></div>
-        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-3 text-xs font-black text-white px-4 py-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
-            <div class="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="h-6 sm:h-8 w-px bg-white/10"></div>
+        <button wire:click="openBulkDeleteModal" class="group flex items-center gap-2 sm:gap-3 text-[9px] sm:text-xs font-black text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all uppercase tracking-widest">
+            <div class="p-1.5 sm:p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-red-500/30 text-white/50 group-hover:text-red-500 transition-all shadow-inner shrink-0">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </div>

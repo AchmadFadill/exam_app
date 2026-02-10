@@ -14,11 +14,10 @@
 <body class="font-sans antialiased bg-bg-app text-text-main">
     <div x-data="{ sidebarOpen: false }" class="min-h-screen flex flex-col md:flex-row">
         
-        <!-- Mobile Header -->
         <div class="md:hidden bg-bg-surface border-b border-border-main p-4 flex justify-between items-center sticky top-0 z-20">
-            <div class="flex items-center gap-2">
-                <div class="font-bold text-xl tracking-wide text-primary">
-                    <span class="text-secondary">SMAIT</span> CBT
+            <div class="flex items-center gap-2 overflow-hidden">
+                <div class="font-black text-lg sm:text-xl tracking-wide text-primary truncate max-w-[200px] sm:max-w-none">
+                    {{ $app_name ?? 'CBT' }}
                 </div>
             </div>
             <button @click="sidebarOpen = !sidebarOpen" class="text-text-muted hover:text-primary focus:outline-none">

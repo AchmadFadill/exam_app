@@ -11,28 +11,28 @@
     />
 
     <!-- Student Info Card -->
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 pointer-events-none"></div>
         
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="flex items-center gap-5">
-                <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner">
-                    <span class="text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+            <div class="flex items-center gap-4 sm:gap-5">
+                <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner shrink-0">
+                    <span class="text-xl sm:text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
                 </div>
                 <div>
-                    <h2 class="text-lg font-black text-text-main">{{ auth()->user()->name }}</h2>
-                    <p class="text-xs font-medium text-text-muted">NIS: {{ auth()->user()->student->nis ?? '-' }}</p>
+                    <h2 class="text-base sm:text-lg font-black text-text-main line-clamp-1">{{ auth()->user()->name }}</h2>
+                    <p class="text-[10px] sm:text-xs font-medium text-text-muted">NIS: {{ auth()->user()->student->nis ?? '-' }}</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 md:gap-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-4 md:pt-0 md:pl-8">
+            <div class="flex items-center gap-6 sm:gap-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-5 md:pt-0 md:pl-8">
                 <div>
-                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Kelas</p>
-                    <p class="text-sm font-black text-text-main">{{ auth()->user()->student->classroom->name ?? 'Belum ada kelas' }}</p>
+                    <p class="text-[8px] sm:text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Kelas</p>
+                    <p class="text-xs sm:text-sm font-black text-text-main">{{ auth()->user()->student->classroom->name ?? 'Belum ada kelas' }}</p>
                 </div>
                 <div>
-                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Wali Kelas</p>
-                    <p class="text-sm font-black text-text-main">{{ auth()->user()->student->classroom->teacher->user->name ?? '-' }}</p>
+                    <p class="text-[8px] sm:text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Wali Kelas</p>
+                    <p class="text-xs sm:text-sm font-black text-text-main line-clamp-1">{{ auth()->user()->student->classroom->teacher->user->name ?? '-' }}</p>
                 </div>
             </div>
         </div>
@@ -52,52 +52,52 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             @forelse($active_exams as $exam)
-            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-border-main dark:border-white/5 overflow-hidden hover:border-primary/40 transition-all relative group">
+            <div class="bg-bg-surface dark:bg-slate-900 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl shadow-black/5 border border-border-main dark:border-white/5 overflow-hidden hover:border-primary/40 transition-all relative group">
                  @if($exam['is_urgent'])
-                <div class="absolute top-0 right-0 mt-6 mr-8">
-                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-red-500/10 text-red-600 animate-pulse border border-red-500/20">
+                <div class="absolute top-0 right-0 mt-4 sm:mt-6 mr-5 sm:mr-8">
+                    <span class="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest bg-red-500/10 text-red-600 animate-pulse border border-red-500/20">
                         SEGERA BERAKHIR
                     </span>
                 </div>
                 @endif
                 
-                <div class="p-10">
+                <div class="p-6 sm:p-10">
                     <div class="flex items-start justify-between">
                         <div>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-lg">
+                            <span class="px-2.5 py-1 bg-primary/10 text-primary text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] rounded-lg">
                                 {{ $exam['subject'] }}
                             </span>
-                            <h4 class="mt-6 text-3xl font-black text-text-main group-hover:text-primary transition-colors tracking-tight italic leading-tight">
+                            <h4 class="mt-4 sm:mt-6 text-2xl sm:text-3xl font-black text-text-main group-hover:text-primary transition-colors tracking-tight italic leading-tight">
                                 {{ $exam['title'] }}
                             </h4>
-                            <p class="text-text-muted text-[10px] font-bold uppercase tracking-widest mt-2 opacity-50">Guru Pengampu: {{ $exam['teacher'] }}</p>
+                            <p class="text-text-muted text-[8px] sm:text-[10px] font-bold uppercase tracking-widest mt-2 opacity-50">Guru: {{ $exam['teacher'] }}</p>
                         </div>
                     </div>
 
-                    <div class="mt-10 flex items-center gap-10 text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="mt-6 sm:mt-10 flex flex-wrap items-center gap-5 sm:gap-10 text-[8px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-60">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             <span>{{ $exam['duration'] }} Menit</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                             <span>{{ $exam['questions_count'] }} Soal</span>
                         </div>
                     </div>
 
-                    <div class="mt-10 pt-10 border-t border-border-subtle dark:border-slate-800 flex items-center justify-between">
+                    <div class="mt-6 sm:mt-10 pt-6 sm:pt-10 border-t border-border-subtle dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
                         <div>
-                            <p class="text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Cut-off Time</p>
-                            <p class="font-black text-text-main uppercase tracking-widest">{{ $exam['end_time'] }} WIB</p>
+                            <p class="text-[8px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Cut-off Time</p>
+                            <p class="text-sm sm:text-base font-black text-text-main uppercase tracking-widest">{{ $exam['end_time'] }} WIB</p>
                         </div>
-                        <a href="{{ route('student.exam.start', $exam['id']) }}" class="group/btn inline-flex items-center px-8 py-4 bg-primary hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-100">
+                        <a href="{{ route('student.exam.start', $exam['id']) }}" class="group/btn w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 bg-primary hover:bg-blue-700 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-100">
                             Kerjakan Sekarang
-                            <svg class="ml-3 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                            <svg class="ml-2 sm:ml-3 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </a>
                     </div>
                 </div>
-                <div class="h-2 w-full bg-gray-100 dark:bg-slate-800">
-                    <div class="h-2 bg-primary rounded-r-full shadow-lg shadow-primary/20" style="width: 45%"></div>
+                <div class="h-1.5 sm:h-2 w-full bg-gray-100 dark:bg-slate-800">
+                    <div class="h-full bg-primary rounded-r-full shadow-lg shadow-primary/20" style="width: 45%"></div>
                 </div>
             </div>
             @empty
@@ -117,19 +117,19 @@
             <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Jadwal Mendatang</h3>
             <div class="bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-black/5 border border-white/5 divide-y divide-border-subtle dark:divide-slate-800 overflow-hidden">
                 @forelse($upcoming_exams as $exam)
-                <div class="p-8 flex items-center gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/20 transition-all group">
-                    <div class="shrink-0 w-20 h-20 bg-gray-100/50 dark:bg-slate-800 rounded-[1.5rem] flex flex-col items-center justify-center border border-border-main dark:border-slate-700 shadow-inner transition-transform group-hover:scale-105">
-                         <svg class="w-8 h-8 text-text-muted opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <div class="p-5 sm:p-8 flex items-center gap-4 sm:gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/20 transition-all group">
+                    <div class="shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gray-100/50 dark:bg-slate-800 rounded-[1.2rem] sm:rounded-[1.5rem] flex flex-col items-center justify-center border border-border-main dark:border-slate-700 shadow-inner transition-transform group-hover:scale-105">
+                         <svg class="w-6 h-6 sm:w-8 sm:h-8 text-text-muted opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="text-[8px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">{{ $exam['subject'] }}</span>
+                        <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                            <span class="text-[7px] sm:text-[8px] font-black text-primary bg-primary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest">{{ $exam['subject'] }}</span>
                         </div>
-                        <h4 class="text-xl font-black text-text-main truncate tracking-tight uppercase group-hover:text-primary transition-colors italic leading-tight">{{ $exam['title'] }}</h4>
-                        <p class="text-[10px] font-bold text-text-muted mt-2 uppercase tracking-widest opacity-40">{{ date('d M Y', strtotime($exam['date'])) }}</p>
+                        <h4 class="text-base sm:text-xl font-black text-text-main truncate tracking-tight uppercase group-hover:text-primary transition-colors italic leading-tight">{{ $exam['title'] }}</h4>
+                        <p class="text-[8px] sm:text-[10px] font-bold text-text-muted mt-1 sm:mt-2 uppercase tracking-widest opacity-40">{{ date('d M Y', strtotime($exam['date'])) }}</p>
                     </div>
                      <div class="text-right sr-only sm:not-sr-only">
-                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-gray-100 dark:bg-slate-800 text-text-muted opacity-60">
+                        <span class="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest bg-gray-100 dark:bg-slate-800 text-text-muted opacity-60">
                             TERJADWAL
                         </span>
                     </div>
@@ -150,12 +150,12 @@
         <div class="space-y-8">
             <h3 class="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">Statistik Belajar</h3>
             
-            <div class="bg-gradient-to-br from-primary via-blue-700 to-indigo-900 rounded-[2rem] shadow-2xl p-8 text-white relative overflow-hidden group">
+            <div class="bg-gradient-to-br from-primary via-blue-700 to-indigo-900 rounded-[2rem] shadow-2xl p-6 sm:p-8 text-white relative overflow-hidden group">
                 <div class="relative z-10">
-                    <p class="text-blue-100/60 text-[10px] font-black uppercase tracking-widest">Rata-rata Nilai</p>
-                    <h2 class="text-6xl font-black mt-2 tracking-tighter">{{ $stats['avg_score'] }}</h2>
-                    <div class="mt-10 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-primary bg-white px-5 py-3 rounded-2xl w-fit shadow-xl transition-transform group-hover:scale-105 active:scale-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    <p class="text-blue-100/60 text-[8px] sm:text-[10px] font-black uppercase tracking-widest">Rata-rata Nilai</p>
+                    <h2 class="text-4xl sm:text-6xl font-black mt-2 tracking-tighter">{{ $stats['avg_score'] }}</h2>
+                    <div class="mt-8 sm:mt-10 flex items-center gap-3 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-primary bg-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl w-fit shadow-xl transition-transform group-hover:scale-105 active:scale-100">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                         <span>Capaian: Top 10%</span>
                     </div>
                 </div>

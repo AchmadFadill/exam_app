@@ -2,8 +2,8 @@
 
 <div class="space-y-8">
     <!-- Hero & Quick Stats Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-300">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div class="lg:col-span-2 bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-6 sm:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-10 relative overflow-hidden transition-all duration-300">
             <div class="relative z-10 flex-1">
                 <x-page-header 
                     title="Halaman" 
@@ -15,18 +15,18 @@
             </div>
             
             <!-- Quick Stats Mini-Grid -->
-            <div class="grid grid-cols-2 gap-5 w-full md:w-auto relative z-10">
-                <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
-                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">UJIAN HARI INI</div>
-                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['exams_today'] }}</div>
+            <div class="grid grid-cols-2 gap-3 sm:gap-5 w-full md:w-auto relative z-10">
+                <div class="p-4 sm:p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.2rem] sm:rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
+                    <div class="text-[8px] sm:text-[10px] text-text-muted font-black uppercase tracking-widest mb-1 sm:mb-2 opacity-60 group-hover:opacity-100 transition-opacity">UJIAN HARI INI</div>
+                    <div class="text-2xl sm:text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['exams_today'] }}</div>
                 </div>
-                <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
-                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">SISWA AKTIF</div>
-                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['active_students'] }}</div>
+                <div class="p-4 sm:p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.2rem] sm:rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group">
+                    <div class="text-[8px] sm:text-[10px] text-text-muted font-black uppercase tracking-widest mb-1 sm:mb-2 opacity-60 group-hover:opacity-100 transition-opacity">SISWA AKTIF</div>
+                    <div class="text-2xl sm:text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['active_students'] }}</div>
                 </div>
-                <div class="p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group col-span-2">
-                    <div class="text-[10px] text-text-muted font-black uppercase tracking-widest mb-2 opacity-60 group-hover:opacity-100 transition-opacity">PERMINTAAN RESET PASSWORD</div>
-                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['pending_password_requests'] }}</div>
+                <div class="p-4 sm:p-6 bg-gray-50/50 dark:bg-slate-800/30 rounded-[1.2rem] sm:rounded-[1.5rem] border border-border-subtle dark:border-border-subtle flex flex-col items-center justify-center text-center shadow-inner group col-span-2">
+                    <div class="text-[8px] sm:text-[10px] text-text-muted font-black uppercase tracking-widest mb-1 sm:mb-2 opacity-60 group-hover:opacity-100 transition-opacity">PERMINTAAN RESET PASSWORD</div>
+                    <div class="text-2xl sm:text-3xl font-black text-text-main tracking-tighter">{{ $quick_stats['pending_password_requests'] }}</div>
                 </div>
             </div>
 
@@ -35,9 +35,9 @@
         </div>
 
         <!-- School Info Card -->
-        <div class="bg-gradient-to-br from-primary to-blue-700 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden flex flex-col justify-between">
+        <div class="bg-gradient-to-br from-primary to-blue-700 rounded-[2rem] shadow-lg p-6 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between">
              <div class="relative z-10">
-                <h3 class="text-xl font-bold">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</h3>
+                <h3 class="text-lg sm:text-xl font-bold">{{ $app_name ?? 'Sistem CBT' }}</h3>
                 <p class="text-blue-100 text-sm mt-1 opacity-80">Portal Administrasi Utama</p>
                 
                 <div class="mt-8 space-y-3">
@@ -157,11 +157,11 @@
     </div>
 
     <!-- Quick Management & System Summary -->
-    <div class="bg-slate-900 rounded-[3rem] p-12 text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/5">
-        <div class="relative z-10 lg:w-1/2 text-center lg:text-left">
-            <h2 class="text-4xl font-black mb-4 tracking-tighter italic uppercase">Panel <span class="text-primary not-italic">Kendali</span></h2>
-            <p class="text-slate-400 text-lg mb-10 leading-relaxed font-medium">Kelola sistem CBT mulai dari data pengguna hingga pengaturan server secara real-time.</p>
-            <div class="grid grid-cols-2 gap-5">
+    <div class="bg-slate-900 rounded-[2.5rem] sm:rounded-[3rem] p-6 sm:p-12 text-white flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12 relative overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/5">
+        <div class="relative z-10 lg:w-1/2 text-center lg:text-left w-full">
+            <h2 class="text-2xl sm:text-4xl font-black mb-3 sm:mb-4 tracking-tighter italic uppercase">Panel <span class="text-primary not-italic">Kendali</span></h2>
+            <p class="text-slate-400 text-sm sm:text-lg mb-6 sm:mb-10 leading-relaxed font-medium">Kelola sistem CBT mulai dari data pengguna hingga pengaturan server secara real-time.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
                 <a href="{{ route('admin.students') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Siswa & Kelas
                 </a>

@@ -13,50 +13,53 @@
         </div>
         
         <!-- Filters & Actions -->
-        <div class="flex gap-2 flex-wrap w-full sm:w-auto">
-            <select wire:model.live="filterSubject" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm">
-                <option value="">Semua Mata Pelajaran</option>
+        <div class="flex gap-2.5 flex-wrap w-full sm:w-auto">
+            <select wire:model.live="filterSubject" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-xs sm:text-sm bg-white">
+                <option value="">Semua Mapel</option>
                 @foreach($subjects as $subject)
                 <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="filterType" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm">
+            <select wire:model.live="filterType" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-xs sm:text-sm bg-white">
                 <option value="">Semua Tipe</option>
                 <option value="multiple_choice">Pilihan Ganda</option>
                 <option value="essay">Essay</option>
             </select>
 
-            <x-button wire:click="openImportModal" variant="secondary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import
-            </x-button>
+            <div class="flex gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                <x-button wire:click="openImportModal" variant="secondary" class="flex-1 sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap py-2 sm:py-2.5 text-xs sm:text-sm font-bold">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Import
+                </x-button>
 
-            <x-button wire:click="openAddModal" variant="primary" class="flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Soal
-            </x-button>
+                <x-button wire:click="openAddModal" variant="primary" class="flex-1 sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap py-2 sm:py-2.5 text-xs sm:text-sm font-bold shadow-lg shadow-primary/20">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Soal
+                </x-button>
+            </div>
         </div>
     </div>
 
     <!-- Bulk Action Bar -->
     @if(count($selectedQuestions) > 0)
-    <div class="bg-primary text-white px-6 py-4 rounded-lg shadow-lg flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-primary text-white px-5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-lg shadow-lg flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="font-medium">{{ count($selectedQuestions) }} soal dipilih</span>
+            <span class="text-xs sm:text-sm font-medium">{{ count($selectedQuestions) }} soal dipilih</span>
         </div>
-        <button wire:click="$set('showBulkDeleteModal', true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button wire:click="$set('showBulkDeleteModal', true)" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Hapus Terpilih
+            <span class="hidden sm:inline">Hapus Terpilih</span>
+            <span class="sm:hidden">Hapus</span>
         </button>
     </div>
     @endif
@@ -64,17 +67,17 @@
     <!-- Question Group Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($groupedQuestions as $title => $questions)
-        <x-card class="hover:shadow-lg transition-shadow">
-            <div class="p-6">
+        <x-card class="hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
+            <div class="p-5 sm:p-6">
                 <!-- Group Header -->
                 <div class="flex items-start justify-between mb-4">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-bold text-text-main mb-2">{{ $title }}</h3>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base sm:text-lg font-black text-text-main mb-2 truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $title }}</h3>
+                        <div class="flex items-center gap-1.5 sm:gap-2 mb-3">
+                            <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold rounded-lg border border-green-200">
                                 {{ $questions->first()->subject->name }}
                             </span>
-                            <span class="px-2.5 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full">
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] sm:text-xs font-bold rounded-lg border border-blue-200">
                                 {{ count($questions) }} soal
                             </span>
                         </div>

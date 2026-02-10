@@ -7,7 +7,6 @@
             title="Pengaturan" 
             subtitle="Konfigurasi pusat identitas dan pengaturan sistem CBT" 
         />
-
     </div>
 
     @if (session('success'))
@@ -19,26 +18,26 @@
 
     <div class="space-y-8 max-w-4xl mx-auto">
         <!-- Identitas Sekolah Card -->
-        <div class="bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 transition-all">
-            <div class="p-8 border-b border-border-subtle dark:border-border-subtle flex items-center gap-4 bg-gray-50/50 dark:bg-slate-800/30 rounded-t-[2rem]">
-                <div class="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+        <div class="bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 transition-all overflow-hidden">
+            <div class="p-5 sm:p-8 border-b border-border-subtle dark:border-border-subtle flex items-center gap-4 bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 text-primary rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Identitas Sekolah</h3>
+                    <h3 class="font-black text-lg sm:text-xl text-text-main tracking-tight uppercase">Identitas Sekolah</h3>
                 </div>
             </div>
 
-            <div class="p-8 space-y-8">
+            <div class="p-5 sm:p-8 space-y-6 sm:space-y-8">
                 <div>
-                    <label class="block text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Nama Sekolah / Lembaga</label>
-                    <input type="text" wire:model="schoolName" class="w-full px-6 py-4 rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-lg" placeholder="Contoh: SMAIT Baitul Muslim">
-                    @error('schoolName') <span class="text-red-500 text-xs mt-2 block font-bold leading-none">{{ $message }}</span> @enderror
+                    <label class="block text-[10px] sm:text-sm font-black text-text-main mb-2 uppercase tracking-widest opacity-70">Nama Sekolah / Lembaga</label>
+                    <input type="text" wire:model="schoolName" class="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border-border-main dark:border-border-main dark:bg-slate-800/50 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-bold text-base sm:text-lg" placeholder="Contoh: SMAIT Baitul Muslim">
+                    @error('schoolName') <span class="text-red-500 text-[10px] mt-2 block font-bold leading-none">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-sm font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Logo Sekolah</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <label class="block text-[10px] sm:text-sm font-black text-text-main mb-3 uppercase tracking-widest opacity-70">Logo Sekolah</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div class="relative group">
                             <input type="file" wire:model="logo" id="logo-upload" class="hidden">
                             <label for="logo-upload" class="flex flex-col items-center justify-center h-48 border-2 border-dashed border-border-main dark:border-border-main rounded-[2rem] hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group overflow-hidden relative">
@@ -87,18 +86,18 @@
         </div>
 
         <!-- Akademik Card -->
-        <div class="bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5">
-            <div class="p-8 border-b border-border-subtle dark:border-border-subtle flex items-center gap-4 bg-gray-50/50 dark:bg-slate-800/30 rounded-t-[2rem]">
-                <div class="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <div class="bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 overflow-hidden">
+            <div class="p-5 sm:p-8 border-b border-border-subtle dark:border-border-subtle flex items-center gap-4 bg-gray-50/50 dark:bg-slate-800/30">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500/10 text-amber-600 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-black text-xl text-text-main tracking-tight uppercase">Pengaturan Akademik</h3>
+                    <h3 class="font-black text-lg sm:text-xl text-text-main tracking-tight uppercase">Pengaturan Akademik</h3>
                 </div>
             </div>
 
-            <div class="p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="p-5 sm:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                     <div>
                         <x-select 
                             label="Tahun Ajaran" 
@@ -127,9 +126,11 @@
                 </p>
             </div>
         </div>
-        <x-button wire:click="save" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-8 py-3.5 align-right">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-            Simpan Konfigurasi
-        </x-button>
+        <div class="flex justify-end pt-4">
+            <x-button wire:click="save" variant="primary" class="w-full sm:w-auto font-black uppercase text-[10px] tracking-widest px-8 py-3.5">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                Simpan Konfigurasi
+            </x-button>
+        </div>
     </div>
 </div>

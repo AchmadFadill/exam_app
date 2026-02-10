@@ -1,28 +1,32 @@
 <div>
     <x-header title="Data Siswa" subtitle="Kelola dan pantau seluruh data siswa di sistem.">
-        <x-button wire:click="exportStudents" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Export
-        </x-button>
-        <x-button wire:click="openImportModal" variant="secondary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Import
-        </x-button>
-        <x-button wire:click="openAddModal" variant="primary" class="font-black uppercase text-[10px] tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Siswa
-        </x-button>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <x-button wire:click="exportStudents" variant="secondary" class="flex-1 sm:flex-none font-black uppercase text-[10px] tracking-widest px-4 sm:px-6 py-3">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span class="hidden xs:inline">Export</span>
+                <span class="xs:hidden">XLS</span>
+            </x-button>
+            <x-button wire:click="openImportModal" variant="secondary" class="flex-1 sm:flex-none font-black uppercase text-[10px] tracking-widest px-4 sm:px-6 py-3">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span class="hidden xs:inline">Import</span>
+                <span class="xs:hidden">IMP</span>
+            </x-button>
+            <x-button wire:click="openAddModal" variant="primary" class="w-full sm:w-auto font-black uppercase text-[10px] tracking-widest px-6 py-3">
+                <svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Siswa
+            </x-button>
+        </div>
     </x-header>
 
-    <div class="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
+    <div class="mb-6 sm:mb-10 flex flex-col lg:flex-row justify-between items-stretch lg:items-end gap-4 sm:gap-6">
         <!-- Search Bar (Left - fills space) -->
-        <div class="relative w-full sm:flex-1 sm:max-w-lg group">
+        <div class="relative flex-1 group">
             <span class="absolute left-5 top-1/2 transform -translate-y-1/2 pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -32,7 +36,7 @@
         </div>
 
         <!-- Classroom Filter -->
-        <div class="w-full sm:w-auto sm:min-w-[280px]">
+        <div class="w-full lg:w-72">
             <x-select 
                 wire:model.live="filterClassroom" 
                 :options="$classrooms->map(fn($c) => ['value' => $c->id, 'label' => $c->name . ' - ' . $c->level])->prepend(['value' => '', 'label' => 'Semua Kelas'])->toArray()" 
@@ -45,56 +49,63 @@
     <x-table>
         <x-table.thead>
             <x-table.tr>
-                <x-table.th class="w-4">
+                <x-table.th class="w-10">
                     <div class="flex items-center justify-center">
                         <input type="checkbox" wire:model.live="selectAll" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                     </div>
                 </x-table.th>
-                <x-table.th>Nama Siswa</x-table.th>
-                <x-table.th>Kelas</x-table.th>
-                <x-table.th>Email</x-table.th>
+                <x-table.th>Siswa / NIS</x-table.th>
+                <x-table.th class="hidden md:table-cell">Kelas</x-table.th>
+                <x-table.th class="hidden lg:table-cell">Email</x-table.th>
                 <x-table.th class="text-right">Aksi</x-table.th>
             </x-table.tr>
         </x-table.thead>
-        <tbody class="divide-y divide-gray-50">
+        <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
             @forelse($students as $student)
-            <x-table.tr>
+            <x-table.tr class="group">
                 <x-table.td class="text-center">
                     <div class="flex items-center justify-center">
                         <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student->id }}" class="w-5 h-5 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
                     </div>
                 </x-table.td>
                 <x-table.td>
-                    <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs shadow-inner group-hover:scale-110 transition-transform">
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <div class="hidden sm:flex h-12 w-12 rounded-2xl bg-primary/10 text-primary items-center justify-center font-black text-xs shadow-inner group-hover:scale-110 transition-transform shrink-0">
                             {{ substr($student->user->name, 0, 2) }}
                         </div>
                         <div class="min-w-0">
-                            <div class="font-black text-text-main tracking-tight uppercase text-sm truncate group-hover:text-primary transition-colors">{{ $student->user->name }}</div>
-                            <div class="text-[10px] font-black text-text-muted uppercase tracking-widest ">NIS: {{ $student->nis }}</div>
+                            <div class="font-black text-text-main tracking-tight uppercase text-sm truncate group-hover:text-primary transition-colors leading-tight">{{ $student->user->name }}</div>
+                            <div class="text-[10px] font-black text-text-muted uppercase tracking-widest mt-0.5 whitespace-nowrap">NIS: {{ $student->nis }}</div>
+                            <div class="md:hidden mt-1.5 flex flex-wrap gap-1">
+                                <span class="px-1.5 py-0.5 rounded-lg bg-blue-50 dark:bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest">
+                                    {{ $student->classroom?->name ?? '-' }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </x-table.td>
-                <x-table.td>
+                <x-table.td class="hidden md:table-cell">
                     <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
                         {{ $student->classroom?->name ?? '-' }}
                     </span>
                 </x-table.td>
-                <x-table.td class="font-bold text-text-muted lowercase">{{ $student->user->email }}</x-table.td>
+                <x-table.td class="hidden lg:table-cell font-bold text-text-muted lowercase text-sm truncate">
+                    {{ $student->user->email }}
+                </x-table.td>
                 <x-table.td class="text-right">
-                    <div class="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
-                        <x-button wire:click="openResetPasswordModal({{ $student->id }})" variant="warning" size="sm" square="true" title="Reset Password">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex justify-end gap-1.5 sm:gap-3 opacity-100 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity">
+                        <x-button wire:click="openResetPasswordModal({{ $student->id }})" variant="warning" size="sm" square="true" title="Reset Password" class="!p-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                             </svg>
                         </x-button>
-                        <x-button wire:click="openEditModal({{ $student->id }})" variant="primary" size="sm" square="true" title="Edit">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <x-button wire:click="openEditModal({{ $student->id }})" variant="primary" size="sm" square="true" title="Edit" class="!p-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </x-button>
-                        <x-button wire:click="openDeleteModal({{ $student->id }})" variant="danger" size="sm" square="true" title="Hapus">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <x-button wire:click="openDeleteModal({{ $student->id }})" variant="danger" size="sm" square="true" title="Hapus" class="!p-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </x-button>
@@ -282,32 +293,32 @@
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedStudents) > 0)
-    <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 dark:bg-slate-800 px-10 py-5 rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-10 z-40 animate-bounce-in ring-4 ring-primary/20">
-        <div class="flex items-center gap-4">
-            <span class="bg-primary text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-lg">{{ count($selectedStudents) }}</span>
-            <span class="text-xs font-black text-white uppercase tracking-widest opacity-80">Siswa Terpilih</span>
+    <div class="fixed bottom-6 sm:bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md px-4 sm:px-10 py-3 sm:py-5 rounded-2xl sm:rounded-[2rem] shadow-2xl border border-white/10 flex items-center gap-3 sm:gap-10 z-40 animate-bounce-in ring-4 ring-primary/20 w-[calc(100%-2rem)] sm:w-auto overflow-x-auto">
+        <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+            <span class="bg-primary text-white text-[10px] sm:text-xs font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl shadow-lg">{{ count($selectedStudents) }}</span>
+            <span class="text-[10px] sm:text-xs font-black text-white uppercase tracking-widest opacity-80 whitespace-nowrap">Siswa Pilih</span>
         </div>
-        <div class="h-8 w-px bg-white/10"></div>
-        <x-button wire:click="openBulkClassModal" variant="primary" size="sm" class="uppercase tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Pindah Kelas
-        </x-button>
-        <div class="h-8 w-px bg-white/10"></div>
-        <x-button wire:click="openBulkResetPasswordModal" variant="warning" size="sm" class="uppercase tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-            </svg>
-            Reset Pass
-        </x-button>
-        <div class="h-8 w-px bg-white/10"></div>
-        <x-button wire:click="openBulkDeleteModal" variant="danger" size="sm" class="uppercase tracking-widest px-6 py-3">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Hapus Massal
-        </x-button>
+        <div class="h-6 sm:h-8 w-px bg-white/10 shrink-0"></div>
+        <div class="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
+            <x-button wire:click="openBulkClassModal" variant="primary" size="sm" class="uppercase tracking-widest px-3 sm:px-6 py-2 sm:py-3 text-[9px] sm:text-[10px] whitespace-nowrap shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Kelas
+            </x-button>
+            <x-button wire:click="openBulkResetPasswordModal" variant="warning" size="sm" class="uppercase tracking-widest px-3 sm:px-6 py-2 sm:py-3 text-[9px] sm:text-[10px] whitespace-nowrap shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+                Pass
+            </x-button>
+            <x-button wire:click="openBulkDeleteModal" variant="danger" size="sm" class="uppercase tracking-widest px-3 sm:px-6 py-2 sm:py-3 text-[9px] sm:text-[10px] whitespace-nowrap shrink-0">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Hapus
+            </x-button>
+        </div>
     </div>
     @endif
 

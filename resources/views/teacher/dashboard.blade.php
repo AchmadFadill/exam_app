@@ -7,33 +7,33 @@
         subtitle="Ringkasan aktivitas dan kendali ujian hari ini" 
     />
 
-    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-12 sm:-mr-16 -mt-12 sm:-mt-16 pointer-events-none"></div>
 
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="flex items-center gap-5">
-                <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner">
-                    <span class="text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+            <div class="flex items-center gap-4 sm:gap-5">
+                <div class="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner shrink-0">
+                    <span class="text-xl sm:text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
                 </div>
-                <div>
-                    <h2 class="text-lg font-black text-text-main">{{ auth()->user()->name }}</h2>
-                    <p class="text-xs font-medium text-text-muted">Wali Kelas: {{ $homeroom_class ?? 'Belum ditetapkan' }}</p>
+                <div class="min-w-0">
+                    <h2 class="text-base sm:text-lg font-black text-text-main truncate">{{ auth()->user()->name }}</h2>
+                    <p class="text-[10px] sm:text-xs font-medium text-text-muted truncate">Wali Kelas: {{ $homeroom_class ?? 'Belum ditetapkan' }}</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 md:gap-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-4 md:pt-0 md:pl-8">
+            <div class="flex items-center gap-6 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-5 md:pt-0 md:pl-8">
                 <div>
-                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Mata Pelajaran</p>
+                    <p class="text-[8px] sm:text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Mata Pelajaran</p>
                     @if(count($taught_subjects))
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-1.5 sm:gap-2">
                             @foreach($taught_subjects as $subject)
-                                <span class="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-primary/10 text-primary text-[8px] sm:text-[10px] font-black uppercase tracking-widest">
                                     {{ $subject }}
                                 </span>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-sm font-black text-text-main">Belum ada mata pelajaran</p>
+                        <p class="text-xs sm:text-sm font-black text-text-main">Belum ada mata pelajaran</p>
                     @endif
                 </div>
             </div>
@@ -102,26 +102,26 @@
 
             <!-- Quick Actions Grid -->
              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <a href="{{ route('teacher.questions') }}" class="group p-8 bg-gradient-to-br from-indigo-600 to-primary rounded-[2rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[1]">
+                <a href="{{ route('teacher.questions') }}" class="group p-6 sm:p-8 bg-gradient-to-br from-indigo-600 to-primary rounded-[1.5rem] sm:rounded-[2rem] shadow-xl shadow-primary/20 text-white relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[1]">
                     <div class="relative z-10">
-                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:rotate-6 transition-transform">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 backdrop-blur-sm group-hover:rotate-6 transition-transform">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                         </div>
-                        <h4 class="font-black text-2xl tracking-tight italic">Buat <span class="not-italic">Ujian</span></h4>
-                        <p class="text-indigo-100 text-sm mt-2 font-bold opacity-80 uppercase tracking-widest">Bank Soal</p>
+                        <h4 class="font-black text-xl sm:text-2xl tracking-tight italic">Buat <span class="not-italic">Ujian</span></h4>
+                        <p class="text-indigo-100 text-[10px] sm:text-sm mt-1 sm:mt-2 font-bold opacity-80 uppercase tracking-widest">Bank Soal</p>
                     </div>
                     <div class="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity transform translate-x-1/4 translate-y-1/4 rotate-12 pointer-events-none">
-                        <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <svg class="w-32 h-32 sm:w-48 h-48" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
                 </a>
 
-                <a href="{{ route('teacher.exams.index') }}" class="group p-8 bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[2rem] shadow-xl shadow-black/5 hover:border-primary/30 transition-all hover:scale-[1.02] active:scale-[1] relative overflow-hidden">
+                <a href="{{ route('teacher.exams.index') }}" class="group p-6 sm:p-8 bg-bg-surface dark:bg-bg-surface border border-border-main dark:border-border-main rounded-[1.5rem] sm:rounded-[2rem] shadow-xl shadow-black/5 hover:border-primary/30 transition-all hover:scale-[1.02] active:scale-[1] relative overflow-hidden">
                     <div class="relative z-10">
-                        <div class="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:rotate-6 transition-transform">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <h4 class="font-black text-2xl text-text-main tracking-tight italic">Jadwal <span class="not-italic text-amber-600">Ujian</span></h4>
-                        <p class="text-text-muted text-sm mt-2 font-bold uppercase tracking-widest opacity-60">Jadwal & Kelas</p>
+                        <h4 class="font-black text-xl sm:text-2xl text-text-main tracking-tight italic">Jadwal <span class="not-italic text-amber-600">Ujian</span></h4>
+                        <p class="text-text-muted text-[10px] sm:text-sm mt-1 sm:mt-2 font-bold uppercase tracking-widest opacity-60">Jadwal & Kelas</p>
                     </div>
                 </a>
             </div>
@@ -138,16 +138,16 @@
                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                      </x-button>
                 </div>
-                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-4">
+                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-2 sm:p-4">
                     @forelse($upcoming_exams as $exam)
-                    <div class="flex gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 rounded-2xl transition-all group cursor-pointer border border-transparent hover:border-border-subtle">
-                        <div class="flex-shrink-0 w-16 h-16 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-primary/10 text-primary rounded-xl border border-primary/5 shadow-inner">
-                            <span class="text-[10px] font-black uppercase tracking-widest opacity-60">{{ $exam['month'] }}</span>
-                            <span class="text-xl font-black tracking-tighter">{{ $exam['day'] }}</span>
+                    <div class="flex gap-4 sm:gap-5 p-4 sm:p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 rounded-2xl transition-all group cursor-pointer border border-transparent hover:border-border-subtle">
+                        <div class="shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-primary/10 text-primary rounded-xl border border-primary/5 shadow-inner">
+                            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest opacity-60">{{ $exam['month'] }}</span>
+                            <span class="text-lg sm:text-xl font-black tracking-tighter">{{ $exam['day'] }}</span>
                         </div>
-                        <div class="flex-1 min-w-0 py-1">
-                            <h5 class="text-sm font-black text-text-main truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $exam['name'] }}</h5>
-                            <p class="text-xs text-text-muted mt-1 font-bold uppercase tracking-wider opacity-60">{{ $exam['class'] }} <span class="mx-1 opacity-20">•</span> {{ $exam['time'] }}</p>
+                        <div class="flex-1 min-w-0 py-0.5 sm:py-1">
+                            <h5 class="text-xs sm:text-sm font-black text-text-main truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $exam['name'] }}</h5>
+                            <p class="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1 font-bold uppercase tracking-wider opacity-60">{{ $exam['class'] }} <span class="mx-1 opacity-20">•</span> {{ $exam['time'] }}</p>
                         </div>
                     </div>
                     @empty
@@ -165,7 +165,7 @@
             <!-- Recent Activity -->
             <section>
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Aktivitas Terkini</h3>
-                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-8">
+                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main p-6 sm:p-8">
                     <div class="flow-root">
                         <ul role="list" class="-mb-8">
                             @forelse($recent_activities as $activity)
@@ -174,9 +174,9 @@
                                     @if(!$loop->last)
                                     <span class="absolute top-5 left-5 -ml-px h-full w-0.5 bg-border-subtle dark:bg-slate-800" aria-hidden="true"></span>
                                     @endif
-                                    <div class="relative flex space-x-4">
+                                    <div class="relative flex space-x-3 sm:space-x-4">
                                         <div>
-                                            <span class="h-10 w-10 rounded-xl flex items-center justify-center ring-8 ring-bg-surface dark:ring-slate-900
+                                            <span class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center ring-6 sm:ring-8 ring-bg-surface dark:ring-slate-900
                                                 @if($activity['type'] == 'success') bg-green-100 text-green-600
                                                 @elseif($activity['type'] == 'warning') bg-amber-100 text-amber-600
                                                 @elseif($activity['type'] == 'info') bg-blue-100 text-blue-600

@@ -1,15 +1,15 @@
 <x-exam-layout title="Ujian Matematika">
     <x-slot name="header_actions">
         <!-- Header Actions: User Info & Timer -->
-        <div class="flex items-center space-x-4" x-data>
-            <div class="hidden sm:flex flex-col items-end mr-4">
+        <div class="flex items-center space-x-2 sm:space-x-4" x-data>
+            <div class="hidden lg:flex flex-col items-end mr-4">
                 <span class="text-sm font-semibold text-gray-700">{{ Auth::user()->name }}</span>
                 <span class="text-xs text-gray-500">NIS: {{ Auth::user()->student->nis ?? '-' }}</span>
             </div>
             
             <!-- Timer Badge -->
-            <div class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 font-mono font-bold text-lg flex items-center shadow-sm">
-                <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="px-2 sm:px-3 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 font-mono font-bold text-sm sm:text-lg flex items-center shadow-sm">
+                <svg class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span x-text="$store.exam.formattedTime" :class="{'text-red-600 animate-pulse': $store.exam.timeLeft < 300}"></span>
@@ -18,7 +18,7 @@
     </x-slot>
 
     <!-- Main Exam UI -->
-    <div x-data="examData()" x-init="initExam()" class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 h-full">
+    <div x-data="examData()" x-init="initExam()" class="container mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8 h-full">
         <div x-cloak x-show="isOffline || saveErrorMessage || lastHeartbeatFailed" class="mb-4 rounded-lg border px-4 py-3 text-sm"
             :class="isOffline ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-red-50 border-red-300 text-red-800'">
             <template x-if="isOffline">
@@ -35,36 +35,36 @@
             </template>
         </div>
         
-        <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
+        <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-[calc(100vh-8rem)]">
             
             <!-- Question Area (Left) -->
-            <div class="flex-1 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-full">
+            <div class="flex-1 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[500px] lg:h-full">
                 <!-- Question Header -->
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h2 class="text-lg font-bold text-gray-800">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h2 class="text-base sm:text-lg font-bold text-gray-800">
                         Soal No. <span x-text="currentQuestion + 1"></span>
                     </h2>
                     <div class="flex items-center space-x-2">
-                        <span x-show="questions[currentQuestion].type === 'multiple_choice'" class="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-1 rounded">Pilihan Ganda</span>
+                        <span x-show="questions[currentQuestion].type === 'multiple_choice'" class="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-1 rounded">PG</span>
                     </div>
                 </div>
 
                 <!-- Question Content -->
-                <div class="flex-1 overflow-y-auto p-6">
-                    <div class="prose max-w-none text-gray-800 text-lg mb-8">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-6">
+                    <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8">
                         <!-- Image Rendering -->
                         <template x-if="questions[currentQuestion].image_path">
-                            <img :src="questions[currentQuestion].image_path" class="max-w-md rounded-lg mb-4 mx-auto md:mx-0 shadow-sm border border-gray-100">
+                            <img :src="questions[currentQuestion].image_path" class="w-full max-w-md rounded-lg mb-4 mx-auto md:mx-0 shadow-sm border border-gray-100">
                         </template>
                         
                         <div x-html="questions[currentQuestion].text"></div>
                     </div>
 
                     <!-- Options -->
-                    <div class="space-y-4">
+                    <div class="space-y-3 sm:space-y-4">
 
                         <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
-                            <label class="flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50"
+                            <label class="flex items-start p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50 active:scale-[0.98]"
                                 :class="{
                                     'border-blue-600 bg-blue-50': answers[questions[currentQuestion].id] === option.id,
                                     'border-gray-200': answers[questions[currentQuestion].id] !== option.id
@@ -74,8 +74,8 @@
                                     :value="option.id"
                                     x-model="answers[questions[currentQuestion].id]"
                                     @change="saveProgress(questions[currentQuestion].id)"
-                                    class="h-5 w-5 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300">
-                                <span class="ml-3 text-gray-700 group-hover:text-gray-900" 
+                                    class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300 flex-shrink-0">
+                                <span class="ml-3 text-sm sm:text-base text-gray-700 group-hover:text-gray-900" 
                                     :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}" 
                                     x-text="option.text"></span>
                             </label>
@@ -84,49 +84,51 @@
                 </div>
 
                 <!-- Footer / Navigation -->
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div class="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
                     <button @click="prevQuestion()" 
                         :disabled="currentQuestion === 0"
-                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        Sebelumnya
+                        class="px-3 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm sm:text-base font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <span class="hidden sm:inline">Sebelumnya</span>
+                        <span class="sm:hidden">Prev</span>
                     </button>
 
-                    <label class="flex items-center cursor-pointer select-none">
+                    <label class="flex items-center cursor-pointer select-none order-first lg:order-none w-full lg:w-auto justify-center">
                         <div class="relative">
                             <input type="checkbox" class="sr-only" x-model="flags[questions[currentQuestion].id]">
                             <div class="w-10 h-6 bg-gray-200 rounded-full shadow-inner transition duration-200" :class="{'bg-yellow-400': flags[questions[currentQuestion].id]}"></div>
                             <div class="dot absolute w-4 h-4 bg-white rounded-full shadow left-1 top-1 transition duration-200 transform" :class="{'translate-x-4': flags[questions[currentQuestion].id]}"></div>
                         </div>
-                        <span class="ml-3 text-sm font-medium text-gray-600">Ragu-ragu</span>
+                        <span class="ml-3 text-xs sm:text-sm font-medium text-gray-600">Ragu-ragu</span>
                     </label>
 
                     <button @click="nextQuestion()" 
                         x-show="currentQuestion < questions.length - 1"
-                        class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-white font-medium hover:bg-blue-700 flex items-center transition shadow-sm">
-                        Selanjutnya
-                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        class="px-3 sm:px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-white text-sm sm:text-base font-medium hover:bg-blue-700 flex items-center transition shadow-sm">
+                        <span class="hidden sm:inline">Selanjutnya</span>
+                        <span class="sm:hidden">Next</span>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                     
                     <button @click="finishExam()" 
                         x-show="currentQuestion === questions.length - 1"
-                        class="px-4 py-2 bg-green-600 border border-transparent rounded-lg text-white font-medium hover:bg-green-700 flex items-center transition shadow-sm">
+                        class="px-3 sm:px-4 py-2 bg-green-600 border border-transparent rounded-lg text-white text-sm sm:text-base font-medium hover:bg-green-700 flex items-center transition shadow-sm">
                         Selesai
-                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </button>
                 </div>
             </div>
 
             <!-- Navigation Panel (Right) -->
-            <div class="w-full lg:w-80 flex flex-col gap-6">
+            <div class="w-full lg:w-80 flex flex-col gap-4 lg:gap-6 mt-4 lg:mt-0">
                 <!-- Navigation Grid -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col h-full">
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Navigasi Soal</h3>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 flex flex-col">
+                    <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 sm:mb-4">Navigasi Soal</h3>
                     
-                    <div class="grid grid-cols-5 gap-2 overflow-y-auto max-h-[60vh] p-1">
+                    <div class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2 overflow-y-auto max-h-[40vh] lg:max-h-[60vh] p-1">
                         <template x-for="(q, index) in questions" :key="index">
                             <button @click="jumpToQuestion(index)"
-                                class="w-10 h-10 rounded-lg text-sm font-bold flex items-center justify-center transition-all duration-200 relative border-2"
+                                class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center transition-all duration-200 relative border-2 active:scale-95"
                                 :class="{
                                     'border-blue-600 ring-2 ring-blue-200 ring-offset-1': currentQuestion === index,
                                     'bg-green-500 text-white border-green-500 hover:bg-green-600': answers[q.id] && !flags[q.id] && currentQuestion !== index,
@@ -135,27 +137,27 @@
                                 }">
                                 <span x-text="index + 1"></span>
                                 <!-- Indicator dots -->
-                                <div x-show="currentQuestion === index" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white"></div>
+                                <div x-show="currentQuestion === index" class="absolute -top-1 -right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-600 rounded-full border-2 border-white"></div>
                             </button>
                         </template>
                     </div>
 
-                    <div class="mt-auto pt-6 border-t border-gray-100">
-                        <div class="space-y-2 text-xs font-medium text-gray-600">
+                    <div class="mt-auto pt-4 sm:pt-6 border-t border-gray-100">
+                        <div class="space-y-1.5 sm:space-y-2 text-[10px] sm:text-xs font-medium text-gray-600">
                             <div class="flex items-center">
-                                <div class="w-4 h-4 rounded bg-green-500 mr-2"></div> Sudah dijawab
+                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded bg-green-500 mr-2 flex-shrink-0"></div> Sudah dijawab
                             </div>
                             <div class="flex items-center">
-                                <div class="w-4 h-4 rounded bg-yellow-400 mr-2"></div> Ragu-ragu
+                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded bg-yellow-400 mr-2 flex-shrink-0"></div> Ragu-ragu
                             </div>
                             <div class="flex items-center">
-                                <div class="w-4 h-4 rounded bg-gray-100 border border-gray-200 mr-2"></div> Belum dijawab
+                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded bg-gray-100 border border-gray-200 mr-2 flex-shrink-0"></div> Belum dijawab
                             </div>
                         </div>
                     </div>
                     
-                     <div class="mt-6">
-                        <button @click="finishExam()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg shadow-blue-200 transform hover:-translate-y-0.5">
+                     <div class="mt-4 sm:mt-6">
+                        <button @click="finishExam()" class="w-full py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm sm:text-base font-bold transition shadow-lg shadow-blue-200 transform hover:-translate-y-0.5 active:scale-95">
                             Kumpulkan Jawaban
                         </button>
                     </div>

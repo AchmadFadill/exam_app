@@ -17,44 +17,53 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
         </div>
     @endif
 
-    <div class="relative">
+    <div class="relative overflow-x-auto">
         <x-table>
             <x-table.thead>
                 <x-table.tr>
                     <x-table.th class="w-10 text-center">
                         <input type="checkbox" wire:model.live="selectAll" class="rounded border-border-main text-primary focus:ring-primary/20 bg-bg-surface">
                     </x-table.th>
-                    <x-table.th>Waktu Request</x-table.th>
-                    <x-table.th>NIS / Email</x-table.th>
-                    <x-table.th>Nama User</x-table.th>
-                    <x-table.th>Alasan</x-table.th>
-                    <x-table.th class="text-center">Aksi</x-table.th>
+                    <x-table.th>User / NIS-Email</x-table.th>
+                    <x-table.th class="hidden md:table-cell">Waktu</x-table.th>
+                    <x-table.th class="hidden lg:table-cell text-center">Alasan</x-table.th>
+                    <x-table.th class="text-right">Aksi</x-table.th>
                 </x-table.tr>
             </x-table.thead>
             <tbody class="bg-bg-surface dark:bg-bg-surface divide-y divide-border-subtle dark:divide-border-subtle">
                 @forelse ($requests as $request)
-                    <x-table.tr wire:key="{{ $request->id }}" class="{{ in_array($request->id, $selected) ? 'bg-primary/5' : '' }}">
+                    <x-table.tr wire:key="{{ $request->id }}" class="{{ in_array($request->id, $selected) ? 'bg-primary/5' : '' }} group">
                         <x-table.td class="text-center">
                             <input type="checkbox" value="{{ $request->id }}" wire:model.live="selected" class="rounded border-border-main text-primary focus:ring-primary/20 bg-bg-surface">
                         </x-table.td>
-                        <x-table.td class="text-xs">
-                            <div class="font-black text-text-main uppercase tracking-tight">{{ $request->created_at->format('d M Y H:i') }}</div>
-                            <div class="text-[10px] text-text-muted font-bold mt-0.5 opacity-60">{{ $request->created_at->diffForHumans() }}</div>
-                        </x-table.td>
-                        <x-table.td class="font-black text-text-main uppercase tracking-tight italic">
-                            {{ $request->user->student->nis ?? $request->user->email ?? '-' }}
-                        </x-table.td>
                         <x-table.td>
-                            <div class="font-black text-text-main uppercase tracking-tight">{{ $request->user->name }}</div>
-                            <div class="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">{{ $request->user->role }}</div>
+                            <div class="flex flex-col min-w-0">
+                                <div class="font-black text-text-main uppercase tracking-tight truncate leading-tight">{{ $request->user->name }}</div>
+                                <div class="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-0.5 truncate italic">
+                                    {{ $request->user->student->nis ?? $request->user->email ?? '-' }}
+                                </div>
+                                <div class="md:hidden mt-1 text-[9px] font-bold text-text-muted/60 uppercase">
+                                    {{ $request->created_at->format('d M, H:i') }} • {{ $request->user->role }}
+                                </div>
+                                <div class="lg:hidden mt-2">
+                                    <button @click="activeReason = @js($request->reason)" class="text-primary hover:text-blue-700 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        Lihat Alasan
+                                    </button>
+                                </div>
+                            </div>
                         </x-table.td>
-                        <x-table.td>
+                        <x-table.td class="hidden md:table-cell">
+                            <div class="font-black text-text-main uppercase tracking-tight text-xs">{{ $request->created_at->format('d M Y') }}</div>
+                            <div class="text-[9px] text-text-muted font-bold mt-0.5 opacity-60">{{ $request->created_at->format('H:i') }} ({{ $request->created_at->diffForHumans() }})</div>
+                        </x-table.td>
+                        <x-table.td class="hidden lg:table-cell text-center">
                             <button @click="activeReason = @js($request->reason)" class="text-primary hover:text-blue-700 text-[10px] font-black uppercase tracking-[0.2em] underline decoration-2 underline-offset-4 decoration-primary/20">
                                 Lihat
                             </button>
                         </x-table.td>
                         <x-table.td>
-                            <div class="flex justify-center gap-3">
+                            <div class="flex justify-end gap-1.5 sm:gap-3">
                                 <button @click="$dispatch('show-confirm-modal', [{ 
                                         title: 'Setujui Permintaan?', 
                                         message: 'Password user akan direset menjadi default (NIS/Email).', 
@@ -63,7 +72,7 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
                                         onConfirm: 'approve-request',
                                         onConfirmDetail: {{ $request->id }}
                                     }])" 
-                                    class="px-4 py-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-500/20 transition-all border border-green-500/20">
+                                    class="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-green-500/20 transition-all border border-green-500/20 whitespace-nowrap">
                                     Approve
                                 </button>
                                 <button @click="$dispatch('show-confirm-modal', [{ 
@@ -74,7 +83,7 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
                                         onConfirm: 'reject-request',
                                         onConfirmDetail: {{ $request->id }}
                                     }])" 
-                                    class="px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all border border-red-500/20">
+                                    class="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all border border-red-500/20 whitespace-nowrap">
                                     Reject
                                 </button>
                             </div>
@@ -82,7 +91,7 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
                     </x-table.tr>
                 @empty
                     <x-empty-state 
-                        colspan="6" 
+                        colspan="5" 
                         title="Semua Aman!" 
                         message="Tidak ada permintaan reset password yang tertunda saat ini." 
                         icon="folder-open" 
@@ -99,25 +108,25 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
              x-transition:leave="transition ease-in duration-200 transform"
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="translate-y-20 opacity-0"
-             class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-8 py-5 rounded-[2rem] shadow-2xl z-50 flex items-center gap-8 border border-white/10"
+             class="fixed bottom-6 sm:bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-4 sm:px-8 py-3 sm:py-5 rounded-2xl sm:rounded-[2rem] shadow-2xl z-50 flex items-center gap-4 sm:gap-8 border border-white/10 w-[calc(100%-2rem)] sm:w-auto overflow-x-auto"
              style="display: none;">
             
-            <div class="flex flex-col">
-                <span class="text-xs font-black uppercase tracking-[0.2em] text-white/40">Terpilih</span>
-                <span class="text-lg font-black tracking-tight"><span x-text="$wire.selected.length"></span> Item</span>
+            <div class="flex flex-col shrink-0">
+                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 leading-none">Terpilih</span>
+                <span class="text-sm sm:text-lg font-black tracking-tight mt-1 leading-none"><span x-text="$wire.selected.length"></span> Item</span>
             </div>
             
-            <div class="h-10 w-px bg-white/10"></div>
+            <div class="h-8 sm:h-10 w-px bg-white/10 shrink-0"></div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
                 <button @click="$dispatch('show-confirm-modal', [{ 
                         title: 'Approve Semua?', 
                         message: 'Setujui semua permintaan reset password yang dipilih.', 
                         type: 'primary',
                         confirmText: 'Ya, Setujui Semua',
                         onConfirm: 'bulk-approve'
-                    }])" class="px-6 py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all transform hover:scale-105 active:scale-95">
-                    Approve All
+                    }])" class="px-4 sm:px-6 py-2 sm:py-3 bg-white text-slate-900 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all transform active:scale-95 whitespace-nowrap">
+                    Approve <span class="hidden xs:inline">All</span>
                 </button>
                 
                 <button @click="$dispatch('show-confirm-modal', [{ 
@@ -126,8 +135,8 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
                         type: 'danger',
                         confirmText: 'Ya, Tolak Semua',
                         onConfirm: 'bulk-reject'
-                    }])" class="px-6 py-3 bg-red-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-500/20">
-                    Reject All
+                    }])" class="px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all transform active:scale-95 shadow-lg shadow-red-500/20 whitespace-nowrap">
+                    Reject <span class="hidden xs:inline">All</span>
                 </button>
             </div>
         </div>

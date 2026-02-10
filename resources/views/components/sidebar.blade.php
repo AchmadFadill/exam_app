@@ -16,7 +16,7 @@
                 </div>
                 <div class="text-left leading-tight">
                     <h1 class="font-bold text-lg tracking-wide text-white">CBT System</h1>
-                    <p class="text-xs text-white/70 font-medium">{{ $app_name ?? 'SMAIT Baitul Muslim' }}</p>
+                    <p class="text-xs text-white/70 font-medium">{{ $app_name ?? 'Sistem Ujian' }}</p>
                 </div>
             </div>
         </div>

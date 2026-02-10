@@ -1,38 +1,38 @@
 <x-student-layout>
     <x-slot name="title">Detail Hasil Ujian</x-slot>
-<div class="container mx-auto px-6 py-8">
+<div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
     <!-- Back Button -->
-    <div class="mb-6">
-            <x-button variant="soft" href="{{ route('student.results') }}" class="px-6 py-3 rounded-xl text-xs font-black bg-blue-100 hover:bg-blue-200 text-blue-600 hover:text-blue-700 border-none shadow-none">
+    <div class="mb-5 sm:mb-6">
+            <x-button variant="soft" href="{{ route('student.results') }}" class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-blue-100 hover:bg-blue-200 text-blue-600 hover:text-blue-700 border-none shadow-none">
                 &larr; KEMBALI 
             </x-button>
     </div>
 
     <!-- Result Header Card -->
-    <div class="bg-bg-surface dark:bg-bg-surface rounded-3xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden mb-8">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10 text-white">
-            <div class="md:flex justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <h2 class="text-3xl font-bold mb-2">{{ $exam->name }}</h2>
-                    <p class="text-blue-100 text-lg">{{ $exam->subject->name ?? 'Mata Pelajaran' }}</p>
-                    <div class="flex items-center mt-4 text-blue-100 text-sm">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+    <div class="bg-bg-surface dark:bg-bg-surface rounded-3xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden mb-6 sm:mb-8">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 sm:px-8 py-8 sm:py-10 text-white">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8 sm:gap-6">
+                <div class="text-center md:text-left">
+                    <h2 class="text-2xl sm:text-3xl font-bold mb-2">{{ $exam->name }}</h2>
+                    <p class="text-blue-100 text-base sm:text-lg">{{ $exam->subject->name ?? 'Mata Pelajaran' }}</p>
+                    <div class="flex items-center justify-center md:justify-start mt-4 text-blue-100 text-xs">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         Dikerjakan pada {{ $attempt->started_at->translatedFormat('d F Y, H:i') }}
                     </div>
                 </div>
-                <div class="relative overflow-hidden bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-6 text-center border border-white/30 group">
+                <div class="relative overflow-hidden bg-bg-surface dark:bg-bg-surface/20 backdrop-blur-md rounded-2xl p-5 sm:p-6 text-center border border-white/30 group w-full sm:w-auto min-w-[160px]">
                     <!-- Profile Photo Background -->
                     <img src="{{ auth()->user()->profile_photo_url }}" alt="Profile" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-500">
                     <div class="absolute inset-0 bg-black/50"></div>
 
                     <!-- Content -->
-                    <div class="relative z-10">
-                        <div class="text-sm font-medium uppercase tracking-wider mb-1 text-white">Nilai Akhir</div>
-                        <div class="text-6xl font-black text-white">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
+                    <div class="relative z-10 text-center">
+                        <div class="text-[10px] sm:text-sm font-medium uppercase tracking-wider mb-1 text-white">Nilai Akhir</div>
+                        <div class="text-5xl sm:text-6xl font-black text-white">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
                         @if($attempt->passed)
-                            <div class="mt-2 text-xs font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
+                            <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
                         @else
-                            <div class="mt-2 text-xs font-semibold px-3 py-1 bg-red-500 text-white rounded-full inline-block shadow-lg">TIDAK LULUS</div>
+                            <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-red-500 text-white rounded-full inline-block shadow-lg">TIDAK LULUS</div>
                         @endif
                     </div>
                 </div>
@@ -40,29 +40,29 @@
         </div>
         
         <!-- Stats Summary -->
-        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-border-subtle dark:divide-border-subtle border-t border-border-subtle dark:border-border-subtle">
-            <div class="p-6 text-center">
-                <div class="text-sm font-medium text-text-muted mb-1 leading-tight">Total Soal</div>
-                <div class="text-2xl font-bold text-text-main">{{ $exam->questions->count() }}</div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 lg:divide-x divide-border-subtle dark:divide-border-subtle border-t border-border-subtle dark:border-border-subtle">
+            <div class="p-4 sm:p-6 text-center border-r border-border-subtle lg:border-r-0">
+                <div class="text-[10px] sm:text-sm font-medium text-text-muted mb-1 leading-tight">Total Soal</div>
+                <div class="text-xl sm:text-2xl font-bold text-text-main">{{ $exam->questions->count() }}</div>
             </div>
-            <div class="p-6 text-center">
-                <div class="text-sm font-medium text-green-600 mb-1 leading-tight">Benar</div>
-                <div class="text-2xl font-bold text-green-600">{{ $attempt->answers->where('is_correct', true)->count() }}</div>
+            <div class="p-4 sm:p-6 text-center border-b sm:border-b-0">
+                <div class="text-[10px] sm:text-sm font-medium text-green-600 mb-1 leading-tight">Benar</div>
+                <div class="text-xl sm:text-2xl font-bold text-green-600">{{ $attempt->answers->where('is_correct', true)->count() }}</div>
             </div>
-            <div class="p-6 text-center">
-                <div class="text-sm font-medium text-red-600 mb-1 leading-tight">Salah</div>
-                <div class="text-2xl font-bold text-red-600">{{ $attempt->answers->where('is_correct', false)->count() }}</div>
+            <div class="p-4 sm:p-6 text-center border-r border-border-subtle lg:border-r-0">
+                <div class="text-[10px] sm:text-sm font-medium text-red-600 mb-1 leading-tight">Salah</div>
+                <div class="text-xl sm:text-2xl font-bold text-red-600">{{ $attempt->answers->where('is_correct', false)->count() }}</div>
             </div>
-            <div class="p-6 text-center">
-                <div class="text-sm font-medium text-text-muted mb-1 leading-tight">Score Total</div>
-                <div class="text-2xl font-bold text-text-muted">{{ $attempt->total_score }}</div>
+            <div class="p-4 sm:p-6 text-center">
+                <div class="text-[10px] sm:text-sm font-medium text-text-muted mb-1 leading-tight">Score Total</div>
+                <div class="text-xl sm:text-2xl font-bold text-text-muted">{{ $attempt->total_score }}</div>
             </div>
         </div>
     </div>
 
     <!-- Discussion Section -->
-    <div class="mb-6 flex items-center justify-between">
-        <h4 class="text-text-main text-xl font-bold">Pembahasan Jawaban</h4>
+    <div class="mb-5 sm:mb-6 flex items-center justify-between">
+        <h4 class="text-text-main text-lg sm:text-xl font-bold">Pembahasan Jawaban</h4>
         <!-- <div class="text-sm text-text-muted">Menampilkan semua soal</div> -->
     </div>
 
@@ -95,14 +95,14 @@
                     {!! \App\Support\HtmlSanitizer::clean($question->text) !!}
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="text-xs sm:text-sm">
                         <div class="font-semibold text-text-muted mb-2">Jawaban Kamu:</div>
                         <div class="p-3 {{ $isCorrect ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700' }} border rounded-xl font-medium">
                              {{ $userOption->text ?? 'Tidak Menjawab / Essay' }}
                         </div>
                     </div>
-                     <div class="text-sm">
+                     <div class="text-xs sm:text-sm">
                         <div class="font-semibold text-text-muted mb-2">Kunci Jawaban:</div>
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 font-medium">
                              {{ $correctOption->text ?? '-' }}

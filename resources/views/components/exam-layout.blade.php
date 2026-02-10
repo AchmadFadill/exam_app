@@ -27,11 +27,11 @@
     
     <div class="min-h-screen flex flex-col">
         <!-- Minimalist Header -->
-        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-50 fixed w-full top-0">
-            <div class="flex items-center">
+        <header class="bg-white shadow-sm h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6 lg:px-8 z-50 fixed w-full top-0">
+            <div class="flex items-center overflow-hidden">
                 <!-- Logo / School Name -->
                 <div class="flex-shrink-0 flex items-center">
-                    <span class="text-xl font-bold text-blue-600">CBT SMAIT Baitul Muslim</span>
+                    <span class="text-base sm:text-xl font-bold text-blue-600 truncate">{{ $app_name ?? 'CBT System' }}</span>
                 </div>
                 <div class="hidden md:ml-6 md:flex md:items-center border-l border-gray-200 pl-6">
                     <div>
@@ -47,7 +47,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 mt-16 pb-20 overflow-y-auto">
+        <main class="flex-1 mt-14 sm:mt-16 pb-10 sm:pb-20 overflow-y-auto">
             {{ $slot }}
         </main>
     </div>
