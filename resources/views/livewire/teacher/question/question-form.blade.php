@@ -102,10 +102,30 @@
                          </div>
 
                         <!-- Question Text -->
-                        <div>
-                            <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Pertanyaan <span class="text-red-500">*</span></label>
-                            <textarea wire:model="questionForm.text" rows="5" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium leading-relaxed shadow-inner" placeholder="Tulis pertanyaan disini..."></textarea>
+                        <div x-data="latexPreview(@js($questionForm['text'] ?? ''))" x-init="init()">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <label class="block text-xs font-black text-text-main uppercase tracking-widest opacity-70 italic">Pertanyaan <span class="text-red-500">*</span></label>
+                                <button type="button"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/10"
+                                        @click="$dispatch('open-latex-guide')">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M9 9h6m-8.25 9h10.5A2.25 2.25 0 0019.5 15.75V8.25A2.25 2.25 0 0017.25 6H6.75A2.25 2.25 0 004.5 8.25v7.5A2.25 2.25 0 006.75 18z" />
+                                    </svg>
+                                    Panduan Rumus
+                                </button>
+                            </div>
+                            <textarea wire:model.live.debounce.300ms="questionForm.text"
+                                      rows="5"
+                                      data-latex-enabled="1"
+                                      @focus="window.setLatexActiveInput($event.target)"
+                                      @input="update($event.target.value)"
+                                      class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium leading-relaxed shadow-inner"
+                                      placeholder="Tulis pertanyaan disini..."></textarea>
                             @error('questionForm.text') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
+                            <div class="mt-3 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/70 dark:bg-slate-800/60 p-4">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-300 mb-2">Pratinjau Rumus</p>
+                                <div x-ref="preview" class="text-sm text-slate-700 dark:text-slate-200 min-h-8 break-words"></div>
+                            </div>
                         </div>
 
                         <!-- Image Upload -->
@@ -147,9 +167,19 @@
 
                         <!-- Options for Multiple Choice -->
                         @if($questionForm['type'] === 'multiple_choice')
-                            <div class="space-y-6 pt-6 border-t border-gray-100 dark:border-slate-800">
+                            <div class="space-y-6 pt-6 border-t border-gray-100 dark:border-slate-800" x-data="latexPreview('')" x-init="init()">
                                 <div class="flex justify-between items-center">
-                                    <label class="block text-xs font-black text-text-main uppercase tracking-widest opacity-70 italic">Opsi Jawaban</label>
+                                    <div class="flex items-center gap-2">
+                                        <label class="block text-xs font-black text-text-main uppercase tracking-widest opacity-70 italic">Opsi Jawaban</label>
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary/10"
+                                                @click="$dispatch('open-latex-guide')">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M9 9h6m-8.25 9h10.5A2.25 2.25 0 0019.5 15.75V8.25A2.25 2.25 0 0017.25 6H6.75A2.25 2.25 0 004.5 8.25v7.5A2.25 2.25 0 006.75 18z" />
+                                            </svg>
+                                            Panduan Rumus
+                                        </button>
+                                    </div>
                                     <div class="flex gap-2">
                                         @if($optionCount > 2)
                                         <button type="button" wire:click="removeOption" class="px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 text-[10px] font-black uppercase tracking-widest transition-colors">
@@ -176,7 +206,13 @@
                                             </label>
                                             
                                             <div class="flex-1">
-                                                <input type="text" wire:model="questionForm.options.{{ $index }}" class="w-full px-5 py-3 bg-white dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-sm placeholder-gray-400" placeholder="Jawaban opsi {{ $label }}">
+                                                <input type="text"
+                                                       wire:model.live.debounce.300ms="questionForm.options.{{ $index }}"
+                                                       data-latex-enabled="1"
+                                                       @focus="window.setLatexActiveInput($event.target); update($event.target.value)"
+                                                       @input="update($event.target.value)"
+                                                       class="w-full px-5 py-3 bg-white dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-sm placeholder-gray-400"
+                                                       placeholder="Jawaban opsi {{ $label }}">
                                             </div>
                                         </div>
                                         @error("questionForm.options.{$index}") <p class="pl-16 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
@@ -188,6 +224,10 @@
                                             <span class="text-xs font-bold uppercase tracking-wide">Mohon pilih kunci jawaban yang benar</span>
                                         </div>
                                     @enderror
+                                </div>
+                                <div class="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/70 dark:bg-slate-800/60 p-4">
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-300 mb-2">Pratinjau Rumus</p>
+                                    <div x-ref="preview" class="text-sm text-slate-700 dark:text-slate-200 min-h-8 break-words"></div>
                                 </div>
                             </div>
                         @else
@@ -233,4 +273,5 @@
             </div>
         </div>
     </div>
+    <x-latex-guide-modal />
 </div>

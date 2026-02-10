@@ -227,7 +227,7 @@ class ManageStudent extends Component
 
         try {
             $import = new \App\Imports\StudentsImport();
-            \Maatwebsite\Excel\Facades\Excel::import($import, $this->importFile);
+            \Maatwebsite\Excel\Facades\Excel::import($import, $this->importFile->getRealPath());
 
             $this->showImportModal = false;
             $this->reset('importFile');

@@ -76,7 +76,7 @@ it('returns skipped for fully empty student row', function () {
     expect($result['status'])->toBe('skipped');
 });
 
-it('returns error when student nis already exists', function () {
+it('updates existing student when student nis already exists', function () {
     $user = User::create([
         'name' => 'Existing Student',
         'email' => 'existing.student@example.test',
@@ -89,12 +89,38 @@ it('returns error when student nis already exists', function () {
         'classroom_id' => null,
     ]);
 
+    $newClassroom = Classroom::create(['name' => 'XI IPA 1', 'level' => 'XI']);
+
     $result = app(ImportStudentRowAction::class)->execute([
         'nis' => 'NIS-DUP-001',
         'nama' => 'Siswa Duplikat',
-        'email' => 'new.student@example.test',
+        'email' => 'existing.student@example.test',
+        'kelas' => '11 ipa-1',
     ], 8);
 
-    expect($result['status'])->toBe('error')
-        ->and($result['message'])->toContain('NIS NIS-DUP-001 sudah terdaftar');
+    expect($result['status'])->toBe('imported');
+
+    $student = Student::where('nis', 'NIS-DUP-001')->firstOrFail();
+    $student->load('user');
+
+    expect($student->user->name)->toBe('Siswa Duplikat')
+        ->and($student->classroom_id)->toBe($newClassroom->id);
+});
+
+it('supports student import header aliases for name and class columns', function () {
+    $classroom = Classroom::create(['name' => 'X IPS 1', 'level' => 'X']);
+
+    $result = app(ImportStudentRowAction::class)->execute([
+        'nis' => 'NIS-ALIAS-001',
+        'name' => 'Siswa Alias',
+        'email' => 'siswa.alias@example.test',
+        'classroom' => '10 ips 1',
+    ], 12);
+
+    expect($result['status'])->toBe('imported');
+
+    $user = User::where('email', 'siswa.alias@example.test')->firstOrFail();
+    $student = Student::where('user_id', $user->id)->firstOrFail();
+
+    expect($student->classroom_id)->toBe($classroom->id);
 });
