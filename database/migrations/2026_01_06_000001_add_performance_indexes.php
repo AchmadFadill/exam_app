@@ -126,13 +126,19 @@ return new class extends Migration
             if ($this->hasIndex('students', 'students_nis_index')) {
                 $table->dropIndex(['nis']);
             }
-            if ($this->hasIndex('students', 'students_classroom_id_index')) {
+            if (
+                $this->hasIndex('students', 'students_classroom_id_index') &&
+                !$this->hasForeignOnColumn('students', 'classroom_id')
+            ) {
                 $table->dropIndex(['classroom_id']);
             }
         });
 
         Schema::table('teachers', function (Blueprint $table) {
-            if ($this->hasIndex('teachers', 'teachers_user_id_index')) {
+            if (
+                $this->hasIndex('teachers', 'teachers_user_id_index') &&
+                !$this->hasForeignOnColumn('teachers', 'user_id')
+            ) {
                 $table->dropIndex(['user_id']);
             }
             if (
@@ -156,10 +162,16 @@ return new class extends Migration
         });
 
         Schema::table('questions', function (Blueprint $table) {
-            if ($this->hasIndex('questions', 'questions_subject_id_index')) {
+            if (
+                $this->hasIndex('questions', 'questions_subject_id_index') &&
+                !$this->hasForeignOnColumn('questions', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
-            if ($this->hasIndex('questions', 'questions_teacher_id_index')) {
+            if (
+                $this->hasIndex('questions', 'questions_teacher_id_index') &&
+                !$this->hasForeignOnColumn('questions', 'teacher_id')
+            ) {
                 $table->dropIndex(['teacher_id']);
             }
             if ($this->hasIndex('questions', 'questions_type_index')) {
@@ -168,10 +180,16 @@ return new class extends Migration
         });
 
         Schema::table('exams', function (Blueprint $table) {
-            if ($this->hasIndex('exams', 'exams_subject_id_index')) {
+            if (
+                $this->hasIndex('exams', 'exams_subject_id_index') &&
+                !$this->hasForeignOnColumn('exams', 'subject_id')
+            ) {
                 $table->dropIndex(['subject_id']);
             }
-            if ($this->hasIndex('exams', 'exams_teacher_id_index')) {
+            if (
+                $this->hasIndex('exams', 'exams_teacher_id_index') &&
+                !$this->hasForeignOnColumn('exams', 'teacher_id')
+            ) {
                 $table->dropIndex(['teacher_id']);
             }
         });

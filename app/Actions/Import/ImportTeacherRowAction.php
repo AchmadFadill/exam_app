@@ -17,12 +17,17 @@ class ImportTeacherRowAction
     public function execute(array $row, int $rowNumber): array
     {
         try {
-            $nama = trim((string) ($row['nama'] ?? ''));
+            $nama = trim((string) ($row['nama'] ?? $row['name'] ?? ''));
             $email = trim((string) ($row['email'] ?? ''));
-            $mataPelajaran = trim((string) ($row['mata_pelajaran'] ?? ''));
+            $mataPelajaran = trim((string) (
+                $row['mata_pelajaran']
+                ?? $row['subject']
+                ?? $row['subject_code']
+                ?? ''
+            ));
 
             if ($nama === '' || $email === '') {
-                return ['status' => 'skipped'];
+                return ['status' => 'error', 'message' => "Baris {$rowNumber}: Kolom nama/email wajib diisi dan header harus sesuai template."];
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

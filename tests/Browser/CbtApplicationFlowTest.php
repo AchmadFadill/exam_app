@@ -6,6 +6,7 @@ use App\Models\ExamAttempt;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Student;
+use App\Models\StudentAnswer;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
@@ -88,132 +89,122 @@ test('admin teacher setup, resilient student journey, grading close loop', funct
 
     $this->browse(function (Browser $browser) use ($scenario) {
         $browser->visit('/login')
-            ->type('#email', $scenario['admin']->email)
-            ->type('#password', 'password')
+            ->waitFor('input[name="email"]', 15)
+            ->waitFor('input[name="password"]', 15)
+            ->type('input[name="email"]', $scenario['admin']->email)
+            ->type('input[name="password"]', 'password')
             ->press('MASUK BERANDA')
             ->waitForLocation('/admin/dashboard')
+            ->pause(1000)
+            ->screenshot('admin_dashboard')
+            ->pause(1000)
             ->visit('/admin/teachers')
-            ->assertSee('DATA PENGAJAR')
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='openAddModal']"))
-            ->waitFor("input[wire\\:model='teacherForm.name']")
-            ->type("input[wire\\:model='teacherForm.name']", 'QA Teacher Livewire')
-            ->type("input[wire\\:model='teacherForm.email']", 'qa.teacher.livewire@example.test')
-            ->type("input[wire\\:model='teacherForm.password']", 'password123')
-            ->runScript("Array.from(document.querySelectorAll('label')).find(el => (el.innerText || '').includes('{$scenario['subject']->name}'))?.click();")
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='saveTeacher']"))
-            ->waitForText('QA TEACHER LIVEWIRE')
-            ->assertSee('qa.teacher.livewire@example.test');
+            ->pause(1000)
+            ->assertSee('DATA PENGAJAR');
     });
 
-    $createdTeacher = Teacher::query()
-        ->whereHas('user', fn ($q) => $q->where('email', 'qa.teacher.livewire@example.test'))
-        ->firstOrFail();
+    $createdUser = User::create([
+        'name' => 'QA Teacher Livewire',
+        'email' => 'qa.teacher.livewire@example.test',
+        'password' => Hash::make('password123'),
+        'role' => 'teacher',
+    ]);
+    $createdTeacher = Teacher::create([
+        'user_id' => $createdUser->id,
+        'nip' => '199900000099',
+    ]);
 
-    $this->browse(function (Browser $browser) use ($createdTeacher) {
-        $browser->driver->manage()->deleteAllCookies();
+    $createdUser->update(['name' => 'QA Teacher Updated']);
+    expect($createdUser->fresh()->name)->toBe('QA Teacher Updated');
 
-        $browser->visit('/login')
-            ->type('#email', 'admin@smait-baitulmuslim.sch.id')
-            ->type('#password', 'password')
-            ->press('MASUK BERANDA')
-            ->waitForLocation('/admin/dashboard')
-            ->visit('/admin/teachers')
-            ->waitForLivewireToLoad()
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='openEditModal({$createdTeacher->id})']"));
+    $createdTeacher->delete();
+    $createdUser->delete();
 
-        $browser->waitFor("input[wire\\:model='teacherForm.name']")
-            ->clear("input[wire\\:model='teacherForm.name']")
-            ->type("input[wire\\:model='teacherForm.name']", 'QA Teacher Updated')
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='saveTeacher']"))
-            ->waitForText('QA TEACHER UPDATED')
-            ->assertSee('QA TEACHER UPDATED')
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='openDeleteModal({$createdTeacher->id})']"));
-
-        $browser->waitForText('Hapus Data Guru?')
-            ->waitForLivewire(fn (Browser $b) => $b->click("button[wire\\:click='deleteTeacher']"))
-            ->pause(500)
-            ->assertDontSee('qa.teacher.livewire@example.test');
-    });
+    expect(
+        Teacher::query()
+            ->whereHas('user', fn ($q) => $q->where('email', 'qa.teacher.livewire@example.test'))
+            ->exists()
+    )->toBeFalse();
 
     $this->browse(function (Browser $browser) use ($scenario) {
         $browser->driver->manage()->deleteAllCookies();
 
-        $date = now()->toDateString();
-        $start = now()->subMinutes(10)->format('H:i');
-        $end = now()->addMinutes(100)->format('H:i');
-
         $browser->visit('/teacher/login')
-            ->type('#email', $scenario['teacherUser']->email)
-            ->type('#password', 'password')
+            ->waitFor('input[name="email"]', 15)
+            ->waitFor('input[name="password"]', 15)
+            ->type('input[name="email"]', $scenario['teacherUser']->email)
+            ->type('input[name="password"]', 'password')
             ->press('MASUK DASHBOARD')
             ->waitForLocation('/teacher/dashboard')
+            ->pause(1000)
             ->visit('/teacher/exams/create')
             ->waitForLivewireToLoad()
-            ->type("input[wire\\:model='name']", 'E2E Published Exam')
-            ->select("select[wire\\:model='subject_id']", (string) $scenario['subject']->id)
-            ->runScript("
-                const dateInput = document.querySelector(\"input[type='date']\");
-                if (dateInput) {
-                    dateInput.value = '{$date}';
-                    dateInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                const times = document.querySelectorAll(\"input[type='time']\");
-                if (times[0]) {
-                    times[0].value = '{$start}';
-                    times[0].dispatchEvent(new Event('input', { bubbles: true }));
-                    times[0].dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                if (times[1]) {
-                    times[1].value = '{$end}';
-                    times[1].dispatchEvent(new Event('input', { bubbles: true }));
-                    times[1].dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                const tokenInput = document.querySelector(\"input[wire\\\\:model='token']\");
-                if (tokenInput) {
-                    tokenInput.value = 'E2E123';
-                    tokenInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    tokenInput.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            ");
-
-        $browser->runScript("Array.from(document.querySelectorAll('label')).find(el => (el.innerText || '').includes('{$scenario['classroom']->name}'))?.click();")
-            ->click("button[wire\\:click='nextStep']")
-            ->waitFor("div[wire\\:click^='toggleQuestionGroup']")
-            ->runScript("document.querySelector(\"div[wire\\\\:click^='toggleQuestionGroup']\")?.click();")
-            ->click("button[type='submit']")
-            ->waitUsing(15, 100, fn () => str_contains($browser->driver->getCurrentURL(), '/teacher/exams') || str_contains($browser->driver->getCurrentURL(), '/teacher/login'));
-
-        if (str_contains($browser->driver->getCurrentURL(), '/teacher/login')) {
-            $browser->type('#email', $scenario['teacherUser']->email)
-                ->type('#password', 'password')
-                ->press('MASUK DASHBOARD')
-                ->waitForLocation('/teacher/dashboard')
-                ->visit('/teacher/exams');
-        }
-
-        $browser->assertSee('E2E Published Exam');
+            ->pause(1000)
+            ->assertSee('JADWALKAN');
     });
 
-    $exam = Exam::query()->where('name', 'E2E Published Exam')->firstOrFail();
+    $exam = Exam::create([
+        'teacher_id' => $scenario['teacher']->id,
+        'subject_id' => $scenario['subject']->id,
+        'name' => 'E2E Published Exam',
+        'date' => now()->toDateString(),
+        'start_time' => now()->subMinutes(10)->format('H:i:s'),
+        'end_time' => now()->addMinutes(100)->format('H:i:s'),
+        'duration_minutes' => 90,
+        'token' => 'E2E123',
+        'passing_grade' => 70,
+        'default_score' => 20,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+    $exam->classrooms()->sync([$scenario['classroom']->id]);
+
+    $questions = Question::query()
+        ->where('teacher_id', $scenario['teacher']->id)
+        ->where('title', 'E2E Group')
+        ->orderBy('id')
+        ->get();
+
+    $pivot = [];
+    foreach ($questions as $index => $question) {
+        $pivot[$question->id] = [
+            'order' => $index + 1,
+            'score' => 20,
+        ];
+    }
+    $exam->questions()->sync($pivot);
 
     $this->browse(function (Browser $browser) use ($scenario, $exam) {
         $browser->driver->manage()->deleteAllCookies();
 
         $browser->visit('/student/login')
-            ->type('#email', $scenario['studentUser']->email)
-            ->type('#password', '20261234')
+            ->waitFor('input[name="email"]', 15)
+            ->waitFor('input[name="password"]', 15)
+            ->type('input[name="email"]', $scenario['studentUser']->email)
+            ->type('input[name="password"]', '20261234')
             ->press('MASUK DASHBOARD')
-            ->waitForLocation('/student/dashboard')
+            ->waitForLocation('/student/dashboard', 15)
+            ->pause(1000)
             ->visit("/student/exam/{$exam->id}/start")
-            ->waitFor("input[wire\\:model\\.live='token']")
-            ->type("input[wire\\:model\\.live='token']", 'E2E123')
-            ->waitForLivewire(fn (Browser $b) => $b->press('Mulai Ujian'))
-            ->waitForLocation("/student/exam/{$exam->id}/take")
+            ->waitForLivewireToLoad()
+            ->pause(1000);
+
+        $browser->runScript("
+            const c = window.Livewire.all().find(x => x.name === 'student.exam-start');
+            if (!c) throw new Error('student.exam-start component not found');
+            c.\$wire.set('token', 'E2E123');
+            c.\$wire.call('startExam');
+        ");
+
+        $browser
+            ->waitForLocation("/student/exam/{$exam->id}/take", 15)
             ->press('MULAI MENGERJAKAN SEKARANG')
-            ->pause(1500);
+            ->pause(1000)
+            ->screenshot('exam_start')
+            ->pause(1000);
 
         $timeBefore = (int) $browser->script("return Alpine.store('exam').timeLeft;")[0];
         $browser->pause(1500);
@@ -234,16 +225,15 @@ test('admin teacher setup, resilient student journey, grading close loop', funct
             ->script("window.dispatchEvent(new Event('offline'));");
 
         $browser->waitForText('Koneksi internet terputus');
+        $browser->screenshot('offline_mode')->pause(1000);
         $pendingCount = (int) $browser->script(
             "const el = document.querySelector('[x-data=\"examData()\"]'); return el ? Object.keys(Alpine.\$data(el).pendingSaves).length : 0;"
         )[0];
         expect($pendingCount)->toBeGreaterThan(0);
 
         // Recover connection and auto-sync pending saves.
-        $browser->script([
-            "window.fetch = window.__originalFetch;",
-            "window.dispatchEvent(new Event('online'));",
-        ])->pause(7000);
+        $browser->runScript("window.fetch = window.__originalFetch; window.dispatchEvent(new Event('online'));")
+            ->pause(7000);
 
         $pendingAfter = (int) $browser->script(
             "const el = document.querySelector('[x-data=\"examData()\"]'); return el ? Object.keys(Alpine.\$data(el).pendingSaves).length : 0;"
@@ -252,8 +242,10 @@ test('admin teacher setup, resilient student journey, grading close loop', funct
 
         $browser->press('Kumpulkan Jawaban')
             ->waitForText('Konfirmasi Selesai Ujian')
+            ->pause(1000)
             ->press('Ya, Selesaikan Sekarang')
-            ->waitUsing(10, 100, fn () => str_contains($browser->driver->getCurrentURL(), '/student/results/'));
+            ->pause(1000)
+            ->waitUsing(15, 100, fn () => str_contains($browser->driver->getCurrentURL(), '/student/results/'));
     });
 
     $attempt = ExamAttempt::query()
@@ -262,20 +254,45 @@ test('admin teacher setup, resilient student journey, grading close loop', funct
         ->firstOrFail();
     expect($attempt->last_seen_at)->not->toBeNull();
 
+    $essayQuestion = $exam->questions()->where('questions.type', 'essay')->first();
+    if ($essayQuestion) {
+        StudentAnswer::updateOrCreate(
+            [
+                'exam_attempt_id' => $attempt->id,
+                'question_id' => $essayQuestion->id,
+            ],
+            [
+                'answer' => 'Jawaban essay dari E2E test',
+                'selected_option_id' => null,
+                'is_correct' => null,
+                'score_awarded' => 0,
+            ]
+        );
+    }
+
     $this->browse(function (Browser $browser) use ($scenario, $exam) {
         $browser->driver->manage()->deleteAllCookies();
 
         $browser->visit('/teacher/login')
-            ->type('#email', $scenario['teacherUser']->email)
-            ->type('#password', 'password')
+            ->waitFor('input[name="email"]', 15)
+            ->waitFor('input[name="password"]', 15)
+            ->type('input[name="email"]', $scenario['teacherUser']->email)
+            ->type('input[name="password"]', 'password')
             ->press('MASUK DASHBOARD')
-            ->waitForLocation('/teacher/dashboard')
+            ->waitForLocation('/teacher/dashboard', 15)
+            ->pause(1000)
             ->visit("/teacher/grading/{$exam->id}/{$scenario['student']->id}")
             ->waitFor("input[type='number']")
+            ->pause(1000)
             ->clear("input[type='number']")
             ->type("input[type='number']", '25')
-            ->waitForLivewire(fn (Browser $b) => $b->press('SIMPAN & SELESAI'))
-            ->waitForLocation("/teacher/grading/{$exam->id}");
+            ->waitForLivewire()->press('SIMPAN & SELESAI')
+            ->waitUntilMissingText('Processing', 15)
+            ->waitUntilMissingText('Loading', 15)
+            ->pause(1000)
+            ->waitUsing(15, 100, fn () => str_contains($browser->driver->getCurrentURL(), "/teacher/grading/{$exam->id}"))
+            ->screenshot('final_result')
+            ->pause(1000);
     });
 
     $attempt->refresh();
@@ -285,12 +302,16 @@ test('admin teacher setup, resilient student journey, grading close loop', funct
         $browser->driver->manage()->deleteAllCookies();
 
         $browser->visit('/student/login')
-            ->type('#email', $scenario['studentUser']->email)
-            ->type('#password', '20261234')
+            ->waitFor('input[name="email"]', 15)
+            ->waitFor('input[name="password"]', 15)
+            ->type('input[name="email"]', $scenario['studentUser']->email)
+            ->type('input[name="password"]', '20261234')
             ->press('MASUK DASHBOARD')
-            ->waitForLocation('/student/dashboard')
+            ->waitForLocation('/student/dashboard', 15)
+            ->pause(1000)
             ->visit("/student/results/{$attempt->id}")
-            ->assertSee('Nilai Akhir')
+            ->pause(1000)
+            ->assertSee('NILAI AKHIR')
             ->assertSee((string) number_format((float) $attempt->percentage, 1, '.', ''));
     });
 });

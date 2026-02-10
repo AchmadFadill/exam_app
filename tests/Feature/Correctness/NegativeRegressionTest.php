@@ -382,6 +382,75 @@ it('rejects heartbeat for non-active attempt', function () {
         ->assertJson(['success' => false]);
 });
 
+it('scores text answers case-insensitively and with trimmed whitespace', function () {
+    $this->withoutVite();
+
+    $scoringService = app(ScoringService::class);
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.normalize.neg@example.test');
+    [, $student] = makeStudentUserForNegativeTests('Student', 'student.normalize.neg@example.test', 'NEG007');
+    $subject = Subject::create(['name' => 'Language', 'code' => 'NEG-LNG']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Normalize Answer Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA08',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $question = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set A',
+        'type' => 'multiple_choice',
+        'text' => 'Pilih jawaban benar',
+        'score' => 10,
+    ]);
+
+    QuestionOption::create([
+        'question_id' => $question->id,
+        'label' => 'A',
+        'text' => 'Benar',
+        'is_correct' => true,
+    ]);
+
+    $exam->questions()->attach($question->id, ['order' => 1, 'score' => 25]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now(),
+        'status' => ExamAttemptStatus::InProgress,
+    ]);
+
+    StudentAnswer::create(array_merge([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $question->id,
+    ], $scoringService->scoreSingleAnswer($exam, $question, '  benar  ')));
+
+    $result = $scoringService->recalculateAttempt($exam, $attempt->fresh());
+
+    expect((int) $result['total_score'])->toBe(25);
+
+    $this->assertDatabaseHas('student_answers', [
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $question->id,
+        'is_correct' => true,
+        'score_awarded' => 25,
+    ]);
+});
+
 function makeTeacherUserForNegativeTests(string $name, string $email): array
 {
     $user = User::create([

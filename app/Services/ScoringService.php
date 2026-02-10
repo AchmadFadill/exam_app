@@ -36,6 +36,16 @@ class ScoringService
                 $isCorrect = true;
                 $scoreAwarded = $this->examPivotScore($exam, $question->id);
             }
+        } elseif (is_string($answerValue)) {
+            $correctOption = QuestionOption::query()
+                ->where('question_id', $question->id)
+                ->where('is_correct', true)
+                ->first();
+
+            if ($correctOption && $this->answersMatch($answerValue, $correctOption->text)) {
+                $isCorrect = true;
+                $scoreAwarded = $this->examPivotScore($exam, $question->id);
+            }
         }
 
         return [
@@ -78,6 +88,15 @@ class ScoringService
                         ->where('question_id', $answer->question_id)
                         ->where('is_correct', true)
                         ->exists();
+                } elseif (is_string($answer->answer)) {
+                    $correctOption = QuestionOption::query()
+                        ->where('question_id', $answer->question_id)
+                        ->where('is_correct', true)
+                        ->first();
+
+                    $isCorrect = $correctOption
+                        ? $this->answersMatch($answer->answer, $correctOption->text)
+                        : false;
                 }
 
                 $scoreAwarded = $isCorrect ? (int) $meta['score'] : 0;
@@ -117,5 +136,10 @@ class ScoringService
             ->first();
 
         return (int) ($question?->pivot?->score ?? 0);
+    }
+
+    private function answersMatch(?string $studentAnswer, ?string $correctAnswer): bool
+    {
+        return strtoupper(trim((string) $studentAnswer)) === strtoupper(trim((string) $correctAnswer));
     }
 }

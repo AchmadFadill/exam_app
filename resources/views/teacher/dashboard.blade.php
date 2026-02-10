@@ -7,6 +7,39 @@
         subtitle="Ringkasan aktivitas dan kendali ujian hari ini" 
     />
 
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-blue-50 dark:border-slate-800 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 flex items-center justify-center shadow-inner">
+                    <span class="text-2xl font-black text-primary">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-text-main">{{ auth()->user()->name }}</h2>
+                    <p class="text-xs font-medium text-text-muted">Wali Kelas: {{ $homeroom_class ?? 'Belum ditetapkan' }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 md:gap-8 border-t md:border-t-0 md:border-l border-gray-100 dark:border-slate-800 pt-4 md:pt-0 md:pl-8">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-text-muted font-bold opacity-60 mb-1">Mata Pelajaran</p>
+                    @if(count($taught_subjects))
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($taught_subjects as $subject)
+                                <span class="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
+                                    {{ $subject }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm font-black text-text-main">Belum ada mata pelajaran</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Stat Card 1: Active Exams (Red/Animated) -->
@@ -53,69 +86,18 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                        Live Activity ({{ count($ongoing_exams) }})
+                        Aktivitas Langsung ({{ count($ongoing_exams) }})
                     </h3>
                     <x-button href="{{ route('teacher.monitoring') }}" variant="soft">
                         SELENGKAPNYA
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </x-button>
                 </div>
-                
-                <div class="bg-bg-surface dark:bg-bg-surface rounded-[2rem] shadow-xl shadow-black/5 border border-border-main dark:border-border-main divide-y divide-border-subtle dark:divide-border-subtle overflow-hidden">
-                    @forelse($ongoing_exams as $exam)
-                    <div class="p-8 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all group">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                            <!-- Exam Info -->
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] bg-gray-100 dark:bg-slate-800 text-text-muted">{{ $exam['class'] }}</span>
-                                    <span class="w-1.5 h-1.5 rounded-full bg-border-main dark:bg-slate-700"></span>
-                                    <span class="text-xs font-black text-primary uppercase tracking-widest">{{ $exam['subject'] }}</span>
-                                </div>
-                                <h4 class="font-black text-text-main group-hover:text-primary transition-colors text-2xl tracking-tight">{{ $exam['name'] }}</h4>
-                                <div class="flex items-center gap-6 mt-4 text-sm text-text-muted font-bold">
-                                    <span class="flex items-center gap-2">
-                                        <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        {{ $exam['start_time'] }} - {{ $exam['end_time'] }}
-                                    </span>
-                                    <span class="flex items-center gap-2">
-                                        <svg class="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                        {{ $exam['finished_students'] }}/{{ $exam['total_students'] }} <span class="uppercase tracking-widest text-[10px] opacity-60">Finished</span>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- Progress Circle / Action -->
-                            <div class="flex items-center gap-5">
-                                <div class="text-right hidden sm:block">
-                                    <div class="text-3xl font-black text-text-main tracking-tighter">{{ $exam['percentage'] }}%</div>
-                                    <div class="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] opacity-60">Progress</div>
-                                </div>
-                                <div class="w-px h-12 bg-border-subtle dark:bg-slate-800 hidden sm:block"></div>
-                                <a href="{{ route('teacher.exams.edit', $exam['id']) }}" class="px-6 py-3 bg-bg-surface dark:bg-slate-800 border border-border-main dark:border-border-main text-text-main font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all text-xs uppercase tracking-widest shadow-sm">
-                                    Detail
-                                </a>
-                                <a href="{{ route('teacher.monitoring.detail', $exam['id']) }}" class="px-6 py-3 bg-primary text-white font-black rounded-2xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center gap-3">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    Pantau
-                                </a>
-                            </div>
-                        </div>
-                        <!-- Progress Bar -->
-                        <div class="mt-8 w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden shadow-inner">
-                            <div class="bg-primary h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(30,64,175,0.4)]" style="width: {{ $exam['percentage'] }}%"></div>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="p-12">
-                        <x-empty-state 
-                            title="Tidak Ada Aktivitas" 
-                            message="Tidak ada aktivitas ujian yang terdeteksi sedang berlangsung." 
-                            icon="coffee" 
-                        />
-                    </div>
-                    @endforelse
-                </div>
+                <x-dashboard.active-exam-cards
+                    :exams="$ongoing_exams"
+                    emptyTitle="Tidak Ada Aktivitas"
+                    emptyMessage="Tidak ada aktivitas ujian yang terdeteksi sedang berlangsung."
+                />
             </section>
 
             <!-- Quick Actions Grid -->
@@ -234,4 +216,3 @@
         </div>
     </div>
 </div>
-

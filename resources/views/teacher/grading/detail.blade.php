@@ -39,6 +39,13 @@
     </div>
 
     <div class="max-w-5xl mx-auto space-y-10">
+        @if($attempt->answers->isEmpty())
+            <div class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-[2rem] shadow-sm border border-gray-200">
+                <img src="{{ asset('img/not-found.png') }}" alt="Tidak Ada Jawaban" class="w-96 max-w-md mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Belum Ada Jawaban</h3>
+                <p class="text-slate-500 max-w-md mx-auto">Siswa tidak menjawab soal sama sekali.</p>
+            </div>
+        @else
         <!-- PG Answers Accordion -->
         <div x-data="{ expanded: false }" class="bg-white rounded-[2rem] shadow-sm border border-gray-200 overflow-hidden group hover:border-blue-200 transition-colors">
             <button @click="expanded = !expanded" class="w-full px-8 py-6 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer">
@@ -178,6 +185,7 @@
             </div>
             @endforeach
         </div>
+        @endif
     </div>
 
     <!-- Fixed Bottom Actions -->
@@ -192,11 +200,13 @@
                     <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Total Nilai Akhir</p>
                     <p class="text-xl font-black text-primary">{{ $this->currentTotalScore }}</p>
                 </div>
-                <!-- Save Button -->
-                <x-button wire:click="finishGrading" variant="primary" class="px-8 py-3.5 rounded-xl text-xs font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
-                    SIMPAN & SELESAI
-                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </x-button>
+                @if(!$attempt->answers->isEmpty())
+                    <!-- Save Button -->
+                    <x-button wire:click="finishGrading" variant="primary" class="px-8 py-3.5 rounded-xl text-xs font-black shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                        SIMPAN & SELESAI
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </x-button>
+                @endif
             </div>
         </div>
     </div>

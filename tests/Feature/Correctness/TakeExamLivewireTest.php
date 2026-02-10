@@ -151,6 +151,79 @@ it('keeps final scoring consistent by saving current answer during timeout submi
         ->and($attempt->submitted_at)->not->toBeNull();
 });
 
+it('loads only questions attached to the exam pivot even when same subject has other groups', function () {
+    $this->withoutVite();
+
+    [, $teacher] = makeTeacherUserForTakeExam('Teacher Group', 'teacher.group@example.test');
+    [$studentUser, $student] = makeStudentUserForTakeExam('Student Group', 'student.group@example.test', 'NISGRP01');
+    $subject = Subject::create(['name' => 'Geography', 'code' => 'GEOGRP']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Group Strict Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '00:01',
+        'end_time' => '23:59',
+        'duration_minutes' => 120,
+        'token' => 'GRP001',
+        'passing_grade' => 60,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $includedQ1 = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Group A',
+        'type' => 'multiple_choice',
+        'text' => 'Included 1',
+        'score' => 10,
+    ]);
+    $includedQ2 = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Group A',
+        'type' => 'multiple_choice',
+        'text' => 'Included 2',
+        'score' => 10,
+    ]);
+    $otherGroupQuestion = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Group B',
+        'type' => 'multiple_choice',
+        'text' => 'Must Not Appear',
+        'score' => 10,
+    ]);
+
+    QuestionOption::create(['question_id' => $includedQ1->id, 'label' => 'A', 'text' => 'X', 'is_correct' => true]);
+    QuestionOption::create(['question_id' => $includedQ2->id, 'label' => 'A', 'text' => 'Y', 'is_correct' => true]);
+    QuestionOption::create(['question_id' => $otherGroupQuestion->id, 'label' => 'A', 'text' => 'Z', 'is_correct' => true]);
+
+    $exam->questions()->attach($includedQ1->id, ['order' => 1, 'score' => 50]);
+    $exam->questions()->attach($includedQ2->id, ['order' => 2, 'score' => 50]);
+
+    ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now(),
+        'status' => ExamAttemptStatus::InProgress,
+    ]);
+
+    $component = Livewire::actingAs($studentUser)
+        ->test(TakeExam::class, ['id' => $exam->id]);
+
+    $questionIds = $component->instance()->questions->pluck('id')->all();
+
+    expect($questionIds)->toBe([$includedQ1->id, $includedQ2->id])
+        ->and($questionIds)->not->toContain($otherGroupQuestion->id);
+});
+
 function makeTeacherUserForTakeExam(string $name, string $email): array
 {
     $user = User::create([

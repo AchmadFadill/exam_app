@@ -98,7 +98,7 @@ class Dashboard extends Component
                     'id' => 'att-' . $attempt->id . '-' . $attempt->updated_at->timestamp,
                     'timestamp' => $attempt->updated_at,
                     'time' => $attempt->updated_at->format('H:i:s'),
-                    'student' => $attempt->student->user->name ?? 'Unknown',
+                    'student' => $attempt->student->user->name ?? 'Tidak Diketahui',
                     'exam' => $attempt->exam->name ?? '-',
                     'activity' => $activity,
                     'type' => $type
@@ -115,6 +115,8 @@ class Dashboard extends Component
 
     public function render()
     {
+        $today = now();
+
         // Global Stats
         $stats = [
             'total_students' => \App\Models\Student::count(),
@@ -124,24 +126,20 @@ class Dashboard extends Component
             'active_exams_count' => 0, // Will update below
         ];
 
-        // System Health (Simulated/Partial Real)
-        $diskFree = disk_free_space(base_path());
-        $diskTotal = disk_total_space(base_path());
-        $diskUsage = round((($diskTotal - $diskFree) / $diskTotal) * 100);
-        
-        $system_health = [
-            'cpu_load' => rand(10, 40), // Simulated
-            'ram_usage' => rand(30, 60), // Simulated
-            'disk_space' => $diskUsage,
-            'uptime' => 'Online', // Simplified
-            'status' => 'Healthy',
+        $quick_stats = [
+            'exams_today' => \App\Models\Exam::whereDate('date', $today)->count(),
+            'active_students' => \App\Models\ExamAttempt::query()
+                ->where('status', ExamAttemptStatus::InProgress->value)
+                ->distinct('student_id')
+                ->count('student_id'),
+            'pending_password_requests' => \App\Models\PasswordResetRequest::where('status', 'pending')->count(),
         ];
 
         // Active Exams Feed - REAL DATA - OPTIMIZED
         $activeExamsQuery = \App\Models\Exam::where('status', 'scheduled')
-            ->whereDate('date', now())
-            ->whereTime('start_time', '<=', now()->format('H:i'))
-            ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->whereDate('date', $today)
+            ->whereTime('start_time', '<=', $today->format('H:i'))
+            ->whereTime('end_time', '>=', $today->format('H:i'))
             ->with([
                 'subject', 
                 'classrooms' => function($q) {
@@ -169,12 +167,15 @@ class Dashboard extends Component
             $progress = $totalDuration > 0 ? min(100, round(($elapsed / $totalDuration) * 100)) : 0;
 
             return [
-                'subject' => $exam->subject->name ?? 'Unknown Subject',
+                'id' => $exam->id,
+                'status' => $exam->status,
+                'subject' => $exam->subject->name ?? 'Mapel Tidak Diketahui',
                 'class' => $exam->classrooms->pluck('name')->join(', '),
-                'teacher' => $exam->teacher->user->name ?? 'Unknown Teacher',
+                'teacher' => $exam->teacher->user->name ?? 'Guru Tidak Diketahui',
                 'progress' => $progress,
                 'students_online' => $studentsOnline,
                 'total_students' => $totalStudents,
+                'monitor_url' => route('admin.monitor.detail', $exam->id),
             ];
         })->toArray();
 
@@ -184,7 +185,7 @@ class Dashboard extends Component
         return view('admin.dashboard', [
             'greeting' => $this->getGreeting(),
             'stats' => $stats,
-            'system_health' => $system_health,
+            'quick_stats' => $quick_stats,
             'active_exams' => $active_exams,
             'live_logs' => $this->live_logs, // Updated variable
         ])->layout('layouts.admin', ['title' => 'Dashboard']);

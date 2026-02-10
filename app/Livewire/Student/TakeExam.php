@@ -7,6 +7,7 @@ use App\Enums\ExamAttemptStatus;
 use App\Models\Exam;
 use App\Models\ExamActivity;
 use App\Models\ExamAttempt;
+use App\Models\Question;
 use App\Models\StudentAnswer;
 use App\Services\ScoringService;
 use Carbon\Carbon;
@@ -73,7 +74,27 @@ class TakeExam extends Component
 
     public function getExamProperty()
     {
-        return Exam::with(['questions.options'])->findOrFail($this->examId);
+        $exam = Exam::with('examQuestions')->findOrFail($this->examId);
+
+        $orderedQuestionIds = $exam->examQuestions
+            ->sortBy('order')
+            ->pluck('question_id')
+            ->values();
+
+        $questions = Question::query()
+            ->with('options')
+            ->whereIn('id', $orderedQuestionIds)
+            ->get()
+            ->keyBy('id');
+
+        $orderedQuestions = $orderedQuestionIds
+            ->map(fn (int $questionId) => $questions->get($questionId))
+            ->filter()
+            ->values();
+
+        $exam->setRelation('questions', $orderedQuestions);
+
+        return $exam;
     }
 
     public function getAttemptProperty()
