@@ -228,18 +228,20 @@ class ManageTeacher extends Component
 
     public function downloadTemplate()
     {
+        // Streaming CSV is much faster than generating XLSX (PhpSpreadsheet), especially on Windows.
         $headers = ['nama', 'email', 'mata_pelajaran'];
-        $filename = 'template_guru.xlsx';
-        
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new class($headers) implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
-                private $headers;
-                public function __construct($headers) { $this->headers = $headers; }
-                public function array(): array { return []; }
-                public function headings(): array { return $this->headers; }
-            },
-            $filename
-        );
+        $filename = 'template_guru.csv';
+
+        return response()->streamDownload(function () use ($headers) {
+            // UTF-8 BOM for Excel compatibility.
+            echo "\xEF\xBB\xBF";
+            $out = fopen('php://output', 'w');
+            fputcsv($out, $headers);
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
     }
 
     public function importTeachers()

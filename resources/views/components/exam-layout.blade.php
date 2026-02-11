@@ -18,6 +18,26 @@
     <!-- AlpineJS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- KaTeX (LaTeX renderer) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script>
+        // Render $...$ and $$...$$ math inside a container.
+        window.renderKatexIn = function (root) {
+            if (!root) return;
+            if (typeof window.renderMathInElement !== 'function') return;
+
+            window.renderMathInElement(root, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                ],
+                throwOnError: false,
+            });
+        };
+    </script>
+
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }

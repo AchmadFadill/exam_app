@@ -50,6 +50,12 @@
                 </svg>
                 Distribusi (100)
             </x-button>
+            <x-button variant="secondary" wire:click="exportGroupQuestions" class="flex-1 lg:flex-none flex items-center justify-center py-2.5 sm:py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest" title="Export soal untuk kelompok ini">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export
+            </x-button>
             <x-button variant="primary" wire:click="openAddModal" class="flex-1 lg:flex-none flex items-center justify-center py-2.5 sm:py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20">
                 <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -207,4 +213,3 @@
     @endif
     <x-latex-guide-modal />
 </div>
-

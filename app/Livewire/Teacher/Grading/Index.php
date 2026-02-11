@@ -12,9 +12,13 @@ class Index extends Component
     public function render()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isAdmin = $user->isAdmin();
         $teacherId = $user->isTeacher() ? $user->teacher->id : 0;
 
-        $exams = \App\Models\Exam::where('teacher_id', $teacherId)
+        $exams = \App\Models\Exam::query()
+            ->when(!$isAdmin, fn ($q) => $q->where('teacher_id', $teacherId))
+            // Grading module is only for exams that contain essay questions (manual scoring).
+            ->whereHas('questions', fn ($q) => $q->where('questions.type', 'essay'))
             ->withCount(['attempts' => function ($query) {
                 $query->where('status', ExamAttemptStatus::Submitted->value);
             }])
@@ -39,6 +43,6 @@ class Index extends Component
 
         return view('teacher.grading.index', [
             'exams' => $exams
-        ])->layout('layouts.teacher')->title('Analisis Nilai');
+        ])->layout($isAdmin ? 'layouts.admin' : 'layouts.teacher')->title('Analisis Nilai');
     }
 }

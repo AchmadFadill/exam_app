@@ -34,6 +34,19 @@
                 <div class="mt-1 font-semibold" x-text="`Jawaban tertunda: ${Object.keys(pendingSaves).length}`"></div>
             </template>
         </div>
+
+        <!-- Fullscreen helper (best-effort: browsers may block fullscreen without a user gesture) -->
+        <div x-cloak x-show="needsFullscreen && Alpine.store('exam').isActive && !showStartOverlay && !showWarningModal && !showFinishModal"
+            class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 flex items-start justify-between gap-3">
+            <div>
+                <div class="font-semibold">Mode layar penuh diperlukan</div>
+                <div class="text-blue-800">Jika setelah refresh layar penuh tidak aktif, klik tombol di kanan untuk masuk kembali.</div>
+            </div>
+            <button type="button" @click="tryEnterFullscreen()"
+                class="shrink-0 inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Masuk Layar Penuh
+            </button>
+        </div>
         
         <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-[calc(100vh-8rem)]">
             
@@ -46,11 +59,12 @@
                     </h2>
                     <div class="flex items-center space-x-2">
                         <span x-show="questions[currentQuestion].type === 'multiple_choice'" class="text-xs font-medium bg-gray-200 text-gray-600 px-2 py-1 rounded">PG</span>
+                        <span x-show="questions[currentQuestion].type === 'essay'" class="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded">Essay</span>
                     </div>
                 </div>
 
                 <!-- Question Content -->
-                <div class="flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="flex-1 overflow-y-auto p-3 sm:p-6" x-ref="mathRoot">
                     <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8">
                         <!-- Image Rendering -->
                         <template x-if="questions[currentQuestion].image_path">
@@ -60,25 +74,43 @@
                         <div x-html="questions[currentQuestion].text"></div>
                     </div>
 
-                    <!-- Options -->
+                    <!-- Answer Input -->
                     <div class="space-y-3 sm:space-y-4">
+                        <template x-if="questions[currentQuestion].type === 'multiple_choice'">
+                            <div class="space-y-3 sm:space-y-4">
+                                <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
+                                    <label class="flex items-start p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50 active:scale-[0.98]"
+                                        :class="{
+                                            'border-blue-600 bg-blue-50': answers[questions[currentQuestion].id] === option.id,
+                                            'border-gray-200': answers[questions[currentQuestion].id] !== option.id
+                                        }">
+                                        <input type="radio"
+                                            :name="'question_' + questions[currentQuestion].id"
+                                            :value="option.id"
+                                            x-model="answers[questions[currentQuestion].id]"
+                                            @change="saveProgress(questions[currentQuestion].id)"
+                                            class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300 flex-shrink-0">
+                                        <span class="ml-3 text-sm sm:text-base text-gray-700 group-hover:text-gray-900"
+                                            :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}"
+                                            x-text="option.text"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </template>
 
-                        <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
-                            <label class="flex items-start p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50 active:scale-[0.98]"
-                                :class="{
-                                    'border-blue-600 bg-blue-50': answers[questions[currentQuestion].id] === option.id,
-                                    'border-gray-200': answers[questions[currentQuestion].id] !== option.id
-                                }">
-                                <input type="radio" 
-                                    :name="'question_' + questions[currentQuestion].id" 
-                                    :value="option.id"
+                        <template x-if="questions[currentQuestion].type === 'essay'">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">Jawaban Essay</label>
+                                <textarea
+                                    :name="'question_' + questions[currentQuestion].id"
                                     x-model="answers[questions[currentQuestion].id]"
-                                    @change="saveProgress(questions[currentQuestion].id)"
-                                    class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300 flex-shrink-0">
-                                <span class="ml-3 text-sm sm:text-base text-gray-700 group-hover:text-gray-900" 
-                                    :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}" 
-                                    x-text="option.text"></span>
-                            </label>
+                                    @input.debounce.800ms="saveProgress(questions[currentQuestion].id)"
+                                    @blur="saveProgress(questions[currentQuestion].id)"
+                                    rows="8"
+                                    class="w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 text-sm sm:text-base"
+                                    placeholder="Tulis jawaban Anda di sini..."></textarea>
+                                <p class="text-xs text-gray-500">Jawaban disimpan otomatis.</p>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -278,10 +310,12 @@
 
             Alpine.data('examData', () => ({
                 currentQuestion: 0,
+                attemptId: {{ (int) $attempt->id }},
                 answers: @json((object)$existingAnswers),
                 flags: {},
-                violations: 0,
+                violations: {{ (int) ($attempt->tab_switches ?? 0) }},
                 violationMessage: '',
+                needsFullscreen: false,
                 showWarningModal: false,
                 showFinishModal: false,
                 showStartOverlay: true,
@@ -291,6 +325,7 @@
                 saveErrorMessage: '',
                 lastHeartbeatFailed: false,
                 isRetryingSaves: false,
+                isSubmitting: false,
 
                 async postJson(url, payload) {
                     const response = await fetch(url, {
@@ -381,38 +416,119 @@
 
                 handleViolation(message) {
                     if (this.showFinishModal) return; 
-                    
-                    this.violations++;
+
+                    const type = document.hidden ? 'tab_switch' : 'fullscreen_exit';
                     this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
                     
                     const maxViolations = {{ $exam->tab_tolerance ?? 3 }};
                     
-                    if (this.violations >= maxViolations) {
-                        alert(`Batas pelanggaran tercapai (${maxViolations}x). Ujian Anda akan otomatis dikirim.`);
-                        this.submitExam();
-                    } else {
+                    // Persist violation server-side so refresh cannot reset the counter.
+                    this.postJson('{{ route('student.exam.log-violation', $exam->id) }}', {
+                        type: type,
+                        message: this.violationMessage,
+                        count: 1
+                    }).then((data) => {
+                        if (typeof data.tab_switches === 'number') {
+                            this.violations = data.tab_switches;
+                        } else {
+                            this.violations++;
+                        }
+
+                        if (data.force_stop || this.violations >= maxViolations) {
+                            // Silent auto-finish. Also disable beforeunload to prevent
+                            // "Changes you made may not be saved." confirmation dialog.
+                            this.isSubmitting = true;
+                            window.onbeforeunload = null;
+
+                            const finalize = () => {
+                                if (data.redirect) {
+                                    window.location.href = data.redirect;
+                                    return;
+                                }
+                                this.submitExam();
+                            };
+
+                            // Best-effort: flush pending saves before leaving.
+                            this.flushPendingSaves().finally(() => finalize());
+                            return;
+                        }
+
                         this.showWarningModal = true;
                         if (document.fullscreenElement) {
                             document.exitFullscreen().catch(() => {});
                         }
+                    }).catch(() => {
+                        // If request fails (offline), keep local count. Server-side statusCheck will enforce once connected.
+                        this.violations++;
+                        this.showWarningModal = true;
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
+                    });
+                },
+
+                async checkStatus() {
+                    if (this.isSubmitting || this.showFinishModal) return;
+
+                    try {
+                        const res = await fetch('{{ route('student.exam.status_check', $exam->id) }}', {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const data = await res.json();
+                        if (!data.force_stop) return;
+
+                        // Silent redirect. Disable beforeunload so Chrome doesn't show confirmation.
+                        this.isSubmitting = true;
+                        window.onbeforeunload = null;
+                        await this.flushPendingSaves();
+                        window.location.href = data.redirect;
+                    } catch (e) {
+                        // ignore
                     }
                 },
 
-                checkStatus() {
-                   fetch('{{ route('student.exam.status_check', $exam->id) }}', { 
-                       headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                   })
-                   .then(res => res.json())
-                   .then(data => {
-                       if(data.force_stop) {
-                           alert('Ujian telah dihentikkan oleh pengawas.');
-                           window.location.href = data.redirect;
-                       }
-                   })
-                   .catch(() => {});
+                tryEnterFullscreen() {
+                    // Browsers often require a user gesture for fullscreen.
+                    // We attempt anyway, and if blocked we show a banner and retry on next click.
+                    return document.documentElement.requestFullscreen()
+                        .then(() => { this.needsFullscreen = false; })
+                        .catch(() => { this.needsFullscreen = true; });
                 },
 
                 initExam() {
+                    // Auto-resume after refresh (prevents going back to "MULAI..." overlay).
+                    // Uses sessionStorage so it's per-tab session and doesn't create a permanent bypass.
+                    const startedKey = `exam_started_attempt_${this.attemptId}`;
+                    if (sessionStorage.getItem(startedKey) === '1') {
+                        this.showStartOverlay = false;
+                        Alpine.store('exam').startTimer();
+                        this.sendHeartbeat();
+                        this.tryEnterFullscreen();
+
+                        // If fullscreen is blocked, retry once on the next user click (counts as a gesture).
+                        const retryOnClick = () => {
+                            if (!this.needsFullscreen) {
+                                window.removeEventListener('click', retryOnClick, true);
+                                return;
+                            }
+                            this.tryEnterFullscreen().finally(() => {
+                                window.removeEventListener('click', retryOnClick, true);
+                            });
+                        };
+                        window.addEventListener('click', retryOnClick, true);
+                    }
+
+                    // Initial math render (KaTeX might load slightly after Alpine; retry briefly).
+                    const tryRender = (attempt = 0) => {
+                        if (attempt > 40) return;
+                        if (typeof window.renderMathInElement !== 'function') {
+                            setTimeout(() => tryRender(attempt + 1), 50);
+                            return;
+                        }
+                        window.renderKatexIn(this.$refs.mathRoot);
+                    };
+                    this.$nextTick(() => tryRender());
+
                     window.addEventListener('online', () => this.handleOnline());
                     window.addEventListener('offline', () => this.handleOffline());
 
@@ -463,6 +579,13 @@
                     document.addEventListener('msfullscreenchange', onFullscreenChange);
                     @endif
 
+                    // Keep a lightweight indicator for fullscreen state while exam is active.
+                    document.addEventListener('fullscreenchange', () => {
+                        if (Alpine.store('exam').isActive) {
+                            this.needsFullscreen = !document.fullscreenElement;
+                        }
+                    });
+
                     // Disable Right Click
                     document.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
@@ -493,24 +616,29 @@
 
                 beginExam() {
                     this.showStartOverlay = false;
+                    try {
+                        sessionStorage.setItem(`exam_started_attempt_${this.attemptId}`, '1');
+                    } catch (e) {
+                        // Ignore storage errors.
+                    }
                     Alpine.store('exam').startTimer();
                     this.sendHeartbeat();
-                    document.documentElement.requestFullscreen().catch((e) => {
-                        console.log("Fullscreen blocked", e);
-                        // alert("Mohon izinkan Fullscreen untuk melanjutkan ujian.");
-                    });
+                    this.tryEnterFullscreen();
                 },
 
                 prevQuestion() {
                     if (this.currentQuestion > 0) this.currentQuestion--;
+                    this.$nextTick(() => window.renderKatexIn(this.$refs.mathRoot));
                 },
 
                 nextQuestion() {
                     if (this.currentQuestion < this.questions.length - 1) this.currentQuestion++;
+                    this.$nextTick(() => window.renderKatexIn(this.$refs.mathRoot));
                 },
 
                 jumpToQuestion(index) {
                     this.currentQuestion = index;
+                    this.$nextTick(() => window.renderKatexIn(this.$refs.mathRoot));
                 },
                 
                 resumeExam() {
@@ -523,6 +651,7 @@
                 },
 
                 async submitExam() {
+                     this.isSubmitting = true;
                      await this.flushPendingSaves();
 
                      // Remove unload listener
@@ -536,12 +665,19 @@
                      this.postJson('{{ route('student.exam.submit', $exam->id) }}', { answers: this.answers })
                      .then(data => {
                          if(data.success) {
+                             try {
+                                 sessionStorage.removeItem(`exam_started_attempt_${this.attemptId}`);
+                             } catch (e) {
+                                 // Ignore storage errors.
+                             }
                              window.location.href = data.redirect;
                          } else {
+                             this.isSubmitting = false;
                              alert('Terjadi kesalahan saat menyimpan jawaban.');
                          }
                      })
                      .catch(error => {
+                         this.isSubmitting = false;
                          console.error('Error:', error);
                          alert('Gagal mengirim jawaban. Periksa koneksi internet Anda.');
                      });
@@ -563,9 +699,3 @@
         });
     </script>
 </x-exam-layout>
-
-
-
-
-
-

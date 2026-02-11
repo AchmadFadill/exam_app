@@ -30,8 +30,9 @@ class ExamFactory extends Factory
             'shuffle_answers' => fake()->boolean(),
             'enable_tab_tolerance' => fake()->boolean(),
             'tab_tolerance' => fake()->numberBetween(0, 5),
+            'show_score_to_student' => true,
+            'show_answers_to_student' => true,
             'status' => 'scheduled',
         ];
     }
 }
-

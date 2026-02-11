@@ -81,6 +81,12 @@
                         <div class="text-center pt-2">
                             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] opacity-40">Format JPG, PNG (Max 1MB)</p>
                         </div>
+
+                        @if (Auth::user()->role === 'student')
+                            <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
+                                <p class="text-xs font-semibold text-blue-900">Gunakan foto yang jelas, formal, dan memakai atribut/seragam lengkap.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </x-card>

@@ -5,7 +5,7 @@
         title="Daftar Ujian" 
         subtitle="Kelola Ujian Anda Disini"
     >
-        <x-button href="{{ route('teacher.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
+        <x-button href="{{ route('admin.exams.create') }}" variant="primary" class="group px-8 py-3.5 rounded-[2rem] text-sm tracking-widest">
             <svg class="w-5 h-5 group-hover:rotate-90 transition-transform mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
             BUAT UJIAN BARU 
         </x-button>

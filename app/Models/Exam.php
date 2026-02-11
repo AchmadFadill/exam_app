@@ -15,7 +15,8 @@ class Exam extends Model
     protected $fillable = [
         'teacher_id', 'subject_id', 'name', 'date', 'start_time', 'end_time',
         'duration_minutes', 'token', 'passing_grade', 'default_score',
-        'shuffle_questions', 'shuffle_answers', 'enable_tab_tolerance', 'tab_tolerance', 'status',
+        'shuffle_questions', 'shuffle_answers', 'enable_tab_tolerance', 'tab_tolerance',
+        'show_score_to_student', 'show_answers_to_student', 'status',
     ];
 
     protected $casts = [
@@ -23,6 +24,8 @@ class Exam extends Model
         'shuffle_questions' => 'boolean',
         'shuffle_answers' => 'boolean',
         'enable_tab_tolerance' => 'boolean',
+        'show_score_to_student' => 'boolean',
+        'show_answers_to_student' => 'boolean',
     ];
 
     public function teacher(): BelongsTo

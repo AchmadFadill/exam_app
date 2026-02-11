@@ -86,7 +86,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                        Aktivitas Langsung ({{ count($ongoing_exams) }})
+                        UJIAN BERJALAN ({{ count($ongoing_exams) }})
                     </h3>
                     <x-button href="{{ route('teacher.monitoring') }}" variant="soft">
                         SELENGKAPNYA

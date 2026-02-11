@@ -80,32 +80,117 @@ class ScoringService
             }
 
             if ($meta['type'] === 'multiple_choice') {
+                $canDetermine = true;
                 $isCorrect = false;
+                $normalizedSelectedOptionId = $answer->selected_option_id ? (int) $answer->selected_option_id : null;
+                $selectedOption = null;
 
+                // 1) Resolve selected option from FK; if mismatched question, remap by label.
                 if ($answer->selected_option_id) {
-                    $isCorrect = QuestionOption::query()
+                    $rawSelected = QuestionOption::query()
                         ->where('id', $answer->selected_option_id)
-                        ->where('question_id', $answer->question_id)
-                        ->where('is_correct', true)
-                        ->exists();
+                        ->first();
+
+                    if ($rawSelected && (int) $rawSelected->question_id === (int) $answer->question_id) {
+                        $selectedOption = $rawSelected;
+                    } elseif ($rawSelected) {
+                        $remapped = QuestionOption::query()
+                            ->where('question_id', $answer->question_id)
+                            ->where('label', $rawSelected->label)
+                            ->first();
+
+                        if ($remapped) {
+                            $selectedOption = $remapped;
+                            $normalizedSelectedOptionId = (int) $remapped->id;
+                        }
+                    }
+                }
+
+                // 2) Resolve from legacy/raw answer value when selected option is missing/stale.
+                if (!$selectedOption && is_string($answer->answer)) {
+                    $raw = trim($answer->answer);
+
+                    if ($raw !== '') {
+                        if (is_numeric($raw)) {
+                            $candidate = QuestionOption::query()
+                                ->where('id', (int) $raw)
+                                ->where('question_id', $answer->question_id)
+                                ->first();
+
+                            if ($candidate) {
+                                $selectedOption = $candidate;
+                                $normalizedSelectedOptionId = (int) $candidate->id;
+                            }
+                        }
+
+                        if (!$selectedOption && preg_match('/^[A-E]$/i', $raw) === 1) {
+                            $candidate = QuestionOption::query()
+                                ->where('question_id', $answer->question_id)
+                                ->where('label', strtoupper($raw))
+                                ->first();
+
+                            if ($candidate) {
+                                $selectedOption = $candidate;
+                                $normalizedSelectedOptionId = (int) $candidate->id;
+                            }
+                        }
+
+                        if (!$selectedOption) {
+                            $candidate = QuestionOption::query()
+                                ->where('question_id', $answer->question_id)
+                                ->get()
+                                ->first(fn (QuestionOption $opt) => $this->answersMatch($raw, $opt->text));
+
+                            if ($candidate) {
+                                $selectedOption = $candidate;
+                                $normalizedSelectedOptionId = (int) $candidate->id;
+                            }
+                        }
+                    }
+                }
+
+                if ($selectedOption) {
+                    $isCorrect = (bool) $selectedOption->is_correct;
                 } elseif (is_string($answer->answer)) {
                     $correctOption = QuestionOption::query()
                         ->where('question_id', $answer->question_id)
                         ->where('is_correct', true)
                         ->first();
 
-                    $isCorrect = $correctOption
-                        ? $this->answersMatch($answer->answer, $correctOption->text)
-                        : false;
+                    // If stored answer is numeric id-like string and no option can be resolved,
+                    // treat as indeterminate instead of forcing it to wrong.
+                    if (is_numeric(trim($answer->answer))) {
+                        $canDetermine = false;
+                    } elseif ($correctOption) {
+                        $isCorrect = $this->answersMatch($answer->answer, $correctOption->text);
+                    } else {
+                        $canDetermine = false;
+                    }
+                } else {
+                    $canDetermine = false;
                 }
 
-                $scoreAwarded = $isCorrect ? (int) $meta['score'] : 0;
+                $scoreAwarded = $canDetermine
+                    ? ($isCorrect ? (int) $meta['score'] : 0)
+                    : (int) ($answer->score_awarded ?? 0);
 
-                if ((bool) $answer->is_correct !== $isCorrect || (int) $answer->score_awarded !== $scoreAwarded) {
-                    $answer->update([
+                $updates = [];
+
+                if ($normalizedSelectedOptionId !== null && (int) ($answer->selected_option_id ?? 0) !== $normalizedSelectedOptionId) {
+                    $updates['selected_option_id'] = $normalizedSelectedOptionId;
+                    // Keep existing app convention for PG: answer stores selected option id string.
+                    $updates['answer'] = (string) $normalizedSelectedOptionId;
+                }
+
+                if ($canDetermine && ((bool) $answer->is_correct !== $isCorrect || (int) $answer->score_awarded !== $scoreAwarded)) {
+                    $updates = array_merge($updates, [
                         'is_correct' => $isCorrect,
                         'score_awarded' => $scoreAwarded,
                     ]);
+                }
+
+                if (!empty($updates)) {
+                    $answer->update($updates);
                 }
 
                 $totalScore += $scoreAwarded;

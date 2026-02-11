@@ -5,11 +5,13 @@ namespace App\Livewire\Teacher;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Subject;
+use App\Exports\QuestionGroupExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
 
 class QuestionGroupDetail extends Component
 {
@@ -147,7 +149,7 @@ class QuestionGroupDetail extends Component
 
     public function addOption()
     {
-        if ($this->optionCount < 4) {
+        if ($this->optionCount < 5) {
             $this->optionCount++;
             while (count($this->questionForm['options']) < $this->optionCount) {
                 $this->questionForm['options'][] = '';
@@ -189,15 +191,21 @@ class QuestionGroupDetail extends Component
 
         // Load options for multiple choice
         if ($question->type === 'multiple_choice') {
+            $maxOptionIndex = -1;
             foreach ($question->options as $option) {
                 $index = ord($option->label) - ord('A');
                 if ($index >= 0 && $index < 5) {
                     $this->questionForm['options'][$index] = $option->text;
+                    $maxOptionIndex = max($maxOptionIndex, $index);
                     if ($option->is_correct) {
                         $this->questionForm['correct_option'] = $option->label;
                     }
                 }
             }
+
+            $this->optionCount = max(4, $maxOptionIndex + 1);
+        } else {
+            $this->optionCount = 4;
         }
 
         $this->showEditModal = true;
@@ -428,6 +436,16 @@ class QuestionGroupDetail extends Component
     {
         Question::distributeScoresByTitle($this->title);
         $this->dispatch('notify', ['message' => 'Bobot nilai semua soal berhasil disesuaikan menjadi total 100!']);
+    }
+
+    public function exportGroupQuestions()
+    {
+        $teacherId = Auth::user()->isTeacher() ? Auth::user()->teacher?->id : null;
+
+        return Excel::download(
+            new QuestionGroupExport($this->title, $teacherId),
+            'soal_' . \Illuminate\Support\Str::slug($this->title) . '_' . now()->format('Ymd_His') . '.xlsx'
+        );
     }
 
     public function render()

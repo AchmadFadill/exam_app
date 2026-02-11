@@ -2,7 +2,7 @@
 
 <div class="space-y-6">
     <div class="flex items-center gap-4">
-        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.exams') : route('teacher.grading.index') }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
+        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.index') : route('teacher.grading.index') }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
             <svg class="w-6 h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         </x-button>
         <div class="flex-1">

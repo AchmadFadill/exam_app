@@ -33,6 +33,15 @@ class Detail extends Component
 
         $this->exam = $this->attempt->exam;
         $this->student = $this->attempt->student;
+
+        // Grading detail page is only relevant for exams with essay questions.
+        if (!$this->exam->questions()->where('type', 'essay')->exists()) {
+            $route = \Illuminate\Support\Facades\Auth::user()->isAdmin()
+                ? 'admin.grading.index'
+                : 'teacher.grading.index';
+
+            return redirect()->route($route);
+        }
         
         // 2. Process Data
         $this->prepareData();
@@ -146,11 +155,11 @@ class Detail extends Component
             ]);
         });
 
-        $route = \Illuminate\Support\Facades\Auth::user()->isAdmin() 
-            ? 'admin.grading.show' 
-            : 'teacher.grading.show';
+        $route = \Illuminate\Support\Facades\Auth::user()->isAdmin()
+            ? 'admin.grading.index'
+            : 'teacher.grading.index';
 
-        return redirect()->route($route, $this->exam->id)
+        return redirect()->route($route)
             ->with('success', 'Penilaian berhasil disimpan!');
     }
 

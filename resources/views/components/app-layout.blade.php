@@ -51,6 +51,42 @@
     <!-- Global confirm modal used by pages dispatching `show-confirm-modal` events -->
     <x-confirm-modal />
 
+    <!-- KaTeX auto-render for pages that show math (teacher grading, student Livewire take-exam, reports, etc.) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script>
+        window.renderKatexIn = window.renderKatexIn || function (root) {
+            if (!root) return;
+            if (typeof window.renderMathInElement !== 'function') return;
+            window.renderMathInElement(root, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                ],
+                throwOnError: false,
+            });
+        };
+
+        // Re-render after Livewire updates (Livewire v3).
+        document.addEventListener('livewire:navigated', () => {
+            window.renderKatexIn(document.body);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // If KaTeX scripts are still loading, retry briefly.
+            const tryRender = (attempt = 0) => {
+                if (attempt > 40) return;
+                if (typeof window.renderMathInElement !== 'function') {
+                    setTimeout(() => tryRender(attempt + 1), 50);
+                    return;
+                }
+                window.renderKatexIn(document.body);
+            };
+            tryRender();
+        });
+    </script>
+
     <!-- Notification System -->
     <div x-data="{ 
         notifications: [],

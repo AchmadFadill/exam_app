@@ -213,7 +213,7 @@
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
                         <p>Pastikan format Excel sesuai template. Kolom wajib: NIS, Nama. Kolom opsional: Email, Kelas, Password.</p>
-                        <x-button wire:click="downloadTemplate" variant="soft" size="xs" class="mt-2">Download Template Excel</x-button>
+                        <x-button wire:click="downloadTemplate" variant="soft" size="xs" class="mt-2">Download Template (CSV)</x-button>
                     </div>
                 </div>
                 

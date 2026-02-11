@@ -109,9 +109,21 @@
 
                 <!-- Actions -->
                 <div class="pt-4 border-t border-gray-100">
-                    <x-button href="{{ route('teacher.questions.group', ['title' => urlencode($title)]) }}" variant="primary" class="w-full">
-                        Lihat Detail
-                    </x-button>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <x-button href="{{ route('teacher.questions.group', ['title' => urlencode($title)]) }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Detail
+                        </x-button>
+                        <x-button wire:click="exportGroup('{{ addslashes($title) }}')" variant="secondary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Export
+                        </x-button>
+                    </div>
                 </div>
             </div>
         </x-card>
@@ -194,7 +206,7 @@
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
                         <p class="text-sm">Pastikan format file sesuai template. Format didukung: .xlsx, .xls, .csv. Kolom wajib: Mata Pelajaran, Tipe, Pertanyaan, Opsi A-D, Jawaban Benar, Pembahasan. <span class="font-semibold">Opsi E opsional</span> (kosongkan jika hanya butuh A-D).</p>
-                        <button type="button" wire:click="downloadTemplate" class="mt-2 inline-block font-bold underline text-sm">Download Template Excel</button>
+                        <button type="button" wire:click="downloadTemplate" class="mt-2 inline-block font-bold underline text-sm">Download Template (CSV)</button>
                     </div>
                 </div>
 

@@ -6,6 +6,7 @@ use App\Imports\QuestionsImport;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Subject;
+use App\Exports\QuestionGroupExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -61,7 +62,12 @@ class ManageQuestion extends Component
 
     public function openAddModal()
     {
-        $this->dispatch('openQuestionModal');
+        $payload = [];
+        if (!empty($this->filterSubject)) {
+            $payload['subject_id'] = (int) $this->filterSubject;
+        }
+
+        $this->dispatch('openQuestionModal', $payload);
     }
 
     public function openEditModal($questionId)
@@ -140,53 +146,70 @@ class ManageQuestion extends Component
 
     public function downloadTemplate()
     {
-        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray, \Maatwebsite\Excel\Concerns\WithHeadings {
-            public function array(): array
-            {
-                return [
-                    [
-                        'Matematika',
-                        'multiple_choice',
-                        'Berapakah hasil dari 2 + 2?',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        'C',
-                        'Hasil penjumlahan 2 + 2 adalah 4',
-                    ],
-                    [
-                        'Bahasa Indonesia',
-                        'essay',
-                        'Jelaskan pengertian pantun!',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        'Pantun adalah bentuk puisi lama yang terdiri dari 4 baris',
-                    ],
-                ];
-            }
+        // Streaming CSV is much faster than generating XLSX (PhpSpreadsheet), especially on Windows.
+        $headers = [
+            'Mata Pelajaran',
+            'Tipe',
+            'Pertanyaan',
+            'Opsi A',
+            'Opsi B',
+            'Opsi C',
+            'Opsi D',
+            'Opsi E',
+            'Jawaban Benar',
+            'Pembahasan',
+        ];
 
-            public function headings(): array
-            {
-                return [
-                    'Mata Pelajaran',
-                    'Tipe',
-                    'Pertanyaan',
-                    'Opsi A',
-                    'Opsi B',
-                    'Opsi C',
-                    'Opsi D',
-                    'Opsi E',
-                    'Jawaban Benar',
-                    'Pembahasan',
-                ];
+        $rows = [
+            [
+                'Matematika',
+                'multiple_choice',
+                'Berapakah hasil dari 2 + 2?',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                'C',
+                'Hasil penjumlahan 2 + 2 adalah 4',
+            ],
+            [
+                'Bahasa Indonesia',
+                'essay',
+                'Jelaskan pengertian pantun!',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'Pantun adalah bentuk puisi lama yang terdiri dari 4 baris',
+            ],
+        ];
+
+        return response()->streamDownload(function () use ($headers, $rows) {
+            // UTF-8 BOM for Excel compatibility.
+            echo "\xEF\xBB\xBF";
+            $out = fopen('php://output', 'w');
+            fputcsv($out, $headers);
+            foreach ($rows as $row) {
+                fputcsv($out, $row);
             }
-        }, 'template_soal.xlsx');
+            fclose($out);
+        }, 'template_soal.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+
+    public function exportGroup(string $title)
+    {
+        $teacherId = Auth::user()->isTeacher() ? $this->getTeacherId() : null;
+
+        return Excel::download(
+            new QuestionGroupExport($title, $teacherId),
+            'soal_' . \Illuminate\Support\Str::slug($title) . '_' . now()->format('Ymd_His') . '.xlsx'
+        );
     }
 
     public function render()

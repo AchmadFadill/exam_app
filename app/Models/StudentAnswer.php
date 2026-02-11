@@ -33,4 +33,9 @@ class StudentAnswer extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    public function selectedOption()
+    {
+        return $this->belongsTo(QuestionOption::class, 'selected_option_id');
+    }
 }

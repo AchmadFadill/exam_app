@@ -268,7 +268,7 @@
                     <div>
                         <p class="font-semibold mb-1">Instruksi Import:</p>
                         <p>Kolom wajib: <strong>nama</strong>, <strong>email</strong>. Kolom opsional: <strong>mata_pelajaran</strong> (kode mapel). Password default: password123.</p>
-                        <x-button type="button" wire:click="downloadTemplate" variant="soft" size="xs" class="mt-2">Download Template Excel</x-button>
+                        <x-button type="button" wire:click="downloadTemplate" variant="soft" size="xs" class="mt-2">Download Template (CSV)</x-button>
                     </div>
                 </div>
                 

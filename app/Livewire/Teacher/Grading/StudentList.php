@@ -25,6 +25,13 @@ class StudentList extends Component
         $this->examId = $exam;
         $this->exam = \App\Models\Exam::findOrFail($exam);
         Gate::authorize('grade', $this->exam);
+
+        // Grading page is only for exams with essay questions.
+        $hasEssay = $this->exam->questions()->where('type', 'essay')->exists();
+        if (!$hasEssay) {
+            $route = auth()->user()->isAdmin() ? 'admin.grading.index' : 'teacher.grading.index';
+            return redirect()->route($route);
+        }
     }
 
     public function render()

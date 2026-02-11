@@ -168,7 +168,7 @@
                 <a href="{{ route('admin.teachers') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Data Guru
                 </a>
-                <a href="{{ route('teacher.exams.create') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
+                <a href="{{ route('admin.exams.create') }}" class="px-8 py-5 bg-primary hover:bg-blue-600 rounded-[1.5rem] text-center font-black transition-all shadow-2xl shadow-primary/40 text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">
                     Buat Ujian Baru
                 </a>
                 <a href="{{ route('admin.settings') }}" class="px-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-center font-black border border-white/5 transition-all text-xs uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-[1]">

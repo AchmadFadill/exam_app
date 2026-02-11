@@ -45,7 +45,15 @@ class QuestionForm extends Component
 
     public function mount()
     {
-        $this->subjects = \App\Models\Subject::orderBy('name')->get();
+        $user = Auth::user();
+
+        if ($user->isTeacher() && $user->teacher) {
+            $this->subjects = $user->teacher->subjects()->orderBy('name')->get();
+        } else {
+            $this->subjects = \App\Models\Subject::orderBy('name')->get();
+        }
+
+        $this->defaultSubjectId = $this->subjects->first()?->id;
     }
 
     public function openQuestionModal($params = [])
@@ -61,6 +69,9 @@ class QuestionForm extends Component
             // Pre-fill defaults if provided
             if (isset($params['subject_id'])) {
                 $this->questionForm['subject_id'] = $params['subject_id'];
+            } elseif ($this->defaultSubjectId) {
+                // Default to teacher-assigned subject.
+                $this->questionForm['subject_id'] = $this->defaultSubjectId;
             }
             if (isset($params['title'])) {
                 $this->questionForm['title'] = $params['title'];
@@ -220,10 +231,9 @@ class QuestionForm extends Component
                     
                     $question->update($data);
                     
-                    // Re-create options
+                    // Keep option IDs stable when editing to avoid breaking historical selected_option_id references.
                     if ($this->questionForm['type'] === 'multiple_choice') {
-                        $question->options()->delete();
-                        $this->createOptions($question);
+                        $this->syncOptions($question);
                     } else {
                         $question->options()->delete();
                     }
@@ -283,6 +293,39 @@ class QuestionForm extends Component
                 ]);
             }
         }
+    }
+
+    private function syncOptions($question): void
+    {
+        $labels = ['A', 'B', 'C', 'D', 'E'];
+        $existing = $question->options()->get()->keyBy('label');
+        $keepLabels = [];
+
+        foreach ($labels as $index => $label) {
+            if ($index >= $this->optionCount) {
+                continue;
+            }
+
+            $payload = [
+                'text' => $this->questionForm['options'][$index],
+                'is_correct' => $label === $this->questionForm['correct_option'],
+            ];
+
+            if ($existing->has($label)) {
+                $existing[$label]->update($payload);
+            } else {
+                QuestionOption::create(array_merge($payload, [
+                    'question_id' => $question->id,
+                    'label' => $label,
+                ]));
+            }
+
+            $keepLabels[] = $label;
+        }
+
+        $question->options()
+            ->whereNotIn('label', $keepLabels)
+            ->delete();
     }
 
     private function getTeacherId()

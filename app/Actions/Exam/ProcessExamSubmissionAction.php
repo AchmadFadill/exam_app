@@ -23,9 +23,10 @@ class ProcessExamSubmissionAction
         Exam $exam,
         ExamAttempt $attempt,
         array $answers = [],
-        ?callable $beforeRecalculate = null
+        ?callable $beforeRecalculate = null,
+        ?ExamAttemptStatus $finalStatus = null
     ): ExamAttempt {
-        return DB::transaction(function () use ($exam, $attempt, $answers, $beforeRecalculate): ExamAttempt {
+        return DB::transaction(function () use ($exam, $attempt, $answers, $beforeRecalculate, $finalStatus): ExamAttempt {
             $lockedAttempt = ExamAttempt::query()
                 ->whereKey($attempt->id)
                 ->where('exam_id', $exam->id)
@@ -48,7 +49,7 @@ class ProcessExamSubmissionAction
 
             $lockedAttempt->update([
                 'submitted_at' => now(),
-                'status' => $summary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
+                'status' => $finalStatus ?? ($summary['has_essay'] ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded),
                 'total_score' => $summary['total_score'],
                 'percentage' => $summary['percentage'],
                 'passed' => $summary['passed'],

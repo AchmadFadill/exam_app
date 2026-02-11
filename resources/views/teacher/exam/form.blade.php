@@ -263,6 +263,42 @@
                                 </div>
                             </label>
 
+                            <!-- Result Visibility: Score -->
+                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V7m0 10v-1m9-4a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Tampilkan Nilai</span>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Siswa dapat melihat nilai akhir</span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="show_score_to_student" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
+                                </div>
+                            </label>
+
+                            <!-- Result Visibility: Answer & Discussion -->
+                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z"></path></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Tampilkan Jawaban</span>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Siswa dapat melihat pembahasan</span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="show_answers_to_student" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
+                                </div>
+                            </label>
+
                             <!-- Tab Tolerance Slider (Visible only if enabled) -->
                             <!-- Tab Tolerance Slider (Visible only if enabled) -->
                             <div x-show="$wire.enable_tab_tolerance" 

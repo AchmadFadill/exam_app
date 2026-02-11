@@ -42,6 +42,8 @@ class Form extends Component
     public $shuffle_answers = false;
     public $enable_tab_tolerance = false;
     public $tab_tolerance = 3;
+    public $show_score_to_student = true;
+    public $show_answers_to_student = true;
 
     // Step 4: Status
     public $status = 'draft';
@@ -132,6 +134,8 @@ class Form extends Component
         $this->shuffle_answers = $exam->shuffle_answers;
         $this->enable_tab_tolerance = $exam->enable_tab_tolerance;
         $this->tab_tolerance = $exam->tab_tolerance;
+        $this->show_score_to_student = (bool) ($exam->show_score_to_student ?? true);
+        $this->show_answers_to_student = (bool) ($exam->show_answers_to_student ?? true);
         $this->status = $exam->status;
 
         // Load selected questions with scores
@@ -225,6 +229,8 @@ class Form extends Component
                 'classes' => 'required|array|min:1',
                 'token' => 'required|string|size:6|unique:exams,token,' . $this->examId,
                 'tab_tolerance' => 'required|integer|min:0|max:10',
+                'show_score_to_student' => 'boolean',
+                'show_answers_to_student' => 'boolean',
             ],
             2 => [
                 'selectedQuestions' => 'required|array|min:1',
@@ -333,6 +339,8 @@ class Form extends Component
                 'shuffle_answers' => $this->shuffle_answers,
                 'enable_tab_tolerance' => $this->enable_tab_tolerance,
                 'tab_tolerance' => $this->tab_tolerance,
+                'show_score_to_student' => (bool) $this->show_score_to_student,
+                'show_answers_to_student' => (bool) $this->show_answers_to_student,
                 'status' => 'scheduled', // Force scheduled status
             ];
 

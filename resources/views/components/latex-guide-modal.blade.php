@@ -1,4 +1,4 @@
-<div x-data="latexGuideModal()" @open-latex-guide.window="open = true">
+<div x-data="latexGuideModal()" @open-latex-guide.window="openAndRender()">
     <div x-cloak x-show="open" class="fixed inset-0 z-[120] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
         <div class="relative w-full max-w-4xl max-h-[88vh] overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-gray-200 dark:border-slate-700">
@@ -30,7 +30,11 @@
                             <tr class="border-b border-gray-100 dark:border-slate-800 align-top">
                                 <td class="py-3 pr-3 font-semibold text-primary" x-text="row.category"></td>
                                 <td class="py-3 pr-3 text-slate-700 dark:text-slate-200">
-                                    <div class="rounded-lg bg-blue-50 dark:bg-slate-800 px-3 py-2" x-init="window.__renderKatexText($el, row.preview)"></div>
+                                    <!-- Always show raw text immediately; then upgrade to KaTeX once scripts are ready -->
+                                    <div class="rounded-lg bg-blue-50 dark:bg-slate-800 px-3 py-2"
+                                         data-latex-example="1"
+                                         :data-preview="row.preview"
+                                         x-text="row.preview"></div>
                                 </td>
                                 <td class="py-3 pr-3">
                                     <code class="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded break-all" x-text="row.snippet"></code>
@@ -56,11 +60,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <style>
+        /* Keep the cheat-sheet table compact and consistent (no big display-math blocks). */
+        [data-latex-example="1"] .katex-display { margin: 0 !important; display: inline-block !important; }
+        [data-latex-example="1"] .katex { font-size: 1em; }
+    </style>
     @push('scripts')
         <script>
             window.__latexRows = [
                 { category: 'Dasar', label: 'Inline', preview: '$x+y$', snippet: '$x+y$' },
-                { category: 'Dasar', label: 'Display', preview: '$$E=mc^2$$', snippet: '$$E=mc^2$$' },
+                // Preview renders inline to keep row height consistent; snippet keeps true display-math.
+                { category: 'Dasar', label: 'Display', preview: '$\\displaystyle E=mc^2$', snippet: '$$E=mc^2$$' },
                 { category: 'Operasi', label: 'Pecahan', preview: '$\\frac{a}{b}$', snippet: '$\\frac{a}{b}$' },
                 { category: 'Operasi', label: 'Akar', preview: '$\\sqrt{x}$', snippet: '$\\sqrt{x}$' },
                 { category: 'Operasi', label: 'Pangkat', preview: '$x^n$', snippet: '$x^n$' },
@@ -73,7 +83,29 @@
 
             window.__renderKatexText = function (element, text) {
                 if (!element) return;
-                element.textContent = text || '';
+                const value = (text || '').trim();
+                element.textContent = value;
+
+                // Prefer direct KaTeX render for predictable preview rendering.
+                if (window.katex && typeof window.katex.render === 'function') {
+                    const isDisplay = value.startsWith('$$') && value.endsWith('$$');
+                    const isInline = value.startsWith('$') && value.endsWith('$');
+
+                    if (isDisplay || isInline) {
+                        const expr = value.slice(isDisplay ? 2 : 1, isDisplay ? -2 : -1);
+                        try {
+                            window.katex.render(expr, element, {
+                                throwOnError: false,
+                                displayMode: isDisplay,
+                            });
+                            return;
+                        } catch (e) {
+                            // Fallback below.
+                        }
+                    }
+                }
+
+                // Fallback to auto-render if available.
                 if (typeof renderMathInElement === 'function') {
                     renderMathInElement(element, {
                         delimiters: [
@@ -102,6 +134,37 @@
                 return {
                     open: false,
                     rows: window.__latexRows,
+                    openAndRender() {
+                        this.open = true;
+                        this.$nextTick(() => this.renderAllExamples());
+                    },
+                    renderAllExamples() {
+                        const root = this.$root;
+                        if (!root) return;
+
+                        const nodes = root.querySelectorAll('[data-latex-example="1"]');
+                        nodes.forEach((el) => this.renderExample(el));
+                    },
+                    renderExample(el, attempt = 0) {
+                        if (!el) return;
+
+                        const text = el.dataset.preview || el.textContent || '';
+                        // Always set raw content first (never blank)
+                        el.textContent = text;
+
+                        // Retry until KaTeX core or auto-render is ready.
+                        if (
+                            !(window.katex && typeof window.katex.render === 'function') &&
+                            typeof window.renderMathInElement !== 'function'
+                        ) {
+                            if (attempt < 100) {
+                                setTimeout(() => this.renderExample(el, attempt + 1), 100);
+                            }
+                            return;
+                        }
+
+                        window.__renderKatexText(el, text);
+                    },
                     insert(snippet) {
                         const target = window.__latexActiveInput;
                         if (!target) return;

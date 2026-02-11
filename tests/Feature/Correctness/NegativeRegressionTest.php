@@ -451,6 +451,162 @@ it('scores text answers case-insensitively and with trimmed whitespace', functio
     ]);
 });
 
+it('does not downgrade previously correct mc answers when selected option reference becomes stale', function () {
+    $this->withoutVite();
+
+    $scoringService = app(ScoringService::class);
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.stale-option.neg@example.test');
+    [, $student] = makeStudentUserForNegativeTests('Student', 'student.stale-option.neg@example.test', 'NEG009');
+    $subject = Subject::create(['name' => 'Math', 'code' => 'NEG-STL']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Stale Option Integrity Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA09',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $question = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set A',
+        'type' => 'multiple_choice',
+        'text' => '2 + 2 = ?',
+        'score' => 10,
+    ]);
+
+    $correctOption = QuestionOption::create([
+        'question_id' => $question->id,
+        'label' => 'A',
+        'text' => '4',
+        'is_correct' => true,
+    ]);
+
+    $exam->questions()->attach($question->id, ['order' => 1, 'score' => 25]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now(),
+        'status' => ExamAttemptStatus::InProgress,
+    ]);
+
+    $studentAnswer = StudentAnswer::create(array_merge([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $question->id,
+    ], $scoringService->scoreSingleAnswer($exam, $question, $correctOption->id)));
+
+    // Simulate stale FK reference after option list mutation.
+    $correctOption->delete();
+
+    $result = $scoringService->recalculateAttempt($exam, $attempt->fresh());
+
+    $studentAnswer->refresh();
+
+    expect((int) $result['total_score'])->toBe(25)
+        ->and($studentAnswer->is_correct)->toBeTrue()
+        ->and((int) $studentAnswer->score_awarded)->toBe(25);
+});
+
+it('auto-remaps mismatched selected_option_id by label during recalculation', function () {
+    $this->withoutVite();
+
+    $scoringService = app(ScoringService::class);
+
+    [, $teacher] = makeTeacherUserForNegativeTests('Teacher', 'teacher.remap.neg@example.test');
+    [, $student] = makeStudentUserForNegativeTests('Student', 'student.remap.neg@example.test', 'NEG010');
+    $subject = Subject::create(['name' => 'Math', 'code' => 'NEG-RMP']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Remap Option Exam',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'NEGA10',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'status' => 'scheduled',
+    ]);
+
+    $questionA = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set A',
+        'type' => 'multiple_choice',
+        'text' => '2 + 2 = ?',
+        'score' => 10,
+    ]);
+
+    $questionB = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set A',
+        'type' => 'multiple_choice',
+        'text' => '3 + 3 = ?',
+        'score' => 10,
+    ]);
+
+    $correctA = QuestionOption::create([
+        'question_id' => $questionA->id,
+        'label' => 'A',
+        'text' => '4',
+        'is_correct' => true,
+    ]);
+
+    $wrongA = QuestionOption::create([
+        'question_id' => $questionB->id,
+        'label' => 'A',
+        'text' => '6',
+        'is_correct' => false,
+    ]);
+
+    $exam->questions()->attach($questionA->id, ['order' => 1, 'score' => 25]);
+    $exam->questions()->attach($questionB->id, ['order' => 2, 'score' => 25]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now(),
+        'status' => ExamAttemptStatus::InProgress,
+    ]);
+
+    $answer = StudentAnswer::create([
+        'exam_attempt_id' => $attempt->id,
+        'question_id' => $questionA->id,
+        'selected_option_id' => $wrongA->id, // points to another question
+        'answer' => (string) $wrongA->id,
+        'is_correct' => false,
+        'score_awarded' => 0,
+    ]);
+
+    $result = $scoringService->recalculateAttempt($exam, $attempt);
+    $answer->refresh();
+
+    expect((int) $result['total_score'])->toBe(25)
+        ->and((int) $answer->selected_option_id)->toBe((int) $correctA->id)
+        ->and($answer->is_correct)->toBeTrue()
+        ->and((int) $answer->score_awarded)->toBe(25);
+});
+
 function makeTeacherUserForNegativeTests(string $name, string $email): array
 {
     $user = User::create([
