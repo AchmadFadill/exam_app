@@ -144,7 +144,7 @@ class Detail extends Component
             
         $totalQuestions = $exam->questions()->count();
 
-        $students = $assignedStudents->map(function($student) use ($exam, $totalQuestions) {
+        $students = $assignedStudents->map(function($student) use ($exam, $totalQuestions, $isAdmin) {
             $attempt = $exam->attempts->where('student_id', $student->id)->first();
             
             $status = 'not_started';
@@ -177,7 +177,10 @@ class Detail extends Component
                 'progress' => $progress,
                 'w' => $width,
                 'tab_alert' => $tab_alert,
-                'attempt_id' => $attempt ? $attempt->id : null
+                'attempt_id' => $attempt ? $attempt->id : null,
+                'detail_route' => $isAdmin 
+                    ? 'admin.reports.student' 
+                    : 'teacher.reports.student'
             ];
         });
 
@@ -206,7 +209,6 @@ class Detail extends Component
             'students' => $students,
             'live_logs' => $this->live_logs,
             'backRoute' => $isAdmin ? 'admin.monitor' : 'teacher.monitoring',
-            'studentDetailRoute' => $isAdmin ? 'admin.reports.student' : 'teacher.grading.detail', // Dynamic Route
             'classes' => $exam->classrooms->pluck('name')->unique() // Pass classes for filter dropdown
         ]);
     }

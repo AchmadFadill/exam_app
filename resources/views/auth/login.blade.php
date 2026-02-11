@@ -19,7 +19,7 @@
         <div class="space-y-1.5 group">
             <div class="flex items-center justify-between ml-1">
                 <label for="password" class="block text-[10px] font-bold text-[var(--color-text-main)] uppercase tracking-[0.15em] opacity-60 group-focus-within:opacity-100 transition-opacity">Kata Sandi</label>
-                <a href="#" class="text-[10px] font-bold text-[var(--color-primary)] hover:underline transition-colors">Lupa password?</a>
+               
             </div>
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--color-text-muted)] transition-colors group-focus-within:text-[var(--color-primary)]">

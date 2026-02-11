@@ -1,6 +1,6 @@
 @section('title', 'Monitoring Ujian')
 
-<div class="space-y-6">
+<div class="space-y-6" wire:poll.5s>
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
         <div class="flex items-center gap-3 sm:gap-4">
             <x-button href="{{ route($backRoute) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
@@ -60,7 +60,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
-                    <x-button href="{{ route($studentDetailRoute, [$exam->id, $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail</x-button>
+                    <x-button href="{{ route($student['detail_route'], [$exam['id'], $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail Hasil</x-button>
                     @if($student['status'] == 'working' || $student['status'] == 'in_progress')
                     <x-button 
                         @click="$dispatch('show-confirm-modal', [{ 

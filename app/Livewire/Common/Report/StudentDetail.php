@@ -16,13 +16,13 @@ class StudentDetail extends Component
 
     public function mount($examId, $studentId)
     {
-        $this->exam = \App\Models\Exam::findOrFail($examId);
+        $this->exam = \App\Models\Exam::with(['questions.options'])->findOrFail($examId);
         Gate::authorize('viewReport', $this->exam);
         $this->student = \App\Models\Student::with('user:id,name')->findOrFail($studentId);
         
         $this->attempt = \App\Models\ExamAttempt::where('exam_id', $examId)
             ->where('student_id', $studentId)
-            ->with(['answers.question.options'])
+            ->with(['answers'])
             ->first();
     }
 

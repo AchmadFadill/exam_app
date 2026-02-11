@@ -36,7 +36,13 @@
     @if($attempt)
     <!-- Answers List -->
     <div class="max-w-4xl mx-auto space-y-6">
-        @foreach($attempt->answers as $index => $answer)
+        @foreach($exam->questions as $index => $question)
+        @php
+            $answer = $attempt->answers->where('question_id', $question->id)->first();
+            $isAnswered = $answer !== null;
+            $isCorrect = $answer?->is_correct ?? false;
+            // If shuffle is on, we might need original order, but for report default order is fine or use pivot order
+        @endphp
         <div class="bg-white rounded-[1.5rem] sm:rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
             <!-- Question Number -->
             <div class="absolute top-0 right-0 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-50 rounded-bl-xl sm:rounded-bl-2xl text-[10px] sm:text-xs font-black text-gray-400 border-l border-b border-gray-100 group-hover:text-primary transition-colors">
@@ -47,19 +53,18 @@
                 <!-- Question Text -->
                 <div class="pr-12">
                      <div class="prose prose-sm max-w-none text-text-main">
-                        {!! \App\Support\HtmlSanitizer::clean($answer->question->text) !!}
+                        {!! \App\Support\HtmlSanitizer::clean($question->text) !!}
                     </div>
                 </div>
 
                 <!-- Answer Details -->
                 <div class="bg-gray-50/50 rounded-xl p-4 border border-gray-100 space-y-3">
-                    @if($answer->question->type === 'multiple_choice')
+                    @if($question->type === 'multiple_choice')
                         <div class="flex items-start gap-3">
                             <div class="w-24 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wide pt-1">Jawaban Siswa</div>
                             <div class="flex-1">
                                 @php
-                                    $selectedOption = $answer->question->options->where('id', $answer->selected_option_id)->first();
-                                    $isCorrect = $answer->is_correct;
+                                    $selectedOption = $isAnswered ? $question->options->where('id', $answer->selected_option_id)->first() : null;
                                 @endphp
                                 <div class="font-medium {{ $isCorrect ? 'text-green-700' : 'text-red-700' }} flex items-center gap-2">
                                     @if($selectedOption)
@@ -81,12 +86,12 @@
                         </div>
 
                         <!-- Show Correct Answer if Wrong -->
-                        @if(!$answer->is_correct)
+                        @if(!$isCorrect)
                         <div class="flex items-start gap-3 pt-3 border-t border-gray-200/50">
                             <div class="w-24 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wide pt-1">Kunci Jawaban</div>
                             <div class="flex-1">
                                 @php
-                                    $correctOption = $answer->question->options->where('is_correct', true)->first();
+                                    $correctOption = $question->options->where('is_correct', true)->first();
                                 @endphp
                                 <div class="font-medium text-green-700 flex items-center gap-2">
                                     <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-green-100 border border-green-200 text-green-700">
@@ -108,7 +113,7 @@
                                 </div>
                             </div>
                             
-                            @if($answer->teacher_notes)
+                            @if($answer?->teacher_notes)
                             <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
                                 <div class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1 flex items-center gap-1">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
@@ -122,7 +127,7 @@
 
                             <div class="flex items-center justify-end gap-2 text-sm pt-2 border-t border-gray-200/50">
                                 <span class="text-gray-500">Nilai:</span>
-                                <span class="font-bold text-gray-900">{{ $answer->score_awarded }} / {{ $answer->question->score }}</span>
+                                <span class="font-bold text-gray-900">{{ $answer->score_awarded ?? 0 }} / {{ $question->score }}</span>
                             </div>
                         </div>
                     @endif

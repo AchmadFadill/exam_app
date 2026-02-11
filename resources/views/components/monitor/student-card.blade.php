@@ -27,7 +27,6 @@
         <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $student['w'] }}"></div>
     </div>
     <div class="flex justify-between text-xs text-text-muted mb-3">
-        <span>Soal Terjawab: {{ $student['progress'] }}</span>
         <span>{{ $student['w'] }}</span>
     </div>
 
