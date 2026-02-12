@@ -245,24 +245,6 @@
                                 </div>
                             </label>
 
-                            <!-- Anti Tab-Switching Toggle -->
-                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
-                                <div class="flex items-center gap-4">
-                                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    </div>
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Anti Tab-Switching</span>
-                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Otomatis submit jika curang</span>
-                                    </div>
-                                </div>
-                                <div class="relative">
-                                    <input type="checkbox" wire:model.live="enable_tab_tolerance" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
-                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
-                                </div>
-                            </label>
-
                             <!-- Result Visibility: Score -->
                             <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
                                 <div class="flex items-center gap-4">
@@ -294,6 +276,24 @@
                                 </div>
                                 <div class="relative">
                                     <input type="checkbox" wire:model.live="show_answers_to_student" class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
+                                </div>
+                            </label>
+
+                            <!-- Anti Tab-Switching Toggle -->
+                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Anti Tab-Switching</span>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Otomatis submit jika curang</span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <input type="checkbox" wire:model.live="enable_tab_tolerance" class="sr-only peer">
                                     <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
                                     <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
                                 </div>

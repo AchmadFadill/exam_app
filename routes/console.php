@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 
 // Schedule the auto-submit command
 \Illuminate\Support\Facades\Schedule::command('exam:auto-submit')->everyMinute();
+\Illuminate\Support\Facades\Schedule::command('exam:prune-activity-logs --hours=24')->daily();

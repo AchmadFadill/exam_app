@@ -57,6 +57,7 @@ class Detail extends Component
     {
          // 1. Violation Logs (from ExamActivity)
         $violation_logs = \App\Models\ExamActivity::where('exam_id', $this->examId)
+            ->where('created_at', '>=', now()->subHours(24))
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->take(20)

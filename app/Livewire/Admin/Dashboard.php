@@ -54,6 +54,7 @@ class Dashboard extends Component
     {
         // 1. Violation/Activity Logs (Global)
         $violation_logs = \App\Models\ExamActivity::with(['user', 'exam'])
+            ->where('created_at', '>=', now()->subHours(24))
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get()
