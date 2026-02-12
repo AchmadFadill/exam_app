@@ -353,6 +353,12 @@
                     </div>
                 </div>
 
+                @error('selectedQuestions')
+                    <div class="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-bold text-red-700">
+                        {{ $message }}
+                    </div>
+                @enderror
+
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
                     <!-- Filters Column -->
                     <div class="lg:col-span-1 space-y-8">

@@ -24,7 +24,7 @@ class QuestionGroupDetail extends Component
     public $showEditModal = false;
     public $showDeleteModal = false;
     public $selectedQuestion = null;
-    public $optionCount = 4; // Number of options to show
+    public $optionCount = 5; // Number of options to show
     
     // Check Renaming State
     public $renamingTitle = false;
@@ -40,7 +40,7 @@ class QuestionGroupDetail extends Component
         'text' => '',
         'explanation' => '',
         'score' => 10,
-        'options' => ['', '', '', ''], // Default 4 options
+        'options' => ['', '', '', '', ''], // Default 5 options
         'correct_option' => '',
     ];
 
@@ -143,7 +143,7 @@ class QuestionGroupDetail extends Component
             $this->questionForm['subject_id'] = $firstQuestion->subject_id;
         }
         
-        $this->optionCount = 4;
+        $this->optionCount = 5;
         $this->showAddModal = true;
     }
 
@@ -203,9 +203,9 @@ class QuestionGroupDetail extends Component
                 }
             }
 
-            $this->optionCount = max(4, $maxOptionIndex + 1);
+            $this->optionCount = max(5, $maxOptionIndex + 1);
         } else {
-            $this->optionCount = 4;
+            $this->optionCount = 5;
         }
 
         $this->showEditModal = true;
@@ -305,7 +305,7 @@ class QuestionGroupDetail extends Component
         $this->questionForm['title'] = $keepTitle;
         $this->questionForm['subject_id'] = $keepSubject;
         $this->questionForm['type'] = $keepType;
-        $this->optionCount = 4;
+        $this->optionCount = 5;
     }
 
     private function getQuestionData()
@@ -377,6 +377,7 @@ class QuestionGroupDetail extends Component
             'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
+        $this->optionCount = 5;
         $this->questionImage = null;
         $this->editingImagePath = null;
         $this->resetValidation();

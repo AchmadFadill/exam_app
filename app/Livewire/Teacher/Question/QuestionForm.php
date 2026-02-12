@@ -26,11 +26,11 @@ class QuestionForm extends Component
         'text' => '',
         'explanation' => '',
         'score' => 10,
-        'options' => ['', '', '', ''], // Default 4 options A-D
+        'options' => ['', '', '', '', ''], // Default 5 options A-E
         'correct_option' => '',
     ];
 
-    public $optionCount = 4;
+    public $optionCount = 5;
     public $subjects = [];
     
     // Image Upload
@@ -138,13 +138,13 @@ class QuestionForm extends Component
             }
             
             // Fill gaps if any
-            $this->optionCount = max(count($this->questionForm['options']), 4);
+            $this->optionCount = max(count($this->questionForm['options']), 5);
              while (count($this->questionForm['options']) < $this->optionCount) {
                 $this->questionForm['options'][] = '';
             }
         } else {
-            $this->optionCount = 4;
-             $this->questionForm['options'] = ['', '', '', ''];
+            $this->optionCount = 5;
+             $this->questionForm['options'] = ['', '', '', '', ''];
         }
     }
 
@@ -349,10 +349,10 @@ class QuestionForm extends Component
             'text' => '',
             'explanation' => '',
             'score' => 10,
-            'options' => ['', '', '', ''],
+            'options' => ['', '', '', '', ''],
             'correct_option' => '',
         ];
-        $this->optionCount = 4;
+        $this->optionCount = 5;
         $this->questionImage = null;
         $this->editingImagePath = null;
         $this->questionId = null;

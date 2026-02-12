@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 class ProfileSettings extends Component
 {
     use WithFileUploads;
+    private const PHOTO_MAX_KB = 1024;
 
     public $current_password;
     public $password;
@@ -41,15 +42,31 @@ class ProfileSettings extends Component
 
     public function updatedPhoto()
     {
-        $this->validate([
-            'photo' => 'image|max:1024', // 1MB Max
-        ]);
+        try {
+            $this->validate([
+                'photo' => 'image|max:' . self::PHOTO_MAX_KB, // 1MB max
+            ], [
+                'photo.image' => 'File harus berupa gambar.',
+                'photo.max' => 'Ukuran foto maksimal 1 MB. Gunakan file di bawah 1 MB.',
+            ]);
+        } catch (ValidationException $e) {
+            $this->photo = null;
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Upload gagal: ukuran foto maksimal 1 MB.',
+            ]);
+            throw $e;
+        }
     }
 
     public function savePhoto()
     {
         $this->validate([
-            'photo' => 'image|max:1024',
+            'photo' => 'required|image|max:' . self::PHOTO_MAX_KB,
+        ], [
+            'photo.required' => 'Silakan pilih file foto terlebih dahulu.',
+            'photo.image' => 'File harus berupa gambar.',
+            'photo.max' => 'Ukuran foto maksimal 1 MB. Gunakan file di bawah 1 MB.',
         ]);
 
         $user = Auth::user();

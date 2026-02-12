@@ -2,7 +2,7 @@
     'isOpen' => false,
     'isEdit' => false,
     'subjects' => [],
-    'optionCount' => 4,
+    'optionCount' => 5,
     'editingImagePath' => null,
     'questionImage' => null,
     'type' => 'multiple_choice',
