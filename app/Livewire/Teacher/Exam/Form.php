@@ -9,6 +9,7 @@ use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class Form extends Component
@@ -240,20 +241,41 @@ class Form extends Component
         };
 
         $this->validate($rules);
+
+        if ($this->currentStep === 2 && !$this->hasSingleQuestionGroup()) {
+            throw ValidationException::withMessages([
+                'selectedQuestions' => 'Semua soal pada ujian harus berasal dari satu grup soal yang sama.',
+            ]);
+        }
     }
 
 
 
     public function toggleQuestion($questionId)
     {
+        $question = Question::select('id', 'score', 'title', 'subject_id')->find($questionId);
+        if (!$question) {
+            return;
+        }
+
         if (in_array($questionId, $this->selectedQuestions)) {
             // Remove question
             $this->selectedQuestions = array_values(array_diff($this->selectedQuestions, [$questionId]));
             unset($this->questionScores[$questionId]);
         } else {
+            $selectedGroup = $this->getSelectedGroupKey();
+            $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
+
+            if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
+                $this->dispatch('notify', [
+                    'message' => 'Satu ujian hanya boleh mengambil soal dari satu grup soal.',
+                    'type' => 'error',
+                ]);
+                return;
+            }
+
             // Add question with its own configured score from bank soal
             $this->selectedQuestions[] = $questionId;
-            $question = Question::select('id', 'score')->find($questionId);
             $this->questionScores[$questionId] = $question?->score ?? $this->default_score;
         }
     }
@@ -277,6 +299,17 @@ class Form extends Component
                 unset($this->questionScores[$qId]);
             }
         } else {
+            $selectedGroup = $this->getSelectedGroupKey();
+            $candidateGroup = $this->buildGroupKey($title, (int) $subjectId);
+
+            if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
+                $this->dispatch('notify', [
+                    'message' => 'Satu ujian hanya boleh mengambil soal dari satu grup soal.',
+                    'type' => 'error',
+                ]);
+                return;
+            }
+
             // Add all questions from this group
             foreach ($groupQuestions as $question) {
                 $qId = $question->id;
@@ -401,11 +434,26 @@ class Form extends Component
 
     public function handleInstantQuestionSaved($questionId)
     {
+        $question = \App\Models\Question::select('id', 'title', 'subject_id', 'score')->find($questionId);
+        if (!$question) {
+            return;
+        }
+
+        $selectedGroup = $this->getSelectedGroupKey();
+        $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
+
+        if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
+            $this->dispatch('notify', [
+                'message' => 'Soal instan berhasil dibuat, tetapi tidak otomatis dipilih karena beda grup soal.',
+                'type' => 'warning',
+            ]);
+            return;
+        }
+
         // Automatically select the new question for this exam
         $this->selectedQuestions[] = $questionId;
         
         // Get score from question
-        $question = \App\Models\Question::find($questionId);
         $this->questionScores[$questionId] = $question->score ?? $this->default_score;
 
         $this->dispatch('notify', ['message' => 'Soal instan berhasil dibuat dan dipilih!']);
@@ -464,5 +512,43 @@ class Form extends Component
             'availableClasses' => $classrooms,
             'questionGroups' => $questionGroups,
         ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title($this->examId ? 'Edit Ujian' : 'Buat Ujian Baru');
+    }
+
+    private function hasSingleQuestionGroup(): bool
+    {
+        if (empty($this->selectedQuestions)) {
+            return true;
+        }
+
+        $distinctGroupCount = Question::query()
+            ->whereIn('id', $this->selectedQuestions)
+            ->select('title', 'subject_id')
+            ->distinct()
+            ->count();
+
+        return $distinctGroupCount <= 1;
+    }
+
+    private function getSelectedGroupKey(): ?string
+    {
+        if (empty($this->selectedQuestions)) {
+            return null;
+        }
+
+        $question = Question::query()
+            ->whereIn('id', $this->selectedQuestions)
+            ->select('title', 'subject_id')
+            ->first();
+
+        if (!$question) {
+            return null;
+        }
+
+        return $this->buildGroupKey($question->title, (int) $question->subject_id);
+    }
+
+    private function buildGroupKey(string $title, int $subjectId): string
+    {
+        return $subjectId . '::' . $title;
     }
 }
