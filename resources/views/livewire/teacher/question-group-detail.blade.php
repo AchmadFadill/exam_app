@@ -4,7 +4,7 @@
     <!-- Header with Back Button -->
     <div class="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div class="flex items-center gap-3 sm:gap-4">
-            <a href="{{ route('teacher.questions') }}" class="p-2 hover:bg-gray-100 rounded-xl transition-colors shrink-0 border border-border-subtle">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.questions') : route('teacher.questions') }}" class="p-2 hover:bg-gray-100 rounded-xl transition-colors shrink-0 border border-border-subtle">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>

@@ -37,6 +37,9 @@ class Dashboard extends Component
             ->with(['subject', 'teacher.user'])
             ->get()
             ->map(function($exam) {
+                $endAt = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
+                $remainingMinutes = max(0, now()->diffInMinutes($endAt, false));
+
                 return [
                     'id' => $exam->id,
                     'subject' => $exam->subject->name,
@@ -47,7 +50,7 @@ class Dashboard extends Component
                     'duration' => $exam->duration_minutes,
                     'questions_count' => $exam->questions()->count(),
                     'status' => 'ongoing',
-                    'is_urgent' => \Carbon\Carbon::parse($exam->end_time)->diffInMinutes(now()) < 30,
+                    'is_urgent' => $remainingMinutes <= 10,
                 ];
             });
 

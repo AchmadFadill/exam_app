@@ -99,16 +99,31 @@
                         </template>
 
                         <template x-if="questions[currentQuestion].type === 'essay'">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-gray-700">Jawaban Essay</label>
+                            <div class="space-y-3" x-data="latexPreview('')" x-effect="update(answers[questions[currentQuestion].id] || '')">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-semibold text-gray-700">Jawaban Essay</label>
+                                    <button type="button"
+                                        @click="$dispatch('open-latex-guide')"
+                                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-xs font-bold hover:bg-blue-100 transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M4.5 9.75h15M5.625 21h12.75A1.875 1.875 0 0020.25 19.125V8.25a1.875 1.875 0 00-1.875-1.875H5.625A1.875 1.875 0 003.75 8.25v10.875A1.875 1.875 0 005.625 21z" />
+                                        </svg>
+                                        Panduan Rumus
+                                    </button>
+                                </div>
                                 <textarea
                                     :name="'question_' + questions[currentQuestion].id"
                                     x-model="answers[questions[currentQuestion].id]"
                                     @input.debounce.800ms="saveProgress(questions[currentQuestion].id)"
                                     @blur="saveProgress(questions[currentQuestion].id)"
+                                    data-latex-enabled="1"
                                     rows="8"
                                     class="w-full rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3 text-sm sm:text-base"
                                     placeholder="Tulis jawaban Anda di sini..."></textarea>
+                                <div class="rounded-lg border border-blue-100 bg-blue-50 p-3">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-blue-700 mb-2">Pratinjau Rumus</p>
+                                    <div x-ref="preview" class="min-h-[2.5rem] text-sm text-gray-800"></div>
+                                </div>
                                 <p class="text-xs text-gray-500">Jawaban disimpan otomatis.</p>
                             </div>
                         </template>
@@ -188,7 +203,7 @@
                         </div>
                     </div>
                     
-                     <div class="mt-4 sm:mt-6">
+                     <div class="mt-4 sm:mt-6" x-show="currentQuestion === questions.length - 1" x-cloak>
                         <button @click="finishExam()" class="w-full py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm sm:text-base font-bold transition shadow-lg shadow-blue-200 transform hover:-translate-y-0.5 active:scale-95">
                             Kumpulkan Jawaban
                         </button>
@@ -647,6 +662,9 @@
                 },
 
                 finishExam() {
+                    if (this.currentQuestion !== this.questions.length - 1) {
+                        return;
+                    }
                     this.showFinishModal = true;
                 },
 
@@ -698,4 +716,8 @@
             // Watch logic moved outside or use x-init inside the component
         });
     </script>
+
+    @push('modals')
+        <x-latex-guide-modal />
+    @endpush
 </x-exam-layout>

@@ -96,9 +96,28 @@
                         @endforeach
                     @else
                         <!-- Essay -->
-                        <textarea wire:model.live.debounce.500ms="essayAnswer" rows="8" 
-                            class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
-                            placeholder="Tulis jawaban Anda di sini..."></textarea>
+                        <div class="space-y-3" x-data="latexPreview(@js($essayAnswer ?? ''))" x-init="init()">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-semibold text-gray-700">Jawaban Essay</label>
+                                <button type="button"
+                                    @click="$dispatch('open-latex-guide')"
+                                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-xs font-bold hover:bg-blue-100 transition">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3v2.25m4.5-2.25v2.25M4.5 9.75h15M5.625 21h12.75A1.875 1.875 0 0020.25 19.125V8.25a1.875 1.875 0 00-1.875-1.875H5.625A1.875 1.875 0 003.75 8.25v10.875A1.875 1.875 0 005.625 21z" />
+                                    </svg>
+                                    Panduan Rumus
+                                </button>
+                            </div>
+                            <textarea wire:model.live.debounce.500ms="essayAnswer" rows="8"
+                                data-latex-enabled="1"
+                                x-on:input="update($event.target.value)"
+                                class="w-full rounded-xl border-gray-300 focus:border-primary focus:ring-primary"
+                                placeholder="Tulis jawaban Anda di sini..."></textarea>
+                            <div class="rounded-lg border border-blue-100 bg-blue-50 p-3">
+                                <p class="text-[11px] font-black uppercase tracking-widest text-blue-700 mb-2">Pratinjau Rumus</p>
+                                <div x-ref="preview" class="min-h-[2.5rem] text-sm text-gray-800"></div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -174,6 +193,8 @@
         </div>
     </div>
     </div>
+    @push('modals')
+        <x-latex-guide-modal />
+    @endpush
     <!-- Anti-Cheat Scripts REMOVED as per user request -->
-
 </div>

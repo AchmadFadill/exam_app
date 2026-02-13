@@ -56,6 +56,7 @@ class Detail extends Component
         
         // Map questions by ID for easy access
         $questions = $this->exam->questions->keyBy('id');
+        $answersByQuestion = $this->attempt->answers->keyBy('question_id');
         
         foreach ($this->attempt->answers as $answer) {
             $question = $answer->question; // or look up from $questions if eager loaded correctly
@@ -66,8 +67,8 @@ class Detail extends Component
                 // Determine correctness from pivot if needed, or answer's own calculation
                 // StudentAnswer has 'score_awarded' and 'is_correct'
                 
-                $this->pgScore += $answer->score_awarded;
-                $this->maxPgScore += $question->score; // Or pivot score if available? Assuming question score for now.
+                $this->pgScore += (int) ($answer->score_awarded ?? 0);
+                $this->maxPgScore += (int) ($question->pivot->score ?? $question->score ?? 0);
                 
                 $this->pgAnswers[] = [
                     'no' => count($this->pgAnswers) + 1, // Logic for numbering might need improvement if questions are shuffled
@@ -77,18 +78,29 @@ class Detail extends Component
                     // Simplified: Just use answer->is_correct
                     'is_correct' => $answer->is_correct
                 ];
-            } else {
-                // Essay
-                // Initialize grades
-                $this->essayGrades[$answer->id] = [
-                    'question' => $question->text,
-                    'student_answer' => $answer->answer,
-                    'key' => $question->explanation ?? 'Lihat kunci jawaban di bank soal',
-                    'max_score' => $question->score,
-                    'score' => $answer->score_awarded ?? 0, // Default to 0 or existing score
-                    'feedback' => $answer->teacher_feedback ?? '' // Ensure column exists? Need to check migration usage or json
-                ];
             }
+        }
+
+        // Always show all essay questions, including unanswered ones.
+        $essayQuestions = $this->exam->questions->where('type', 'essay');
+        foreach ($essayQuestions as $question) {
+            $answer = $answersByQuestion->get($question->id);
+            $rawAnswer = trim((string) ($answer?->answer ?? ''));
+            $isEmptyAnswer = $rawAnswer === '';
+            $maxScore = (int) ($question->pivot->score ?? $question->score ?? 0);
+
+            $this->essayGrades[$question->id] = [
+                'answer_id' => $answer?->id,
+                'question_id' => (int) $question->id,
+                'question' => $question->text,
+                'student_answer' => $isEmptyAnswer ? null : $answer?->answer,
+                'is_empty' => $isEmptyAnswer,
+                'key' => $question->explanation ?? 'Lihat kunci jawaban di bank soal',
+                'max_score' => $maxScore,
+                'score' => (int) ($answer?->score_awarded ?? 0),
+                'feedback' => $answer?->teacher_feedback ?? '',
+                'is_correct' => $answer?->is_correct,
+            ];
         }
         
         // Fallback for MaxPG if it's 0 (maybe no PG questions)
@@ -136,13 +148,29 @@ class Detail extends Component
         $scoringService = app(ScoringService::class);
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($scoringService) {
-            foreach ($this->essayGrades as $answerId => $data) {
-                $score = (int)$data['score'];
-                
-                \App\Models\StudentAnswer::where('id', $answerId)->update([
-                    'score_awarded' => $score,
-                    // 'feedback' => $data['feedback'] // Need to verify if 'feedback' column exists on student_answers?
-                ]);
+            foreach ($this->essayGrades as $questionId => $data) {
+                $max = (int) ($data['max_score'] ?? 0);
+                $score = (int) ($data['score'] ?? 0);
+                $score = max(0, min($score, $max));
+                $isEmptyAnswer = (bool) ($data['is_empty'] ?? false);
+
+                // Teacher assessment for essay:
+                // score > 0 => correct, score = 0 => incorrect.
+                $isCorrect = $score > 0;
+
+                \App\Models\StudentAnswer::updateOrCreate(
+                    [
+                        'exam_attempt_id' => $this->attempt->id,
+                        'question_id' => (int) $questionId,
+                    ],
+                    [
+                        'answer' => $isEmptyAnswer ? null : (string) ($data['student_answer'] ?? ''),
+                        'selected_option_id' => null,
+                        'score_awarded' => $score,
+                        'is_correct' => $isCorrect,
+                        'teacher_feedback' => (string) ($data['feedback'] ?? ''),
+                    ]
+                );
             }
 
             $summary = $scoringService->recalculateAttempt($this->exam, $this->attempt);
@@ -156,11 +184,11 @@ class Detail extends Component
         });
 
         $route = \Illuminate\Support\Facades\Auth::user()->isAdmin()
-            ? 'admin.grading.index'
-            : 'teacher.grading.index';
+            ? 'admin.grading.show'
+            : 'teacher.grading.show';
 
-        return redirect()->route($route)
-            ->with('success', 'Penilaian berhasil disimpan!');
+        return redirect()->route($route, ['exam' => $this->exam->id])
+            ->with('success', 'Penilaian tersimpan. Lanjutkan menilai siswa lainnya.');
     }
 
     public function render()

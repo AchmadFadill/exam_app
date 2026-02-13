@@ -3,7 +3,7 @@
     <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-3 sm:py-4 mb-6 sm:mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all overflow-hidden">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
             <div class="flex items-center gap-3 sm:gap-4">
-                <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.index') : route('teacher.grading.index') }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
+                <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
                     <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </x-button>
                 <div class="min-w-0">
@@ -34,7 +34,7 @@
     </div>
 
     <div class="max-w-5xl mx-auto space-y-10">
-        @if($attempt->answers->isEmpty())
+        @if(collect($essayGrades)->isEmpty())
             <div class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-[2rem] shadow-sm border border-gray-200">
                 <img src="{{ asset('img/not-found.png') }}" alt="Tidak Ada Jawaban" class="w-96 max-w-md mb-8">
                 <h3 class="text-xl font-bold text-slate-800 mb-2">Belum Ada Jawaban</h3>
@@ -71,7 +71,13 @@
                                     <!-- Lined paper effect -->
                                     <div class="absolute inset-x-6 top-0 bottom-0 pointer-events-none opacity-10" style="background-image: linear-gradient(#000 1px, transparent 1px); background-size: 100% 2rem; background-position: 0 1.5rem;"></div>
                                     <p class="relative text-sm text-slate-700 font-medium leading-8 font-serif italic">
-                                        "{{ $data['student_answer'] }}"
+                                        @if($data['is_empty'])
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 border border-amber-200">
+                                                Essay tidak diisi
+                                            </span>
+                                        @else
+                                            "{{ $data['student_answer'] }}"
+                                        @endif
                                     </p>
                                 </div>
                              </div>
@@ -124,7 +130,7 @@
     <!-- Fixed Bottom Actions -->
     <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 sm:px-8 py-4 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.index') : route('teacher.grading.index') }}" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
+            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
                 <span class="hidden sm:inline">KEMBALI KE DAFTAR</span>
                 <span class="sm:hidden">KEMBALI</span>
             </x-button>
@@ -134,7 +140,7 @@
                     <p class="text-[8px] sm:text-[10px] font-bold text-text-muted uppercase tracking-widest leading-tight">Total Nilai</p>
                     <p class="text-lg sm:text-2xl font-black text-primary leading-none mt-0.5 sm:mt-1">{{ $this->currentTotalScore }}</p>
                 </div>
-                @if(!$attempt->answers->isEmpty())
+                @if(!collect($essayGrades)->isEmpty())
                     <!-- Save Button -->
                     <x-button wire:click="finishGrading" variant="primary" class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs font-black shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
                         <span class="hidden sm:inline">SIMPAN & SELESAI</span>

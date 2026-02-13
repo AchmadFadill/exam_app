@@ -35,7 +35,11 @@
                     {{ $result['submitted_at'] }}
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap">
-                    @if(($result['status'] === 'graded' || $result['passed'] !== null) && $result['show_score_to_student'])
+                    @if($result['has_pending_essay'])
+                        <span class="px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500/10 text-amber-600 italic border border-amber-500/20">
+                            Pending Penilaian
+                        </span>
+                    @elseif(($result['status'] === 'graded' || $result['passed'] !== null) && $result['show_score_to_student'])
                         <span class="text-lg sm:text-xl font-black {{ $result['passed'] ? 'text-green-600' : 'text-red-600' }}">{{ number_format($result['score'], 1) }}</span>
                     @elseif($result['status'] === 'graded' || $result['passed'] !== null)
                         <span class="px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-gray-500/10 text-gray-600 italic border border-gray-500/20">

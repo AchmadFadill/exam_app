@@ -32,6 +32,7 @@ class QuestionForm extends Component
 
     public $optionCount = 5;
     public $subjects = [];
+    public $teacherSubjectIds = [];
     
     // Image Upload
     public $questionImage;
@@ -49,6 +50,7 @@ class QuestionForm extends Component
 
         if ($user->isTeacher() && $user->teacher) {
             $this->subjects = $user->teacher->subjects()->orderBy('name')->get();
+            $this->teacherSubjectIds = $this->subjects->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
         } else {
             $this->subjects = \App\Models\Subject::orderBy('name')->get();
         }
@@ -67,7 +69,12 @@ class QuestionForm extends Component
         } else {
             $this->isEdit = false;
             // Pre-fill defaults if provided
-            if (isset($params['subject_id'])) {
+            if (Auth::user()->isTeacher() && !empty($this->teacherSubjectIds)) {
+                $incomingSubjectId = isset($params['subject_id']) ? (int) $params['subject_id'] : null;
+                $this->questionForm['subject_id'] = ($incomingSubjectId && in_array($incomingSubjectId, $this->teacherSubjectIds, true))
+                    ? $incomingSubjectId
+                    : $this->defaultSubjectId;
+            } elseif (isset($params['subject_id'])) {
                 $this->questionForm['subject_id'] = $params['subject_id'];
             } elseif ($this->defaultSubjectId) {
                 // Default to teacher-assigned subject.
@@ -194,6 +201,13 @@ class QuestionForm extends Component
 
     public function save($addAnother = false)
     {
+        if (Auth::user()->isTeacher() && !empty($this->teacherSubjectIds)) {
+            $currentSubjectId = (int) ($this->questionForm['subject_id'] ?? 0);
+            if (!in_array($currentSubjectId, $this->teacherSubjectIds, true)) {
+                $this->questionForm['subject_id'] = (int) $this->defaultSubjectId;
+            }
+        }
+
         $this->validate($this->getRules(), $this->getMessages());
 
         try {
@@ -332,7 +346,11 @@ class QuestionForm extends Component
     {
         $user = Auth::user();
         if ($user->isAdmin()) {
-            return \App\Models\Teacher::first()?->id;
+            $teacher = \App\Models\Teacher::firstOrCreate(
+                ['user_id' => $user->id],
+                ['nip' => null]
+            );
+            return $teacher->id;
         }
         if ($user->isTeacher()) {
             return \App\Models\Teacher::where('user_id', $user->id)->first()?->id;
@@ -362,9 +380,13 @@ class QuestionForm extends Component
 
     public function getRules()
     {
+        $subjectRule = (Auth::user()->isTeacher() && !empty($this->teacherSubjectIds))
+            ? 'required|in:' . implode(',', $this->teacherSubjectIds)
+            : 'required|exists:subjects,id';
+
         $rules = [
             'questionForm.title' => 'required|string|max:255',
-            'questionForm.subject_id' => 'required|exists:subjects,id',
+            'questionForm.subject_id' => $subjectRule,
             'questionForm.type' => 'required|in:multiple_choice,essay',
             'questionForm.text' => 'required|string',
             'questionForm.explanation' => 'nullable|string|max:1000',

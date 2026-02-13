@@ -118,7 +118,9 @@ class QuestionGroupDetail extends Component
         });
 
         // Redirect to new URL
-        return redirect()->route('teacher.questions.group', ['title' => urlencode($this->newGroupTitle)])
+        $route = Auth::user()->isAdmin() ? 'admin.questions.group' : 'teacher.questions.group';
+
+        return redirect()->route($route, ['title' => urlencode($this->newGroupTitle)])
             ->with('success', 'Nama kelompok soal berhasil diubah!');
     }
 
@@ -311,7 +313,9 @@ class QuestionGroupDetail extends Component
     private function getQuestionData()
     {
         $user = Auth::user();
-        $teacherId = $user->isTeacher() ? $user->teacher->id : \App\Models\Teacher::first()->id;
+        $teacherId = $user->isTeacher()
+            ? $user->teacher->id
+            : \App\Models\Teacher::firstOrCreate(['user_id' => $user->id], ['nip' => null])->id;
 
         return [
             'teacher_id' => $teacherId,
@@ -464,7 +468,7 @@ class QuestionGroupDetail extends Component
             'questions' => $questions,
             'subjects' => $subjects,
             'totalScore' => $totalScore,
-        ])->layout('layouts.teacher')->title('Detail Soal - ' . $this->title);
+        ])->layout(Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Detail Soal - ' . $this->title);
     }
 
     private function groupQuestionsQuery()

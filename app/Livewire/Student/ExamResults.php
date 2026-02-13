@@ -23,10 +23,27 @@ class ExamResults extends Component
         // Fetch all completed exam attempts for this student
         $results = \App\Models\ExamAttempt::where('student_id', $student->id)
             ->whereNotNull('submitted_at')
-            ->with(['exam.subject'])
+            ->with([
+                'exam.subject',
+                'exam.questions:id,type',
+                'answers:id,exam_attempt_id,question_id,is_correct',
+            ])
             ->latest('submitted_at')
             ->paginate(10)
             ->through(function($attempt) {
+                $essayQuestionIds = $attempt->exam->questions
+                    ->where('type', 'essay')
+                    ->pluck('id')
+                    ->values();
+
+                $gradedEssayCount = $attempt->answers
+                    ->whereIn('question_id', $essayQuestionIds)
+                    ->whereNotNull('is_correct')
+                    ->count();
+
+                $hasPendingEssay = $essayQuestionIds->isNotEmpty()
+                    && $gradedEssayCount < $essayQuestionIds->count();
+
                 return [
                     'id' => $attempt->id,
                     'subject' => $attempt->exam->subject->name ?? '-',
@@ -37,6 +54,7 @@ class ExamResults extends Component
                     'status' => $attempt->status instanceof ExamAttemptStatus ? $attempt->status->value : $attempt->status,
                     'show_score_to_student' => (bool) ($attempt->exam->show_score_to_student ?? true),
                     'show_answers_to_student' => (bool) ($attempt->exam->show_answers_to_student ?? true),
+                    'has_pending_essay' => $hasPendingEssay,
                 ];
             });
 

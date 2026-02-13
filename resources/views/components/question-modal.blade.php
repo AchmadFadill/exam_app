@@ -74,7 +74,7 @@
                             </div>
                             @endif
                             
-                            @if($showSubject)
+                            @if($showSubject && !auth()->user()?->isTeacher())
                             <div>
                                 <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran <span class="text-red-500">*</span></label>
                                 <div class="relative group">
@@ -88,6 +88,15 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
+                            </div>
+                            @elseif($showSubject)
+                            <div>
+                                <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran</label>
+                                <div class="w-full px-6 py-4 bg-gray-100/70 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl font-bold shadow-inner text-text-main">
+                                    {{ optional(collect($subjects)->firstWhere('id', (int) data_get($this, 'questionForm.subject_id')))->name ?? (optional(collect($subjects)->first())->name ?? '-') }}
+                                </div>
+                                <p class="mt-2 text-[9px] font-bold text-text-muted uppercase tracking-widest">Mapel otomatis sesuai yang diampu</p>
                                 @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                             </div>
                             @endif

@@ -214,11 +214,13 @@ class ManageQuestion extends Component
 
     public function render()
     {
+        $user = Auth::user();
+
         // 1. Base query for filtering
         $query = Question::query();
 
         // For teachers, only show their own questions
-        if (Auth::user()->isTeacher()) {
+        if ($user->isTeacher()) {
             $teacherId = $this->getTeacherId();
             if ($teacherId) {
                 $query->where('teacher_id', $teacherId);
@@ -251,7 +253,7 @@ class ManageQuestion extends Component
             ->whereIn('title', $paginatedTitles->pluck('title'))
             // Apply same teacher filter again to ensure safety if needed, 
             // though title check usually suffices if titles are unique to teachers or global
-            ->when(Auth::user()->isTeacher(), function($q) {
+            ->when($user->isTeacher(), function($q) {
                 $teacherId = $this->getTeacherId();
                  if ($teacherId) {
                     $q->where('teacher_id', $teacherId);
@@ -270,12 +272,14 @@ class ManageQuestion extends Component
             return $questions->first()->created_at;
         });
 
-        $subjects = Subject::orderBy('name')->get();
+        $subjects = $user->isTeacher()
+            ? Auth::user()->teacher?->subjects()->orderBy('name')->get() ?? collect()
+            : Subject::orderBy('name')->get();
 
         return view('teacher.manage-question', [
             'groupedQuestions' => $groupedQuestions,
             'subjects' => $subjects,
             'paginatedTitles' => $paginatedTitles, // Pass this for pagination links
-        ])->layout('layouts.teacher')->title('Bank Soal');
+        ])->layout($user->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Bank Soal');
     }
 }

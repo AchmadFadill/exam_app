@@ -48,6 +48,13 @@
                  Pelajaran
             </x-sidebar-link>
 
+            <x-sidebar-link href="{{ route('admin.questions') }}" :active="request()->routeIs('admin.questions*')">
+                 <x-slot name="icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                 </x-slot>
+                 Soal
+            </x-sidebar-link>
+
             <div class="px-4 py-2 text-xs uppercase text-blue-300 font-semibold mt-4">Ujian</div>
             <x-sidebar-link href="{{ route('admin.exams') }}" :active="request()->routeIs('admin.exams*')">
                 <x-slot name="icon">

@@ -28,7 +28,7 @@ class QuestionsImport implements ToCollection, WithHeadingRow
         $user = Auth::user();
         $teacherId = $user->isTeacher()
             ? optional($user->teacher)->id
-            : optional(\App\Models\Teacher::first())->id;
+            : \App\Models\Teacher::firstOrCreate(['user_id' => $user->id], ['nip' => null])->id;
 
         if (!$teacherId) {
             $this->errors[] = 'Teacher tidak ditemukan untuk user saat ini.';

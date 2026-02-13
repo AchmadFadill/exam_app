@@ -169,6 +169,132 @@ it('redirects submit response to result detail even when answer visibility is di
         ->assertJsonPath('redirect', route('student.results.detail', $attemptId));
 });
 
+it('shows pending badge on result list when essay grading is not finished', function () {
+    $this->withoutVite();
+
+    [, $teacher] = makeTeacherUserForResultVisibility('Teacher Visibility 4', 'teacher.visibility4@example.test');
+    [$studentUser, $student] = makeStudentUserForResultVisibility('Student Visibility 4', 'student.visibility4@example.test', 'VIS004');
+    $subject = Subject::create(['name' => 'Bahasa', 'code' => 'VIS-BHS']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Exam Pending Essay',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'VIS004',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'show_score_to_student' => true,
+        'show_answers_to_student' => true,
+        'status' => 'scheduled',
+    ]);
+
+    $essay = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set Essay',
+        'type' => 'essay',
+        'text' => 'Jelaskan fotosintesis',
+        'score' => 10,
+    ]);
+
+    $exam->questions()->attach($essay->id, ['order' => 1, 'score' => 10]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now()->subMinutes(30),
+        'submitted_at' => now()->subMinutes(5),
+        'status' => ExamAttemptStatus::Submitted,
+        'total_score' => 0,
+        'percentage' => 0,
+        'passed' => false,
+    ]);
+
+    $attempt->answers()->create([
+        'question_id' => $essay->id,
+        'answer_text' => 'Jawaban siswa',
+        'selected_option_id' => null,
+        'is_correct' => null,
+        'score_awarded' => 0,
+    ]);
+
+    $this->actingAs($studentUser)
+        ->get(route('student.results'))
+        ->assertOk()
+        ->assertSee('Pending Penilaian');
+});
+
+it('shows pending badge on result detail when essay grading is not finished', function () {
+    $this->withoutVite();
+
+    [, $teacher] = makeTeacherUserForResultVisibility('Teacher Visibility 5', 'teacher.visibility5@example.test');
+    [$studentUser, $student] = makeStudentUserForResultVisibility('Student Visibility 5', 'student.visibility5@example.test', 'VIS005');
+    $subject = Subject::create(['name' => 'Fisika', 'code' => 'VIS-FIS']);
+
+    $exam = Exam::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'name' => 'Exam Pending Detail',
+        'date' => now()->toDateString(),
+        'start_time' => '08:00',
+        'end_time' => '10:00',
+        'duration_minutes' => 120,
+        'token' => 'VIS005',
+        'passing_grade' => 70,
+        'default_score' => 10,
+        'shuffle_questions' => false,
+        'shuffle_answers' => false,
+        'enable_tab_tolerance' => false,
+        'tab_tolerance' => 3,
+        'show_score_to_student' => true,
+        'show_answers_to_student' => true,
+        'status' => 'scheduled',
+    ]);
+
+    $essay = Question::create([
+        'teacher_id' => $teacher->id,
+        'subject_id' => $subject->id,
+        'title' => 'Set Essay',
+        'type' => 'essay',
+        'text' => 'Jelaskan gaya gravitasi.',
+        'score' => 10,
+    ]);
+    $exam->questions()->attach($essay->id, ['order' => 1, 'score' => 10]);
+
+    $attempt = ExamAttempt::create([
+        'exam_id' => $exam->id,
+        'student_id' => $student->id,
+        'started_at' => now()->subMinutes(20),
+        'submitted_at' => now()->subMinutes(5),
+        'status' => ExamAttemptStatus::Submitted,
+        'total_score' => 0,
+        'percentage' => 0,
+        'passed' => false,
+    ]);
+
+    $attempt->answers()->create([
+        'question_id' => $essay->id,
+        'answer_text' => 'Bumi menarik benda...',
+        'selected_option_id' => null,
+        'is_correct' => null,
+        'score_awarded' => 0,
+    ]);
+
+    $this->actingAs($studentUser)
+        ->get(route('student.results.detail', $attempt->id))
+        ->assertOk()
+        ->assertSee('PENDING PENILAIAN')
+        ->assertDontSee('TIDAK LULUS');
+});
+
 function makeTeacherUserForResultVisibility(string $name, string $email): array
 {
     $user = User::create([

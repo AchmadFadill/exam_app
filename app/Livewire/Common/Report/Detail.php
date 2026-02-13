@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\StudentAnswer;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
@@ -67,6 +68,23 @@ class Detail extends Component
 
         $submittedAttemptsCollection = $submittedAttempts->values();
 
+        $essayQuestionIds = $examModel->questions()
+            ->where('type', 'essay')
+            ->pluck('questions.id');
+        $essayQuestionCount = $essayQuestionIds->count();
+
+        $gradedEssayCountsByStudent = collect();
+        if ($essayQuestionCount > 0) {
+            $gradedEssayCountsByStudent = StudentAnswer::query()
+                ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
+                ->where('exam_attempts.exam_id', $this->examId)
+                ->whereIn('student_answers.question_id', $essayQuestionIds)
+                ->whereNotNull('student_answers.is_correct')
+                ->groupBy('exam_attempts.student_id')
+                ->select('exam_attempts.student_id', DB::raw('COUNT(*) as graded_essay_count'))
+                ->pluck('graded_essay_count', 'exam_attempts.student_id');
+        }
+
         // Exam Summary
         $exam = [
             'id' => $examModel->id,
@@ -88,16 +106,23 @@ class Detail extends Component
             ->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
-        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel) {
+        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $gradedEssayCountsByStudent) {
             $attempt = $submittedAttempts->get($student->id);
+            $gradedEssayCount = (int) ($gradedEssayCountsByStudent[$student->id] ?? 0);
+
+            if (!$attempt) {
+                $status = 'Belum Mengerjakan';
+            } elseif ($essayQuestionCount > 0 && $gradedEssayCount < $essayQuestionCount) {
+                $status = 'Pending Penilaian';
+            } else {
+                $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+            }
             
             return [
                 'id' => $student->id,
                 'name' => $student->name,
                 'score' => $attempt ? $attempt->total_score : '-',
-                'status' => $attempt 
-                    ? ($attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus') 
-                    : 'Belum Mengerjakan',
+                'status' => $status,
                 'started_at' => $attempt && $attempt->started_at ? $attempt->started_at->format('H:i') : '-',
                 'submitted_at' => $attempt && $attempt->submitted_at ? $attempt->submitted_at->format('H:i') : '-',
                 'duration_minutes' => $attempt ? $this->calculateDuration($attempt->started_at, $attempt->submitted_at) : 999999,

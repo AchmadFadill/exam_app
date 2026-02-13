@@ -103,8 +103,8 @@
                             </x-table.td>
                             <x-table.td class="text-center font-black text-xl text-text-main italic">{{ $student['score'] }}</x-table.td>
                             <x-table.td class="text-center">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
-                                    {{ $student['status'] == 'Lulus' ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20' }}">
+                                <span class="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                                    {{ $student['status'] == 'Lulus' ? 'bg-green-500/10 text-green-600 border-green-500/20' : ($student['status'] == 'Pending Penilaian' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : ($student['status'] == 'Belum Mengerjakan' ? 'bg-gray-500/10 text-gray-600 border-gray-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20')) }}">
                                     {{ $student['status'] }}
                                 </span>
                             </x-table.td>

@@ -12,9 +12,20 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-it('prevents selecting questions from a second group in exam form', function () {
+it('auto-fills subject from assigned teacher subject when creating exam', function () {
+    [$teacherUser, $teacher] = makeTeacherUserForExamFormRule('Teacher Rule 0', 'teacher.rule0@example.test');
+    $subject = Subject::create(['name' => 'Biologi', 'code' => 'RULE-BIO']);
+    $teacher->subjects()->attach($subject->id);
+
+    Livewire::actingAs($teacherUser)
+        ->test(ExamForm::class)
+        ->assertSet('subject_id', $subject->id);
+});
+
+it('switches to the newly selected group when teacher selects a different question group', function () {
     [$teacherUser, $teacher] = makeTeacherUserForExamFormRule('Teacher Rule', 'teacher.rule@example.test');
     $subject = Subject::create(['name' => 'Math', 'code' => 'RULE-MTH']);
+    $teacher->subjects()->attach($subject->id);
 
     $groupAQuestion = Question::create([
         'teacher_id' => $teacher->id,
@@ -25,7 +36,7 @@ it('prevents selecting questions from a second group in exam form', function () 
         'score' => 10,
     ]);
 
-    Question::create([
+    $groupBQuestion = Question::create([
         'teacher_id' => $teacher->id,
         'subject_id' => $subject->id,
         'title' => 'Group B',
@@ -39,13 +50,13 @@ it('prevents selecting questions from a second group in exam form', function () 
         ->call('toggleQuestionGroup', 'Group A', $subject->id)
         ->assertSet('selectedQuestions', [$groupAQuestion->id])
         ->call('toggleQuestionGroup', 'Group B', $subject->id)
-        ->assertSet('selectedQuestions', [$groupAQuestion->id])
-        ->assertDispatched('notify');
+        ->assertSet('selectedQuestions', [$groupBQuestion->id]);
 });
 
-it('fails validation when attempting to save exam with mixed question groups', function () {
+it('auto-normalizes mixed question groups into a single group when saving exam', function () {
     [$teacherUser, $teacher] = makeTeacherUserForExamFormRule('Teacher Rule 2', 'teacher.rule2@example.test');
     $subject = Subject::create(['name' => 'Science', 'code' => 'RULE-SCI']);
+    $teacher->subjects()->attach($subject->id);
     $classroom = Classroom::create(['name' => 'X-RULE-1', 'level' => 'X']);
 
     $groupAQuestion = Question::create([
@@ -85,7 +96,18 @@ it('fails validation when attempting to save exam with mixed question groups', f
             $groupBQuestion->id => 10,
         ])
         ->call('saveExam')
-        ->assertHasErrors(['selectedQuestions']);
+        ->assertHasNoErrors()
+        ->assertRedirect(route('teacher.exams.index'));
+
+    $exam = \App\Models\Exam::query()->where('token', 'RUL001')->firstOrFail();
+    $exam->load('questions:id,title,subject_id');
+
+    $distinctGroups = $exam->questions
+        ->map(fn ($q) => $q->subject_id . '::' . $q->title)
+        ->unique()
+        ->count();
+
+    expect($distinctGroups)->toBe(1);
 });
 
 function makeTeacherUserForExamFormRule(string $name, string $email): array
@@ -101,4 +123,3 @@ function makeTeacherUserForExamFormRule(string $name, string $email): array
 
     return [$user, $teacher];
 }
-

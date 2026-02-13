@@ -9,7 +9,6 @@ use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class Form extends Component
@@ -48,12 +47,20 @@ class Form extends Component
 
     // Step 4: Status
     public $status = 'draft';
+    public $teacherSubjectIds = [];
 
     // Instant Question Modal
 
 
     public function mount($id = null)
     {
+        if (Auth::user()->isTeacher()) {
+            $teacher = \App\Models\Teacher::with('subjects:id')->where('user_id', Auth::id())->first();
+            $this->teacherSubjectIds = $teacher
+                ? $teacher->subjects->pluck('id')->map(fn ($id) => (int) $id)->values()->all()
+                : [];
+        }
+
         if ($id) {
             $this->examId = $id;
             $this->loadExam($id);
@@ -67,12 +74,9 @@ class Form extends Component
             $this->generateToken();
             
             // Set default subject for teacher
-            if (Auth::user()->isTeacher()) {
-                $teacher = \App\Models\Teacher::with('subjects')->where('user_id', Auth::id())->first();
-                if ($teacher && $teacher->subjects->count() === 1) {
-                    // Pre-fill only if teacher has exactly one subject
-                    $this->subject_id = $teacher->subjects->first()->id;
-                }
+            if (Auth::user()->isTeacher() && !empty($this->teacherSubjectIds)) {
+                // For teacher flow, subject is locked to the assigned subject.
+                $this->subject_id = (int) $this->teacherSubjectIds[0];
             }
         }
         
@@ -115,6 +119,17 @@ class Form extends Component
                 // Ignore parsing errors
             }
         }
+    }
+
+    public function updatedSubjectId($value): void
+    {
+        if (Auth::user()->isTeacher() && !in_array((int) $value, $this->teacherSubjectIds, true)) {
+            $this->subject_id = !empty($this->teacherSubjectIds) ? (int) $this->teacherSubjectIds[0] : '';
+        }
+
+        // Prevent stale mixed selection when subject is changed in step 1.
+        $this->selectedQuestions = [];
+        $this->questionScores = [];
     }
 
     protected function loadExam($id)
@@ -217,10 +232,14 @@ class Form extends Component
 
     protected function validateCurrentStep()
     {
+        $subjectRule = Auth::user()->isTeacher()
+            ? 'required|in:' . implode(',', $this->teacherSubjectIds)
+            : 'required|exists:subjects,id';
+
         $rules = match ($this->currentStep) {
             1 => [
                 'name' => 'required|string|max:255',
-                'subject_id' => 'required|exists:subjects,id',
+                'subject_id' => $subjectRule,
                 'date' => 'required|date',
                 'start_time' => 'required',
                 'end_time' => 'required|after:start_time',
@@ -242,10 +261,14 @@ class Form extends Component
 
         $this->validate($rules);
 
+        if ($this->currentStep === 2) {
+            $this->normalizeSelectedQuestionsToSingleGroup();
+        }
+
         if ($this->currentStep === 2 && !$this->hasSingleQuestionGroup()) {
-            throw ValidationException::withMessages([
-                'selectedQuestions' => 'Semua soal pada ujian harus berasal dari satu grup soal yang sama.',
-            ]);
+            // Do not block save with validation error; selection is normalized
+            // to a single group by normalizeSelectedQuestionsToSingleGroup().
+            $this->normalizeSelectedQuestionsToSingleGroup();
         }
     }
 
@@ -267,11 +290,9 @@ class Form extends Component
             $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
 
             if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
-                $this->dispatch('notify', [
-                    'message' => 'Satu ujian hanya boleh mengambil soal dari satu grup soal.',
-                    'type' => 'error',
-                ]);
-                return;
+                // Switch group automatically: keep only the newly selected question.
+                $this->selectedQuestions = [];
+                $this->questionScores = [];
             }
 
             // Add question with its own configured score from bank soal
@@ -299,24 +320,13 @@ class Form extends Component
                 unset($this->questionScores[$qId]);
             }
         } else {
-            $selectedGroup = $this->getSelectedGroupKey();
-            $candidateGroup = $this->buildGroupKey($title, (int) $subjectId);
-
-            if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
-                $this->dispatch('notify', [
-                    'message' => 'Satu ujian hanya boleh mengambil soal dari satu grup soal.',
-                    'type' => 'error',
-                ]);
-                return;
-            }
-
-            // Add all questions from this group
+            // In single-group mode, selecting a group always replaces previous selection.
+            $this->selectedQuestions = [];
+            $this->questionScores = [];
             foreach ($groupQuestions as $question) {
                 $qId = $question->id;
-                if (!in_array($qId, $this->selectedQuestions)) {
-                    $this->selectedQuestions[] = $qId;
-                    $this->questionScores[$qId] = $question->score ?? $this->default_score;
-                }
+                $this->selectedQuestions[] = $qId;
+                $this->questionScores[$qId] = $question->score ?? $this->default_score;
             }
         }
     }
@@ -325,6 +335,17 @@ class Form extends Component
     {
         // Keep aliases synchronized before validation/save.
         $this->selectedClasses = $this->classes;
+
+        if (Auth::user()->isTeacher()) {
+            if (empty($this->teacherSubjectIds)) {
+                $this->dispatch('notify', [
+                    'message' => 'Akun guru belum memiliki mata pelajaran yang diampu.',
+                    'type' => 'error',
+                ]);
+                return;
+            }
+            $this->subject_id = (int) $this->teacherSubjectIds[0];
+        }
 
         // Validate all visible steps in this form (Step 1 and Step 2).
         $originalStep = $this->currentStep;
@@ -443,11 +464,9 @@ class Form extends Component
         $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
 
         if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
-            $this->dispatch('notify', [
-                'message' => 'Soal instan berhasil dibuat, tetapi tidak otomatis dipilih karena beda grup soal.',
-                'type' => 'warning',
-            ]);
-            return;
+            // Switch group to the newly created instant question.
+            $this->selectedQuestions = [];
+            $this->questionScores = [];
         }
 
         // Automatically select the new question for this exam
@@ -475,13 +494,18 @@ class Form extends Component
 
     public function render()
     {
-        $subjects = Subject::orderBy('name')->get();
+        $subjects = Auth::user()->isTeacher()
+            ? Subject::query()->whereIn('id', $this->teacherSubjectIds)->orderBy('name')->get()
+            : Subject::orderBy('name')->get();
         $classrooms = Classroom::orderBy('name')->get();
         
         // Group questions by title for selection
         $questionGroups = Question::with(['subject'])
             ->when($this->searchQuery, function ($q) {
                 $q->where('title', 'like', '%' . $this->searchQuery . '%');
+            })
+            ->when(Auth::user()->isTeacher() && !empty($this->teacherSubjectIds), function ($q) {
+                $q->whereIn('subject_id', $this->teacherSubjectIds);
             })
             // If subject_id is set (from Step 1), force filter by it.
             // Otherwise fallback to the manual filter (though typically subject_id is required in Step 1)
@@ -527,6 +551,57 @@ class Form extends Component
             ->count();
 
         return $distinctGroupCount <= 1;
+    }
+
+    private function normalizeSelectedQuestionsToSingleGroup(): void
+    {
+        $selectedIds = collect($this->selectedQuestions)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn ($id) => $id > 0)
+            ->unique()
+            ->values();
+
+        if ($selectedIds->isEmpty()) {
+            $this->selectedQuestions = [];
+            $this->questionScores = [];
+            return;
+        }
+
+        $questions = Question::query()
+            ->whereIn('id', $selectedIds->all())
+            ->select('id', 'title', 'subject_id', 'score')
+            ->get();
+
+        if ($questions->isEmpty()) {
+            $this->selectedQuestions = [];
+            $this->questionScores = [];
+            return;
+        }
+
+        $grouped = $questions->groupBy(fn ($q) => $this->buildGroupKey((string) $q->title, (int) $q->subject_id));
+        if ($grouped->count() <= 1) {
+            $this->selectedQuestions = $questions->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+            return;
+        }
+
+        $targetGroup = $grouped
+            ->sortByDesc(function ($items, $groupKey) {
+                $countScore = $items->count() * 1000;
+                $subjectBonus = ((int) $items->first()->subject_id === (int) $this->subject_id) ? 1 : 0;
+                return $countScore + $subjectBonus;
+            })
+            ->keys()
+            ->first();
+
+        $kept = $grouped->get($targetGroup, collect())->values();
+        $this->selectedQuestions = $kept->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $newScores = [];
+        foreach ($kept as $question) {
+            $qid = (int) $question->id;
+            $newScores[$qid] = (int) ($this->questionScores[$qid] ?? $question->score ?? $this->default_score);
+        }
+        $this->questionScores = $newScores;
     }
 
     private function getSelectedGroupKey(): ?string
