@@ -29,7 +29,11 @@
                     {{ date('d M Y', strtotime($exam->date)) }}
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap space-y-1">
-                    @if($exam->pending_count > 0)
+                    @if($exam->grading_status === 'no_participants')
+                        <span class="px-3 py-1 inline-flex text-[10px] font-black uppercase tracking-widest rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-500/20">
+                            Siswa belum Mengerjakan
+                        </span>
+                    @elseif($exam->pending_count > 0)
                         <span class="px-3 py-1 inline-flex text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-100 text-amber-700 ring-1 ring-amber-500/20">
                             Butuh Koreksi ({{ $exam->pending_count }})
                         </span>

@@ -7,7 +7,7 @@
                     <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </x-button>
                 <div class="min-w-0">
-                    <h2 class="font-black text-lg sm:text-xl text-text-main tracking-tight leading-none truncate uppercase italic">{{ $student_name }}</h2>
+                    <h2 class="font-black text-lg sm:text-xl text-text-main tracking-tight leading-tight uppercase italic break-words">{{ $student_name }}</h2>
                     <div class="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1.5 opacity-60 italic">
                         <span>{{ $grade }}</span>
                     </div>
