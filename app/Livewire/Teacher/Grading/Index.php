@@ -15,12 +15,19 @@ class Index extends Component
         $isAdmin = $user->isAdmin();
         $teacherId = $user->isTeacher() ? $user->teacher->id : 0;
 
+        $targetStatuses = [
+            ExamAttemptStatus::Submitted->value,
+            ExamAttemptStatus::Completed->value,
+            ExamAttemptStatus::TimedOut->value,
+            ExamAttemptStatus::Abandoned->value
+        ];
+
         $exams = \App\Models\Exam::query()
             ->when(!$isAdmin, fn ($q) => $q->where('teacher_id', $teacherId))
             // Grading module is only for exams that contain essay questions (manual scoring).
             ->whereHas('questions', fn ($q) => $q->where('questions.type', 'essay'))
-            ->withCount(['attempts' => function ($query) {
-                $query->where('status', ExamAttemptStatus::Submitted->value);
+            ->withCount(['attempts' => function ($query) use ($targetStatuses) {
+                $query->whereIn('status', $targetStatuses);
             }])
             ->with(['questions' => function ($query) {
                 $query->select('questions.id', 'questions.type')->where('questions.type', 'essay');

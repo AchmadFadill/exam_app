@@ -70,7 +70,7 @@
                     <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) : route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) }}"
                               variant="{{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'secondary' : 'primary' }}"
                               class="text-[10px] px-6">
-                        {{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'Edit Nilai' : 'Beri Nilai' }}
+                        {{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'EDIT NILAI' : 'BERI NILAI' }}
                     </x-button>
                 </x-table.td>
             </x-table.tr>

@@ -9,6 +9,7 @@ use Livewire\Component;
 use App\Traits\HasDynamicLayout;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use App\Enums\ExamAttemptStatus;
 
 class Detail extends Component
 {
@@ -62,8 +63,8 @@ class Detail extends Component
 
         $submittedAttempts = ExamAttempt::query()
             ->where('exam_id', $this->examId)
-            ->whereNotNull('submitted_at')
-            ->get(['student_id', 'total_score', 'started_at', 'submitted_at'])
+            // Removed whereNotNull('submitted_at') to include InProgress, Abandoned, etc.
+            ->get(['student_id', 'total_score', 'started_at', 'submitted_at', 'status'])
             ->keyBy('student_id');
 
         $submittedAttemptsCollection = $submittedAttempts->values();
@@ -73,29 +74,21 @@ class Detail extends Component
             ->pluck('questions.id');
         $essayQuestionCount = $essayQuestionIds->count();
 
-        $gradedEssayCountsByStudent = collect();
-        if ($essayQuestionCount > 0) {
-            $gradedEssayCountsByStudent = StudentAnswer::query()
-                ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
-                ->where('exam_attempts.exam_id', $this->examId)
-                ->whereIn('student_answers.question_id', $essayQuestionIds)
-                ->whereNotNull('student_answers.is_correct')
-                ->groupBy('exam_attempts.student_id')
-                ->select('exam_attempts.student_id', DB::raw('COUNT(*) as graded_essay_count'))
-                ->pluck('graded_essay_count', 'exam_attempts.student_id');
-        }
-
-        // Exam Summary
+        // Exam Summary (Calculations should filter for valid/finished attempts if needed, 
+        // but for now simple stats on all attempts is acceptable or we can filter strictly for stats)
+        // Let's keep stats based on submitted/graded attempts to avoid skewing with InProgress 0s
+        $finishedAttempts = $submittedAttemptsCollection->filter(fn($a) => $a->status !== ExamAttemptStatus::InProgress);
+        
         $exam = [
             'id' => $examModel->id,
             'exam_name' => $examModel->name,
             'class' => $examModel->classrooms->pluck('name')->join(', '),
             'subject' => $examModel->subject->name ?? '-',
             'date' => $examModel->date ? $examModel->date->format('d M Y') : '-',
-            'avg_score' => $submittedAttemptsCollection->count() > 0 ? number_format($submittedAttemptsCollection->avg('total_score'), 1) : 0,
-            'highest' => $submittedAttemptsCollection->max('total_score') ?? 0,
-            'lowest' => $submittedAttemptsCollection->min('total_score') ?? 0,
-            'participants' => $submittedAttemptsCollection->count()
+            'avg_score' => $finishedAttempts->count() > 0 ? number_format($finishedAttempts->avg('total_score'), 1) : 0,
+            'highest' => $finishedAttempts->max('total_score') ?? 0,
+            'lowest' => $finishedAttempts->min('total_score') ?? 0,
+            'participants' => $submittedAttemptsCollection->count() // Count all who started
         ];
 
         // Fetch All Students in Exam Classrooms
@@ -106,15 +99,24 @@ class Detail extends Component
             ->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
-        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $gradedEssayCountsByStudent) {
+        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount) {
             $attempt = $submittedAttempts->get($student->id);
-            $gradedEssayCount = (int) ($gradedEssayCountsByStudent[$student->id] ?? 0);
 
             if (!$attempt) {
                 $status = 'Belum Mengerjakan';
-            } elseif ($essayQuestionCount > 0 && $gradedEssayCount < $essayQuestionCount) {
-                $status = 'Pending Penilaian';
+            } elseif ($attempt->status === ExamAttemptStatus::Graded) {
+                $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+            } elseif (in_array($attempt->status, [ExamAttemptStatus::Submitted, ExamAttemptStatus::Completed, ExamAttemptStatus::TimedOut, ExamAttemptStatus::Abandoned])) {
+                // Check if needs grading (has essays)
+                if ($essayQuestionCount > 0) {
+                    $status = 'Pending Penilaian';
+                } else {
+                    $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+                }
+            } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
+                $status = 'Sedang Mengerjakan';
             } else {
+                // Fallback
                 $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
             }
             

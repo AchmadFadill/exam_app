@@ -4,12 +4,6 @@
     $correctCount = $attempt->answers->filter(fn($a) => $a->is_correct === true)->count();
     $wrongCount = $attempt->answers->filter(fn($a) => $a->is_correct === false)->count();
     $pendingCount = $attempt->answers->filter(fn($a) => is_null($a->is_correct))->count();
-    $essayQuestionIds = $exam->questions->where('type', 'essay')->pluck('id');
-    $gradedEssayCount = $attempt->answers
-        ->whereIn('question_id', $essayQuestionIds)
-        ->whereNotNull('is_correct')
-        ->count();
-    $hasPendingEssay = $essayQuestionIds->isNotEmpty() && $gradedEssayCount < $essayQuestionIds->count();
 @endphp
 <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
     <!-- Back Button -->
@@ -37,9 +31,7 @@
                         <div class="text-[10px] sm:text-sm font-medium uppercase tracking-wider mb-1 text-white opacity-80">Nilai Akhir</div>
                         @if($exam->show_score_to_student)
                             <div class="text-5xl sm:text-6xl font-black text-white drop-shadow-sm">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
-                            @if($hasPendingEssay)
-                                <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-amber-500 text-white rounded-full inline-block shadow-lg">PENDING PENILAIAN</div>
-                            @elseif($attempt->passed)
+                            @if($attempt->passed)
                                 <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
                             @else
                                 <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-red-500 text-white rounded-full inline-block shadow-lg">TIDAK LULUS</div>
@@ -115,23 +107,11 @@
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-sm font-bold text-text-muted">SOAL NO. {{ $index + 1 }}</span>
-                    @if($isEssay)
-                        @if(!$studentAnswer || is_null($studentAnswer->is_correct))
-                        <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full flex items-center">
-                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9V9h2v4zm0-6H9V5h2v2z"></path></svg>
-                            MENUNGGU PENILAIAN
-                        </span>
-                        @elseif($studentAnswer->is_correct === true)
-                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center">
-                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            BENAR
-                        </span>
-                        @else
-                        <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full flex items-center">
-                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                            SALAH
-                        </span>
-                        @endif
+                    @if($isEssay && is_null($studentAnswer?->is_correct))
+                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full flex items-center">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9V9h2v4zm0-6H9V5h2v2z"></path></svg>
+                        MENUNGGU PENILAIAN
+                    </span>
                     @elseif($isCorrect)
                     <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
@@ -162,7 +142,7 @@
                     <div class="text-xs sm:text-sm">
                         <div class="font-semibold text-text-muted mb-2">Jawaban Kamu:</div>
                         <div class="p-3 {{ $isCorrect ? 'bg-green-50 border-green-200 text-green-700' : ($isWrong ? 'bg-red-50 border-red-200 text-red-700' : 'bg-gray-50 border-gray-200 text-gray-700') }} border rounded-xl font-medium">
-                             {{ $isEssay ? (($studentAnswer && filled(trim((string) $studentAnswer->answer))) ? $studentAnswer->answer : 'Essay tidak diisi') : (($selectedOptionMatchesQuestion ? $userOption->text : null) ?? (!is_null($userOptionId) ? 'Jawaban tersimpan' : 'Tidak Menjawab')) }}
+                             {{ $isEssay ? ($studentAnswer->answer ?? 'Belum ada jawaban essay') : (($selectedOptionMatchesQuestion ? $userOption->text : null) ?? (!is_null($userOptionId) ? 'Jawaban tersimpan' : 'Tidak Menjawab')) }}
                         </div>
                     </div>
                      <div class="text-xs sm:text-sm">

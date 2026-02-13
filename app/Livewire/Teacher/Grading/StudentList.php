@@ -36,10 +36,25 @@ class StudentList extends Component
 
     public function render()
     {
+        $targetStatuses = [
+            ExamAttemptStatus::Submitted->value, 
+            ExamAttemptStatus::Graded->value,
+            ExamAttemptStatus::Completed->value,
+            ExamAttemptStatus::TimedOut->value,
+            ExamAttemptStatus::Abandoned->value
+        ];
+
         $attempts = \App\Models\ExamAttempt::where('exam_id', $this->examId)
-            ->whereIn('status', [ExamAttemptStatus::Submitted->value, ExamAttemptStatus::Graded->value])
+            ->whereIn('status', $targetStatuses)
             ->with('student.user')
-            ->orderByRaw("FIELD(status, ?, ?)", [ExamAttemptStatus::Submitted->value, ExamAttemptStatus::Graded->value]) // Prioritize submitted
+            // Prioritize pending statuses (Submitted, Completed, TimedOut, Abandoned) over Graded
+            ->orderByRaw("FIELD(status, ?, ?, ?, ?, ?)", [
+                ExamAttemptStatus::Submitted->value, 
+                ExamAttemptStatus::Completed->value,
+                ExamAttemptStatus::TimedOut->value,
+                ExamAttemptStatus::Abandoned->value,
+                ExamAttemptStatus::Graded->value
+            ])
             ->latest('submitted_at')
             ->paginate(10);
 
