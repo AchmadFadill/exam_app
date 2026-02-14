@@ -142,9 +142,9 @@
                 </div>
                 @if(!collect($essayGrades)->isEmpty())
                     <!-- Save Button -->
-                    <x-button wire:click="finishGrading" variant="primary" class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs font-black shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
-                        <span class="hidden sm:inline">SIMPAN & SELESAI</span>
-                        <span class="sm:hidden">SIMPAN</span>
+                    <x-button wire:click="publishScore" variant="primary" class="px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs font-black shadow-xl shadow-primary/20 hover:scale-[1.03] active:scale-95 transition-all">
+                        <span class="hidden sm:inline">TERBITKAN NILAI</span>
+                        <span class="sm:hidden">TERBITKAN</span>
                         <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </x-button>
                 @endif

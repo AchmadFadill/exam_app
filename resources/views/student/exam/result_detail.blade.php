@@ -4,6 +4,12 @@
     $correctCount = $attempt->answers->filter(fn($a) => $a->is_correct === true)->count();
     $wrongCount = $attempt->answers->filter(fn($a) => $a->is_correct === false)->count();
     $pendingCount = $attempt->answers->filter(fn($a) => is_null($a->is_correct))->count();
+    $essayQuestionIds = $exam->questions->where('type', 'essay')->pluck('id');
+    $gradedEssayCount = $attempt->answers
+        ->whereIn('question_id', $essayQuestionIds)
+        ->whereNotNull('is_correct')
+        ->count();
+    $hasPendingEssay = $essayQuestionIds->isNotEmpty() && $gradedEssayCount < $essayQuestionIds->count();
 @endphp
 <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
     <!-- Back Button -->
@@ -31,7 +37,9 @@
                         <div class="text-[10px] sm:text-sm font-medium uppercase tracking-wider mb-1 text-white opacity-80">Nilai Akhir</div>
                         @if($exam->show_score_to_student)
                             <div class="text-5xl sm:text-6xl font-black text-white drop-shadow-sm">{{ number_format($attempt->percentage ?? 0, 1) }}</div>
-                            @if($attempt->passed)
+                            @if($hasPendingEssay)
+                                <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-amber-500 text-white rounded-full inline-block shadow-lg">PENDING PENILAIAN</div>
+                            @elseif($attempt->passed)
                                 <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-green-500 text-white rounded-full inline-block shadow-lg">LULUS KKM</div>
                             @else
                                 <div class="mt-2 text-[10px] font-semibold px-3 py-1 bg-red-500 text-white rounded-full inline-block shadow-lg">TIDAK LULUS</div>
@@ -102,6 +110,8 @@
                         : (!is_null($userOptionId) || filled(trim((string) ($studentAnswer->answer ?? ''))))
                 );
                 $isWrong = $hasAnswer && !$isCorrect && (!$isEssay || !is_null($studentAnswer?->is_correct));
+                $maxQuestionScore = (float) ($question->pivot->score ?? $question->score ?? 0);
+                $awardedScore = $studentAnswer ? (float) ($studentAnswer->score_awarded ?? 0) : 0.0;
             @endphp
         <div class="bg-bg-surface dark:bg-bg-surface rounded-2xl shadow-sm border border-border-subtle dark:border-border-subtle overflow-hidden">
             <div class="p-6">
@@ -110,27 +120,17 @@
                     @if($isEssay && is_null($studentAnswer?->is_correct))
                     <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9V9h2v4zm0-6H9V5h2v2z"></path></svg>
-                        MENUNGGU PENILAIAN
-                    </span>
-                    @elseif($isCorrect)
-                    <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                        BENAR
-                    </span>
-                    @elseif($isWrong)
-                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full flex items-center">
-                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                        SALAH
+                        POIN: Pending / {{ number_format($maxQuestionScore, 1) }}
                     </span>
                     @elseif(!$hasAnswer)
                     <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11H9v4h2V7zm0 6H9v2h2v-2z"></path></svg>
-                        TIDAK DIJAWAB
+                        POIN: 0.0 / {{ number_format($maxQuestionScore, 1) }}
                     </span>
                     @else
-                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full flex items-center">
+                    <span class="px-3 py-1 {{ $awardedScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} text-xs font-bold rounded-full flex items-center">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11H9v4h2V7zm0 6H9v2h2v-2z"></path></svg>
-                        SUDAH DIJAWAB
+                        POIN: {{ number_format($awardedScore, 1) }} / {{ number_format($maxQuestionScore, 1) }}
                     </span>
                     @endif
                 </div>

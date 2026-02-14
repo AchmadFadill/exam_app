@@ -191,6 +191,55 @@ class Detail extends Component
             ->with('success', 'Penilaian tersimpan. Lanjutkan menilai siswa lainnya.');
     }
 
+    public function publishScore()
+    {
+        Gate::authorize('grade', $this->exam);
+
+        $scoringService = app(ScoringService::class);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($scoringService) {
+            foreach ($this->essayGrades as $questionId => $data) {
+                $max = (int) ($data['max_score'] ?? 0);
+                $score = (int) ($data['score'] ?? 0);
+                $score = max(0, min($score, $max));
+                $isEmptyAnswer = (bool) ($data['is_empty'] ?? false);
+                $isCorrect = $score > 0;
+
+                \App\Models\StudentAnswer::updateOrCreate(
+                    [
+                        'exam_attempt_id' => $this->attempt->id,
+                        'question_id' => (int) $questionId,
+                    ],
+                    [
+                        'answer' => $isEmptyAnswer ? null : (string) ($data['student_answer'] ?? ''),
+                        'selected_option_id' => null,
+                        'score_awarded' => $score,
+                        'is_correct' => $isCorrect,
+                        'teacher_feedback' => (string) ($data['feedback'] ?? ''),
+                    ]
+                );
+            }
+
+            $summary = $scoringService->recalculateAttempt($this->exam, $this->attempt);
+
+            $this->attempt->update([
+                'total_score' => $summary['total_score'],
+                'percentage' => $summary['percentage'],
+                'status' => ExamAttemptStatus::Graded,
+                'passed' => $summary['passed'],
+            ]);
+
+            $this->exam->update(['is_published' => true]);
+        });
+
+        $route = \Illuminate\Support\Facades\Auth::user()->isAdmin()
+            ? 'admin.grading.show'
+            : 'teacher.grading.show';
+
+        return redirect()->route($route, ['exam' => $this->exam->id])
+            ->with('success', 'Nilai berhasil diterbitkan.');
+    }
+
     public function render()
     {
         return view('teacher.grading.detail', [

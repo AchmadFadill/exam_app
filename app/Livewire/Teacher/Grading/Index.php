@@ -35,7 +35,9 @@ class Index extends Component
             ->with(['questions' => function ($query) {
                 $query->select('questions.id', 'questions.type')->where('questions.type', 'essay');
             }])
-            ->latest('date')
+            // Sort by newest exam record first on grading index.
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(10);
 
         // Transform collection to add 'pending_count' and 'status' logic
