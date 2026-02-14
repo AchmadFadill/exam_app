@@ -37,7 +37,7 @@
                     </div>
                 @endif
                 <div class="flex items-center gap-2.5 mt-0.5">
-                    <div class="text-[10px] sm:text-sm font-bold text-gray-400 italic">{{ count($questions) }} Soal</div>
+                    <div class="text-[10px] sm:text-sm font-bold text-gray-400 italic">{{ $questions->total() }} Soal</div>
                     <span class="text-gray-300">•</span>
                     <div class="text-[10px] sm:text-sm font-black text-primary uppercase tracking-widest">Total: {{ $totalScore }} Poin</div>
                 </div>
@@ -167,6 +167,12 @@
             :readonly-group="true"
         />
     @endforeach
+
+    @if($questions->hasPages())
+    <div class="mt-6">
+        {{ $questions->links() }}
+    </div>
+    @endif
 
     <!-- Delete Modal -->
     @if($showDeleteModal)

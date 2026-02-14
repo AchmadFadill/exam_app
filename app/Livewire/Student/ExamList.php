@@ -4,9 +4,13 @@ namespace App\Livewire\Student;
 
 use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
+use Livewire\WithPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ExamList extends Component
 {
+    use WithPagination;
+
     public $filter = 'all'; // all, active, upcoming, history
 
     protected $queryString = ['filter'];
@@ -14,13 +18,22 @@ class ExamList extends Component
     public function setFilter($filter)
     {
         $this->filter = $filter;
+        $this->resetPage('studentExamPage');
     }
 
     public function getExamsProperty()
     {
         $student = \Illuminate\Support\Facades\Auth::user()->student;
         
-        if (!$student) return collect([]);
+        if (!$student) {
+            return new LengthAwarePaginator(
+                items: [],
+                total: 0,
+                perPage: 10,
+                currentPage: 1,
+                options: ['path' => request()->url(), 'pageName' => 'studentExamPage']
+            );
+        }
 
         $query = \App\Models\Exam::whereHas('classrooms', function($q) use ($student) {
             $q->where('classroom_id', $student->classroom_id);
@@ -34,7 +47,7 @@ class ExamList extends Component
             'active' => $this->getActiveExams($query, $student),
             'upcoming' => $this->getUpcomingExams($query),
             'history' => $this->getHistoryExams($query, $student),
-            default => $query->orderBy('date', 'desc')->orderBy('start_time')->get()
+            default => $query->orderBy('date', 'desc')->orderBy('start_time')->paginate(10, ['*'], 'studentExamPage')
         };
     }
 
@@ -49,7 +62,7 @@ class ExamList extends Component
                 $q->where('student_id', $student->id)
                   ->whereNotNull('submitted_at');
             })
-            ->get();
+            ->paginate(10, ['*'], 'studentExamPage');
     }
 
     private function getUpcomingExams($query)
@@ -65,7 +78,7 @@ class ExamList extends Component
             })
             ->orderBy('date')
             ->orderBy('start_time')
-            ->get();
+            ->paginate(10, ['*'], 'studentExamPage');
     }
 
     private function getHistoryExams($query, $student)
@@ -79,7 +92,7 @@ class ExamList extends Component
             ->orWhere('date', '<', now()->subDay()); // Simple check for past exams
         })
         ->orderBy('date', 'desc')
-        ->get();
+        ->paginate(10, ['*'], 'studentExamPage');
     }
 
     public function getExamStatus($exam)

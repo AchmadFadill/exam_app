@@ -4,9 +4,13 @@ namespace App\Livewire\Teacher;
 
 use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
+use Livewire\WithPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class Dashboard extends Component
 {
+    use WithPagination;
+
     public function render()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
@@ -25,7 +29,13 @@ class Dashboard extends Component
                 ],
                 'ongoing_exams' => [],
                 'upcoming_exams' => [],
-                'recent_activities' => [],
+                'recent_activities' => new LengthAwarePaginator(
+                    items: [],
+                    total: 0,
+                    perPage: 5,
+                    currentPage: 1,
+                    options: ['path' => request()->url(), 'pageName' => 'activityPage']
+                ),
                 'greeting' => $this->getGreeting(),
                 'homeroom_class' => null,
                 'taught_subjects' => [],
@@ -144,16 +154,16 @@ class Dashboard extends Component
                 ];
             });
             
-        // 4. Recent Activity (Latest 5 submissions)
+        // 4. Recent Activity (paginated submissions)
         $recent_activities = \App\Models\ExamAttempt::whereHas('exam', function($q) use ($teacher) {
             $q->where('teacher_id', $teacher->id);
         })
         ->whereNotNull('submitted_at')
+        ->where('submitted_at', '>=', now()->subDay())
         ->with(['student.user', 'exam'])
         ->orderBy('submitted_at', 'desc')
-        ->limit(5)
-        ->get()
-        ->map(function($attempt) {
+        ->paginate(5, ['*'], 'activityPage')
+        ->through(function($attempt) {
             return [
                 'action' => "{$attempt->student->user->name} menyelesaikan {$attempt->exam->name}",
                 'time' => $attempt->submitted_at->diffForHumans(),

@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 
 class QuestionGroupDetail extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public $title;
     public $selectedQuestions = [];
@@ -458,9 +459,9 @@ class QuestionGroupDetail extends Component
         $questions = $this->groupQuestionsQuery()
             ->with(['subject', 'options'])
             ->latest()
-            ->get();
+            ->paginate(10);
         
-        $totalScore = $questions->sum('score');
+        $totalScore = $this->groupQuestionsQuery()->sum('score');
         
         $subjects = Subject::orderBy('name')->get();
 

@@ -7,9 +7,12 @@ use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use WithPagination;
+
     // Bulk Action States
     public $selectedExams = [];
     public $selectAll = false;
@@ -131,34 +134,36 @@ class Index extends Component
 
     public function render()
     {
-        $exams = $this->getExamsQuery()->get()->map(function ($exam) {
-            return [
-                'id' => $exam->id,
-                'name' => $exam->name,
-                'subject' => $exam->subject->name,
-                'class' => $exam->classrooms->pluck('name')->join(', '),
-                'date' => $exam->date->format('Y-m-d'),
-                'start_time' => $exam->start_time,
-                'end_time' => $exam->end_time,
-                'duration' => $exam->duration_minutes,
-                'status' => (function() use ($exam) {
-                    if ($exam->status === 'scheduled') {
-                        $now = now();
-                        $date = $exam->date->format('Y-m-d');
-                        $start = \Carbon\Carbon::parse($date . ' ' . $exam->start_time);
-                        $end = \Carbon\Carbon::parse($date . ' ' . $exam->end_time);
-                        
-                        if ($now->between($start, $end)) {
-                            return 'ongoing';
-                        } elseif ($now->gt($end)) {
-                            return 'completed';
+        $exams = $this->getExamsQuery()
+            ->paginate(9)
+            ->through(function ($exam) {
+                return [
+                    'id' => $exam->id,
+                    'name' => $exam->name,
+                    'subject' => $exam->subject->name,
+                    'class' => $exam->classrooms->pluck('name')->join(', '),
+                    'date' => $exam->date->format('Y-m-d'),
+                    'start_time' => $exam->start_time,
+                    'end_time' => $exam->end_time,
+                    'duration' => $exam->duration_minutes,
+                    'status' => (function() use ($exam) {
+                        if ($exam->status === 'scheduled') {
+                            $now = now();
+                            $date = $exam->date->format('Y-m-d');
+                            $start = \Carbon\Carbon::parse($date . ' ' . $exam->start_time);
+                            $end = \Carbon\Carbon::parse($date . ' ' . $exam->end_time);
+                            
+                            if ($now->between($start, $end)) {
+                                return 'ongoing';
+                            } elseif ($now->gt($end)) {
+                                return 'completed';
+                            }
                         }
-                    }
-                    return $exam->status;
-                })(),
-                'questions_count' => $exam->questions->count(),
-            ];
-        });
+                        return $exam->status;
+                    })(),
+                    'questions_count' => $exam->questions->count(),
+                ];
+            });
 
         return view('teacher.exam.index', [
             'exams' => $exams,

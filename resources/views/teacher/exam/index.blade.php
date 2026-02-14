@@ -21,7 +21,7 @@
             <label for="selectAllExams" class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest cursor-pointer">Pilih Semua</label>
         </div>
         <div class="hidden sm:block h-6 w-px bg-border-subtle dark:bg-slate-800"></div>
-        <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Showing {{ count($exams) }} Exams</p>
+        <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest opacity-40">Showing {{ $exams->count() }} of {{ $exams->total() }} Exams</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($exams as $exam)
@@ -63,6 +63,12 @@
         </div>
         @endforelse
     </div>
+
+    @if($exams->hasPages())
+    <div class="mt-8">
+        {{ $exams->links() }}
+    </div>
+    @endif
 
     <!-- Bulk Action Floating Bar -->
     @if(count($selectedExams) > 0)
@@ -196,4 +202,3 @@
 
 
 </div>
-

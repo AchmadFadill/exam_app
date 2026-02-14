@@ -118,4 +118,10 @@
             />
         @endforelse
     </div>
+
+    @if(method_exists($exams, 'hasPages') && $exams->hasPages())
+    <div class="mt-6">
+        {{ $exams->links() }}
+    </div>
+    @endif
 </div>
