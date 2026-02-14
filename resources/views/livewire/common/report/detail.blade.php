@@ -41,120 +41,164 @@
         </x-card>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Student List -->
-        <div class="lg:col-span-2">
-            <x-card title="Hasil Per Siswa">
-                <!-- Filter Buttons -->
-                <div class="flex flex-wrap gap-2 mb-6 -mt-2">
-                    <x-button
-                        wire:click="sortByHighest"
-                        variant="{{ $sortBy === 'highest' ? 'success' : 'secondary' }}"
-                        size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
-                        Tertinggi
-                    </x-button>
-                    <x-button
-                        wire:click="sortByLowest"
-                        variant="{{ $sortBy === 'lowest' ? 'warning' : 'secondary' }}"
-                        size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
-                        Terendah
-                    </x-button>
-                    <x-button
-                        wire:click="sortByFastest"
-                        variant="{{ $sortBy === 'fastest' ? 'primary' : 'secondary' }}"
-                        size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
-                        Tercepat
-                    </x-button>
-                    <x-button
-                        wire:click="sortBySlowest"
-                        variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
-                        size="sm"
-                        class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500 shadow-purple-500/20 shadow-lg' : 'opacity-60 grayscale-[0.5]' }}">
-                        Terlambat
-                    </x-button>
-                    @if($sortBy !== 'default')
-                        <x-button
-                            wire:click="resetFilter"
-                            variant="secondary"
-                            size="sm"
-                            class="!rounded-xl uppercase tracking-widest !bg-red-50 !border-red-500/10 !text-red-600 hover:!bg-red-500/10 active:!bg-red-500/20">
-                            Nonaktifkan Filter
-                        </x-button>
-                    @endif
+    <div class="space-y-6">
+    <!-- Most Failed Questions -->
+    <x-card title="Analisis Soal">
+        <p class="text-xs text-text-muted mb-4 uppercase tracking-widest font-bold">Soal Paling Banyak Salah</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            @forelse($most_failed_questions as $q)
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 group hover:border-red-100 transition-colors h-full">
+                <div class="flex justify-between items-start mb-2 gap-2">
+                    <span class="px-2.5 h-8 rounded-lg bg-white border border-gray-200 inline-flex items-center justify-center font-bold text-sm text-gray-900 whitespace-nowrap">Soal {{ $q['number'] }}</span>
+                    <span class="text-xs font-black text-red-600 uppercase tracking-widest text-right">{{ $q['failed_percentage'] }}% Gagal</span>
                 </div>
-                <x-table>
-                    <x-table.thead>
-                        <x-table.tr>
-                            <x-table.th>Nama Siswa</x-table.th>
-                            <x-table.th class="text-center">Nilai</x-table.th>
-                            <x-table.th class="text-center">Status</x-table.th>
-                            <x-table.th class="text-right">Aksi</x-table.th>
-                        </x-table.tr>
-                    </x-table.thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
-                        @forelse($students as $student)
-                        <x-table.tr>
-                            <x-table.td>
-                                <div class="font-black text-text-main uppercase tracking-tight">{{ $student['name'] }}</div>
-                                <div class="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">{{ $student['started_at'] }} - {{ $student['submitted_at'] }}</div>
-                            </x-table.td>
-                            <x-table.td class="text-center font-black text-xl text-text-main italic">{{ $student['score'] }}</x-table.td>
-                            <x-table.td class="text-center">
-                                <span class="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
-                                    {{ $student['status'] == 'Lulus' ? 'bg-green-500/10 text-green-600 border-green-500/20' : ($student['status'] == 'Pending Penilaian' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : ($student['status'] == 'Belum Mengerjakan' ? 'bg-gray-500/10 text-gray-600 border-gray-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20')) }}">
-                                    {{ $student['status'] }}
-                                </span>
-                            </x-table.td>
-                            <x-table.td class="text-right">
-                                <div class="flex justify-end">
-                                    <x-button variant="soft" href="{{ route($studentDetailRoute, ['examId' => $exam['id'], 'studentId' => $student['id']]) }}" class="px-6 text-[10px]">Detail</x-button>
-                                </div>
-                            </x-table.td>
-                        </x-table.tr>
-                        @empty
-                        <x-empty-state 
-                            colspan="4" 
-                            title="Tidak Ada Peserta" 
-                            message="Belum ada data peserta yang menyelesaikan ujian ini." 
-                            icon="coffee" 
-                        />
-                        @endforelse
-                    </tbody>
-                </x-table>
-            </x-card>
+                <p class="text-xs text-gray-600 line-clamp-3 leading-relaxed mb-3">{{ $q['text'] }}</p>
+                <div class="pt-3 border-t border-gray-200/50 text-[10px] text-gray-500">
+                     Jawaban Benar: <span class="font-bold text-green-600">{{ $q['correct_answer'] }}</span>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full py-8">
+                <x-empty-state 
+                    title="Sempurna!" 
+                    message="Semua soal dijawab dengan baik oleh seluruh peserta. ✨" 
+                    icon="coffee" 
+                />
+            </div>
+            @endforelse
+        </div>
+        <x-button variant="primary" href="{{ route($analysisRoute, $exam['id']) }}" class="w-full sm:w-auto mt-6">Lihat Analisis Lengkap</x-button>
+    </x-card>
+
+    <!-- Student List -->
+    <x-card title="Hasil Per Siswa">
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <label for="classroomFilter" class="text-[10px] font-black text-text-muted uppercase tracking-widest">Filter Kelas</label>
+                <select id="classroomFilter" wire:model.live="classroomFilter" class="w-full sm:w-auto px-3 py-2 border border-border-main rounded-xl bg-white text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
+                    <option value="">Semua Kelas</option>
+                    @foreach($assigned_classes as $class)
+                        <option value="{{ $class['id'] }}">{{ $class['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <x-button href="{{ route($printRoute, ['id' => $exam['id']]) }}" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
+                Cetak Rekap
+            </x-button>
         </div>
 
-        <!-- Most Failed Questions (Teacher Only maybe, or shared) -->
-        <div class="lg:col-span-1">
-            <x-card title="Analisis Soal">
-                <p class="text-xs text-text-muted mb-4 uppercase tracking-widest font-bold">Soal Paling Banyak Salah</p>
-                <div class="space-y-4">
-                    @forelse($most_failed_questions as $q)
-                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 group hover:border-red-100 transition-colors">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center font-bold text-sm text-gray-900">#{{ $q['number'] }}</span>
-                            <span class="text-xs font-black text-red-600 uppercase tracking-widest">{{ $q['failed_percentage'] }}% Gagal</span>
-                        </div>
-                        <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-3">{{ $q['text'] }}</p>
-                        <div class="pt-3 border-t border-gray-200/50 text-[10px] text-gray-500">
-                             Jawaban Benar: <span class="font-bold text-green-600">{{ $q['correct_answer'] }}</span>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="py-8">
-                        <x-empty-state 
-                            title="Sempurna!" 
-                            message="Semua soal dijawab dengan baik oleh seluruh peserta. ✨" 
-                            icon="coffee" 
-                        />
-                    </div>
-                    @endforelse
-                </div>
-                <x-button variant="primary" href="{{ route($analysisRoute, $exam['id']) }}" class="w-full mt-6">Lihat Analisis Lengkap</x-button>
-            </x-card>
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap gap-2 mb-6 -mt-2">
+            <x-button
+                wire:click="sortByHighest"
+                variant="{{ $sortBy === 'highest' ? 'success' : 'secondary' }}"
+                size="sm"
+                class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'highest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
+                Tertinggi
+            </x-button>
+            <x-button
+                wire:click="sortByLowest"
+                variant="{{ $sortBy === 'lowest' ? 'warning' : 'secondary' }}"
+                size="sm"
+                class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'lowest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
+                Terendah
+            </x-button>
+            <x-button
+                wire:click="sortByFastest"
+                variant="{{ $sortBy === 'fastest' ? 'primary' : 'secondary' }}"
+                size="sm"
+                class="!rounded-xl uppercase tracking-widest {{ $sortBy !== 'fastest' ? 'opacity-60 grayscale-[0.5]' : '' }}">
+                Tercepat
+            </x-button>
+            <x-button
+                wire:click="sortBySlowest"
+                variant="{{ $sortBy === 'slowest' ? 'primary' : 'secondary' }}"
+                size="sm"
+                class="!rounded-xl uppercase tracking-widest {{ $sortBy === 'slowest' ? '!bg-purple-500 shadow-purple-500/20 shadow-lg' : 'opacity-60 grayscale-[0.5]' }}">
+                Terlambat
+            </x-button>
+            @if($sortBy !== 'default')
+                <x-button
+                    wire:click="resetFilter"
+                    variant="secondary"
+                    size="sm"
+                    class="!rounded-xl uppercase tracking-widest !bg-red-50 !border-red-500/10 !text-red-600 hover:!bg-red-500/10 active:!bg-red-500/20">
+                    Nonaktifkan Filter
+                </x-button>
+            @endif
         </div>
-    </div>
+        <x-table>
+            <x-table.thead>
+                <x-table.tr>
+                    <x-table.th>Nama Siswa</x-table.th>
+                    <x-table.th class="text-center">Nilai</x-table.th>
+                    <x-table.th class="text-center">Status</x-table.th>
+                    <x-table.th class="text-right">Aksi</x-table.th>
+                </x-table.tr>
+            </x-table.thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
+                @forelse($students as $student)
+                <x-table.tr>
+                    <x-table.td>
+                        <div class="font-black text-text-main uppercase tracking-tight">{{ $student['name'] }}</div>
+                        <div class="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">{{ $student['started_at'] }} - {{ $student['submitted_at'] }}</div>
+                    </x-table.td>
+                    <x-table.td class="text-center font-black text-xl text-text-main italic">{{ $student['score'] }}</x-table.td>
+                    <x-table.td class="text-center">
+                        <span class="inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                            {{ $student['status'] == 'Lulus' ? 'bg-green-500/10 text-green-600 border-green-500/20' : ($student['status'] == 'Pending Penilaian' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : ($student['status'] == 'Belum Mengerjakan' ? 'bg-gray-500/10 text-gray-600 border-gray-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20')) }}">
+                            {{ $student['status'] }}
+                        </span>
+                    </x-table.td>
+                    <x-table.td class="text-right">
+                        <div class="flex justify-end">
+                            <x-button variant="soft" href="{{ route($studentDetailRoute, ['examId' => $exam['id'], 'studentId' => $student['id']]) }}" class="px-6 text-[10px]">Detail</x-button>
+                        </div>
+                    </x-table.td>
+                </x-table.tr>
+                @empty
+                <x-empty-state 
+                    colspan="4" 
+                    title="Tidak Ada Peserta" 
+                    message="Belum ada data peserta yang menyelesaikan ujian ini." 
+                    icon="coffee" 
+                />
+                @endforelse
+            </tbody>
+        </x-table>
+        @if(method_exists($students, 'hasPages') && $students->hasPages())
+            <div class="mt-4 border border-border-main rounded-xl px-4 py-3 bg-bg-surface">
+                <div class="flex items-center justify-between gap-3">
+                    <button
+                        type="button"
+                        wire:click="previousPage('studentsPage')"
+                        @disabled($students->onFirstPage())
+                        class="h-8 w-8 rounded-lg border border-border-main bg-white text-text-muted hover:text-text-main hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                        aria-label="Halaman sebelumnya"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+
+                    <p class="text-[11px] font-bold text-text-muted">
+                        Hal {{ $students->currentPage() }} dari {{ $students->lastPage() }}
+                    </p>
+
+                    <button
+                        type="button"
+                        wire:click="nextPage('studentsPage')"
+                        @disabled(!$students->hasMorePages())
+                        class="h-8 w-8 rounded-lg border border-border-main bg-white text-text-muted hover:text-text-main hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                        aria-label="Halaman berikutnya"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
+    </x-card>
+</div>
 </div>

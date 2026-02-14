@@ -83,3 +83,4 @@
     <div class="mt-4">
         {{ $attempts->links() }}
     </div>
+</div>

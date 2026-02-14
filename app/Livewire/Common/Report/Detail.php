@@ -6,17 +6,20 @@ use App\Models\ExamAttempt;
 use App\Models\Student;
 use App\Models\StudentAnswer;
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Traits\HasDynamicLayout;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Enums\ExamAttemptStatus;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class Detail extends Component
 {
-    use HasDynamicLayout;
+    use HasDynamicLayout, WithPagination;
 
     public $examId;
     public $sortBy = 'default'; // default, highest, lowest, fastest, slowest
+    public $classroomFilter = '';
 
     public function mount($id)
     {
@@ -26,26 +29,36 @@ class Detail extends Component
     public function sortByHighest()
     {
         $this->sortBy = 'highest';
+        $this->resetPage('studentsPage');
     }
 
     public function sortByLowest()
     {
         $this->sortBy = 'lowest';
+        $this->resetPage('studentsPage');
     }
 
     public function sortByFastest()
     {
         $this->sortBy = 'fastest';
+        $this->resetPage('studentsPage');
     }
 
     public function sortBySlowest()
     {
         $this->sortBy = 'slowest';
+        $this->resetPage('studentsPage');
     }
 
     public function resetFilter()
     {
         $this->sortBy = 'default';
+        $this->resetPage('studentsPage');
+    }
+
+    public function updatedClassroomFilter()
+    {
+        $this->resetPage('studentsPage');
     }
 
     private function calculateDuration($start, $end)
@@ -73,6 +86,11 @@ class Detail extends Component
             ->where('type', 'essay')
             ->pluck('questions.id');
         $essayQuestionCount = $essayQuestionIds->count();
+        $questionNumberMap = $examModel->questions()
+            ->pluck('questions.id')
+            ->values()
+            ->flip()
+            ->map(fn ($index) => $index + 1);
 
         // Exam Summary (Calculations should filter for valid/finished attempts if needed, 
         // but for now simple stats on all attempts is acceptable or we can filter strictly for stats)
@@ -91,12 +109,16 @@ class Detail extends Component
             'participants' => $submittedAttemptsCollection->count() // Count all who started
         ];
 
-        // Fetch All Students in Exam Classrooms
+        // Fetch All Students in Exam Classrooms (with optional class filter)
         $classIds = $examModel->classrooms->pluck('id');
-        $allStudents = Student::query()
+        $allStudentsQuery = Student::query()
             ->with('user:id,name')
             ->whereIn('classroom_id', $classIds)
-            ->get(['id', 'user_id', 'classroom_id']);
+            ->when(
+                filled($this->classroomFilter),
+                fn ($q) => $q->where('classroom_id', (int) $this->classroomFilter)
+            );
+        $allStudents = $allStudentsQuery->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
         $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount) {
@@ -152,6 +174,21 @@ class Detail extends Component
             });
         }
 
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage('studentsPage');
+        $studentsCollection = collect($students);
+        $studentsPage = $studentsCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $students = new LengthAwarePaginator(
+            $studentsPage,
+            $studentsCollection->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'studentsPage',
+            ]
+        );
+
         // Most Failed Questions Analysis
         // Logic: Get wrong answers for this exam, group by question_id, count
         $most_failed_questions = StudentAnswer::query()
@@ -160,17 +197,17 @@ class Detail extends Component
             ->where('exam_attempts.exam_id', $this->examId)
             ->whereNotNull('exam_attempts.submitted_at')
             ->where('student_answers.is_correct', false) // Provided grading sets this
-            ->selectRaw('questions.id, questions.text, questions.answer_key, count(*) as failed_count')
+            ->selectRaw('questions.id as question_id, questions.text, questions.answer_key, count(*) as failed_count')
             ->groupBy('questions.id', 'questions.text', 'questions.answer_key')
             ->orderByDesc('failed_count')
             ->limit(5)
             ->get()
-            ->map(function($q) use ($submittedAttemptsCollection) {
+            ->map(function($q) use ($submittedAttemptsCollection, $questionNumberMap) {
                 $totalAttempts = $submittedAttemptsCollection->count();
                 $percentage = $totalAttempts > 0 ? round(($q->failed_count / $totalAttempts) * 100) : 0;
                 
                 return [
-                    'number' => $q->id, // Or map to sequence if possible, id is okay for now
+                    'number' => $questionNumberMap->get((int) $q->question_id, '-'),
                     'text' => strip_tags($q->text), // Clean HTML
                     'failed_count' => $q->failed_count,
                     'failed_percentage' => $percentage,
@@ -182,7 +219,9 @@ class Detail extends Component
             'exam' => $exam,
             'students' => $students,
             'most_failed_questions' => $most_failed_questions,
+            'assigned_classes' => $examModel->classrooms->map(fn ($c) => ['id' => $c->id, 'name' => $c->name]),
             'backRoute' => $isAdmin ? 'admin.reports.index' : 'teacher.reports.index',
+            'printRoute' => $isAdmin ? 'admin.reports.print' : 'teacher.reports.print',
             'studentDetailRoute' => $isAdmin ? 'admin.reports.student' : 'teacher.reports.student',
             'analysisRoute' => $isAdmin ? 'admin.reports.analysis' : 'teacher.reports.analysis'
         ]);

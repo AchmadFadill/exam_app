@@ -4,6 +4,8 @@
     $userName = auth()->check() ? auth()->user()->name : 'Tamu';
     $roleKey = auth()->check() ? auth()->user()->role : null;
     $authUser = auth()->user();
+    $adminLogo = ($roleKey === 'admin' && isset($app_logo) && $app_logo) ? asset('storage/' . $app_logo) : null;
+    $profileImage = $adminLogo ?: ($authUser?->profile_photo_url ?? asset('img/logo_school.jpg'));
 
     if ($roleKey === 'teacher') {
         $teacherName = $authUser?->name ?: '-';
@@ -54,7 +56,7 @@
             >
                 <div class="relative">
                     <div class="w-10 h-10 rounded-2xl bg-gray-100 overflow-hidden shadow-sm group-hover:shadow-primary/20 transition-all duration-300 transform group-hover:-translate-y-0.5 group-active:translate-y-0 border border-gray-100">
-                        <img src="{{ auth()->user()->profile_photo_url }}" alt="Profile" class="w-full h-full object-cover">
+                        <img src="{{ $profileImage }}" alt="Profile" class="w-full h-full object-cover">
                     </div>
                 </div>
                 <div class="hidden md:block text-left">

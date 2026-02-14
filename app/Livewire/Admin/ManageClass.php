@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Classroom;
-use App\Models\Student;
 use Livewire\Component;
 
 class ManageClass extends Component
@@ -11,7 +10,6 @@ class ManageClass extends Component
     public $showAddModal = false;
     public $showEditModal = false;
     public $showDeleteModal = false;
-    public $showAssignModal = false;
 
     public $classForm = [
         'name' => '',
@@ -21,8 +19,6 @@ class ManageClass extends Component
 
     public $selectedClass = null;
     public $search = '';
-    public $studentSearch = '';
-    public $selectedStudents = [];
 
     protected function rules()
     {
@@ -71,19 +67,6 @@ class ManageClass extends Component
         $this->showDeleteModal = true;
     }
 
-    public function openAssignModal($classId)
-    {
-        $this->selectedClass = $classId;
-        
-        // Pre-select students already in this class
-        $this->selectedStudents = Student::where('classroom_id', $classId)
-            ->pluck('id')
-            ->toArray();
-        
-        $this->studentSearch = '';
-        $this->showAssignModal = true;
-    }
-
     public function saveClass()
     {
         $this->validate();
@@ -124,27 +107,6 @@ class ManageClass extends Component
         $this->dispatch('notify', ['message' => 'Data kelas berhasil dihapus!']);
     }
 
-    public function assignStudents()
-    {
-        if ($this->selectedClass) {
-            // First, unassign all students currently in THIS class
-            // (students that were deselected should be removed from this class)
-            Student::where('classroom_id', $this->selectedClass)
-                ->update(['classroom_id' => null]);
-            
-            // Then assign selected students to this class
-            // This also removes them from any OTHER class they might be in
-            if (!empty($this->selectedStudents)) {
-                Student::whereIn('id', $this->selectedStudents)
-                    ->update(['classroom_id' => $this->selectedClass]);
-            }
-        }
-
-        $this->showAssignModal = false;
-        $this->reset('selectedStudents', 'studentSearch');
-        $this->dispatch('notify', ['message' => 'Penempatan siswa berhasil diperbarui!']);
-    }
-
     public function getAvailableTeachersProperty()
     {
         return \App\Models\Teacher::with('user')
@@ -175,30 +137,8 @@ class ManageClass extends Component
                 'teacher_name' => $c->teacher ? $c->teacher->user->name : '-',
             ]);
 
-        // Query all students for assignment modal (include their current classroom)
-        $studentsQuery = Student::with(['user', 'classroom']);
-        
-        if ($this->studentSearch) {
-            $studentsQuery->where(function($q) {
-                $q->where('nis', 'like', '%' . $this->studentSearch . '%')
-                  ->orWhereHas('user', function($q2) {
-                      $q2->where('name', 'like', '%' . $this->studentSearch . '%');
-                  });
-            });
-        }
-        
-        $allStudents = $studentsQuery->orderBy('nis')->get()
-            ->map(fn($s) => [
-                'id' => $s->id,
-                'name' => $s->user->name,
-                'nis' => $s->nis,
-                'current_class' => $s->classroom ? $s->classroom->name : null,
-                'current_class_id' => $s->classroom_id,
-            ]);
-
         return view('admin.manage-class', [
             'classes' => $classes,
-            'allStudents' => $allStudents,
             'teachers' => $this->availableTeachers,
         ])->layout('layouts.admin', ['title' => 'Data Kelas']);
     }

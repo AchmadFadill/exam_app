@@ -50,7 +50,7 @@
                         <span>{{ $class['student_count'] }} Siswa</span>
                     </div>
 
-                    <x-button wire:click="openAssignModal({{ $class['id'] }})" variant="secondary" class="w-full font-black uppercase text-[10px] tracking-[0.2em] py-3 rounded-xl border-dashed">
+                    <x-button href="{{ route('admin.classes.assign', ['classroom' => $class['id']]) }}" variant="secondary" class="w-full font-black uppercase text-[10px] tracking-[0.2em] py-3 rounded-xl border-dashed">
                         Kelola Siswa 
                     </x-button>
                 </div>
@@ -106,72 +106,6 @@
             <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4">
                 <x-button variant="secondary" wire:click="closeModal" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
                 <x-button variant="primary" wire:click="saveClass" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Perubahan</x-button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    @if($showAssignModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-all" wire:click="$set('showAssignModal', false)"></div>
-        <div class="relative bg-bg-surface dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/5 max-h-[85vh] flex flex-col">
-            <div class="px-10 py-8 border-b border-border-subtle dark:border-border-subtle flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/30 shrink-0">
-                <div>
-                    <h3 class="text-xl font-black text-text-main tracking-tight uppercase">Kelola Anggota Kelas</h3>
-                    <p class="text-[10px] text-text-muted font-bold tracking-[0.2em] mt-1 uppercase opacity-60"></p>
-                </div>
-                <x-button wire:click="$set('showAssignModal', false)" variant="secondary" size="sm" square="true" class="!rounded-xl">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                </x-button>
-            </div>
-            <div class="p-10 space-y-8 overflow-y-auto flex-1">
-                <div class="relative group">
-                    <span class="absolute inset-y-0 left-5 flex items-center text-text-muted group-focus-within:text-primary transition-colors">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </span>
-                    <input type="text" wire:model.live="studentSearch" class="pl-14 w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold" placeholder="Filter identitas atau NIS...">
-                </div>
-
-                <div class="max-h-64 overflow-y-auto border border-border-main dark:border-slate-700 rounded-2xl divide-y divide-border-subtle dark:divide-slate-800 shadow-inner bg-gray-50/50 dark:bg-slate-900/50">
-                    @forelse($allStudents as $student)
-                    <div class="flex items-center gap-5 p-5 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-all cursor-pointer group {{ $student['current_class_id'] && $student['current_class_id'] != $selectedClass ? 'bg-amber-500/5' : '' }}">
-                        <div class="flex items-center justify-center">
-                            <input type="checkbox" wire:model.live="selectedStudents" value="{{ $student['id'] }}" class="w-6 h-6 text-primary border-border-main dark:border-slate-700 rounded-lg focus:ring-primary/20 bg-bg-surface dark:bg-slate-800">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">{{ $student['name'] }}</div>
-                            <div class="text-[10px] font-bold text-text-muted flex items-center gap-3 mt-1 uppercase tracking-widest opacity-60">
-                                <span>NIS: {{ $student['nis'] }}</span>
-                                @if($student['current_class'])
-                                    <span class="px-2 py-0.5 rounded text-[8px] font-black {{ $student['current_class_id'] == $selectedClass ? 'bg-green-100 dark:bg-green-500/20 text-green-600' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-600' }}">
-                                        {{ $student['current_class'] }}
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-text-muted text-[8px] font-black">Unassigned</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-            <x-empty-state 
-                colspan="5" 
-                title="Daftar Kelas Kosong" 
-                message="Belum ada data kelas yang ditambahkan ke dalam sistem." 
-                icon="folder-open" 
-            />
-            @endforelse
-                </div>
-                
-                @if(count($selectedStudents) > 0)
-                <div class="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center gap-4">
-                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                    <p class="text-xs text-primary font-black uppercase tracking-widest">{{ count($selectedStudents) }} Peserta terpilih untuk migrasi.</p>
-                </div>
-                @endif
-            </div>
-            <div class="px-10 py-8 bg-gray-50/50 dark:bg-slate-800/30 border-t border-border-subtle dark:border-border-subtle flex justify-end gap-4 shrink-0">
-                <x-button variant="secondary" wire:click="$set('showAssignModal', false)" class="font-black text-[10px] uppercase tracking-widest">Batal</x-button>
-                <x-button variant="primary" wire:click="assignStudents" class="font-black text-[10px] uppercase tracking-widest px-8">Simpan Perubahan</x-button>
             </div>
         </div>
     </div>

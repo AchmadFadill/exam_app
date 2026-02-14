@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GradingPrintController;
+use App\Http\Controllers\ReportPrintController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -48,6 +50,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/teachers', App\Livewire\Admin\ManageTeacher::class)->name('admin.teachers');
     Route::get('/students', App\Livewire\Admin\ManageStudent::class)->name('admin.students');
     Route::get('/classes', App\Livewire\Admin\ManageClass::class)->name('admin.classes');
+    Route::get('/classes/{classroom}/assign', App\Livewire\Admin\AssignClassStudents::class)->name('admin.classes.assign');
     Route::get('/subjects', App\Livewire\Admin\ManageSubject::class)->name('admin.subjects');
     Route::get('/questions', App\Livewire\Teacher\ManageQuestion::class)->name('admin.questions');
     Route::get('/questions/group/{title}', App\Livewire\Teacher\QuestionGroupDetail::class)->name('admin.questions.group');
@@ -59,9 +62,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/grading', \App\Livewire\Teacher\Grading\Index::class)->name('admin.grading.index');
     Route::get('/grading/{exam}', \App\Livewire\Teacher\Grading\StudentList::class)->name('admin.grading.show');
     Route::get('/grading/{exam}/student/{student}', \App\Livewire\Teacher\Grading\Detail::class)->name('admin.grading.detail');
+    Route::get('/grading/{exam}/print', GradingPrintController::class)->name('admin.grading.print');
     Route::get('/monitor/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('admin.monitor.detail');
     Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('admin.reports.index');
     Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('admin.reports.detail');
+    Route::get('/reports/{id}/print', ReportPrintController::class)->name('admin.reports.print');
     Route::get('/reports/{examId}/student/{studentId}', App\Livewire\Common\Report\StudentDetail::class)->name('admin.reports.student');
     Route::get('/reports/{examId}/analysis', App\Livewire\Common\Report\QuestionAnalysis::class)->name('admin.reports.analysis');
     Route::get('/settings', App\Livewire\Admin\Settings::class)->name('admin.settings');
@@ -88,11 +93,13 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(
     Route::get('/monitoring/{id}', App\Livewire\Common\Monitoring\Detail::class)->name('monitoring.detail');
     Route::get('/grading', App\Livewire\Teacher\Grading\Index::class)->name('grading.index');
     Route::get('/grading/{exam}', App\Livewire\Teacher\Grading\StudentList::class)->name('grading.show');
+    Route::get('/grading/{exam}/print', GradingPrintController::class)->name('grading.print');
     Route::get('/grading/{exam}/{student}', App\Livewire\Teacher\Grading\Detail::class)->name('grading.detail');
     
     // Reports
     Route::get('/reports', App\Livewire\Common\Report\Index::class)->name('reports.index');
     Route::get('/reports/{id}', App\Livewire\Common\Report\Detail::class)->name('reports.detail');
+    Route::get('/reports/{id}/print', ReportPrintController::class)->name('reports.print');
     Route::get('/reports/{examId}/student/{studentId}', App\Livewire\Common\Report\StudentDetail::class)->name('reports.student');
     Route::get('/reports/{examId}/analysis', App\Livewire\Common\Report\QuestionAnalysis::class)->name('reports.analysis');
     Route::get('/settings', App\Livewire\Common\ProfileSettings::class)->name('settings');
