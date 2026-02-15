@@ -153,6 +153,22 @@
                     </div>
                 </div>
 
+                @if($isEssay)
+                @php
+                    $teacherFeedback = trim((string) ($studentAnswer?->teacher_feedback ?? ''));
+                @endphp
+                <div class="mt-4 text-xs sm:text-sm">
+                    <div class="font-semibold text-text-muted mb-2">Feedback Guru:</div>
+                    <div class="p-3 border rounded-xl font-medium {{ is_null($studentAnswer?->is_correct) ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700' }}">
+                        @if(is_null($studentAnswer?->is_correct))
+                            Feedback akan muncul setelah jawaban essay selesai dinilai.
+                        @else
+                            {{ $teacherFeedback !== '' ? $teacherFeedback : 'Guru belum memberikan feedback untuk jawaban ini.' }}
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 @if($question->explanation)
                 <!-- Teacher Explanation -->
                 <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
