@@ -45,7 +45,7 @@ class PasswordRequests extends Component
         });
 
         $this->resetSelection();
-        session()->flash('success', "$count permintaan berhasil disetujui. Password direset ke NIS (Siswa) atau Email (Guru).");
+        session()->flash('success', "$count permintaan berhasil disetujui. Password direset ke NIS (Siswa) atau 12345678 (Guru).");
     }
 
     // Bulk Reject
@@ -75,9 +75,9 @@ class PasswordRequests extends Component
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
             if ($this->processReset($request)) {
-                 session()->flash('success', 'Password berhasil direset menjadi NIS (Siswa) atau Email (Guru).');
+                 session()->flash('success', 'Password berhasil direset menjadi NIS (Siswa) atau 12345678 (Guru).');
             } else {
-                 session()->flash('error', 'Gagal: Data siswa/guru atau NIS/Email tidak ditemukan.');
+                 session()->flash('error', 'Gagal: Data siswa/guru atau NIS tidak ditemukan.');
             }
         });
     }
@@ -93,8 +93,8 @@ class PasswordRequests extends Component
 
         if ($user->student && $user->student->nis) {
             $newPassword = $user->student->nis;
-        } elseif ($user->teacher && $user->email) {
-            $newPassword = $user->email;
+        } elseif ($user->teacher) {
+            $newPassword = '12345678';
         }
 
         if ($newPassword) {

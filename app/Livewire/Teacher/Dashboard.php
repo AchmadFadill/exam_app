@@ -44,7 +44,7 @@ class Dashboard extends Component
 
         // 1. Stats
         $activeExamsCount = \App\Models\Exam::where('teacher_id', $teacher->id)
-            ->where('status', 'scheduled')
+            ->whereIn('status', ['scheduled', 'active', 'running'])
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
             ->whereTime('end_time', '>=', now()->format('H:i'))
@@ -81,10 +81,13 @@ class Dashboard extends Component
 
         // 2. Ongoing Exams - OPTIMIZED
         $ongoing_exams = \App\Models\Exam::where('teacher_id', $teacher->id)
-            ->where('status', 'scheduled')
+            ->whereIn('status', ['scheduled', 'active', 'running'])
             ->whereDate('date', now())
             ->whereTime('start_time', '<=', now()->format('H:i'))
             ->whereTime('end_time', '>=', now()->format('H:i'))
+            ->orderByDesc('date')
+            ->orderByDesc('start_time')
+            ->orderByDesc('id')
             ->with([
                 'subject',
                 'classrooms' => function($q) {
@@ -112,7 +115,8 @@ class Dashboard extends Component
 
                 return [
                     'id' => $exam->id,
-                    'status' => $exam->status,
+                    // Current card context is "ongoing exam", so force runtime status label.
+                    'status' => 'active',
                     'subject' => $exam->subject->name,
                     'class' => $exam->classrooms->pluck('name')->join(', '),
                     'name' => $exam->name,

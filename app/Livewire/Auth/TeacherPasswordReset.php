@@ -49,7 +49,7 @@ class TeacherPasswordReset extends Component
             $this->errorMessage = null;
             $this->isPending = true;
         } elseif ($latestRequest->status === 'approved') {
-            $this->successMessage = 'Permintaan DISETUJUI! Password Anda telah direset menjadi Email Anda.';
+            $this->successMessage = 'Permintaan DISETUJUI! Password Anda telah direset menjadi 12345678.';
             $this->errorMessage = null;
             $this->isPending = false;
         } elseif ($latestRequest->status === 'rejected') {

@@ -9,6 +9,7 @@
         @php
             $statusLabel = match ($exam['status'] ?? 'scheduled') {
                 'scheduled' => 'Dijadwalkan',
+                'active', 'running', 'ongoing' => 'Berlangsung',
                 'in_progress' => 'Sedang Mengerjakan',
                 'submitted' => 'Dikumpulkan',
                 'graded' => 'Dinilai',
@@ -53,7 +54,7 @@
                 <div class="flex-1 bg-gray-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner">
                     <div class="bg-primary h-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(30,64,175,0.4)]" style="width: {{ (int) ($exam['progress'] ?? 0) }}%"></div>
                 </div>
-                <span class="text-xs font-black text-text-main whitespace-nowrap">
+                <span class="text-xs font-black text-text-main whitespace-nowrap" title="Siswa dengan status sedang mengerjakan (in_progress)">
                     {{ (int) ($exam['students_online'] ?? 0) }}/{{ (int) ($exam['total_students'] ?? 0) }}
                     <span class="text-green-500">Aktif</span>
                 </span>

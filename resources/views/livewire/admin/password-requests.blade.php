@@ -66,7 +66,7 @@ x-on:confirmed-bulk-reject.window="$wire.bulkReject()">
                             <div class="flex justify-end gap-1.5 sm:gap-3">
                                 <button @click="$dispatch('show-confirm-modal', [{ 
                                         title: 'Setujui Permintaan?', 
-                                        message: 'Password user akan direset menjadi default (NIS/Email).', 
+                                        message: 'Password user akan direset menjadi default (NIS untuk siswa, 12345678 untuk guru).', 
                                         type: 'primary',
                                         confirmText: 'Ya, Setujui',
                                         onConfirm: 'approve-request',

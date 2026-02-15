@@ -18,15 +18,25 @@
         </div>
 
         @if($attempt)
+        @php
+            $essayQuestionIds = $exam->questions->where('type', 'essay')->pluck('id');
+            $gradedEssayCount = $attempt->answers
+                ->whereIn('question_id', $essayQuestionIds)
+                ->whereNotNull('is_correct')
+                ->count();
+            $hasPendingEssay = $essayQuestionIds->isNotEmpty() && $gradedEssayCount < $essayQuestionIds->count();
+            $statusText = $hasPendingEssay ? 'PENDING' : ($attempt->passed ? 'LULUS' : 'GAGAL');
+            $statusColorClass = $hasPendingEssay ? 'text-amber-600' : ($attempt->passed ? 'text-green-600' : 'text-red-500');
+        @endphp
         <div class="flex items-center gap-2 sm:gap-3">
              <div class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
                 <div class="text-[8px] sm:text-[10px] text-text-muted uppercase tracking-widest font-black leading-tight">Total Nilai</div>
-                <div class="text-lg sm:text-xl font-black {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }} mt-0.5 sm:mt-1">{{ $attempt->total_score }}</div>
+                <div class="text-lg sm:text-xl font-black {{ $statusColorClass }} mt-0.5 sm:mt-1">{{ $attempt->total_score }}</div>
             </div>
              <div class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white rounded-xl border border-gray-100 shadow-sm text-center">
                 <div class="text-[8px] sm:text-[10px] text-text-muted uppercase tracking-widest font-black leading-tight">Status</div>
-                <div class="text-[10px] sm:text-sm font-black {{ $attempt->passed ? 'text-green-600' : 'text-red-500' }} mt-1 sm:mt-1.5 px-2 py-0.5 bg-gray-50 rounded-lg">
-                    {{ $attempt->passed ? 'LULUS' : 'GAGAL' }}
+                <div class="text-[10px] sm:text-sm font-black {{ $statusColorClass }} mt-1 sm:mt-1.5 px-2 py-0.5 bg-gray-50 rounded-lg">
+                    {{ $statusText }}
                 </div>
             </div>
         </div>
