@@ -19,16 +19,27 @@
         </div>
     </div>
 
-    <div class="relative">
-        <svg class="w-4 h-4 text-text-muted absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-        <input
-            type="text"
-            wire:model.live.debounce.400ms="search"
-            placeholder="Cari nama siswa atau NIS..."
-            class="w-full pl-11 pr-4 py-3 bg-bg-surface border border-border-main rounded-xl text-sm font-medium text-text-main placeholder:text-text-muted/70 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="relative sm:col-span-2">
+            <svg class="w-4 h-4 text-text-muted absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input
+                type="text"
+                wire:model.live.debounce.400ms="search"
+                placeholder="Cari nama siswa atau NIS..."
+                class="w-full pl-11 pr-4 py-3 bg-bg-surface border border-border-main rounded-xl text-sm font-medium text-text-main placeholder:text-text-muted/70 focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            >
+        </div>
+        <select
+            wire:model.live="classroomFilter"
+            class="w-full px-4 py-3 bg-bg-surface border border-border-main rounded-xl text-sm font-medium text-text-main focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
         >
+            <option value="">Semua Kelas</option>
+            @foreach($classrooms as $classroom)
+                <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+            @endforeach
+        </select>
     </div>
 
     <x-table>

@@ -184,6 +184,7 @@ class Dashboard extends Component
             return [
                 'id' => $exam->id,
                 'status' => 'active',
+                'name' => $exam->name,
                 'subject' => $exam->subject->name ?? 'Mapel Tidak Diketahui',
                 'class' => $exam->classrooms->pluck('name')->join(', '),
                 'teacher' => $exam->teacher->user->name ?? 'Guru Tidak Diketahui',

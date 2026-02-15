@@ -30,9 +30,9 @@
                             {{ $statusLabel }}
                         </span>
                     </div>
-                    <h4 class="text-xl font-black text-text-main tracking-tight">{{ $exam['subject'] }}</h4>
-                    @if(!empty($exam['name']))
-                        <p class="text-sm text-text-muted mt-1 font-semibold truncate">{{ $exam['name'] }}</p>
+                    <h4 class="text-xl font-black text-text-main tracking-tight">{{ $exam['name'] ?? '-' }}</h4>
+                    @if(!empty($exam['subject']))
+                        <p class="text-sm text-text-muted mt-1 font-semibold truncate">{{ $exam['subject'] }}</p>
                     @endif
                     @if(!empty($exam['teacher']))
                         <p class="text-sm text-text-muted mt-1 font-medium">Guru: {{ $exam['teacher'] }}</p>

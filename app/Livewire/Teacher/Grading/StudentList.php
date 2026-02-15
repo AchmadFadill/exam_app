@@ -13,6 +13,7 @@ class StudentList extends Component
     public $examId;
     public $exam;
     public $search = '';
+    public $classroomFilter = '';
     
     // Publish logic (optional for now, maybe toggle exam visibility?)
     public function publish()
@@ -40,6 +41,11 @@ class StudentList extends Component
         $this->resetPage();
     }
 
+    public function updatingClassroomFilter()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         $targetStatuses = [
@@ -53,6 +59,11 @@ class StudentList extends Component
         $attempts = \App\Models\ExamAttempt::where('exam_id', $this->examId)
             ->whereIn('status', $targetStatuses)
             ->with('student.user')
+            ->when(filled($this->classroomFilter), function ($query) {
+                $query->whereHas('student', function ($studentQuery) {
+                    $studentQuery->where('classroom_id', (int) $this->classroomFilter);
+                });
+            })
             ->when(filled($this->search), function ($query) {
                 $keyword = trim((string) $this->search);
 
@@ -68,10 +79,15 @@ class StudentList extends Component
             ->latest('updated_at')
             ->paginate(10);
 
+        $classrooms = $this->exam->classrooms()
+            ->orderBy('name')
+            ->get(['classrooms.id', 'classrooms.name']);
+
         return view('teacher.grading.student-list', [
             'attempts' => $attempts,
             'examName' => $this->exam->name,
-            'className' => $this->exam->class, // Assuming class is a string on Exam, or relation
+            'className' => $classrooms->pluck('name')->join(', '),
+            'classrooms' => $classrooms,
             'isPublished' => $this->exam->is_published
         ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Daftar Siswa - ' . $this->exam->name);
     }
