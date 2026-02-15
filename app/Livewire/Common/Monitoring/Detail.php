@@ -118,7 +118,9 @@ class Detail extends Component
     {
         $isAdmin = request()->is('admin/*');
         
-        $exam = \App\Models\Exam::with(['subject', 'classrooms', 'attempts.student.user', 'attempts.answers'])
+        $exam = \App\Models\Exam::with(['subject', 'classrooms' => function($query) {
+            $query->withCount('students');
+        }, 'attempts.student.user', 'attempts.answers'])
             ->findOrFail($this->examId);
         Gate::authorize('view', $exam);
 
