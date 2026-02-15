@@ -77,6 +77,8 @@ class Detail extends Component
         $submittedAttempts = ExamAttempt::query()
             ->where('exam_id', $this->examId)
             // Removed whereNotNull('submitted_at') to include InProgress, Abandoned, etc.
+            ->withCount('answers')
+            ->withSum('answers', 'score_awarded')
             ->get(['student_id', 'total_score', 'started_at', 'submitted_at', 'status'])
             ->keyBy('student_id');
 
@@ -86,6 +88,8 @@ class Detail extends Component
             ->where('type', 'essay')
             ->pluck('questions.id');
         $essayQuestionCount = $essayQuestionIds->count();
+        $examEndAt = \Carbon\Carbon::parse($examModel->date->format('Y-m-d') . ' ' . $examModel->end_time);
+        $examWindowEnded = now()->gt($examEndAt);
         $questionNumberMap = $examModel->questions()
             ->pluck('questions.id')
             ->values()
@@ -121,7 +125,7 @@ class Detail extends Component
         $allStudents = $allStudentsQuery->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
-        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount) {
+        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $examWindowEnded) {
             $attempt = $submittedAttempts->get($student->id);
 
             if (!$attempt) {
@@ -136,16 +140,31 @@ class Detail extends Component
                     $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
                 }
             } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
-                $status = 'Sedang Mengerjakan';
+                $hasNoAnswer = (int) ($attempt->answers_count ?? 0) === 0;
+                if ($hasNoAnswer) {
+                    $status = $examWindowEnded ? 'Tidak Mengerjakan' : 'Belum Mengerjakan';
+                } else {
+                    $status = $examWindowEnded ? 'Waktu Habis' : 'Sedang Mengerjakan';
+                }
             } else {
                 // Fallback
                 $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+            }
+
+            $resolvedScore = '-';
+            if ($attempt) {
+                if (!is_null($attempt->total_score)) {
+                    $resolvedScore = $attempt->total_score;
+                } elseif ((int) ($attempt->answers_count ?? 0) > 0) {
+                    // Fallback for unfinished/timeout attempts: use accumulated awarded scores.
+                    $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
+                }
             }
             
             return [
                 'id' => $student->id,
                 'name' => $student->name,
-                'score' => $attempt ? $attempt->total_score : '-',
+                'score' => $resolvedScore,
                 'status' => $status,
                 'started_at' => $attempt && $attempt->started_at ? $attempt->started_at->format('H:i') : '-',
                 'submitted_at' => $attempt && $attempt->submitted_at ? $attempt->submitted_at->format('H:i') : '-',

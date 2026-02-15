@@ -19,15 +19,21 @@ class ReportPrintController extends Controller
 
         $attemptsByStudent = ExamAttempt::query()
             ->where('exam_id', $exam->id)
+            ->withCount('answers')
+            ->withSum('answers', 'score_awarded')
             ->get(['student_id', 'total_score', 'status'])
             ->keyBy('student_id');
+
+        $essayQuestionCount = $exam->questions()->where('type', 'essay')->count();
+        $examEndAt = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
+        $examWindowEnded = now()->gt($examEndAt);
 
         $classIds = $exam->classrooms->pluck('id');
         $students = Student::query()
             ->with(['user:id,name', 'classroom:id,name'])
             ->whereIn('classroom_id', $classIds)
             ->get(['id', 'user_id', 'classroom_id', 'nis'])
-            ->map(function (Student $student) use ($attemptsByStudent, $exam) {
+            ->map(function (Student $student) use ($attemptsByStudent, $exam, $essayQuestionCount, $examWindowEnded) {
                 $attempt = $attemptsByStudent->get($student->id);
                 $attemptStatus = $attempt?->status instanceof ExamAttemptStatus
                     ? $attempt->status->value
@@ -43,16 +49,37 @@ class ReportPrintController extends Controller
                     ExamAttemptStatus::TimedOut->value,
                     ExamAttemptStatus::Abandoned->value,
                 ], true)) {
-                    $status = 'Pending Penilaian';
+                    $status = $essayQuestionCount > 0
+                        ? 'Pending Penilaian'
+                        : (($attempt->total_score ?? 0) >= $exam->passing_grade ? 'Lulus' : 'Tidak Lulus');
+                } elseif (in_array($attemptStatus, [
+                    ExamAttemptStatus::InProgress->value,
+                    ExamAttemptStatus::Ongoing->value,
+                ], true)) {
+                    $hasNoAnswer = (int) ($attempt->answers_count ?? 0) === 0;
+                    if ($hasNoAnswer) {
+                        $status = $examWindowEnded ? 'Tidak Mengerjakan' : 'Belum Mengerjakan';
+                    } else {
+                        $status = $examWindowEnded ? 'Waktu Habis' : 'Sedang Mengerjakan';
+                    }
                 } else {
-                    $status = 'Sedang Mengerjakan';
+                    $status = 'Tidak Lulus';
+                }
+
+                $resolvedScore = null;
+                if ($attempt) {
+                    if (!is_null($attempt->total_score)) {
+                        $resolvedScore = (float) $attempt->total_score;
+                    } elseif ((int) ($attempt->answers_count ?? 0) > 0) {
+                        $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
+                    }
                 }
 
                 return [
                     'nis' => $student->nis ?: '-',
                     'name' => $student->user->name ?? '-',
                     'class' => $student->classroom->name ?? '-',
-                    'score' => $attempt?->total_score,
+                    'score' => $resolvedScore,
                     'status' => $status,
                 ];
             })

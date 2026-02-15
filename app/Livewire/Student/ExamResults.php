@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Auth;
 class ExamResults extends Component
 {
     use WithPagination;
+    public $search = '';
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function render()
     {
@@ -23,6 +29,16 @@ class ExamResults extends Component
         // Fetch all completed exam attempts for this student
         $results = \App\Models\ExamAttempt::where('student_id', $student->id)
             ->whereNotNull('submitted_at')
+            ->when(filled($this->search), function ($query) {
+                $keyword = trim((string) $this->search);
+
+                $query->whereHas('exam', function ($examQuery) use ($keyword) {
+                    $examQuery->where('name', 'like', "%{$keyword}%")
+                        ->orWhereHas('subject', function ($subjectQuery) use ($keyword) {
+                            $subjectQuery->where('name', 'like', "%{$keyword}%");
+                        });
+                });
+            })
             ->with([
                 'exam.subject',
                 'exam.questions:id,type',

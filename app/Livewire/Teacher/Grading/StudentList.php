@@ -12,6 +12,7 @@ class StudentList extends Component
 
     public $examId;
     public $exam;
+    public $search = '';
     
     // Publish logic (optional for now, maybe toggle exam visibility?)
     public function publish()
@@ -34,6 +35,11 @@ class StudentList extends Component
         }
     }
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
         $targetStatuses = [
@@ -47,15 +53,19 @@ class StudentList extends Component
         $attempts = \App\Models\ExamAttempt::where('exam_id', $this->examId)
             ->whereIn('status', $targetStatuses)
             ->with('student.user')
-            // Prioritize pending statuses (Submitted, Completed, TimedOut, Abandoned) over Graded
-            ->orderByRaw("FIELD(status, ?, ?, ?, ?, ?)", [
-                ExamAttemptStatus::Submitted->value, 
-                ExamAttemptStatus::Completed->value,
-                ExamAttemptStatus::TimedOut->value,
-                ExamAttemptStatus::Abandoned->value,
-                ExamAttemptStatus::Graded->value
-            ])
+            ->when(filled($this->search), function ($query) {
+                $keyword = trim((string) $this->search);
+
+                $query->whereHas('student', function ($studentQuery) use ($keyword) {
+                    $studentQuery->where('nis', 'like', "%{$keyword}%")
+                        ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                            $userQuery->where('name', 'like', "%{$keyword}%");
+                        });
+                });
+            })
+            // Latest first.
             ->latest('submitted_at')
+            ->latest('updated_at')
             ->paginate(10);
 
         return view('teacher.grading.student-list', [

@@ -99,18 +99,22 @@ class ExamList extends Component
     {
         $student = \Illuminate\Support\Facades\Auth::user()->student;
         $attempt = $exam->attempts->where('student_id', $student->id)->first();
+        $now = now();
+        $start = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->start_time);
+        $end = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
 
         if ($attempt) {
-            if ($attempt->submitted_at) {
+            if ($attempt->submitted_at || (($attempt->status instanceof ExamAttemptStatus ? $attempt->status : ExamAttemptStatus::tryFrom((string) $attempt->status))?->isFinalized() ?? false)) {
                 return ExamAttemptStatus::Submitted->value;
+            }
+
+            // Attempt exists but exam window has passed -> should not be resumable.
+            if ($now->gt($end)) {
+                return 'missed';
             }
 
             return ExamAttemptStatus::InProgress->value;
         }
-
-        $now = now();
-        $start = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->start_time);
-        $end = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
 
         if ($now->between($start, $end)) return 'active';
         if ($now->lt($start)) return 'upcoming';
