@@ -1,6 +1,6 @@
 @section('title', 'Monitoring Ujian')
 
-<div class="space-y-6" wire:poll.5s>
+<div class="space-y-6" wire:poll.5s x-on:confirmed-force-submit.window="$wire.forceSubmit($event.detail)">
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-4">
         <div class="flex items-center gap-3 sm:gap-4">
             <x-button href="{{ route($backRoute) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
