@@ -23,7 +23,7 @@
                     <div class="text-sm font-black text-text-main line-clamp-1" title="{{ $exam->name }}">{{ $exam->name }}</div>
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap">
-                    <span class="text-xs font-bold text-text-muted">{{ $exam->class }}</span>
+                    <span class="text-xs font-bold text-text-muted">{{ $exam->classrooms->pluck('name')->join(', ') }}</span>
                 </x-table.td>
                  <x-table.td class="whitespace-nowrap italic font-bold text-text-muted text-xs">
                     {{ date('d M Y', strtotime($exam->date)) }}
@@ -53,7 +53,7 @@
                     <div class="flex justify-end gap-3">
                         @if($exam->pending_count > 0)
                             <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" variant="primary" class="shadow-lg shadow-primary/20">
-                                Koreksi ({{ $exam->pending_count }})
+                                KOREKSI ({{ $exam->pending_count }})
                             </x-button>
                         @else
                             <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" variant="secondary" class="hover:bg-gray-100 dark:hover:bg-slate-800">
