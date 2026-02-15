@@ -229,7 +229,7 @@ class ManageQuestion extends Component
 
         // Apply filters
         if ($this->search) {
-            $query->where('text', 'like', '%' . $this->search . '%');
+            $query->where('title', 'like', '%' . $this->search . '%');
         }
 
         if ($this->filterSubject) {

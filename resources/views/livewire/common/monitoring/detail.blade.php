@@ -52,7 +52,7 @@
     </div>
 
     <!-- Filter Bar -->
-    <x-monitor.filter-bar />
+    <x-monitor.filter-bar :classes="$classes" />
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Student Grid -->
@@ -82,7 +82,7 @@
 
         <!-- Live Activity Log Sidebar -->
         <div class="lg:col-span-1 space-y-4">
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-full max-h-[1000px]">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col sticky top-24 max-h-[500px]">
                 <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h3 class="font-bold text-sm text-text-main flex items-center gap-2">
                         <span class="relative flex h-2 w-2">

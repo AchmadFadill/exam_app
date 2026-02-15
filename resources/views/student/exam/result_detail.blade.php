@@ -176,7 +176,7 @@
                          <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                          </div>
-                         <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Catatan Dari Guru</span>
+                         <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Pembahasan</span>
                     </div>
                     <p class="text-sm text-gray-600">
                         {{ $question->explanation }}

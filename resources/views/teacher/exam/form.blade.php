@@ -152,13 +152,7 @@
                                     </div>
                                     @error('duration_minutes') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Bobot Poin Default</label>
-                                    <div class="relative">
-                                        <input type="number" wire:model="default_score" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="5">
-                                        <span class="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-text-muted opacity-40 uppercase tracking-widest">Per Soal</span>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </x-card>
