@@ -132,6 +132,17 @@
                         <div class="flex-1 min-w-0">
                             <div class="text-sm font-black text-text-main tracking-tight uppercase group-hover:text-primary transition-colors">{{ $teacher['name'] }}</div>
                             <div class="text-[10px] font-bold text-text-muted mt-0.5 lowercase opacity-60">{{ $teacher['email'] }}</div>
+                            <div class="mt-2">
+                                @if(!empty($teacher['classroom']))
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase tracking-widest">
+                                        Kelas Diampu: {{ $teacher['classroom'] }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200 text-[10px] font-black uppercase tracking-widest">
+                                        Belum Mengampu Kelas
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     @empty

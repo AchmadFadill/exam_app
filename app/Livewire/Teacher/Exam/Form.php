@@ -222,7 +222,11 @@ class Form extends Component
 
     public function isGroupSelected($title, $subjectId)
     {
-        $groupQuestions = Question::where('title', $title)
+        $groupQuestions = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
+            ->where('title', $title)
             ->where('subject_id', $subjectId)
             ->pluck('id')
             ->toArray();
@@ -276,7 +280,12 @@ class Form extends Component
 
     public function toggleQuestion($questionId)
     {
-        $question = Question::select('id', 'score', 'title', 'subject_id')->find($questionId);
+        $question = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
+            ->select('id', 'score', 'title', 'subject_id')
+            ->find($questionId);
         if (!$question) {
             return;
         }
@@ -304,7 +313,11 @@ class Form extends Component
     public function toggleQuestionGroup($title, $subjectId)
     {
         // Get all questions with this title and subject (including score)
-        $groupQuestions = Question::where('title', $title)
+        $groupQuestions = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
+            ->where('title', $title)
             ->where('subject_id', $subjectId)
             ->get(['id', 'score']);
 
@@ -504,6 +517,9 @@ class Form extends Component
             ->when($this->searchQuery, function ($q) {
                 $q->where('title', 'like', '%' . $this->searchQuery . '%');
             })
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
             ->when(Auth::user()->isTeacher() && !empty($this->teacherSubjectIds), function ($q) {
                 $q->whereIn('subject_id', $this->teacherSubjectIds);
             })
@@ -545,6 +561,9 @@ class Form extends Component
         }
 
         $distinctGroupCount = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
             ->whereIn('id', $this->selectedQuestions)
             ->select('title', 'subject_id')
             ->distinct()
@@ -568,6 +587,9 @@ class Form extends Component
         }
 
         $questions = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
             ->whereIn('id', $selectedIds->all())
             ->select('id', 'title', 'subject_id', 'score')
             ->get();
@@ -611,6 +633,9 @@ class Form extends Component
         }
 
         $question = Question::query()
+            ->when(Auth::user()->isTeacher(), function ($q) {
+                $q->where('teacher_id', $this->currentTeacherId());
+            })
             ->whereIn('id', $this->selectedQuestions)
             ->select('title', 'subject_id')
             ->first();
@@ -625,5 +650,14 @@ class Form extends Component
     private function buildGroupKey(string $title, int $subjectId): string
     {
         return $subjectId . '::' . $title;
+    }
+
+    private function currentTeacherId(): ?int
+    {
+        if (!Auth::user()->isTeacher()) {
+            return null;
+        }
+
+        return \App\Models\Teacher::where('user_id', Auth::id())->value('id');
     }
 }

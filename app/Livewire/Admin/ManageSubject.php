@@ -151,7 +151,7 @@ class ManageSubject extends Component
             ]);
 
         // Query all teachers for assignment modal
-        $teachersQuery = Teacher::with('user');
+        $teachersQuery = Teacher::with(['user', 'classroom:id,name,teacher_id']);
         
         if ($this->teacherSearch) {
             $teachersQuery->whereHas('user', function($q) {
@@ -164,6 +164,7 @@ class ManageSubject extends Component
                 'id' => $t->id,
                 'name' => $t->user->name,
                 'email' => $t->user->email,
+                'classroom' => $t->classroom?->name,
             ]);
 
         return view('admin.manage-subject', [
