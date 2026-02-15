@@ -14,6 +14,10 @@ class StudentList extends Component
     public $exam;
     public $search = '';
     public $classroomFilter = '';
+    private function pageSessionKey(): string
+    {
+        return 'grading_page_exam_' . $this->examId;
+    }
     
     // Publish logic (optional for now, maybe toggle exam visibility?)
     public function publish()
@@ -25,6 +29,11 @@ class StudentList extends Component
     public function mount($exam)
     {
         $this->examId = $exam;
+        $this->classroomFilter = (string) request()->query('classroomFilter', '');
+        $incomingPage = (int) request()->query('gradingPage', (int) session($this->pageSessionKey(), 1));
+        if ($incomingPage > 1) {
+            $this->setPage($incomingPage, 'gradingPage');
+        }
         $this->exam = \App\Models\Exam::findOrFail($exam);
         Gate::authorize('grade', $this->exam);
 
@@ -38,12 +47,14 @@ class StudentList extends Component
 
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage('gradingPage');
+        session([$this->pageSessionKey() => 1]);
     }
 
     public function updatingClassroomFilter()
     {
-        $this->resetPage();
+        $this->resetPage('gradingPage');
+        session([$this->pageSessionKey() => 1]);
     }
 
     public function render()
@@ -77,7 +88,37 @@ class StudentList extends Component
             // Latest first.
             ->latest('submitted_at')
             ->latest('updated_at')
-            ->paginate(10);
+            ->paginate(10, ['*'], 'gradingPage');
+
+        // Persist and keep page valid after data changes (e.g., after grading/publish).
+        if ($attempts->currentPage() > $attempts->lastPage() && $attempts->lastPage() > 0) {
+            $targetPage = $attempts->lastPage();
+            $this->setPage($targetPage, 'gradingPage');
+            session([$this->pageSessionKey() => $targetPage]);
+            $attempts = \App\Models\ExamAttempt::where('exam_id', $this->examId)
+                ->whereIn('status', $targetStatuses)
+                ->with('student.user')
+                ->when(filled($this->classroomFilter), function ($query) {
+                    $query->whereHas('student', function ($studentQuery) {
+                        $studentQuery->where('classroom_id', (int) $this->classroomFilter);
+                    });
+                })
+                ->when(filled($this->search), function ($query) {
+                    $keyword = trim((string) $this->search);
+
+                    $query->whereHas('student', function ($studentQuery) use ($keyword) {
+                        $studentQuery->where('nis', 'like', "%{$keyword}%")
+                            ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                                $userQuery->where('name', 'like', "%{$keyword}%");
+                            });
+                    });
+                })
+                ->latest('submitted_at')
+                ->latest('updated_at')
+                ->paginate(10, ['*'], 'gradingPage');
+        }
+
+        session([$this->pageSessionKey() => $attempts->currentPage()]);
 
         $classrooms = $this->exam->classrooms()
             ->orderBy('name')

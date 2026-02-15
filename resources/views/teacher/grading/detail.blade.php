@@ -3,7 +3,7 @@
     <div class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 -mx-4 px-4 py-3 sm:py-4 mb-6 sm:mb-8 sm:-mx-8 sm:px-8 shadow-sm transition-all overflow-hidden">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
             <div class="flex items-center gap-3 sm:gap-4">
-                <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
+                <x-button href="{{ route($backRoute, $backParams) }}" variant="secondary" size="sm" square="true" class="!rounded-xl group">
                     <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </x-button>
                 <div class="min-w-0">
@@ -130,7 +130,7 @@
     <!-- Fixed Bottom Actions -->
     <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 sm:px-8 py-4 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <x-button variant="soft" href="{{ auth()->user()->isAdmin() ? route('admin.grading.show', ['exam' => $exam->id]) : route('teacher.grading.show', ['exam' => $exam->id]) }}" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
+            <x-button variant="soft" href="{{ route($backRoute, $backParams) }}" class="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black bg-gray-100 hover:bg-gray-200 text-text-muted hover:text-text-main border-none shadow-none">
                 <span class="hidden sm:inline">KEMBALI KE DAFTAR</span>
                 <span class="sm:hidden">KEMBALI</span>
             </x-button>

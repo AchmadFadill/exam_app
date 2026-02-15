@@ -82,7 +82,7 @@
                     @endforeach
                 </select>
             </div>
-            <x-button href="{{ route($printRoute, ['id' => $exam['id']]) }}" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
+            <x-button href="{{ route($printRoute, ['id' => $exam['id'], 'classroomFilter' => $classroomFilter]) }}" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
                 Cetak Rekap
             </x-button>
         </div>

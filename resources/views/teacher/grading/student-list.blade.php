@@ -85,7 +85,7 @@
                     @endif
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap text-right font-medium">
-                    <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) : route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id]) }}"
+                    <x-button href="{{ auth()->user()->isAdmin() ? route('admin.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id, 'classroomFilter' => $classroomFilter, 'gradingPage' => $attempts->currentPage()]) : route('teacher.grading.detail', ['exam' => $examId, 'student' => $attempt->student_id, 'classroomFilter' => $classroomFilter, 'gradingPage' => $attempts->currentPage()]) }}"
                               variant="{{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'secondary' : 'primary' }}"
                               class="text-[10px] px-6">
                         {{ $attemptStatus == \App\Enums\ExamAttemptStatus::Graded->value ? 'EDIT NILAI' : 'BERI NILAI' }}

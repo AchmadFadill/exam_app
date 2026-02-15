@@ -16,6 +16,10 @@ class ReportPrintController extends Controller
     {
         $exam = Exam::with(['subject', 'classrooms'])->findOrFail($id);
         Gate::authorize('viewReport', $exam);
+        $classroomFilter = (int) request()->query('classroomFilter', 0);
+        $selectedClassroom = $classroomFilter > 0
+            ? $exam->classrooms->firstWhere('id', $classroomFilter)
+            : null;
 
         $attemptsByStudent = ExamAttempt::query()
             ->where('exam_id', $exam->id)
@@ -32,6 +36,9 @@ class ReportPrintController extends Controller
         $students = Student::query()
             ->with(['user:id,name', 'classroom:id,name'])
             ->whereIn('classroom_id', $classIds)
+            ->when($classroomFilter > 0, function ($query) use ($classroomFilter) {
+                $query->where('classroom_id', $classroomFilter);
+            })
             ->get(['id', 'user_id', 'classroom_id', 'nis'])
             ->map(function (Student $student) use ($attemptsByStudent, $exam, $essayQuestionCount, $examWindowEnded) {
                 $attempt = $attemptsByStudent->get($student->id);
@@ -90,6 +97,11 @@ class ReportPrintController extends Controller
         $adminUser = User::query()->where('role', 'admin')->orderBy('id')->first();
         $schoolName = Setting::getValue('school_name', 'Sekolah CBT');
         $schoolLogo = Setting::getValue('school_logo');
+        $semester = Setting::getValue('semester', '-');
+        $academicYear = Setting::getValue('academic_year', '-');
+        $classLabel = $selectedClassroom
+            ? $selectedClassroom->name
+            : $exam->classrooms->pluck('name')->join(', ');
 
         return view('livewire.common.report.print', [
             'exam' => $exam,
@@ -99,9 +111,12 @@ class ReportPrintController extends Controller
             'adminName' => $adminUser?->name ?? 'Admin',
             'adminProfileUrl' => $adminUser?->profile_photo_url,
             'schoolLogoUrl' => $schoolLogo ? asset('storage/' . $schoolLogo) : asset('img/logo_school.jpg'),
+            'subjectName' => $exam->subject->name ?? '-',
+            'classSemester' => trim(($classLabel ?: '-') . ' - ' . ($semester ?: '-')),
+            'academicYear' => $academicYear ?: '-',
             'backRoute' => $isAdmin
-                ? route('admin.reports.detail', ['id' => $exam->id])
-                : route('teacher.reports.detail', ['id' => $exam->id]),
+                ? route('admin.reports.detail', ['id' => $exam->id, 'classroomFilter' => $classroomFilter > 0 ? $classroomFilter : null])
+                : route('teacher.reports.detail', ['id' => $exam->id, 'classroomFilter' => $classroomFilter > 0 ? $classroomFilter : null]),
         ]);
     }
 }

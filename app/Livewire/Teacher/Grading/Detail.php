@@ -12,6 +12,8 @@ class Detail extends Component
     public $attempt;
     public $student;
     public $exam;
+    public $classroomFilter = '';
+    public $returnPage = 1;
     
     // PG Data
     public $pgScore = 0;
@@ -21,8 +23,17 @@ class Detail extends Component
     // Essay Data (bound to UI)
     public $essayGrades = []; // [answer_id => ['score' => int, 'feedback' => string]]
 
+    private function pageSessionKey(?int $examId = null): string
+    {
+        return 'grading_page_exam_' . ($examId ?? $this->exam->id);
+    }
+
     public function mount($exam, $student)
     {
+        $this->classroomFilter = (string) request()->query('classroomFilter', '');
+        $sessionPage = (int) session($this->pageSessionKey((int) $exam), 1);
+        $this->returnPage = max(1, (int) request()->query('gradingPage', $sessionPage));
+
         // 1. Fetch Attempt
         $this->attempt = \App\Models\ExamAttempt::where('exam_id', $exam)
             ->where('student_id', $student)
@@ -187,7 +198,15 @@ class Detail extends Component
             ? 'admin.grading.show'
             : 'teacher.grading.show';
 
-        return redirect()->route($route, ['exam' => $this->exam->id])
+        session([$this->pageSessionKey() => $this->returnPage]);
+
+        $params = ['exam' => $this->exam->id];
+        if (filled($this->classroomFilter)) {
+            $params['classroomFilter'] = $this->classroomFilter;
+        }
+        $params['gradingPage'] = $this->returnPage;
+
+        return redirect()->route($route, $params)
             ->with('success', 'Penilaian tersimpan. Lanjutkan menilai siswa lainnya.');
     }
 
@@ -236,15 +255,32 @@ class Detail extends Component
             ? 'admin.grading.show'
             : 'teacher.grading.show';
 
-        return redirect()->route($route, ['exam' => $this->exam->id])
+        session([$this->pageSessionKey() => $this->returnPage]);
+
+        $params = ['exam' => $this->exam->id];
+        if (filled($this->classroomFilter)) {
+            $params['classroomFilter'] = $this->classroomFilter;
+        }
+        $params['gradingPage'] = $this->returnPage;
+
+        return redirect()->route($route, $params)
             ->with('success', 'Nilai berhasil diterbitkan.');
     }
 
     public function render()
     {
+        $isAdmin = \Illuminate\Support\Facades\Auth::user()->isAdmin();
+        $backParams = ['exam' => $this->exam->id];
+        if (filled($this->classroomFilter)) {
+            $backParams['classroomFilter'] = $this->classroomFilter;
+        }
+        $backParams['gradingPage'] = $this->returnPage;
+
         return view('teacher.grading.detail', [
             'student_name' => $this->student->user->name,
             'grade' => $this->exam->class,
-        ])->layout(\Illuminate\Support\Facades\Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Koreksi - ' . $this->student->user->name);
+            'backRoute' => $isAdmin ? 'admin.grading.show' : 'teacher.grading.show',
+            'backParams' => $backParams,
+        ])->layout($isAdmin ? 'layouts.admin' : 'layouts.teacher')->title('Koreksi - ' . $this->student->user->name);
     }
 }

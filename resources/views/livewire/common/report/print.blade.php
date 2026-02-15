@@ -50,6 +50,34 @@
         }
         .heading h1 { margin: 0; font-size: 22px; letter-spacing: 0.04em; }
         .heading p { margin: 6px 0 0; font-size: 12px; color: #6b7280; }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 16px;
+        }
+        .meta-table td {
+            border: none;
+            padding: 2px 0;
+            font-size: 12px;
+            text-align: left;
+            vertical-align: top;
+            word-break: normal;
+        }
+        .meta-table .meta-label {
+            width: 160px;
+            color: #4b5563;
+            font-weight: 700;
+        }
+        .meta-table .meta-sep {
+            width: 12px;
+            text-align: center;
+            color: #4b5563;
+            font-weight: 700;
+        }
+        .meta-table .meta-value {
+            font-weight: 700;
+            color: #111827;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -148,6 +176,26 @@
             <h1>REKAPITULASI NILAI SISWA</h1>
             <p>Dicetak: {{ $printedAt->format('d F Y H:i') }}</p>
         </div>
+
+        <table class="meta-table">
+            <tbody>
+                <tr>
+                    <td class="meta-label">Mata Pelajaran</td>
+                    <td class="meta-sep">:</td>
+                    <td class="meta-value">{{ $subjectName }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">Kelas &amp; Semester</td>
+                    <td class="meta-sep">:</td>
+                    <td class="meta-value">{{ $classSemester }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">Tahun Pelajaran</td>
+                    <td class="meta-sep">:</td>
+                    <td class="meta-value">{{ $academicYear }}</td>
+                </tr>
+            </tbody>
+        </table>
 
         <table>
             <thead>
