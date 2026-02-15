@@ -95,7 +95,43 @@
                 </x-button>
             </div>
 
-            <x-dashboard.active-exam-cards :exams="$active_exams" />
+            <div class="space-y-4">
+                <x-dashboard.active-exam-cards :exams="$active_exams" />
+
+                @if($active_exams->hasPages())
+                    <div class="pt-3 border-t border-border-subtle dark:border-slate-800">
+                        <div class="flex items-center justify-between gap-3">
+                            <button
+                                type="button"
+                                wire:click="previousPage('activeExamPage')"
+                                @disabled($active_exams->onFirstPage())
+                                class="h-8 w-8 rounded-lg border border-border-main dark:border-slate-700 bg-white dark:bg-slate-900 text-text-muted hover:text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                                aria-label="Halaman ujian sebelumnya"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+
+                            <p class="text-[11px] font-bold text-text-muted">
+                                Hal {{ $active_exams->currentPage() }} dari {{ $active_exams->lastPage() }}
+                            </p>
+
+                            <button
+                                type="button"
+                                wire:click="nextPage('activeExamPage')"
+                                @disabled(!$active_exams->hasMorePages())
+                                class="h-8 w-8 rounded-lg border border-border-main dark:border-slate-700 bg-white dark:bg-slate-900 text-text-muted hover:text-text-main hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                                aria-label="Halaman ujian berikutnya"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            </div>
         </section>
 
         <!-- Security Activity -->

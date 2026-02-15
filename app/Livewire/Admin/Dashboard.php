@@ -4,9 +4,12 @@ namespace App\Livewire\Admin;
 
 use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
+    use WithPagination;
+
     public $live_logs = [];
 
     protected $listeners = [
@@ -137,39 +140,50 @@ class Dashboard extends Component
         ];
 
         // Active Exams Feed - REAL DATA - OPTIMIZED
-        $activeExamsQuery = \App\Models\Exam::where('status', 'scheduled')
+        $activeExamsQuery = \App\Models\Exam::whereIn('status', ['scheduled', 'active', 'running'])
             ->whereDate('date', $today)
             ->whereTime('start_time', '<=', $today->format('H:i'))
             ->whereTime('end_time', '>=', $today->format('H:i'))
+            ->orderByDesc('date')
+            ->orderByDesc('start_time')
+            ->orderByDesc('id')
             ->with([
                 'subject', 
                 'classrooms' => function($q) {
                     $q->withCount('students');
                 },
                 'teacher.user', 
-                'attempts' => function($q) {
-                    $q->whereNotNull('started_at');
+            ])
+            ->withCount([
+                'attempts as students_online_count' => function($q) {
+                    $q->where('status', ExamAttemptStatus::InProgress->value);
+                },
+                'attempts as finished_count' => function($q) {
+                    $q->whereIn('status', [
+                        ExamAttemptStatus::Submitted->value,
+                        ExamAttemptStatus::Graded->value,
+                        ExamAttemptStatus::Completed->value,
+                        ExamAttemptStatus::TimedOut->value,
+                        ExamAttemptStatus::Abandoned->value,
+                    ]);
                 }
             ])
-            ->get();
+            ->paginate(3, ['*'], 'activeExamPage');
 
-        $active_exams = $activeExamsQuery->map(function($exam) {
+        $active_exams = $activeExamsQuery->through(function($exam) {
             // Calculate total students assigned to this exam (via classrooms) - OPTIMIZED
             $totalStudents = $exam->classrooms->sum('students_count');
             
-            // Students who have started (have an attempt record)
-            $studentsOnline = $exam->attempts->count();
+            // Students currently in progress
+            $studentsOnline = (int) ($exam->students_online_count ?? 0);
             
-            // Calculate progress based on time elapsed
-            $start = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->start_time);
-            $end = \Carbon\Carbon::parse($exam->date->format('Y-m-d') . ' ' . $exam->end_time);
-            $totalDuration = $start->diffInMinutes($end);
-            $elapsed = $start->diffInMinutes(now());
-            $progress = $totalDuration > 0 ? min(100, round(($elapsed / $totalDuration) * 100)) : 0;
+            // Dynamic progress based on student completion, not elapsed clock time.
+            $finishedCount = (int) ($exam->finished_count ?? 0);
+            $progress = $totalStudents > 0 ? (int) round(($finishedCount / $totalStudents) * 100) : 0;
 
             return [
                 'id' => $exam->id,
-                'status' => $exam->status,
+                'status' => 'active',
                 'subject' => $exam->subject->name ?? 'Mapel Tidak Diketahui',
                 'class' => $exam->classrooms->pluck('name')->join(', '),
                 'teacher' => $exam->teacher->user->name ?? 'Guru Tidak Diketahui',
@@ -178,10 +192,10 @@ class Dashboard extends Component
                 'total_students' => $totalStudents,
                 'monitor_url' => route('admin.monitor.detail', $exam->id),
             ];
-        })->toArray();
+        });
 
         // Update active exams count
-        $stats['active_exams_count'] = count($active_exams);
+        $stats['active_exams_count'] = $active_exams->total();
 
         return view('admin.dashboard', [
             'greeting' => $this->getGreeting(),

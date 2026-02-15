@@ -18,16 +18,27 @@ class MassExamViolationSeeder extends Seeder
     public function run(): void
     {
         $now = now();
-        $exam = $this->resolveLatestActiveExam($now);
+        $exams = $this->resolveActiveExams($now);
 
-        if (!$exam) {
+        if ($exams->isEmpty()) {
             $this->command?->warn('Tidak ditemukan exam aktif/running.');
             return;
         }
 
+        $this->command?->info("Ditemukan {$exams->count()} exam aktif. Memulai simulasi mass violation...");
+
+        foreach ($exams as $exam) {
+            $this->seedExam($exam, $now);
+        }
+
+        $this->command?->info('MassExamViolationSeeder selesai untuk semua exam aktif.');
+    }
+
+    private function seedExam(Exam $exam, Carbon $now): void
+    {
         $classrooms = $exam->classrooms()->select('classrooms.id', 'classrooms.name')->get();
         if ($classrooms->isEmpty()) {
-            $this->command?->warn("Exam #{$exam->id} tidak memiliki kelas terdaftar.");
+            $this->command?->warn("Exam #{$exam->id} dilewati: tidak memiliki kelas terdaftar.");
             return;
         }
 
@@ -38,7 +49,7 @@ class MassExamViolationSeeder extends Seeder
             ->get();
 
         if ($students->isEmpty()) {
-            $this->command?->warn("Tidak ada siswa pada kelas exam #{$exam->id}.");
+            $this->command?->warn("Exam #{$exam->id} dilewati: tidak ada siswa pada kelas terdaftar.");
             return;
         }
 
@@ -47,13 +58,12 @@ class MassExamViolationSeeder extends Seeder
             ->get(['questions.id', 'questions.type', 'questions.answer_key']);
 
         if ($questions->isEmpty()) {
-            $this->command?->warn("Exam #{$exam->id} tidak memiliki soal.");
+            $this->command?->warn("Exam #{$exam->id} dilewati: tidak memiliki soal.");
             return;
         }
 
         $questionIds = $questions->pluck('id')->all();
         $hasEssay = $questions->contains(fn ($q) => $q->type === 'essay');
-
         $distribution = $this->buildDistribution($students->count());
         $scenarioMap = $this->assignScenarios($students->pluck('id')->all(), $distribution);
 
@@ -75,8 +85,8 @@ class MassExamViolationSeeder extends Seeder
             $scoringService
         ) {
             foreach ($students as $student) {
-                $scenario = $scenarioMap[$student->id] ?? 'A';
                 $startedAt = (clone $now)->subMinutes(random_int(5, 60))->subSeconds(random_int(0, 59));
+                $scenario = $scenarioMap[$student->id] ?? 'A';
 
                 $attempt = ExamAttempt::firstOrCreate(
                     ['exam_id' => $exam->id, 'student_id' => $student->id],
@@ -95,7 +105,7 @@ class MassExamViolationSeeder extends Seeder
             }
         });
 
-        $this->command?->info("MassExamViolationSeeder selesai untuk {$students->count()} siswa.");
+        $this->command?->info("Selesai exam #{$exam->id} ({$students->count()} siswa).");
     }
 
     private function applyScenarioA(
@@ -299,7 +309,7 @@ class MassExamViolationSeeder extends Seeder
             ->delete();
     }
 
-    private function resolveLatestActiveExam(Carbon $now): ?Exam
+    private function resolveActiveExams(Carbon $now)
     {
         $today = $now->toDateString();
         $time = $now->format('H:i:s');
@@ -312,9 +322,9 @@ class MassExamViolationSeeder extends Seeder
 
         $byStatus = (clone $base)
             ->whereIn('status', ['active', 'running'])
-            ->first();
+            ->get();
 
-        if ($byStatus) {
+        if ($byStatus->isNotEmpty()) {
             return $byStatus;
         }
 
@@ -323,15 +333,15 @@ class MassExamViolationSeeder extends Seeder
             ->whereDate('date', $today)
             ->whereTime('start_time', '<=', $time)
             ->whereTime('end_time', '>=', $time)
-            ->first();
+            ->get();
 
-        if ($byWindow) {
+        if ($byWindow->isNotEmpty()) {
             return $byWindow;
         }
 
         return (clone $base)
             ->whereDate('date', $today)
-            ->first();
+            ->get();
     }
 
     private function buildDistribution(int $total): array
