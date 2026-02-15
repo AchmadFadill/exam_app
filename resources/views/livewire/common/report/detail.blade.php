@@ -152,7 +152,7 @@
                     </x-table.td>
                     <x-table.td class="text-right">
                         <div class="flex justify-end">
-                            <x-button variant="soft" href="{{ route($studentDetailRoute, ['examId' => $exam['id'], 'studentId' => $student['id']]) }}" class="px-6 text-[10px]">Detail</x-button>
+                            <x-button variant="soft" href="{{ route($studentDetailRoute, ['examId' => $exam['id'], 'studentId' => $student['id'], 'from' => 'report']) }}" class="px-6 text-[10px]">Detail</x-button>
                         </div>
                     </x-table.td>
                 </x-table.tr>

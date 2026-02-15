@@ -60,7 +60,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
-                    <x-button href="{{ route($student['detail_route'], [$exam['id'], $student['id']]) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail Hasil</x-button>
+                    <x-button href="{{ route($student['detail_route'], ['examId' => $exam['id'], 'studentId' => $student['id'], 'from' => 'monitoring']) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail Hasil</x-button>
                     @if($student['status'] == 'working' || $student['status'] == 'in_progress')
                     <x-button 
                         @click="$dispatch('show-confirm-modal', [{ 
