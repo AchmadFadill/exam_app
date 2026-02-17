@@ -64,6 +64,11 @@ class LoginController extends Controller
             }
 
             $request->session()->regenerate();
+
+            if ($user->must_change_password) {
+                return redirect()->route('admin.password.force');
+            }
+
             return redirect()->route('admin.dashboard');
         }
 

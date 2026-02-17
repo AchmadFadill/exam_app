@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\ForcePasswordChangeController;
 use App\Http\Controllers\GradingPrintController;
 use App\Http\Controllers\ReportPrintController;
 use Illuminate\Support\Facades\Route;
@@ -42,10 +43,15 @@ Route::middleware('guest')->group(function () {
 // Logout (Authenticated)
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/password/change', [ForcePasswordChangeController::class, 'show'])->name('admin.password.force');
+    Route::post('/admin/password/change', [ForcePasswordChangeController::class, 'update'])->name('admin.password.force.update');
+});
+
 // ============================================
 // ADMIN ROUTES
 // ============================================
-Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'admin', 'force_admin_password_change'])->group(function () {
     Route::get('/dashboard', App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
     Route::get('/teachers', App\Livewire\Admin\ManageTeacher::class)->name('admin.teachers');
     Route::get('/students', App\Livewire\Admin\ManageStudent::class)->name('admin.students');
