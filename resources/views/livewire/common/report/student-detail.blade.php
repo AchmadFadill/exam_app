@@ -25,7 +25,7 @@
                 ->whereNotNull('is_correct')
                 ->count();
             $hasPendingEssay = $essayQuestionIds->isNotEmpty() && $gradedEssayCount < $essayQuestionIds->count();
-            $statusText = $hasPendingEssay ? 'PENDING' : ($attempt->passed ? 'LULUS' : 'GAGAL');
+            $statusText = $hasPendingEssay ? 'PENDING PENILAIAN' : ($attempt->passed ? 'LULUS' : 'GAGAL');
             $statusColorClass = $hasPendingEssay ? 'text-amber-600' : ($attempt->passed ? 'text-green-600' : 'text-red-500');
         @endphp
         <div class="flex items-center gap-2 sm:gap-3">

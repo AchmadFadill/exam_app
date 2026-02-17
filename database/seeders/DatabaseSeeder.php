@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $seedDemoData = app()->environment(['local', 'testing']);
+
         // Subjects
         $subjects = [
             ['name' => 'Matematika', 'code' => 'MTK'],
@@ -49,6 +51,11 @@ class DatabaseSeeder extends Seeder
             Classroom::updateOrCreate(['name' => $c['name']], ['level' => $c['level']]);
         }
 
+        if (!$seedDemoData) {
+            $this->command->info('Master data seeded. Demo users/exams skipped for production environment.');
+            return;
+        }
+
         // Admin
         User::updateOrCreate(
             ['email' => 'admin@smait-baitulmuslim.sch.id'],
@@ -56,6 +63,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Administrator',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
+                'must_change_password' => true,
             ]
         );
 
@@ -68,7 +76,7 @@ class DatabaseSeeder extends Seeder
         foreach ($teachers as $t) {
             $user = User::updateOrCreate(
                 ['email' => $t['email']],
-                ['name' => $t['name'], 'password' => Hash::make('password'), 'role' => 'teacher']
+                ['name' => $t['name'], 'password' => Hash::make('password'), 'role' => 'teacher', 'must_change_password' => true]
             );
             $teacher = Teacher::firstOrCreate(
                 ['user_id' => $user->id],
@@ -92,11 +100,13 @@ class DatabaseSeeder extends Seeder
         foreach ($students as $s) {
             $user = User::updateOrCreate(
                 ['email' => strtolower(str_replace(' ', '.', $s['name'])) . '@siswa.smait-baitulmuslim.sch.id'],
-                ['name' => $s['name'], 'password' => Hash::make($s['nis']), 'role' => 'student']
+                ['name' => $s['name'], 'password' => Hash::make($s['nis']), 'role' => 'student', 'must_change_password' => false]
             );
+
+            $classroomId = Classroom::where('name', $s['classroom_name'])->value('id');
             Student::updateOrCreate(
-                ['user_id' => $user->id],
-                ['nis' => $s['nis'], 'classroom_id' => $s['classroom_id']]
+                ['nis' => $s['nis']],
+                ['user_id' => $user->id, 'classroom_id' => $classroomId]
             );
         }
 

@@ -51,6 +51,14 @@
                         <span class="px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500/10 text-amber-600 italic border border-amber-500/20">
                             Pending Penilaian
                         </span>
+                    @elseif($result['status'] === 'graded' && !$result['show_score_to_student'])
+                        <span class="px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-gray-500/10 text-gray-600 italic border border-gray-500/20">
+                            Disembunyikan
+                        </span>
+                    @elseif(!$result['is_published'])
+                        <span class="px-2 sm:px-3 py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500/10 text-amber-600 italic border border-amber-500/20">
+                            Belum Diterbitkan
+                        </span>
                     @elseif(($result['status'] === 'graded' || $result['passed'] !== null) && $result['show_score_to_student'])
                         <span class="text-lg sm:text-xl font-black {{ $result['passed'] ? 'text-green-600' : 'text-red-600' }}">{{ number_format($result['score'], 1) }}</span>
                     @elseif($result['status'] === 'graded' || $result['passed'] !== null)
@@ -64,7 +72,9 @@
                     @endif
                 </x-table.td>
                 <x-table.td class="whitespace-nowrap text-right">
-                    @if(($result['status'] === 'graded' || $result['passed'] !== null) && $result['show_answers_to_student'])
+                    @if(!$result['is_published'])
+                        <span class="text-[10px] font-black uppercase tracking-widest text-text-muted opacity-40">Tunggu</span>
+                    @elseif(($result['status'] === 'graded' || $result['passed'] !== null) && $result['show_answers_to_student'])
                         <x-button href="{{ route('student.results.detail', ['id' => $result['id']]) }}" variant="soft" class="text-[10px] px-6">Lihat Detail</x-button>
                     @elseif($result['status'] === 'graded' || $result['passed'] !== null)
                         <span class="text-[10px] font-black uppercase tracking-widest text-text-muted opacity-60">Nonaktif</span>

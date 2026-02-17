@@ -16,7 +16,7 @@ class Exam extends Model
         'teacher_id', 'subject_id', 'name', 'date', 'start_time', 'end_time',
         'duration_minutes', 'token', 'passing_grade', 'default_score',
         'shuffle_questions', 'shuffle_answers', 'enable_tab_tolerance', 'tab_tolerance',
-        'show_score_to_student', 'show_answers_to_student', 'status',
+        'show_score_to_student', 'show_answers_to_student', 'is_published', 'status',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class Exam extends Model
         'enable_tab_tolerance' => 'boolean',
         'show_score_to_student' => 'boolean',
         'show_answers_to_student' => 'boolean',
+        'is_published' => 'boolean',
     ];
 
     public function teacher(): BelongsTo

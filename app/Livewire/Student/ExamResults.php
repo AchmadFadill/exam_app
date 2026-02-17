@@ -68,6 +68,7 @@ class ExamResults extends Component
                     'score' => $attempt->percentage ?? 0,
                     'passed' => $attempt->passed,
                     'status' => $attempt->status instanceof ExamAttemptStatus ? $attempt->status->value : $attempt->status,
+                    'is_published' => (bool) ($attempt->exam->is_published ?? false),
                     'show_score_to_student' => (bool) ($attempt->exam->show_score_to_student ?? true),
                     'show_answers_to_student' => (bool) ($attempt->exam->show_answers_to_student ?? true),
                     'has_pending_essay' => $hasPendingEssay,

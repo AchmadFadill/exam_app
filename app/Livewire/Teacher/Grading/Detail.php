@@ -204,7 +204,9 @@ class Detail extends Component
         if (filled($this->classroomFilter)) {
             $params['classroomFilter'] = $this->classroomFilter;
         }
-        $params['gradingPage'] = $this->returnPage;
+        if ($this->returnPage > 1) {
+            $params['gradingPage'] = $this->returnPage;
+        }
 
         return redirect()->route($route, $params)
             ->with('success', 'Penilaian tersimpan. Lanjutkan menilai siswa lainnya.');
@@ -261,7 +263,9 @@ class Detail extends Component
         if (filled($this->classroomFilter)) {
             $params['classroomFilter'] = $this->classroomFilter;
         }
-        $params['gradingPage'] = $this->returnPage;
+        if ($this->returnPage > 1) {
+            $params['gradingPage'] = $this->returnPage;
+        }
 
         return redirect()->route($route, $params)
             ->with('success', 'Nilai berhasil diterbitkan.');
@@ -274,7 +278,9 @@ class Detail extends Component
         if (filled($this->classroomFilter)) {
             $backParams['classroomFilter'] = $this->classroomFilter;
         }
-        $backParams['gradingPage'] = $this->returnPage;
+        if ($this->returnPage > 1) {
+            $backParams['gradingPage'] = $this->returnPage;
+        }
 
         return view('teacher.grading.detail', [
             'student_name' => $this->student->user->name,
