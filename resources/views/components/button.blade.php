@@ -1,4 +1,4 @@
-@props(['variant' => 'primary', 'type' => 'button', 'href' => null, 'size' => 'md', 'square' => false])
+@props(['variant' => 'primary', 'type' => 'button', 'href' => null, 'size' => 'md', 'square' => false, 'navigate' => true])
 
 @php
     $sizes = [
@@ -29,10 +29,21 @@
     ];
     
     $classes = $baseClasses . ' ' . $sizeClass . ' ' . ($variants[$variant] ?? $variants['primary']);
+    $hrefString = (string) $href;
+    $isInternalHref = $hrefString !== ''
+        && (
+            str_starts_with($hrefString, '/')
+            || str_starts_with($hrefString, url('/'))
+        );
+    $isExcludedHref = str_starts_with($hrefString, '#')
+        || str_starts_with($hrefString, 'mailto:')
+        || str_starts_with($hrefString, 'tel:')
+        || str_starts_with($hrefString, 'javascript:');
+    $shouldNavigate = $href && $navigate && $isInternalHref && !$isExcludedHref;
 @endphp
 
 @if($href)
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
+    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes])->when($shouldNavigate, fn ($attrs) => $attrs->merge(['wire:navigate' => true])) }}>
         {{ $slot }}
     </a>
 @else

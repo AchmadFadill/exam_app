@@ -1,4 +1,4 @@
-@props(['href', 'active' => false])
+@props(['href', 'active' => false, 'navigate' => true])
 
 @php
 $classes = $active
@@ -8,9 +8,14 @@ $classes = $active
 $iconClasses = $active
             ? 'w-5 h-5 text-secondary transition-colors duration-200'
             : 'w-5 h-5 text-white/40 group-hover:text-white transition-colors duration-200';
+    $isInternal = str_starts_with((string) $href, '/')
+        || str_starts_with((string) $href, url('/'))
+        || str_starts_with((string) $href, route('login'));
+
+    $shouldNavigate = $navigate && $isInternal && !str_starts_with((string) $href, '#');
 @endphp
 
-<a href="{{ $href }}" {{ $attributes->merge(['class' => "$classes group"]) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => "$classes group"])->when($shouldNavigate, fn ($attrs) => $attrs->merge(['wire:navigate' => true])) }}>
     <svg class="{{ $iconClasses }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         {{ $icon ?? '' }}
     </svg>

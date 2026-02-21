@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Classroom;
+use App\Models\Student;
 use Livewire\Component;
 
 class ManageClass extends Component

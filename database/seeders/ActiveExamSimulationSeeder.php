@@ -55,15 +55,17 @@ class ActiveExamSimulationSeeder extends Seeder
         $totalStudents = $students->count();
         $blankCount = (int) round($totalStudents * 0.10);
         $randomCount = (int) round($totalStudents * 0.20);
-        $perfectCount = max(0, $totalStudents - $blankCount - $randomCount);
+        $inProgressCount = max(1, (int) round($totalStudents * 0.20));
+        $perfectCount = max(0, $totalStudents - $blankCount - $randomCount - $inProgressCount);
 
         $students = $students->shuffle()->values();
-        $blankStudentIds = $students->take($blankCount)->pluck('id')->all();
-        $randomStudentIds = $students->slice($blankCount, $randomCount)->pluck('id')->all();
+        $inProgressStudentIds = $students->take($inProgressCount)->pluck('id')->all();
+        $blankStudentIds = $students->slice($inProgressCount, $blankCount)->pluck('id')->all();
+        $randomStudentIds = $students->slice($inProgressCount + $blankCount, $randomCount)->pluck('id')->all();
 
         $this->command?->info("Simulating exam: #{$exam->id} - {$exam->name}");
         $this->command?->info('Kelas: ' . $classrooms->pluck('name')->join(', '));
-        $this->command?->info("Total siswa target: {$totalStudents} (Perfect: {$perfectCount}, Random: {$randomCount}, Blank: {$blankCount})");
+        $this->command?->info("Total siswa target: {$totalStudents} (InProgress: {$inProgressCount}, Perfect: {$perfectCount}, Random: {$randomCount}, Blank: {$blankCount})");
 
         $scoringService = app(ScoringService::class);
         $simulatedCount = 0;
@@ -71,7 +73,9 @@ class ActiveExamSimulationSeeder extends Seeder
         foreach ($students as $student) {
             $strategy = in_array($student->id, $blankStudentIds, true)
                 ? 'blank'
-                : (in_array($student->id, $randomStudentIds, true) ? 'random' : 'perfect');
+                : (in_array($student->id, $randomStudentIds, true)
+                    ? 'random'
+                    : (in_array($student->id, $inProgressStudentIds, true) ? 'in_progress' : 'perfect'));
 
             $startedAt = (clone $now)->subMinutes(random_int(1, 60))->subSeconds(random_int(0, 59));
             $submittedAt = (clone $startedAt)->addMinutes(random_int(5, 55));
@@ -103,6 +107,25 @@ class ActiveExamSimulationSeeder extends Seeder
 
             if ($strategy === 'blank') {
                 $attempt->answers()->whereIn('question_id', $questionIds)->delete();
+            } elseif ($strategy === 'in_progress') {
+                // Simulate ongoing work: answer only some questions and keep the attempt open.
+                $partialQuestions = $questions->shuffle()->take(max(1, (int) floor($questions->count() * 0.5)));
+                $keepIds = $partialQuestions->pluck('id')->all();
+
+                $attempt->answers()->whereNotIn('question_id', $keepIds)->delete();
+
+                foreach ($partialQuestions as $question) {
+                    $answerValue = $this->buildAnswerValue($question, 'random');
+                    $scored = $scoringService->scoreSingleAnswer($exam, $question, $answerValue);
+
+                    StudentAnswer::updateOrCreate(
+                        [
+                            'exam_attempt_id' => $attempt->id,
+                            'question_id' => (int) $question->id,
+                        ],
+                        $scored
+                    );
+                }
             } else {
                 foreach ($questions as $question) {
                     $answerValue = $this->buildAnswerValue($question, $strategy);
@@ -120,14 +143,25 @@ class ActiveExamSimulationSeeder extends Seeder
 
             $summary = $scoringService->recalculateAttempt($exam, $attempt);
 
-            $attempt->update([
-                'submitted_at' => $submittedAt,
-                'last_seen_at' => $submittedAt,
-                'status' => $hasEssay ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
-                'total_score' => $summary['total_score'],
-                'percentage' => $summary['percentage'],
-                'passed' => $summary['passed'],
-            ]);
+            if ($strategy === 'in_progress') {
+                $attempt->update([
+                    'submitted_at' => null,
+                    'last_seen_at' => $now,
+                    'status' => ExamAttemptStatus::InProgress,
+                    'total_score' => null,
+                    'percentage' => null,
+                    'passed' => null,
+                ]);
+            } else {
+                $attempt->update([
+                    'submitted_at' => $submittedAt,
+                    'last_seen_at' => $submittedAt,
+                    'status' => $hasEssay ? ExamAttemptStatus::Submitted : ExamAttemptStatus::Graded,
+                    'total_score' => $summary['total_score'],
+                    'percentage' => $summary['percentage'],
+                    'passed' => $summary['passed'],
+                ]);
+            }
 
             $simulatedCount++;
         }
