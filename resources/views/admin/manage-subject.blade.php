@@ -62,12 +62,13 @@
             </div>
         </x-card>
         @empty
+        <div class="col-span-full">
         <x-empty-state 
-            colspan="full" 
             title="Mata Pelajaran Tidak Ditemukan" 
             message="Mata pelajaran yang Anda cari tidak tersedia dalam database atau kriteria pencarian." 
             icon="folder-open" 
         />
+        </div>
         @endforelse
     </div>
 
@@ -146,12 +147,13 @@
                         </div>
                     </div>
                     @empty
-            <x-empty-state 
-                colspan="4" 
-                title="Mata Pelajaran Belum Ada" 
-                message="Belum ada data mata pelajaran yang dikonfigurasi dalam sistem." 
-                icon="folder-open" 
-            />
+            <div class="p-4">
+                <x-empty-state 
+                    title="Data Tidak Ditemukan" 
+                    message="Tidak ada data guru yang tersedia untuk ditugaskan." 
+                    icon="folder-open" 
+                />
+            </div>
             @endforelse
                 </div>
             </div>

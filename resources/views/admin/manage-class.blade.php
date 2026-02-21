@@ -57,12 +57,13 @@
             </div>
         </x-card>
         @empty
-        <x-empty-state 
-            colspan="full" 
-            title="Kelas Tidak Terdaftar" 
-            message="Unit rombongan belajar belum didefinisikan dalam sistem atau tidak ditemukan." 
-            icon="folder-open" 
-        />
+        <div class="col-span-full">
+            <x-empty-state 
+                title="Kelas Tidak Terdaftar" 
+                message="Unit rombongan belajar belum didefinisikan dalam sistem atau tidak ditemukan." 
+                icon="folder-open" 
+            />
+        </div>
         @endforelse
     </div>
 
