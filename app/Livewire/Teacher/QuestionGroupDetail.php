@@ -9,6 +9,7 @@ use App\Exports\QuestionGroupExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Validator;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -53,7 +54,7 @@ class QuestionGroupDetail extends Component
             'questionForm.type' => 'required|in:multiple_choice,essay',
             'questionForm.text' => 'required|string|max:5000',
             'questionForm.explanation' => 'nullable|string|max:1000',
-            'questionForm.score' => 'required|integer|min:1|max:100',
+            'questionForm.score' => 'required',
             // Validation for renaming
             'newGroupTitle' => 'required|string|max:255',
         ];
@@ -71,6 +72,24 @@ class QuestionGroupDetail extends Component
         }
 
         return $rules;
+    }
+
+    private function validateQuestionForm(): void
+    {
+        $this->withValidator(function (Validator $validator): void {
+            $validator->after(function (Validator $validator): void {
+                $normalizedScore = $this->normalizedScoreValue($this->questionForm['score'] ?? null);
+
+                if ($normalizedScore === null) {
+                    $validator->errors()->add('questionForm.score', 'Bobot nilai harus berupa angka (integer/desimal) atau boolean.');
+                    return;
+                }
+
+                if ($normalizedScore < 0 || $normalizedScore > 100) {
+                    $validator->errors()->add('questionForm.score', 'Bobot nilai harus antara 0 sampai 100.');
+                }
+            });
+        })->validate($this->rules());
     }
 
     public function mount($title)
@@ -216,7 +235,8 @@ class QuestionGroupDetail extends Component
 
     public function saveQuestion()
     {
-        $this->validate();
+        $this->validateQuestionForm();
+        $this->normalizeScoreInput();
 
         DB::transaction(function () {
             $imagePath = null;
@@ -274,7 +294,8 @@ class QuestionGroupDetail extends Component
 
     public function saveAndAddAnother()
     {
-        $this->validate();
+        $this->validateQuestionForm();
+        $this->normalizeScoreInput();
 
         DB::transaction(function () {
             $imagePath = null;
@@ -327,6 +348,41 @@ class QuestionGroupDetail extends Component
             'explanation' => $this->questionForm['explanation'],
             'score' => $this->questionForm['score'],
         ];
+    }
+
+    private function normalizedScoreValue(mixed $value): ?float
+    {
+        if (is_bool($value)) {
+            return $value ? 1.0 : 0.0;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return is_finite((float) $value) ? (float) $value : null;
+        }
+
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $normalized = strtolower(trim($value));
+        if (in_array($normalized, ['true', 'false', '1', '0'], true)) {
+            return in_array($normalized, ['true', '1'], true) ? 1.0 : 0.0;
+        }
+
+        $numeric = str_replace(',', '.', trim($value));
+        if (!is_numeric($numeric)) {
+            return null;
+        }
+
+        $floatValue = (float) $numeric;
+
+        return is_finite($floatValue) ? $floatValue : null;
+    }
+
+    private function normalizeScoreInput(): void
+    {
+        $normalizedScore = $this->normalizedScoreValue($this->questionForm['score'] ?? null);
+        $this->questionForm['score'] = $normalizedScore !== null ? round($normalizedScore, 2) : 0;
     }
 
     public function removeImage()

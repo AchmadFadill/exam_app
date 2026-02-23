@@ -125,7 +125,7 @@
                             <div>
                                 <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Bobot Nilai</label>
                                 <div class="relative">
-                                    <input type="number" wire:model="questionForm.score" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="10">
+                                    <input type="number" step="0.01" min="0" max="100" wire:model="questionForm.score" class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold shadow-inner" placeholder="10">
                                     <span class="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-black text-text-muted opacity-40 uppercase tracking-widest">Poin</span>
                                 </div>
                                 @error('questionForm.score') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror

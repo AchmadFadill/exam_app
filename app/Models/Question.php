@@ -14,6 +14,10 @@ class Question extends Model
 
     protected $fillable = ['teacher_id', 'subject_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key', 'score'];
 
+    protected $casts = [
+        'score' => 'float',
+    ];
+
     protected static function booted()
     {
         static::deleting(function ($question) {

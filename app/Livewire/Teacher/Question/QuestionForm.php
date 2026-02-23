@@ -4,6 +4,7 @@ namespace App\Livewire\Teacher\Question;
 
 use App\Models\Question;
 use App\Models\QuestionOption;
+use Illuminate\Validation\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -208,7 +209,8 @@ class QuestionForm extends Component
             }
         }
 
-        $this->validate($this->getRules(), $this->getMessages());
+        $this->validateQuestionForm();
+        $this->normalizeScoreInput();
 
         try {
             $questionId = DB::transaction(function () {
@@ -390,7 +392,7 @@ class QuestionForm extends Component
             'questionForm.type' => 'required|in:multiple_choice,essay',
             'questionForm.text' => 'required|string',
             'questionForm.explanation' => 'nullable|string|max:1000',
-            'questionForm.score' => 'required|integer|min:1|max:100',
+            'questionForm.score' => 'required',
         ];
 
         if ($this->questionImage) {
@@ -406,6 +408,24 @@ class QuestionForm extends Component
 
         return $rules;
     }
+
+    private function validateQuestionForm(): void
+    {
+        $this->withValidator(function (Validator $validator): void {
+            $validator->after(function (Validator $validator): void {
+                $normalizedScore = $this->normalizedScoreValue($this->questionForm['score'] ?? null);
+
+                if ($normalizedScore === null) {
+                    $validator->errors()->add('questionForm.score', 'Bobot nilai harus berupa angka (integer/desimal) atau boolean.');
+                    return;
+                }
+
+                if ($normalizedScore < 0 || $normalizedScore > 100) {
+                    $validator->errors()->add('questionForm.score', 'Bobot nilai harus antara 0 sampai 100.');
+                }
+            });
+        })->validate($this->getRules(), $this->getMessages());
+    }
     
     public function getMessages() {
          return [
@@ -415,6 +435,41 @@ class QuestionForm extends Component
             'questionForm.options.*.required' => 'Semua opsi jawaban wajib diisi.',
             'questionForm.correct_option.required' => 'Jawaban benar wajib dipilih.',
          ];
+    }
+
+    private function normalizedScoreValue(mixed $value): ?float
+    {
+        if (is_bool($value)) {
+            return $value ? 1.0 : 0.0;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return is_finite((float) $value) ? (float) $value : null;
+        }
+
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $normalized = strtolower(trim($value));
+        if (in_array($normalized, ['true', 'false', '1', '0'], true)) {
+            return in_array($normalized, ['true', '1'], true) ? 1.0 : 0.0;
+        }
+
+        $numeric = str_replace(',', '.', trim($value));
+        if (!is_numeric($numeric)) {
+            return null;
+        }
+
+        $floatValue = (float) $numeric;
+
+        return is_finite($floatValue) ? $floatValue : null;
+    }
+
+    private function normalizeScoreInput(): void
+    {
+        $normalizedScore = $this->normalizedScoreValue($this->questionForm['score'] ?? null);
+        $this->questionForm['score'] = $normalizedScore !== null ? round($normalizedScore, 2) : 0;
     }
     
     public function render()
