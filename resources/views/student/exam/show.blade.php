@@ -68,7 +68,7 @@
                     <div class="prose max-w-none text-gray-800 text-base sm:text-lg mb-6 sm:mb-8">
                         <!-- Image Rendering -->
                         <template x-if="questions[currentQuestion].image_path">
-                            <img :src="questions[currentQuestion].image_path" class="w-full max-w-md rounded-lg mb-4 mx-auto md:mx-0 shadow-sm border border-gray-100">
+                            <img :src="questions[currentQuestion].image_path" class="w-full max-w-2xl rounded-xl mb-5 mx-auto md:mx-0 shadow-sm border border-gray-100 object-contain bg-white">
                         </template>
                         
                         <div x-html="questions[currentQuestion].text"></div>
@@ -90,9 +90,14 @@
                                             x-model="answers[questions[currentQuestion].id]"
                                             @change="saveProgress(questions[currentQuestion].id)"
                                             class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300 flex-shrink-0">
-                                        <span class="ml-3 text-sm sm:text-base text-gray-700 group-hover:text-gray-900"
-                                            :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}"
-                                            x-text="option.text"></span>
+                                        <span class="ml-3 flex-1">
+                                            <span class="block text-sm sm:text-base text-gray-700 group-hover:text-gray-900"
+                                                :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}"
+                                                x-text="option.text"></span>
+                                            <template x-if="option.image_path">
+                                                <img :src="option.image_path" class="mt-3 max-h-56 w-auto max-w-full rounded-lg border border-gray-200 object-contain bg-white">
+                                            </template>
+                                        </span>
                                     </label>
                                 </template>
                             </div>

@@ -5,6 +5,8 @@
     'optionCount' => 5,
     'editingImagePath' => null,
     'questionImage' => null,
+    'optionImages' => [],
+    'editingOptionImagePaths' => [],
     'type' => 'multiple_choice',
     'showSubject' => true,
     'showTitle' => true,
@@ -225,11 +227,14 @@
                                     @endif
                                 </div>
                             </div>
+                            <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+                                Upload gambar per opsi maksimal 5120 kilobytes (5 MB).
+                            </p>
                             
                             <div class="space-y-4">
                                 @foreach(range(0, $optionCount - 1) as $index)
                                     @php $label = chr(65 + $index); @endphp
-                                    <div class="group relative flex items-center gap-4 p-2 rounded-2xl transition-colors hover:bg-gray-50 dark:hover:bg-slate-800">
+                                    <div class="group relative flex items-start gap-4 p-2 rounded-2xl transition-colors hover:bg-gray-50 dark:hover:bg-slate-800">
                                         <label class="relative flex items-center justify-center w-12 h-12 cursor-pointer">
                                             <input type="radio" wire:model="questionForm.correct_option" value="{{ $label }}" class="peer sr-only">
                                             <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-text-muted font-black transition-all peer-checked:bg-success peer-checked:text-white peer-checked:shadow-lg peer-checked:scale-110">
@@ -237,7 +242,7 @@
                                             </div>
                                         </label>
                                         
-                                        <div class="flex-1">
+                                        <div class="flex-1 space-y-3">
                                             <input type="text"
                                                    wire:model.live.debounce.300ms="questionForm.options.{{ $index }}"
                                                    data-latex-enabled="1"
@@ -245,9 +250,46 @@
                                                    @input="update($event.target.value)"
                                                    class="w-full px-5 py-3 bg-white dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-sm placeholder-gray-400"
                                                    placeholder="Jawaban opsi {{ $label }}">
+
+                                            <div class="flex items-center gap-3">
+                                                @if(!empty($editingOptionImagePaths[$index]) && empty($optionImages[$index]))
+                                                    <div class="relative">
+                                                        <img src="{{ Storage::url($editingOptionImagePaths[$index]) }}" class="h-14 w-14 object-cover rounded-lg border border-border-main">
+                                                        <button type="button"
+                                                                wire:click="removeOptionImage({{ $index }})"
+                                                                class="absolute -top-1 -right-1 p-1 rounded-full bg-red-500 text-white hover:bg-red-600">
+                                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
+
+                                                @if(!empty($optionImages[$index]))
+                                                    <div class="relative">
+                                                        <img src="{{ $optionImages[$index]->temporaryUrl() }}" class="h-14 w-14 object-cover rounded-lg border-2 border-primary">
+                                                        <button type="button"
+                                                                wire:click="removeOptionImage({{ $index }})"
+                                                                class="absolute -top-1 -right-1 p-1 rounded-full bg-red-500 text-white hover:bg-red-600">
+                                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
+
+                                                <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border-main text-[10px] font-black uppercase tracking-widest text-text-muted hover:border-primary hover:text-primary cursor-pointer">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Upload Gambar Opsi {{ $label }}
+                                                    <input type="file" wire:model="optionImages.{{ $index }}" class="hidden" accept="image/*">
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                     @error("questionForm.options.{$index}") <p class="pl-16 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
+                                    @error("optionImages.{$index}") <p class="pl-16 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 @endforeach
                                 
                                 @error('questionForm.correct_option') 

@@ -24,41 +24,78 @@ class Detail extends Component
     public function mount($id)
     {
         $this->examId = $id;
+        $querySort = (string) request()->query('sortBy', '');
+        $queryClass = (string) request()->query('classroomFilter', '');
+
+        $sessionSort = (string) session($this->sortSessionKey(), 'default');
+        $sessionClass = (string) session($this->classroomSessionKey(), '');
+
+        $resolvedSort = $querySort !== '' ? $querySort : $sessionSort;
+        $this->sortBy = in_array($resolvedSort, ['default', 'highest', 'lowest', 'fastest', 'slowest'], true)
+            ? $resolvedSort
+            : 'default';
+        $this->classroomFilter = $queryClass !== '' ? $queryClass : $sessionClass;
+
+        $this->persistPrintPreferences();
     }
 
     public function sortByHighest()
     {
         $this->sortBy = 'highest';
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
     }
 
     public function sortByLowest()
     {
         $this->sortBy = 'lowest';
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
     }
 
     public function sortByFastest()
     {
         $this->sortBy = 'fastest';
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
     }
 
     public function sortBySlowest()
     {
         $this->sortBy = 'slowest';
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
     }
 
     public function resetFilter()
     {
         $this->sortBy = 'default';
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
     }
 
     public function updatedClassroomFilter()
     {
+        $this->persistPrintPreferences();
         $this->resetPage('studentsPage');
+    }
+
+    private function sortSessionKey(): string
+    {
+        return 'report_sort_exam_' . $this->examId;
+    }
+
+    private function classroomSessionKey(): string
+    {
+        return 'report_classroom_exam_' . $this->examId;
+    }
+
+    private function persistPrintPreferences(): void
+    {
+        session([
+            $this->sortSessionKey() => (string) $this->sortBy,
+            $this->classroomSessionKey() => (string) $this->classroomFilter,
+        ]);
     }
 
     private function calculateDuration($start, $end)

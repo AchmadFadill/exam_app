@@ -357,7 +357,9 @@ class Form extends Component
                 ]);
                 return;
             }
-            $this->subject_id = (int) $this->teacherSubjectIds[0];
+            if (!in_array((int) $this->subject_id, $this->teacherSubjectIds, true)) {
+                $this->subject_id = (int) $this->teacherSubjectIds[0];
+            }
         }
 
         // Validate all visible steps in this form (Step 1 and Step 2).

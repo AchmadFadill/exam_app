@@ -16,7 +16,14 @@ class ReportPrintController extends Controller
     {
         $exam = Exam::with(['subject', 'classrooms'])->findOrFail($id);
         Gate::authorize('viewReport', $exam);
-        $classroomFilter = (int) request()->query('classroomFilter', 0);
+        $sessionClassroom = (string) session('report_classroom_exam_' . $exam->id, '');
+        $classroomFilter = (int) request()->query('classroomFilter', $sessionClassroom !== '' ? (int) $sessionClassroom : 0);
+
+        $sessionSort = (string) session('report_sort_exam_' . $exam->id, 'default');
+        $sortBy = strtolower(trim((string) request()->query('sortBy', $sessionSort ?: 'default')));
+        if (!in_array($sortBy, ['default', 'highest', 'lowest', 'fastest', 'slowest'], true)) {
+            $sortBy = 'default';
+        }
         $selectedClassroom = $classroomFilter > 0
             ? $exam->classrooms->firstWhere('id', $classroomFilter)
             : null;
@@ -88,10 +95,53 @@ class ReportPrintController extends Controller
                     'class' => $student->classroom->name ?? '-',
                     'score' => $resolvedScore,
                     'status' => $status,
+                    'duration_minutes' => ($attempt && $attempt->started_at && $attempt->submitted_at)
+                        ? $attempt->submitted_at->diffInMinutes($attempt->started_at)
+                        : 999999,
+                    'has_attempt' => (bool) $attempt,
                 ];
-            })
-            ->sortBy('name')
-            ->values();
+            });
+
+        if ($sortBy === 'highest') {
+            $students = $students->sort(function (array $a, array $b): int {
+                $scoreA = $a['score'] ?? null;
+                $scoreB = $b['score'] ?? null;
+                if ($scoreA === null && $scoreB === null) return 0;
+                if ($scoreA === null) return 1;
+                if ($scoreB === null) return -1;
+                return (float) $scoreB <=> (float) $scoreA;
+            })->values();
+        } elseif ($sortBy === 'lowest') {
+            $students = $students->sort(function (array $a, array $b): int {
+                $scoreA = $a['score'] ?? null;
+                $scoreB = $b['score'] ?? null;
+                if ($scoreA === null && $scoreB === null) return 0;
+                if ($scoreA === null) return 1;
+                if ($scoreB === null) return -1;
+                return (float) $scoreA <=> (float) $scoreB;
+            })->values();
+        } elseif ($sortBy === 'fastest') {
+            $students = $students->sort(function (array $a, array $b): int {
+                if (!$a['has_attempt'] && !$b['has_attempt']) return 0;
+                if (!$a['has_attempt']) return 1;
+                if (!$b['has_attempt']) return -1;
+                return (int) $a['duration_minutes'] <=> (int) $b['duration_minutes'];
+            })->values();
+        } elseif ($sortBy === 'slowest') {
+            $students = $students->sort(function (array $a, array $b): int {
+                if (!$a['has_attempt'] && !$b['has_attempt']) return 0;
+                if (!$a['has_attempt']) return 1;
+                if (!$b['has_attempt']) return -1;
+                return (int) $b['duration_minutes'] <=> (int) $a['duration_minutes'];
+            })->values();
+        } else {
+            $students = $students->sortBy('name')->values();
+        }
+
+        $students = $students->map(function (array $row): array {
+            unset($row['duration_minutes'], $row['has_attempt']);
+            return $row;
+        })->values();
 
         $isAdmin = request()->is('admin/*');
         $adminUser = User::query()->where('role', 'admin')->orderBy('id')->first();

@@ -6,6 +6,8 @@
         :option-count="$optionCount"
         :editing-image-path="$editingImagePath"
         :question-image="$questionImage"
+        :option-images="$optionImages"
+        :editing-option-image-paths="$editingOptionImagePaths"
         :type="$questionForm['type']"
         :question-text="$questionForm['text']"
     />

@@ -78,7 +78,7 @@
                 <!-- Question Text -->
                 <div class="prose max-w-none text-gray-800 mb-8 flex-1">
                     @if($currentQuestion->image_path)
-                        <img src="{{ Storage::url($currentQuestion->image_path) }}" class="max-w-md rounded-lg mb-4 mx-auto md:mx-0">
+                        <img src="{{ Storage::url($currentQuestion->image_path) }}" class="w-full max-w-2xl rounded-xl mb-5 mx-auto md:mx-0 object-contain bg-white border border-gray-100">
                     @endif
                     
                     {!! nl2br(e($currentQuestion->text)) !!}
@@ -91,7 +91,12 @@
                             {{ $selectedOption == $option->id ? 'border-primary bg-blue-50/50' : 'border-gray-200' }}">
                             <input type="radio" wire:model.live="selectedOption" value="{{ $option->id }}" class="mt-1 text-primary focus:ring-primary">
                             <span class="font-bold min-w-[24px]">{{ chr(65 + $index) }}.</span>
-                            <span class="flex-1">{{ $option->text }}</span>
+                            <span class="flex-1">
+                                <span>{{ $option->text }}</span>
+                                @if($option->image_url)
+                                    <img src="{{ $option->image_url }}" class="mt-3 max-h-56 w-auto max-w-full rounded-lg border border-gray-200 object-contain bg-white">
+                                @endif
+                            </span>
                         </label>
                         @endforeach
                     @else

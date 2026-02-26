@@ -34,6 +34,8 @@ class QuestionGroupDetail extends Component
     
     public $questionImage;
     public $editingImagePath = null;
+    public $optionImages = [];
+    public $editingOptionImagePaths = [];
     
     public $questionForm = [
         'title' => '',
@@ -62,6 +64,7 @@ class QuestionGroupDetail extends Component
         if ($this->questionImage) {
             $rules['questionImage'] = 'image|max:5120|mimes:jpg,jpeg,png,gif,svg';
         }
+        $rules['optionImages.*'] = 'nullable|image|max:5120|mimes:jpg,jpeg,png,gif,svg';
 
         if ($this->questionForm['type'] === 'multiple_choice') {
             // Only validate the number of options currently shown
@@ -186,6 +189,9 @@ class QuestionGroupDetail extends Component
             if (isset($this->questionForm['options'][$this->optionCount])) {
                 $this->questionForm['options'][$this->optionCount] = '';
             }
+            if (isset($this->optionImages[$this->optionCount])) {
+                $this->optionImages[$this->optionCount] = null;
+            }
             $labels = ['A', 'B', 'C', 'D', 'E'];
             if ($this->questionForm['correct_option'] === $labels[$this->optionCount]) {
                 $this->questionForm['correct_option'] = '';
@@ -210,6 +216,7 @@ class QuestionGroupDetail extends Component
         ];
 
         $this->editingImagePath = $question->image_path;
+        $this->editingOptionImagePaths = array_fill(0, 5, null);
 
         // Load options for multiple choice
         if ($question->type === 'multiple_choice') {
@@ -218,6 +225,7 @@ class QuestionGroupDetail extends Component
                 $index = ord($option->label) - ord('A');
                 if ($index >= 0 && $index < 5) {
                     $this->questionForm['options'][$index] = $option->text;
+                    $this->editingOptionImagePaths[$index] = $option->image_path;
                     $maxOptionIndex = max($maxOptionIndex, $index);
                     if ($option->is_correct) {
                         $this->questionForm['correct_option'] = $option->label;
@@ -228,6 +236,7 @@ class QuestionGroupDetail extends Component
             $this->optionCount = max(5, $maxOptionIndex + 1);
         } else {
             $this->optionCount = 5;
+            $this->editingOptionImagePaths = array_fill(0, 5, null);
         }
 
         $this->showEditModal = true;
@@ -404,16 +413,55 @@ class QuestionGroupDetail extends Component
         }
     }
 
+    public function removeOptionImage(int $index): void
+    {
+        if ($index < 0 || $index > 4) {
+            return;
+        }
+
+        $this->optionImages[$index] = null;
+
+        if (!$this->showEditModal || !$this->selectedQuestion) {
+            $this->editingOptionImagePaths[$index] = null;
+            return;
+        }
+
+        $label = chr(65 + $index);
+        $option = QuestionOption::where('question_id', $this->selectedQuestion)
+            ->where('label', $label)
+            ->first();
+
+        if (!$option || !$option->image_path) {
+            $this->editingOptionImagePaths[$index] = null;
+            return;
+        }
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($option->image_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($option->image_path);
+        }
+
+        $option->update(['image_path' => null]);
+        $this->editingOptionImagePaths[$index] = null;
+        $this->dispatch('notify', ['message' => "Gambar opsi {$label} berhasil dihapus!"]);
+    }
+
     private function createOptions($question)
     {
         $labels = ['A', 'B', 'C', 'D', 'E'];
         
         foreach ($labels as $index => $label) {
             if (!empty($this->questionForm['options'][$index])) {
+                $imagePath = null;
+                if (!empty($this->optionImages[$index])) {
+                    $fileName = time() . "_opt_{$label}_" . $this->optionImages[$index]->getClientOriginalName();
+                    $imagePath = $this->optionImages[$index]->storeAs('question-options', $fileName, 'public');
+                }
+
                 QuestionOption::create([
                     'question_id' => $question->id,
                     'label' => $label,
                     'text' => $this->questionForm['options'][$index],
+                    'image_path' => $imagePath,
                     'is_correct' => ($this->questionForm['correct_option'] === $label),
                 ]);
             }
@@ -441,6 +489,8 @@ class QuestionGroupDetail extends Component
         $this->optionCount = 5;
         $this->questionImage = null;
         $this->editingImagePath = null;
+        $this->optionImages = [];
+        $this->editingOptionImagePaths = array_fill(0, 5, null);
         $this->resetValidation();
     }
 

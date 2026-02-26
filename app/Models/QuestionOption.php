@@ -10,9 +10,23 @@ class QuestionOption extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['question_id', 'label', 'text', 'is_correct'];
+    protected $fillable = ['question_id', 'label', 'text', 'image_path', 'is_correct'];
 
     protected $casts = ['is_correct' => 'boolean'];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (QuestionOption $option): void {
+            if ($option->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($option->image_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($option->image_path);
+            }
+        });
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image_path) : null;
+    }
 
     public function question(): BelongsTo
     {

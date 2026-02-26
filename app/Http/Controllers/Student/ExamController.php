@@ -65,7 +65,8 @@ class ExamController extends Controller
                 'options' => $options->map(function($opt) {
                     return [
                         'id' => $opt->id,
-                        'text' => strip_tags(HtmlSanitizer::clean($opt->text))
+                        'text' => strip_tags(HtmlSanitizer::clean($opt->text)),
+                        'image_path' => $opt->image_path ? \Illuminate\Support\Facades\Storage::url($opt->image_path) : null,
                     ];
                 })->toArray()
             ];
