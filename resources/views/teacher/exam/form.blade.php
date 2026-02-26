@@ -1,6 +1,29 @@
 @section('title', $examId ? 'Edit Ujian'  : 'Buat Ujian Baru')
 
 <div>
+@if($availableClasses->isEmpty())
+<div class="max-w-4xl mx-auto py-12 px-4">
+    <div class="flex flex-col items-center justify-center text-center">
+        <img src="{{ asset('img/not-found.png') }}" alt="Belum Ada Kelas" class="w-96 max-w-full mb-8">
+        <h3 class="text-2xl font-bold text-slate-800 mb-3">Belum Ada Kelas Terdaftar</h3>
+        <p class="text-slate-500 max-w-2xl mx-auto">
+            Ujian belum bisa dibuat karena data kelas masih kosong. Silakan daftarkan kelas terlebih dahulu agar peserta ujian dapat ditentukan.
+        </p>
+
+        <div class="mt-8 flex items-center gap-3">
+            @if(auth()->user()->isAdmin())
+                <a href="{{ route('admin.classes') }}" class="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-blue-600 transition-colors">
+                    Kelola Kelas
+                </a>
+            @else
+                <a href="{{ route('teacher.dashboard') }}" class="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-blue-600 transition-colors">
+                    Kembali ke Dashboard
+                </a>
+            @endif
+        </div>
+    </div>
+</div>
+@else
 <div class="max-w-5xl mx-auto space-y-10 pb-20">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -513,4 +536,5 @@
     
     <livewire:teacher.question.question-form />
 </div>
+@endif
 </div>

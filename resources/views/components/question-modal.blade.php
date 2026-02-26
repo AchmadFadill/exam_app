@@ -76,31 +76,40 @@
                             </div>
                             @endif
                             
-                            @if($showSubject && !auth()->user()?->isTeacher())
-                            <div>
-                                <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran <span class="text-red-500">*</span></label>
-                                <div class="relative group">
-                                    <select wire:model="questionForm.subject_id" 
-                                            @if($readonlyGroup) disabled @endif
-                                            class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em] shadow-inner disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200/50 dark:disabled:bg-slate-900/50" 
-                                            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
-                                        <option value="">Pilih Mapel</option>
-                                        @foreach($subjects as $subject)
-                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                                        @endforeach
-                                    </select>
+                            @if($showSubject)
+                            @php
+                                $isTeacher = auth()->user()?->isTeacher();
+                                $teacherHasMultipleSubjects = $isTeacher && collect($subjects)->count() > 1;
+                            @endphp
+                            @if(!$isTeacher || $teacherHasMultipleSubjects)
+                                <div>
+                                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran <span class="text-red-500">*</span></label>
+                                    <div class="relative group">
+                                        <select wire:model="questionForm.subject_id" 
+                                                @if($readonlyGroup) disabled @endif
+                                                class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-bold appearance-none bg-no-repeat bg-[right_1.5rem_center] bg-[length:1em_1em] shadow-inner disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-200/50 dark:disabled:bg-slate-900/50" 
+                                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22currentColor%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222.5%22 d=%22M19 9l-7 7-7-7%22 /%3E%3C/svg%3E')">
+                                            <option value="">Pilih Mapel</option>
+                                            @foreach($subjects as $subject)
+                                                <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @if($teacherHasMultipleSubjects)
+                                        <p class="mt-2 text-[9px] font-bold text-text-muted uppercase tracking-widest">Pilih mapel sesuai yang diampu</p>
+                                    @endif
+                                    @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 </div>
-                                @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
-                            </div>
-                            @elseif($showSubject)
-                            <div>
-                                <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran</label>
-                                <div class="w-full px-6 py-4 bg-gray-100/70 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl font-bold shadow-inner text-text-main">
-                                    {{ optional(collect($subjects)->firstWhere('id', (int) data_get($this, 'questionForm.subject_id')))->name ?? (optional(collect($subjects)->first())->name ?? '-') }}
+                            @else
+                                <div>
+                                    <label class="block text-xs font-black text-text-main mb-3 uppercase tracking-widest opacity-70 italic">Mata Pelajaran</label>
+                                    <div class="w-full px-6 py-4 bg-gray-100/70 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl font-bold shadow-inner text-text-main">
+                                        {{ optional(collect($subjects)->firstWhere('id', (int) data_get($this, 'questionForm.subject_id')))->name ?? (optional(collect($subjects)->first())->name ?? '-') }}
+                                    </div>
+                                    <p class="mt-2 text-[9px] font-bold text-text-muted uppercase tracking-widest">Mapel otomatis sesuai yang diampu</p>
+                                    @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
                                 </div>
-                                <p class="mt-2 text-[9px] font-bold text-text-muted uppercase tracking-widest">Mapel otomatis sesuai yang diampu</p>
-                                @error('questionForm.subject_id') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
-                            </div>
+                            @endif
                             @endif
                          </div>
 
