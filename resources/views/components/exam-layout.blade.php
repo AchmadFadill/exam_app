@@ -23,7 +23,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
     <script>
-        // Render $...$ and $$...$$ math inside a container.
+        // Render common LaTeX delimiters inside a container.
         window.renderKatexIn = function (root) {
             if (!root) return;
             if (typeof window.renderMathInElement !== 'function') return;
@@ -32,6 +32,8 @@
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
+                    { left: '\\[', right: '\\]', display: true },
+                    { left: '\\(', right: '\\)', display: false },
                 ],
                 throwOnError: false,
             });

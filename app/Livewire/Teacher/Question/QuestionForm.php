@@ -40,6 +40,7 @@ class QuestionForm extends Component
     public $editingImagePath = null;
     public $optionImages = [];
     public $editingOptionImagePaths = [];
+    public $editorInlineImage;
     
     // Configuration
     public $keepOpen = false; // For "Save & Add Another"
@@ -238,6 +239,19 @@ class QuestionForm extends Component
         $option->update(['image_path' => null]);
         $this->editingOptionImagePaths[$index] = null;
         $this->dispatch('notify', ['message' => "Gambar opsi {$label} berhasil dihapus!"]);
+    }
+
+    public function storeInlineImage(): ?string
+    {
+        $this->validate([
+            'editorInlineImage' => 'required|image|max:5120|mimes:jpg,jpeg,png,gif,svg,webp',
+        ]);
+
+        $fileName = time() . '_inline_' . $this->editorInlineImage->getClientOriginalName();
+        $path = $this->editorInlineImage->storeAs('questions', $fileName, 'public');
+        $this->editorInlineImage = null;
+
+        return Storage::url($path);
     }
 
     public function save($addAnother = false)
@@ -440,6 +454,7 @@ class QuestionForm extends Component
         $this->editingImagePath = null;
         $this->optionImages = [];
         $this->editingOptionImagePaths = array_fill(0, 5, null);
+        $this->editorInlineImage = null;
         $this->questionId = null;
         $this->isEdit = false;
         $this->resetValidation();

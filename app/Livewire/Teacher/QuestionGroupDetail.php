@@ -36,6 +36,7 @@ class QuestionGroupDetail extends Component
     public $editingImagePath = null;
     public $optionImages = [];
     public $editingOptionImagePaths = [];
+    public $editorInlineImage;
     
     public $questionForm = [
         'title' => '',
@@ -445,6 +446,19 @@ class QuestionGroupDetail extends Component
         $this->dispatch('notify', ['message' => "Gambar opsi {$label} berhasil dihapus!"]);
     }
 
+    public function storeInlineImage(): ?string
+    {
+        $this->validate([
+            'editorInlineImage' => 'required|image|max:5120|mimes:jpg,jpeg,png,gif,svg,webp',
+        ]);
+
+        $fileName = time() . '_inline_' . $this->editorInlineImage->getClientOriginalName();
+        $path = $this->editorInlineImage->storeAs('questions', $fileName, 'public');
+        $this->editorInlineImage = null;
+
+        return \Illuminate\Support\Facades\Storage::url($path);
+    }
+
     private function createOptions($question)
     {
         $labels = ['A', 'B', 'C', 'D', 'E'];
@@ -491,6 +505,7 @@ class QuestionGroupDetail extends Component
         $this->editingImagePath = null;
         $this->optionImages = [];
         $this->editingOptionImagePaths = array_fill(0, 5, null);
+        $this->editorInlineImage = null;
         $this->resetValidation();
     }
 

@@ -145,7 +145,7 @@
                      </div>
 
                     <!-- Question Text -->
-                    <div x-data="latexPreview(@js($attributes->get('question-text') ?? ''))" x-init="init()">
+                    <div>
                         <div class="flex items-center justify-between gap-3 mb-3">
                             <label class="block text-xs font-black text-text-main uppercase tracking-widest opacity-70 italic">Pertanyaan <span class="text-red-500">*</span></label>
                             <button type="button"
@@ -157,18 +157,8 @@
                                 Panduan Rumus
                             </button>
                         </div>
-                        <textarea wire:model.live.debounce.300ms="questionForm.text"
-                                  rows="5"
-                                  data-latex-enabled="1"
-                                  @focus="window.setLatexActiveInput($event.target)"
-                                  @input="update($event.target.value)"
-                                  class="w-full px-6 py-4 bg-gray-100/50 dark:bg-slate-800 border border-border-main dark:border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium leading-relaxed shadow-inner"
-                                  placeholder="Tulis pertanyaan disini..."></textarea>
+                        <x-tiptap-editor wire:model="questionForm.text" placeholder="Tulis pertanyaan disini..." min-height="220px" />
                         @error('questionForm.text') <p class="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-widest">{{ $message }}</p> @enderror
-                        <div class="mt-3 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/70 dark:bg-slate-800/60 p-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-300 mb-2">Pratinjau Rumus</p>
-                            <div x-ref="preview" class="text-sm text-slate-700 dark:text-slate-200 min-h-8 break-words"></div>
-                        </div>
                     </div>
 
                     <!-- Image Upload -->
@@ -210,7 +200,7 @@
 
                     <!-- Options Section -->
                     @if($type === 'multiple_choice')
-                        <div class="space-y-6 pt-6 border-t border-gray-100 dark:border-slate-800" x-data="latexPreview('')" x-init="init()">
+                        <div class="space-y-6 pt-6 border-t border-gray-100 dark:border-slate-800">
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center gap-2">
                                     <label class="block text-xs font-black text-text-main uppercase tracking-widest opacity-70 italic">Opsi Jawaban</label>
@@ -252,13 +242,11 @@
                                         </label>
                                         
                                         <div class="flex-1 space-y-3">
-                                            <input type="text"
-                                                   wire:model.live.debounce.300ms="questionForm.options.{{ $index }}"
-                                                   data-latex-enabled="1"
-                                                   @focus="window.setLatexActiveInput($event.target); update($event.target.value)"
-                                                   @input="update($event.target.value)"
-                                                   class="w-full px-5 py-3 bg-white dark:bg-slate-900 border border-border-main dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-medium text-sm placeholder-gray-400"
-                                                   placeholder="Jawaban opsi {{ $label }}">
+                                            <x-tiptap-editor
+                                                wire:model="questionForm.options.{{ $index }}"
+                                                placeholder="Jawaban opsi {{ $label }}"
+                                                min-height="120px"
+                                            />
 
                                             <div class="flex items-center gap-3">
                                                 @if(!empty($editingOptionImagePaths[$index]) && empty($optionImages[$index]))
@@ -307,10 +295,6 @@
                                         <span class="text-xs font-bold uppercase tracking-wide">Mohon pilih kunci jawaban yang benar</span>
                                     </div>
                                 @enderror
-                            </div>
-                            <div class="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/70 dark:bg-slate-800/60 p-4">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-300 mb-2">Pratinjau Rumus</p>
-                                <div x-ref="preview" class="text-sm text-slate-700 dark:text-slate-200 min-h-8 break-words"></div>
                             </div>
                         </div>
                     @else
