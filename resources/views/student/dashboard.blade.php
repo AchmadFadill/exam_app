@@ -126,7 +126,7 @@
                             <span class="text-[7px] sm:text-[8px] font-black text-primary bg-primary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest">{{ $exam['subject'] }}</span>
                         </div>
                         <h4 class="text-base sm:text-xl font-black text-text-main truncate tracking-tight uppercase group-hover:text-primary transition-colors italic leading-tight">{{ $exam['title'] }}</h4>
-                        <p class="text-[8px] sm:text-[10px] font-bold text-text-muted mt-1 sm:mt-2 uppercase tracking-widest opacity-40">{{ date('d M Y', strtotime($exam['date'])) }}</p>
+                       <p class="text-[8px] sm:text-[10px] font-bold text-text-muted mt-1 sm:mt-2 uppercase tracking-widest opacity-40">{{ $exam['date'] }}</p>
                     </div>
                      <div class="text-right sr-only sm:not-sr-only">
                         <span class="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest bg-gray-100 dark:bg-slate-800 text-text-muted opacity-60">

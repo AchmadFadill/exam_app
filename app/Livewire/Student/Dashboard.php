@@ -75,7 +75,7 @@ class Dashboard extends Component
                 return [
                     'subject' => $exam->subject->name,
                     'title' => $exam->name,
-                    'date' => \Carbon\Carbon::parse($exam->date)->translatedFormat('l, d M') . ' • ' . \Carbon\Carbon::parse($exam->start_time)->format('H:i'),
+                    'date' => $exam->date->translatedFormat('d M Y'),
                     'class' => $exam->classrooms->pluck('name')->join(', ') // Display assigned classes just for info
                 ];
             });
