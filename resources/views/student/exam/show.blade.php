@@ -18,7 +18,19 @@
     </x-slot>
 
     <!-- Main Exam UI -->
-    <div x-data="examData()" x-init="initExam()" class="container mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8 h-full">
+    <div x-data="examData()" x-init="initExam()" class="container mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8 h-full select-none">
+        @if($exam->enable_tab_tolerance)
+        <div class="pointer-events-none fixed inset-0 z-10 overflow-hidden opacity-[0.05] print:hidden" aria-hidden="true">
+            <div class="absolute inset-0 [background-size:280px_160px] [background-image:repeating-linear-gradient(-28deg,transparent,transparent_80px,rgba(17,24,39,.12)_80px,rgba(17,24,39,.12)_82px)]"></div>
+            <div class="absolute inset-0 flex flex-wrap content-start">
+                @for($i = 0; $i < 24; $i++)
+                    <div class="w-1/3 px-8 py-6 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-900/70 rotate-[-18deg]">
+                        {{ $studentName }} • {{ $studentNis }}
+                    </div>
+                @endfor
+            </div>
+        </div>
+        @endif
         <div x-cloak x-show="isOffline || saveErrorMessage || lastHeartbeatFailed" class="mb-4 rounded-lg border px-4 py-3 text-sm"
             :class="isOffline ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-red-50 border-red-300 text-red-800'">
             <template x-if="isOffline">
@@ -336,6 +348,7 @@
                 violations: {{ (int) ($attempt->tab_switches ?? 0) }},
                 violationMessage: '',
                 needsFullscreen: false,
+                screenshotLockUntil: 0,
                 showWarningModal: false,
                 showFinishModal: false,
                 showStartOverlay: true,
@@ -434,10 +447,10 @@
                     this.saveErrorMessage = 'Koneksi internet terputus. Jawaban disimpan lokal sementara.';
                 },
 
-                handleViolation(message) {
+                handleViolation(message, forcedType = null) {
                     if (this.showFinishModal) return; 
 
-                    const type = document.hidden ? 'tab_switch' : 'fullscreen_exit';
+                    const type = forcedType ?? (document.hidden ? 'tab_switch' : 'fullscreen_exit');
                     this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
                     
                     const maxViolations = {{ $exam->tab_tolerance ?? 3 }};
@@ -485,6 +498,43 @@
                             document.exitFullscreen().catch(() => {});
                         }
                     });
+                },
+
+                isScreenshotAttempt(event) {
+                    const key = String(event.key || '').toLowerCase();
+
+                    if (key === 'printscreen') {
+                        return true;
+                    }
+
+                    // Legacy keyboard event path for PrintScreen in some browsers.
+                    if (event.keyCode === 44) {
+                        return true;
+                    }
+
+                    // Common desktop screenshot shortcuts (best effort only).
+                    if (event.metaKey && event.shiftKey && ['3', '4', '5'].includes(key)) {
+                        return true;
+                    }
+
+                    if (event.ctrlKey && event.shiftKey && ['s'].includes(key)) {
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                handleScreenshotAttempt() {
+                    const now = Date.now();
+                    if (now < this.screenshotLockUntil) {
+                        return;
+                    }
+
+                    this.screenshotLockUntil = now + 1500;
+                    this.handleViolation(
+                        'Percobaan screenshot terdeteksi. Screenshot tidak diizinkan selama ujian.',
+                        'fullscreen_exit'
+                    );
                 },
 
                 async checkStatus() {
@@ -583,6 +633,23 @@
                             this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
                         }
                     });
+
+                    // Snipping Tool and some OS overlays do not always emit key events.
+                    // Treat focus loss during active exam as a violation as well.
+                    window.addEventListener('blur', () => {
+                        if (!Alpine.store('exam').isActive || this.showFinishModal || this.showWarningModal) {
+                            return;
+                        }
+
+                        setTimeout(() => {
+                            if (!document.hasFocus() && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal) {
+                                this.handleViolation(
+                                    'Fokus jendela ujian terdeteksi keluar. Ini dianggap pelanggaran.',
+                                    'fullscreen_exit'
+                                );
+                            }
+                        }, 120);
+                    });
                     @endif
 
                     // Fullscreen Exit Detection - Only if enabled
@@ -613,6 +680,14 @@
 
                     // Disable Keyboard Shortcuts
                     document.addEventListener('keydown', (e) => {
+                        @if($exam->enable_tab_tolerance)
+                        if (this.isScreenshotAttempt(e) && Alpine.store('exam').isActive) {
+                            e.preventDefault();
+                            this.handleScreenshotAttempt();
+                            return;
+                        }
+                        @endif
+
                         // F12
                         if (e.key === 'F12') {
                             e.preventDefault();

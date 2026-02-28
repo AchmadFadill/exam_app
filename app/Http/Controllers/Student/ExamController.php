@@ -63,9 +63,12 @@ class ExamController extends Controller
                 'text' => HtmlSanitizer::clean($q->text),
                 'image_path' => $q->image_path ? \Illuminate\Support\Facades\Storage::url($q->image_path) : null,
                 'options' => $options->map(function($opt) {
+                    $cleanOptionText = strip_tags(HtmlSanitizer::clean($opt->text));
+
                     return [
                         'id' => $opt->id,
-                        'text' => strip_tags(HtmlSanitizer::clean($opt->text)),
+                        // Decode HTML entities so KaTeX sees raw symbols (e.g. "&" in matrix).
+                        'text' => html_entity_decode($cleanOptionText, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'image_path' => $opt->image_path ? \Illuminate\Support\Facades\Storage::url($opt->image_path) : null,
                     ];
                 })->toArray()
