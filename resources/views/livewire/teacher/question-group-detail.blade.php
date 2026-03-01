@@ -108,7 +108,7 @@
                 <x-table.td>
                     <input type="checkbox" wire:model.live="selectedQuestions" value="{{ $question->id }}" class="rounded border-gray-300 text-primary focus:ring-primary">
                 </x-table.td>
-                <x-table.td class="text-sm text-text-muted font-bold italic">{{ $loop->iteration }}</x-table.td>
+                <x-table.td class="text-sm text-text-muted font-bold italic">{{ ($questions->firstItem() ?? 1) + $loop->index }}</x-table.td>
                 <x-table.td>
                     <p class="text-sm text-text-main font-medium line-clamp-2 leading-relaxed group-hover:text-primary transition-colors">{!! \Illuminate\Support\Str::limit(strip_tags($question->text), 150) !!}</p>
                     @if($question->image_path)
