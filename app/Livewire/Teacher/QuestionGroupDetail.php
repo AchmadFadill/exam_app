@@ -20,6 +20,8 @@ class QuestionGroupDetail extends Component
     use WithFileUploads, WithPagination;
 
     public $title;
+    public $subjectId = null;
+    public $subjectName = null;
     public $selectedQuestions = [];
     public $showBulkDeleteModal = false;
     public $showAddModal = false;
@@ -99,7 +101,14 @@ class QuestionGroupDetail extends Component
     public function mount($title)
     {
         $this->title = urldecode($title);
+        $incomingSubjectId = request()->query('subject_id');
+        $this->subjectId = is_numeric($incomingSubjectId) ? (int) $incomingSubjectId : null;
         $this->newGroupTitle = $this->title;
+
+        if ($this->subjectId) {
+            $this->subjectName = Subject::query()->whereKey($this->subjectId)->value('name');
+        }
+
         Gate::allowIf(function ($user) {
             if ($user->isAdmin()) {
                 return true;
@@ -111,6 +120,7 @@ class QuestionGroupDetail extends Component
 
             return Question::query()
                 ->where('title', $this->title)
+                ->when($this->subjectId, fn ($query) => $query->where('subject_id', $this->subjectId))
                 ->where('teacher_id', $user->teacher?->id)
                 ->exists();
         });
@@ -144,8 +154,20 @@ class QuestionGroupDetail extends Component
         // Redirect to new URL
         $route = Auth::user()->isAdmin() ? 'admin.questions.group' : 'teacher.questions.group';
 
-        return redirect()->route($route, ['title' => urlencode($this->newGroupTitle)])
+        $params = ['title' => urlencode($this->newGroupTitle)];
+        if ($this->subjectId) {
+            $params['subject_id'] = $this->subjectId;
+        }
+
+        return redirect()->route($route, $params)
             ->with('success', 'Nama kelompok soal berhasil diubah!');
+    }
+
+    public function getDisplayTitleProperty(): string
+    {
+        return $this->subjectName
+            ? "{$this->title} - {$this->subjectName}"
+            : $this->title;
     }
 
     public function toggleSelectAll()
@@ -561,7 +583,22 @@ class QuestionGroupDetail extends Component
 
     public function distributeScores()
     {
-        Question::distributeScoresByTitle($this->title);
+        $questions = $this->groupQuestionsQuery()->orderBy('id')->get();
+        $count = $questions->count();
+
+        if ($count === 0) {
+            return;
+        }
+
+        $totalScore = 100;
+        $baseScore = intdiv($totalScore, $count);
+        $remainder = $totalScore % $count;
+
+        foreach ($questions as $index => $question) {
+            $score = $baseScore + ($index < $remainder ? 1 : 0);
+            $question->update(['score' => $score]);
+        }
+
         $this->dispatch('notify', ['message' => 'Bobot nilai semua soal berhasil disesuaikan menjadi total 100!']);
     }
 
@@ -570,7 +607,7 @@ class QuestionGroupDetail extends Component
         $teacherId = Auth::user()->isTeacher() ? Auth::user()->teacher?->id : null;
 
         return Excel::download(
-            new QuestionGroupExport($this->title, $teacherId),
+            new QuestionGroupExport($this->title, $teacherId, $this->subjectId),
             'soal_' . \Illuminate\Support\Str::slug($this->title) . '_' . now()->format('Ymd_His') . '.xlsx'
         );
     }
@@ -590,13 +627,14 @@ class QuestionGroupDetail extends Component
             'questions' => $questions,
             'subjects' => $subjects,
             'totalScore' => $totalScore,
-        ])->layout(Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Detail Soal - ' . $this->title);
+        ])->layout(Auth::user()->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Detail Soal - ' . $this->displayTitle);
     }
 
     private function groupQuestionsQuery()
     {
         return Question::query()
             ->where('title', $this->title)
+            ->when($this->subjectId, fn ($query) => $query->where('subject_id', $this->subjectId))
             ->when(\Illuminate\Support\Facades\Auth::user()->isTeacher(), function ($query) {
                 $query->where('teacher_id', \Illuminate\Support\Facades\Auth::user()->teacher->id);
             });

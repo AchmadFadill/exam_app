@@ -66,7 +66,11 @@
 
     <!-- Question Group Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @forelse($groupedQuestions as $title => $questions)
+        @forelse($groupedQuestions as $groupKey => $questions)
+        @php
+            [$title, $subjectId] = array_pad(explode('||', (string) $groupKey, 2), 2, null);
+            $subjectId = (int) $subjectId;
+        @endphp
         <x-card class="hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
             <div class="p-5 sm:p-6">
                 <!-- Group Header -->
@@ -110,14 +114,14 @@
                 <!-- Actions -->
                 <div class="pt-4 border-t border-gray-100">
                     <div class="grid grid-cols-2 gap-2.5">
-                        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['title' => urlencode($title)]) : route('teacher.questions.group', ['title' => urlencode($title)]) }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['title' => urlencode($title)]) : route('teacher.questions.group', ['title' => urlencode($title)]) }}?subject_id={{ $subjectId }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                             Detail
                         </x-button>
-                        <x-button wire:click="exportGroup('{{ addslashes($title) }}')" variant="secondary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                        <x-button wire:click="exportGroup('{{ addslashes($title) }}', {{ $subjectId }})" variant="secondary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>

@@ -202,12 +202,12 @@ class ManageQuestion extends Component
         ]);
     }
 
-    public function exportGroup(string $title)
+    public function exportGroup(string $title, ?int $subjectId = null)
     {
         $teacherId = Auth::user()->isTeacher() ? $this->getTeacherId() : null;
 
         return Excel::download(
-            new QuestionGroupExport($title, $teacherId),
+            new QuestionGroupExport($title, $teacherId, $subjectId),
             'soal_' . \Illuminate\Support\Str::slug($title) . '_' . now()->format('Ymd_His') . '.xlsx'
         );
     }
@@ -240,31 +240,45 @@ class ManageQuestion extends Component
             $query->where('type', $this->filterType);
         }
 
-        // 2. Paginate distinct titles (groups)
-        // Fix: Use groupBy instead of distinct() + latest() to avoid SQL error 3065
-        $paginatedTitles = $query->select('title')
-            ->groupBy('title')
+        // 2. Paginate distinct groups by title + subject
+        $paginatedTitles = $query->select('title', 'subject_id')
+            ->groupBy('title', 'subject_id')
             ->orderByRaw('MAX(created_at) DESC')
             ->paginate(9); // 9 groups per page
 
-        // 3. Fetch ALL questions for these titles
-        // This ensures we get the FULL count (e.g., 40) for each group, not just a slice
-        $questionsInPage = Question::with(['subject', 'options'])
-            ->whereIn('title', $paginatedTitles->pluck('title'))
-            // Apply same teacher filter again to ensure safety if needed, 
-            // though title check usually suffices if titles are unique to teachers or global
-            ->when($user->isTeacher(), function($q) {
-                $teacherId = $this->getTeacherId();
-                 if ($teacherId) {
-                    $q->where('teacher_id', $teacherId);
-                }
-            })
-            ->latest()
-            ->get();
+        // 3. Fetch ALL questions for the exact groups shown on this page
+        $groups = $paginatedTitles->getCollection()
+            ->map(fn ($row) => [
+                'title' => (string) $row->title,
+                'subject_id' => (int) $row->subject_id,
+            ])
+            ->all();
 
-        // 4. Group by title
+        $questionsInPage = collect();
+        if (!empty($groups)) {
+            $questionsInPage = Question::with(['subject', 'options'])
+                ->where(function ($groupQuery) use ($groups) {
+                    foreach ($groups as $group) {
+                        $groupQuery->orWhere(function ($rowQuery) use ($group) {
+                            $rowQuery
+                                ->where('title', $group['title'])
+                                ->where('subject_id', $group['subject_id']);
+                        });
+                    }
+                })
+                ->when($user->isTeacher(), function($q) {
+                    $teacherId = $this->getTeacherId();
+                     if ($teacherId) {
+                        $q->where('teacher_id', $teacherId);
+                    }
+                })
+                ->latest()
+                ->get();
+        }
+
+        // 4. Group by title + subject
         $groupedQuestions = $questionsInPage->groupBy(function($question) {
-            return $question->title ?: 'Tanpa Kelompok';
+            return $this->buildGroupKey((string) ($question->title ?: 'Tanpa Kelompok'), (int) $question->subject_id);
         });
 
         // Sort groups to match pagination order (latest first)
@@ -281,5 +295,10 @@ class ManageQuestion extends Component
             'subjects' => $subjects,
             'paginatedTitles' => $paginatedTitles, // Pass this for pagination links
         ])->layout($user->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Bank Soal');
+    }
+
+    private function buildGroupKey(string $title, int $subjectId): string
+    {
+        return $title . '||' . $subjectId;
     }
 }

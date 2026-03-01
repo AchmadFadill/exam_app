@@ -13,6 +13,7 @@ class QuestionGroupExport implements FromCollection, WithHeadings, WithMapping, 
     public function __construct(
         private readonly string $title,
         private readonly ?int $teacherId = null,
+        private readonly ?int $subjectId = null,
     ) {}
 
     public function collection()
@@ -21,6 +22,7 @@ class QuestionGroupExport implements FromCollection, WithHeadings, WithMapping, 
             ->with(['subject:id,name', 'options:id,question_id,label,text,is_correct'])
             ->where('title', $this->title)
             ->when($this->teacherId, fn ($q) => $q->where('teacher_id', $this->teacherId))
+            ->when($this->subjectId, fn ($q) => $q->where('subject_id', $this->subjectId))
             ->orderBy('id')
             ->get();
     }
@@ -64,4 +66,3 @@ class QuestionGroupExport implements FromCollection, WithHeadings, WithMapping, 
         ];
     }
 }
-
