@@ -76,7 +76,7 @@
         <x-card class="h-full hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
             <div class="p-5 sm:p-6 h-full flex flex-col">
                 <!-- Group Header -->
-                <div class="flex items-start justify-between mb-4">
+                <div class="flex items-start justify-between mb-4 gap-3">
                     <div class="flex-1 min-w-0">
                         <h3 class="text-base sm:text-lg font-black text-text-main mb-2 truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $title }}</h3>
                         <div class="flex items-center gap-1.5 sm:gap-2 mb-3">
@@ -86,6 +86,34 @@
                             <span class="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] sm:text-xs font-bold rounded-lg border border-blue-200">
                                 {{ $questions->count() }} soal
                             </span>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="relative shrink-0">
+                        <button type="button"
+                                @click.stop="open = !open"
+                                class="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-border-main bg-white text-text-muted hover:text-primary hover:border-primary/20 transition-all">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4z"/>
+                            </svg>
+                        </button>
+
+                        <div x-cloak
+                             x-show="open"
+                             @click.outside="open = false"
+                             class="absolute right-0 top-12 z-20 w-48 rounded-2xl border border-border-main bg-white shadow-xl p-2">
+                            <button type="button"
+                                    @click.stop="open = false"
+                                    wire:click="duplicateGroup('{{ addslashes($title) }}', {{ $subjectId }})"
+                                    class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 hover:text-primary transition-colors">
+                                Duplikat Soal
+                            </button>
+                            <button type="button"
+                                    @click.stop="open = false"
+                                    wire:click="confirmDeleteGroup('{{ addslashes($title) }}', {{ $subjectId }})"
+                                    class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors">
+                                Hapus Soal Tersimpan
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -186,6 +214,28 @@
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showBulkDeleteModal', false)">Batal</x-button>
                 <x-button variant="danger" wire:click="bulkDelete">Ya, Hapus Semua</x-button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Delete Group Modal -->
+    @if($showDeleteGroupModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('showDeleteGroupModal', false)"></div>
+        <div class="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-text-main mb-2">Hapus Kelompok Soal?</h3>
+                <p class="text-gray-500">Semua soal dalam kelompok ini akan dihapus permanen.</p>
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-center gap-3">
+                <x-button variant="secondary" wire:click="$set('showDeleteGroupModal', false)">Batal</x-button>
+                <x-button variant="danger" wire:click="deleteGroup">Ya, Hapus</x-button>
             </div>
         </div>
     </div>

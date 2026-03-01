@@ -9,6 +9,8 @@ use App\Models\Subject;
 use App\Exports\QuestionGroupExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -22,8 +24,11 @@ class ManageQuestion extends Component
     public $showDeleteModal = false;
     public $showImportModal = false;
     public $showBulkDeleteModal = false;
+    public $showDeleteGroupModal = false;
     public $selectedQuestion = null;
     public $selectedQuestions = [];
+    public $selectedGroupTitle = null;
+    public $selectedGroupSubjectId = null;
     public $importFile;
     public $importTitle = ''; 
     
@@ -89,6 +94,95 @@ class ManageQuestion extends Component
         }
 
         $this->showDeleteModal = true;
+    }
+
+    public function confirmDeleteGroup(string $title, int $subjectId): void
+    {
+        $this->selectedGroupTitle = $title;
+        $this->selectedGroupSubjectId = $subjectId;
+        $this->showDeleteGroupModal = true;
+    }
+
+    public function deleteGroup(): void
+    {
+        if (!$this->selectedGroupTitle || !$this->selectedGroupSubjectId) {
+            return;
+        }
+
+        DB::transaction(function () {
+            $questions = Question::with('options')
+                ->where('title', $this->selectedGroupTitle)
+                ->where('subject_id', $this->selectedGroupSubjectId)
+                ->when(Auth::user()->isTeacher(), function ($query) {
+                    $teacherId = $this->getTeacherId();
+                    if ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    }
+                })
+                ->get();
+
+            foreach ($questions as $question) {
+                $question->options()->delete();
+                $question->delete();
+            }
+        });
+
+        $this->showDeleteGroupModal = false;
+        $deletedTitle = $this->selectedGroupTitle;
+        $this->selectedGroupTitle = null;
+        $this->selectedGroupSubjectId = null;
+
+        $this->dispatch('notify', ['message' => "Kelompok soal {$deletedTitle} berhasil dihapus!"]);
+    }
+
+    public function duplicateGroup(string $title, int $subjectId): void
+    {
+        $teacherId = $this->getTeacherId();
+        $questions = Question::with('options')
+            ->where('title', $title)
+            ->where('subject_id', $subjectId)
+            ->when(Auth::user()->isTeacher(), function ($query) use ($teacherId) {
+                if ($teacherId) {
+                    $query->where('teacher_id', $teacherId);
+                }
+            })
+            ->orderBy('id')
+            ->get();
+
+        if ($questions->isEmpty()) {
+            $this->dispatch('notify', ['message' => 'Kelompok soal tidak ditemukan.', 'type' => 'error']);
+            return;
+        }
+
+        $copyTitle = $this->generateDuplicateTitle($title, $subjectId, $teacherId);
+
+        DB::transaction(function () use ($questions, $copyTitle) {
+            foreach ($questions as $question) {
+                $newQuestion = Question::create([
+                    'teacher_id' => $question->teacher_id,
+                    'subject_id' => $question->subject_id,
+                    'title' => $copyTitle,
+                    'type' => $question->type,
+                    'text' => $question->text,
+                    'image_path' => $this->duplicateStoragePath($question->image_path, 'questions'),
+                    'explanation' => $question->explanation,
+                    'answer_key' => $question->answer_key,
+                    'score' => $question->score,
+                ]);
+
+                foreach ($question->options as $option) {
+                    QuestionOption::create([
+                        'question_id' => $newQuestion->id,
+                        'label' => $option->label,
+                        'text' => $option->text,
+                        'image_path' => $this->duplicateStoragePath($option->image_path, 'question-options'),
+                        'is_correct' => $option->is_correct,
+                    ]);
+                }
+            }
+        });
+
+        $this->dispatch('notify', ['message' => "Kelompok soal berhasil diduplikasi menjadi {$copyTitle}."]);
     }
     
     // ... [Old Save/Create/Update logic removed] ...
@@ -309,5 +403,44 @@ class ManageQuestion extends Component
     private function buildGroupKey(string $title, int $subjectId): string
     {
         return $title . '||' . $subjectId;
+    }
+
+    private function generateDuplicateTitle(string $title, int $subjectId, ?int $teacherId): string
+    {
+        $baseTitle = $title . ' (Copy)';
+        $candidate = $baseTitle;
+        $counter = 2;
+
+        while (
+            Question::query()
+                ->where('title', $candidate)
+                ->where('subject_id', $subjectId)
+                ->when(Auth::user()->isTeacher(), function ($query) use ($teacherId) {
+                    if ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    }
+                })
+                ->exists()
+        ) {
+            $candidate = $baseTitle . ' ' . $counter;
+            $counter++;
+        }
+
+        return $candidate;
+    }
+
+    private function duplicateStoragePath(?string $path, string $directory): ?string
+    {
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            return $path;
+        }
+
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $fileName = Str::uuid()->toString() . ($extension ? '.' . $extension : '');
+        $newPath = trim($directory, '/') . '/' . $fileName;
+
+        Storage::disk('public')->copy($path, $newPath);
+
+        return $newPath;
     }
 }
