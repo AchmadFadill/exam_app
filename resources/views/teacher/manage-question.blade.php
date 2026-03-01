@@ -66,30 +66,32 @@
 
     <!-- Question Group Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @forelse($groupedQuestions as $groupKey => $questions)
+        @forelse($groupedQuestions as $group)
         @php
-            [$title, $subjectId] = array_pad(explode('||', (string) $groupKey, 2), 2, null);
-            $subjectId = (int) $subjectId;
+            $title = (string) data_get($group, 'title', '');
+            $subjectId = (int) data_get($group, 'subject_id', 0);
+            $subjectName = (string) data_get($group, 'subject_name', '-');
+            $questions = data_get($group, 'questions');
         @endphp
-        <x-card class="hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
-            <div class="p-5 sm:p-6">
+        <x-card class="h-full hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
+            <div class="p-5 sm:p-6 h-full flex flex-col">
                 <!-- Group Header -->
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1 min-w-0">
                         <h3 class="text-base sm:text-lg font-black text-text-main mb-2 truncate group-hover:text-primary transition-colors uppercase tracking-tight">{{ $title }}</h3>
                         <div class="flex items-center gap-1.5 sm:gap-2 mb-3">
                             <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold rounded-lg border border-green-200">
-                                {{ $questions->first()->subject->name }}
+                                {{ $subjectName }}
                             </span>
                             <span class="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] sm:text-xs font-bold rounded-lg border border-blue-200">
-                                {{ count($questions) }} soal
+                                {{ $questions->count() }} soal
                             </span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Question Preview -->
-                <div class="space-y-2 mb-4">
+                <div class="space-y-2 mb-4 min-h-[120px]">
                     @foreach($questions->take(3) as $question)
                     <div class="flex items-start gap-2 text-sm text-gray-600">
                         <span class="text-primary font-medium">{{ $loop->iteration }}.</span>
@@ -106,13 +108,13 @@
                         </div>
                     </div>
                     @endforeach
-                    @if(count($questions) > 3)
-                    <p class="text-xs text-gray-400 italic">+ {{ count($questions) - 3 }} soal lainnya...</p>
+                    @if($questions->count() > 3)
+                    <p class="text-xs text-gray-400 italic">+ {{ $questions->count() - 3 }} soal lainnya...</p>
                     @endif
                 </div>
 
                 <!-- Actions -->
-                <div class="pt-4 border-t border-gray-100">
+                <div class="pt-4 border-t border-gray-100 mt-auto">
                     <div class="grid grid-cols-2 gap-2.5">
                         <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['title' => urlencode($title)]) : route('teacher.questions.group', ['title' => urlencode($title)]) }}?subject_id={{ $subjectId }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -28,7 +28,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div class="flex items-center gap-6">
-            <a href="{{ route('teacher.exams.index') }}" class="group p-4 bg-bg-surface dark:bg-slate-800 rounded-2xl border border-border-main dark:border-border-main text-text-muted hover:text-primary transition-all shadow-sm hover:shadow-md active:scale-95">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.exams') : route('teacher.exams.index') }}" class="group p-4 bg-bg-surface dark:bg-slate-800 rounded-2xl border border-border-main dark:border-border-main text-text-muted hover:text-primary transition-all shadow-sm hover:shadow-md active:scale-95">
                 <svg class="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -516,7 +516,7 @@
                         &larr; Tahap Sebelumnya
                     </button>
                 @else
-                    <a href="{{ route('teacher.exams.index') }}" class="relative z-10 px-8 py-4 bg-white/50 dark:bg-slate-800/50 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-red-500 transition-all">Batal & Keluar</a>
+                    <a href="{{ auth()->user()->isAdmin() ? route('admin.exams') : route('teacher.exams.index') }}" class="relative z-10 px-8 py-4 bg-white/50 dark:bg-slate-800/50 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-red-500 transition-all">Batal & Keluar</a>
                 @endif
                 
                 @if($step < 2)

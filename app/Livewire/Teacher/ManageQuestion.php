@@ -276,15 +276,24 @@ class ManageQuestion extends Component
                 ->get();
         }
 
-        // 4. Group by title + subject
-        $groupedQuestions = $questionsInPage->groupBy(function($question) {
-            return $this->buildGroupKey((string) ($question->title ?: 'Tanpa Kelompok'), (int) $question->subject_id);
-        });
+        // 4. Group by title + subject and prepare safe payload for Blade
+        $groupedQuestions = $questionsInPage
+            ->groupBy(function ($question) {
+                return $this->buildGroupKey((string) ($question->title ?: 'Tanpa Kelompok'), (int) $question->subject_id);
+            })
+            ->map(function ($questions) {
+                $first = $questions->first();
 
-        // Sort groups to match pagination order (latest first)
-        $groupedQuestions = $groupedQuestions->sortByDesc(function ($questions) {
-            return $questions->first()->created_at;
-        });
+                return [
+                    'title' => (string) ($first->title ?: 'Tanpa Kelompok'),
+                    'subject_id' => (int) $first->subject_id,
+                    'subject_name' => $first->subject?->name ?? '-',
+                    'questions' => $questions->values(),
+                    'latest_created_at' => $questions->max('created_at'),
+                ];
+            })
+            ->sortByDesc('latest_created_at')
+            ->values();
 
         $subjects = $user->isTeacher()
             ? Auth::user()->teacher?->subjects()->orderBy('name')->get() ?? collect()

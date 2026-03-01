@@ -5,6 +5,7 @@ namespace App\Livewire\Common\Monitoring;
 use App\Enums\ExamAttemptStatus;
 use Livewire\Component;
 use App\Traits\HasDynamicLayout;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class Detail extends Component
@@ -116,7 +117,7 @@ class Detail extends Component
 
     public function render()
     {
-        $isAdmin = request()->is('admin/*');
+        $isAdmin = Auth::user()?->isAdmin() ?? false;
         
         $exam = \App\Models\Exam::with(['subject', 'classrooms' => function($query) {
             $query->withCount('students');
