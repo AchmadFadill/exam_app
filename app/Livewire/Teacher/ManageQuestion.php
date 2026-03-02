@@ -29,6 +29,7 @@ class ManageQuestion extends Component
     public $selectedQuestions = [];
     public $selectedGroupTitle = null;
     public $selectedGroupSubjectId = null;
+    public $selectedGroupQuestionIds = [];
     public $importFile;
     public $importTitle = ''; 
     
@@ -36,6 +37,7 @@ class ManageQuestion extends Component
     public $search = '';
     public $filterSubject = '';
     public $filterType = '';
+    public $showArchived = false;
     
     protected $listeners = [
         'question-saved' => 'handleQuestionSaved',
@@ -96,23 +98,27 @@ class ManageQuestion extends Component
         $this->showDeleteModal = true;
     }
 
-    public function confirmDeleteGroup(string $title, int $subjectId): void
+    public function confirmDeleteGroup(string $title, int $subjectId, string $questionIds = ''): void
     {
         $this->selectedGroupTitle = $title;
         $this->selectedGroupSubjectId = $subjectId;
+        $this->selectedGroupQuestionIds = collect(explode(',', $questionIds))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter(fn ($id) => $id > 0)
+            ->values()
+            ->all();
         $this->showDeleteGroupModal = true;
     }
 
     public function deleteGroup(): void
     {
-        if (!$this->selectedGroupTitle || !$this->selectedGroupSubjectId) {
+        if (!$this->selectedGroupTitle || !$this->selectedGroupSubjectId || empty($this->selectedGroupQuestionIds)) {
             return;
         }
 
         DB::transaction(function () {
             $questions = Question::with('options')
-                ->where('title', $this->selectedGroupTitle)
-                ->where('subject_id', $this->selectedGroupSubjectId)
+                ->whereIn('id', $this->selectedGroupQuestionIds)
                 ->when(Auth::user()->isTeacher(), function ($query) {
                     $teacherId = $this->getTeacherId();
                     if ($teacherId) {
@@ -122,7 +128,6 @@ class ManageQuestion extends Component
                 ->get();
 
             foreach ($questions as $question) {
-                $question->options()->delete();
                 $question->delete();
             }
         });
@@ -131,8 +136,40 @@ class ManageQuestion extends Component
         $deletedTitle = $this->selectedGroupTitle;
         $this->selectedGroupTitle = null;
         $this->selectedGroupSubjectId = null;
+        $this->selectedGroupQuestionIds = [];
 
-        $this->dispatch('notify', ['message' => "Kelompok soal {$deletedTitle} berhasil dihapus!"]);
+        $this->dispatch('notify', ['message' => "Kelompok soal {$deletedTitle} berhasil dipindahkan ke arsip!"]);
+    }
+
+    public function restoreGroup(string $title, int $subjectId, string $questionIds = ''): void
+    {
+        $questionIds = collect(explode(',', $questionIds))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter(fn ($id) => $id > 0)
+            ->values()
+            ->all();
+
+        if (empty($questionIds)) {
+            return;
+        }
+
+        DB::transaction(function () use ($questionIds) {
+            $questions = Question::onlyTrashed()
+                ->whereIn('id', $questionIds)
+                ->when(Auth::user()->isTeacher(), function ($query) {
+                    $teacherId = $this->getTeacherId();
+                    if ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    }
+                })
+                ->get();
+
+            foreach ($questions as $question) {
+                $question->restore();
+            }
+        });
+
+        $this->dispatch('notify', ['message' => "Kelompok soal {$title} berhasil dipulihkan."]);
     }
 
     public function duplicateGroup(string $title, int $subjectId): void
@@ -313,6 +350,10 @@ class ManageQuestion extends Component
         // 1. Base query for filtering
         $query = Question::query();
 
+        if ($this->showArchived) {
+            $query->onlyTrashed();
+        }
+
         // For teachers, only show their own questions
         if ($user->isTeacher()) {
             $teacherId = $this->getTeacherId();
@@ -351,6 +392,7 @@ class ManageQuestion extends Component
         $questionsInPage = collect();
         if (!empty($groups)) {
             $questionsInPage = Question::with(['subject', 'options'])
+                ->when($this->showArchived, fn ($q) => $q->onlyTrashed())
                 ->where(function ($groupQuery) use ($groups) {
                     foreach ($groups as $group) {
                         $groupQuery->orWhere(function ($rowQuery) use ($group) {
@@ -384,6 +426,7 @@ class ManageQuestion extends Component
                     'subject_name' => $first->subject?->name ?? '-',
                     'questions' => $questions->values(),
                     'latest_created_at' => $questions->max('created_at'),
+                    'is_archived' => !is_null($first->deleted_at),
                 ];
             })
             ->sortByDesc('latest_created_at')

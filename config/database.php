@@ -44,22 +44,44 @@ return [
         ],
 
         'mysql' => [
-            'driver' => 'mysql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => '',
+            'driver'         => 'mysql',
+            'url'            => env('DB_URL'),
+            'host'           => env('DB_HOST', '127.0.0.1'),
+            'port'           => env('DB_PORT', '3306'),
+            'database'       => env('DB_DATABASE', 'laravel'),
+            'username'       => env('DB_USERNAME', 'root'),
+            'password'       => env('DB_PASSWORD', ''),
+            'unix_socket'    => env('DB_SOCKET', ''),
+            'charset'        => env('DB_CHARSET', 'utf8mb4'),
+            'collation'      => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix'         => '',
             'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
+            'strict'         => true,
+            'engine'         => null,
+
+            // ── NEXA Performance: 400-user concurrency tuning ─────────────────
+            //
+            // PHP-FPM does NOT maintain a connection pool across requests (each
+            // worker opens a fresh PDO connection per request).  The settings
+            // below minimise the overhead of that per-request handshake and
+            // prevent workers from holding idle connections longer than needed.
+            //
+            // sticky   – reuse the same connection within a single request
+            //            (default true in L11, listed here for clarity).
+            'sticky'         => true,
+
+            // wait_timeout / interactive_timeout (MySQL server variables).
+            // Passed as SET statements after connection; keeps short-lived
+            // PHP-FPM connections from tying up MySQL's max_connections.
+            // Adjust DB_WAIT_TIMEOUT in .env (recommended: 60-120 s for exam load).
+            'options'        => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                // Persistent connections: set to true ONLY if running a dedicated
+                // app server (not shared hosting).  Persistent PDO connections
+                // survive across requests and avoid the TCP handshake overhead.
+                // WARNING: can exhaust MySQL max_connections if pm.max_children is
+                // large. Leave false unless you understand the trade-off.
+                \PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
             ]) : [],
         ],
 
@@ -84,18 +106,32 @@ return [
         ],
 
         'pgsql' => [
-            'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
+            'driver'         => 'pgsql',
+            'url'            => env('DB_URL'),
+            'host'           => env('DB_HOST', '127.0.0.1'),
+            'port'           => env('DB_PORT', '5432'),
+            'database'       => env('DB_DATABASE', 'laravel'),
+            'username'       => env('DB_USERNAME', 'root'),
+            'password'       => env('DB_PASSWORD', ''),
+            'charset'        => env('DB_CHARSET', 'utf8'),
+            'prefix'         => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => 'prefer',
+            'search_path'    => 'public',
+            'sslmode'        => 'prefer',
+
+            // ── NEXA Performance: PostgreSQL 400-user tuning ──────────────────
+            // For PostgreSQL, consider using PgBouncer in transaction-pooling
+            // mode in front of Postgres.  Each PHP-FPM worker then acquires a
+            // Postgres backend only for the duration of a transaction, allowing
+            // far more than max_connections simultaneous PHP processes.
+            //
+            // If PgBouncer is NOT available, set statement_timeout to prevent
+            // long-running queries from holding a connection under load.
+            //
+            // Set DB_STATEMENT_TIMEOUT_MS=5000 in .env (5 s is a safe default).
+            'options'        => [
+                \PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
+            ],
         ],
 
         'sqlsrv' => [

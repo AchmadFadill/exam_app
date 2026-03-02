@@ -27,6 +27,12 @@
                 <option value="essay">Essay</option>
             </select>
 
+            <button type="button"
+                    wire:click="$toggle('showArchived')"
+                    class="flex-1 sm:flex-none px-3 sm:px-4 py-2 border rounded-lg transition-all text-xs sm:text-sm font-bold {{ $showArchived ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-300 bg-white text-gray-600 hover:border-primary hover:text-primary' }}">
+                {{ $showArchived ? 'Lihat Aktif' : 'Lihat Arsip' }}
+            </button>
+
             <div class="flex gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                 <x-button wire:click="openImportModal" variant="secondary" class="flex-1 sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap py-2 sm:py-2.5 text-xs sm:text-sm font-bold">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,6 +78,7 @@
             $subjectId = (int) data_get($group, 'subject_id', 0);
             $subjectName = (string) data_get($group, 'subject_name', '-');
             $questions = data_get($group, 'questions');
+            $isArchived = (bool) data_get($group, 'is_archived', false);
         @endphp
         <x-card class="h-full hover:shadow-lg transition-shadow overflow-hidden rounded-2xl group border-border-main">
             <div class="p-5 sm:p-6 h-full flex flex-col">
@@ -86,6 +93,11 @@
                             <span class="px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] sm:text-xs font-bold rounded-lg border border-blue-200">
                                 {{ $questions->count() }} soal
                             </span>
+                            @if($isArchived)
+                            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-bold rounded-lg border border-amber-200">
+                                Arsip
+                            </span>
+                            @endif
                         </div>
                     </div>
 
@@ -102,6 +114,14 @@
                              x-show="open"
                              @click.outside="open = false"
                              class="absolute right-0 top-12 z-20 w-48 rounded-2xl border border-border-main bg-white shadow-xl p-2">
+                            @if($isArchived)
+                            <button type="button"
+                                    @click.stop="open = false"
+                                    wire:click="restoreGroup('{{ addslashes($title) }}', {{ $subjectId }}, '{{ $questions->pluck('id')->implode(',') }}')"
+                                    class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-emerald-700 hover:bg-emerald-50 transition-colors">
+                                Pulihkan Soal
+                            </button>
+                            @else
                             <button type="button"
                                     @click.stop="open = false"
                                     wire:click="duplicateGroup('{{ addslashes($title) }}', {{ $subjectId }})"
@@ -110,10 +130,11 @@
                             </button>
                             <button type="button"
                                     @click.stop="open = false"
-                                    wire:click="confirmDeleteGroup('{{ addslashes($title) }}', {{ $subjectId }})"
+                                    wire:click="confirmDeleteGroup('{{ addslashes($title) }}', {{ $subjectId }}, '{{ $questions->pluck('id')->implode(',') }}')"
                                     class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors">
                                 Hapus Soal Tersimpan
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -143,6 +164,11 @@
 
                 <!-- Actions -->
                 <div class="pt-4 border-t border-gray-100 mt-auto">
+                    @if($isArchived)
+                    <div class="px-4 py-3 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest text-center border border-amber-200">
+                        Grup Diarsipkan - Gunakan Menu Titik Tiga Untuk Restore
+                    </div>
+                    @else
                     <div class="grid grid-cols-2 gap-2.5">
                         <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['title' => urlencode($title)]) : route('teacher.questions.group', ['title' => urlencode($title)]) }}?subject_id={{ $subjectId }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +184,7 @@
                             Export
                         </x-button>
                     </div>
+                    @endif
                 </div>
             </div>
         </x-card>
@@ -231,7 +258,7 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-text-main mb-2">Hapus Kelompok Soal?</h3>
-                <p class="text-gray-500">Semua soal dalam kelompok ini akan dihapus permanen.</p>
+                <p class="text-gray-500">Semua soal dalam kelompok ini akan dihapus dan dapat di pulihkan di arsip.</p>
             </div>
             <div class="p-6 bg-gray-50 flex justify-center gap-3">
                 <x-button variant="secondary" wire:click="$set('showDeleteGroupModal', false)">Batal</x-button>

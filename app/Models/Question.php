@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Question extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['teacher_id', 'subject_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key', 'score'];
 
@@ -21,9 +22,20 @@ class Question extends Model
     protected static function booted()
     {
         static::deleting(function ($question) {
-            if ($question->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
+            if ($question->isForceDeleting() && $question->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($question->image_path)) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($question->image_path);
             }
+
+            if ($question->isForceDeleting()) {
+                $question->options()->withTrashed()->get()->each->forceDelete();
+                return;
+            }
+
+            $question->options()->get()->each->delete();
+        });
+
+        static::restoring(function ($question) {
+            $question->options()->withTrashed()->restore();
         });
     }
 
