@@ -77,17 +77,46 @@ function extractCsrf(html) {
 }
 
 function extractLivewireComponent(html) {
-    const snapshotMatch = String(html).match(/wire:snapshot="([^"]+)"/i);
-    const idMatch = String(html).match(/wire:id="([^"]+)"/i);
+    const source = String(html);
+    const tagRegex = /<[^>]*wire:id=['"][^'"]+['"][^>]*>/gi;
+    const candidates = [];
+    let match;
 
-    if (!snapshotMatch || !idMatch) {
+    while ((match = tagRegex.exec(source)) !== null) {
+        const tag = match[0];
+        const idMatch = tag.match(/wire:id=['"]([^'"]+)['"]/i);
+        const snapshotMatch = tag.match(/wire:snapshot=['"]([^'"]+)['"]/i);
+        const id = htmlDecode(idMatch ? idMatch[1] : '');
+        const snapshot = htmlDecode(snapshotMatch ? snapshotMatch[1] : '');
+        if (!id || !snapshot) continue;
+
+        let componentName = '';
+        let hasTokenProperty = false;
+        try {
+            const parsed = JSON.parse(snapshot);
+            componentName = String(parsed?.memo?.name || '');
+            hasTokenProperty = Object.prototype.hasOwnProperty.call(parsed?.data || {}, 'token');
+        } catch (e) {
+            // Keep candidate for fallback even when snapshot parsing fails.
+        }
+
+        candidates.push({ id, snapshot, componentName, hasTokenProperty });
+    }
+
+    if (candidates.length === 0) {
         return null;
     }
 
-    return {
-        snapshot: htmlDecode(snapshotMatch[1]),
-        id: htmlDecode(idMatch[1]),
-    };
+    const exactExamStart = candidates.find((c) => c.componentName === 'student.exam-start');
+    if (exactExamStart) return exactExamStart;
+
+    const fuzzyExamStart = candidates.find((c) => c.componentName.includes('exam-start'));
+    if (fuzzyExamStart) return fuzzyExamStart;
+
+    const hasToken = candidates.find((c) => c.hasTokenProperty);
+    if (hasToken) return hasToken;
+
+    return candidates[0];
 }
 
 function pickExamId() {
@@ -174,9 +203,23 @@ function startExam(examId, examToken) {
         fail(`CSRF token not found on exam start page for exam ${examId}`);
     }
 
+    const startBody = String(startPage.body || '');
+    const alreadyOnTakePage =
+        /x-data="examData\(\)"/i.test(startBody) ||
+        /route\('student\.exam\.save-answer'/i.test(startBody) ||
+        /student\/exam\/\d+\/save-answer/i.test(startBody);
+
+    if (alreadyOnTakePage) {
+        return {
+            examHtml: startBody,
+            csrf,
+        };
+    }
+
     const component = extractLivewireComponent(startPage.body);
     if (!component) {
-        fail(`Livewire component snapshot not found on exam start page for exam ${examId}`);
+        const snippet = startBody.slice(0, 240).replace(/\s+/g, ' ');
+        fail(`Livewire component snapshot not found on exam start page for exam ${examId}. Body snippet: ${snippet}`);
     }
 
     const updatePayload = {
@@ -235,20 +278,76 @@ function startExam(examId, examToken) {
 
 function extractQuestionsFromTakePage(html) {
     const source = String(html);
-
-    const match = source.match(/questions:\s*(\[[\s\S]*?\])\s*,\s*violations:/);
-    if (!match) {
-        fail('Failed to parse questions payload from exam page HTML');
+    const keyIndex = source.search(/questions\s*:/i);
+    if (keyIndex === -1) {
+        const snippet = source.slice(0, 260).replace(/\s+/g, ' ');
+        fail(`Failed to parse questions payload from exam page HTML (key not found). Body snippet: ${snippet}`);
     }
 
+    const arrayStart = source.indexOf('[', keyIndex);
+    if (arrayStart === -1) {
+        fail('Failed to parse questions payload from exam page HTML (array start not found)');
+    }
+
+    let depth = 0;
+    let inString = false;
+    let stringQuote = '';
+    let escaped = false;
+    let arrayEnd = -1;
+
+    for (let i = arrayStart; i < source.length; i++) {
+        const ch = source[i];
+
+        if (inString) {
+            if (escaped) {
+                escaped = false;
+                continue;
+            }
+            if (ch === '\\') {
+                escaped = true;
+                continue;
+            }
+            if (ch === stringQuote) {
+                inString = false;
+                stringQuote = '';
+            }
+            continue;
+        }
+
+        if (ch === '"' || ch === "'") {
+            inString = true;
+            stringQuote = ch;
+            continue;
+        }
+
+        if (ch === '[') {
+            depth++;
+            continue;
+        }
+
+        if (ch === ']') {
+            depth--;
+            if (depth === 0) {
+                arrayEnd = i;
+                break;
+            }
+        }
+    }
+
+    if (arrayEnd === -1) {
+        fail('Failed to parse questions payload from exam page HTML (array end not found)');
+    }
+
+    const rawArray = source.slice(arrayStart, arrayEnd + 1);
     try {
-        const questions = JSON.parse(match[1]);
+        const questions = JSON.parse(rawArray);
         if (!Array.isArray(questions) || questions.length === 0) {
             fail('Parsed questions payload is empty');
         }
         return questions;
     } catch (error) {
-        fail(`Questions payload parse error: ${error.message}`);
+        const preview = rawArray.slice(0, 220).replace(/\s+/g, ' ');
+        fail(`Questions payload parse error: ${error.message}. Payload preview: ${preview}`);
     }
 }
 
