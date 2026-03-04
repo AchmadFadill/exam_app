@@ -62,10 +62,16 @@
             $isAnswered = $answer !== null && ($question->type === 'essay'
                 ? $rawAnswer !== ''
                 : (!is_null($answer->selected_option_id) || !is_null($legacyOptionId) || $rawAnswer !== ''));
-            $isCorrect = (bool) (
-                $answer?->is_correct === true
-                || ($question->type === 'multiple_choice' && $resolvedOption && (bool) $resolvedOption->is_correct)
-            );
+            // Use persisted grading result as source of truth.
+            // Do not infer correctness from current option key because historical
+            // option/key changes can make everything appear "correct" incorrectly.
+            if ($question->type === 'multiple_choice') {
+                $isCorrect = !is_null($answer?->is_correct)
+                    ? (bool) $answer->is_correct
+                    : ((int) ($answer?->score_awarded ?? 0) > 0);
+            } else {
+                $isCorrect = (bool) ($answer?->is_correct === true);
+            }
             // If shuffle is on, we might need original order, but for report default order is fine or use pivot order
         @endphp
         <div class="bg-white rounded-[1.5rem] sm:rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
