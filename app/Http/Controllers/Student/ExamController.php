@@ -14,14 +14,14 @@ use App\Support\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class ExamController extends Controller
 {
     public function show($id)
     {
         $student = Auth::user()->student;
-        
-        $exam = Exam::with(['questions.options'])->findOrFail($id);
+        $exam = Exam::with('examQuestions')->findOrFail($id);
         
         // 1. Check Attempt exists
         $attempt = ExamAttempt::where('exam_id', $id)
@@ -36,27 +36,20 @@ class ExamController extends Controller
             return redirect($this->resultRedirectUrl($attempt));
         }
         
-        // Get student for seeded shuffling
-        $student = Auth::user()->student;
-        
-        // Transform questions for Front-end
-        $questionsCollection = $exam->questions;
-        
-        // Shuffle questions if enabled (seeded for consistency per student)
-        if ($exam->shuffle_questions) {
-            $seed = $student->id + $exam->id;
-            $questionsCollection = $questionsCollection->shuffle($seed);
-        }
-        
-        $questions = $questionsCollection->map(function($q, $index) use ($exam, $student) {
-            $options = $q->options;
-            
-            // Shuffle answer options if enabled (only for multiple choice)
-            if ($exam->shuffle_answers && $q->type === 'multiple_choice') {
-                $seed = $student->id + $exam->id + $q->id;
-                $options = $options->shuffle($seed);
-            }
-            
+        // Render order must come from persisted attempt snapshot to avoid randomization drift.
+        $questionIds = $this->resolveQuestionOrder($exam, $attempt);
+        $questionMap = Question::with('options')
+            ->whereIn('id', $questionIds)
+            ->get()
+            ->keyBy('id');
+
+        $questions = collect($questionIds)
+            ->map(fn ($qId) => $questionMap->get((int) $qId))
+            ->filter()
+            ->values()
+            ->map(function ($q) use ($attempt) {
+                $options = $this->resolveOptionOrder($q->options, $attempt, (int) $q->id);
+
             return [
                 'id' => $q->id,
                 'type' => $q->type === 'essay' ? 'essay' : 'multiple_choice', 
@@ -71,9 +64,9 @@ class ExamController extends Controller
                         'text' => html_entity_decode($cleanOptionText, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'image_path' => $opt->image_path ? \Illuminate\Support\Facades\Storage::url($opt->image_path) : null,
                     ];
-                })->toArray()
+                })->values()->toArray()
             ];
-        })->values()->toArray();
+        })->toArray();
 
         // Load existing answers
         // Map: question_id => selected_option_id (for MC) or answer (for Essay)
@@ -108,6 +101,42 @@ class ExamController extends Controller
             'studentNis' => $student->nis,
             'remainingSeconds' => $remainingSeconds
         ]);
+    }
+
+    /**
+     * @return array<int>
+     */
+    private function resolveQuestionOrder(Exam $exam, ExamAttempt $attempt): array
+    {
+        if (!empty($attempt->question_order) && is_array($attempt->question_order)) {
+            return array_values(array_map('intval', $attempt->question_order));
+        }
+
+        return $exam->examQuestions
+            ->sortBy('order')
+            ->pluck('question_id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  Collection<int, \App\Models\QuestionOption>  $options
+     * @return Collection<int, \App\Models\QuestionOption>
+     */
+    private function resolveOptionOrder(Collection $options, ExamAttempt $attempt, int $questionId): Collection
+    {
+        $optionIds = $attempt->options_order[(string) $questionId] ?? null;
+        if (!is_array($optionIds) || empty($optionIds)) {
+            return $options->values();
+        }
+
+        $optionMap = $options->keyBy('id');
+
+        return collect($optionIds)
+            ->map(fn ($optionId) => $optionMap->get((int) $optionId))
+            ->filter()
+            ->values();
     }
 
     public function submit(Request $request, $id, ProcessExamSubmissionAction $processExamSubmission)
