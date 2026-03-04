@@ -146,25 +146,25 @@ class ScoringService
     {
         $raw = trim((string) $rawAnswer);
 
-        // Highest priority for shuffle-answer exams:
-        // if legacy raw answer looks positional (A/B/C... or small number),
-        // resolve by attempt snapshot (options_order) because that is what
-        // the student actually saw on screen.
-        if ($this->isLikelyPositionalRaw($raw)) {
-            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
-            if ($snapshotMatch) {
-                return $snapshotMatch;
-            }
-        }
-
         if ($selectedOptionId) {
             $option = QuestionOption::query()
                 ->where('id', (int) $selectedOptionId)
                 ->withTrashed()
                 ->first();
 
+            // Canonical path:
+            // if selected_option_id already points to this question,
+            // never override it with legacy raw-answer inference.
             if ($option && (int) $option->question_id === $questionId) {
                 return $option;
+            }
+
+            // If selected option id is invalid/mismatch, try positional legacy recovery.
+            if ($this->isLikelyPositionalRaw($raw)) {
+                $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
+                if ($snapshotMatch) {
+                    return $snapshotMatch;
+                }
             }
 
             // Legacy recovery: selected option id points to another question.
@@ -188,9 +188,11 @@ class ScoringService
 
         // For shuffle-answer legacy rows, treat raw value as rendered position
         // (e.g. A/B/C or 1/2/3) based on attempt snapshot.
-        $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
-        if ($snapshotMatch) {
-            return $snapshotMatch;
+        if ($this->isLikelyPositionalRaw($raw)) {
+            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
+            if ($snapshotMatch) {
+                return $snapshotMatch;
+            }
         }
 
         if (is_numeric($raw)) {
