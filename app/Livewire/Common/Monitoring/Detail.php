@@ -150,8 +150,9 @@ class Detail extends Component
         $assignedStudents = $assignedStudentsQuery->get();
             
         $totalQuestions = $exam->questions()->count();
+        $questionTypeMap = $exam->questions->pluck('type', 'id');
 
-        $students = $assignedStudents->map(function($student) use ($exam, $totalQuestions, $isAdmin) {
+        $students = $assignedStudents->map(function($student) use ($exam, $totalQuestions, $isAdmin, $questionTypeMap) {
             $attempt = $exam->attempts->where('student_id', $student->id)->first();
             
             $status = 'not_started';
@@ -162,15 +163,29 @@ class Detail extends Component
             if ($attempt) {
                 $status = $attempt->status;
                 $tab_alert = $attempt->tab_switches;
-                $ansCount = $attempt->answers->count();
+
+                // Count only genuinely answered questions.
+                // MC: selected_option_id exists.
+                // Essay: non-empty text answer.
+                $ansCount = $attempt->answers
+                    ->filter(function ($answer) use ($questionTypeMap) {
+                        $questionType = $questionTypeMap->get($answer->question_id);
+
+                        if ($questionType === 'multiple_choice') {
+                            return !is_null($answer->selected_option_id);
+                        }
+
+                        if ($questionType === 'essay') {
+                            return trim((string) ($answer->answer ?? '')) !== '';
+                        }
+
+                        return !is_null($answer->selected_option_id) || trim((string) ($answer->answer ?? '')) !== '';
+                    })
+                    ->count();
                 
                 if ($totalQuestions > 0) {
                     $percent = ($ansCount / $totalQuestions) * 100;
                     $width = round($percent) . '%';
-                }
-
-                if (($status instanceof ExamAttemptStatus ? $status : ExamAttemptStatus::tryFrom((string) $status))?->isFinalized()) {
-                    $width = '100%';
                 }
             }
             

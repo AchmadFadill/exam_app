@@ -36,6 +36,6 @@ class StudentAnswer extends Model
 
     public function selectedOption()
     {
-        return $this->belongsTo(QuestionOption::class, 'selected_option_id');
+        return $this->belongsTo(QuestionOption::class, 'selected_option_id')->withTrashed();
     }
 }

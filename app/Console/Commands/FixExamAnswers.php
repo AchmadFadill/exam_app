@@ -14,76 +14,96 @@ class FixExamAnswers extends Command
     protected $signature = 'exam:fix-answers
         {--attempt= : Fix only one exam_attempt_id}
         {--limit=0 : Max rows to inspect (0 = unlimited)}
+        {--include-active : Include in_progress/blocked attempts (not recommended during live exam)}
         {--apply : Apply changes (default is dry-run)}';
 
-    protected $description = 'Auto-fix inconsistent multiple-choice answer references and re-calculate affected attempts.';
+    protected $description = 'Auto-fix inconsistent multiple-choice answer references and re-calculate affected attempts (safe mode skips active attempts).';
 
     public function handle(ScoringService $scoringService): int
     {
         $attemptId = $this->option('attempt');
         $limit = max(0, (int) $this->option('limit'));
         $apply = (bool) $this->option('apply');
+        $includeActive = (bool) $this->option('include-active');
+        $chunkSize = 1000;
 
         $base = StudentAnswer::query()
             ->join('questions as q', 'q.id', '=', 'student_answers.question_id')
+            ->join('exam_attempts as ea', 'ea.id', '=', 'student_answers.exam_attempt_id')
             ->where('q.type', 'multiple_choice')
-            ->select('student_answers.id')
-            ->when($attemptId, fn ($q) => $q->where('student_answers.exam_attempt_id', (int) $attemptId));
-
-        if ($limit > 0) {
-            $base->limit($limit);
-        }
-
-        $answerIds = $base->pluck('student_answers.id')->all();
-        if (empty($answerIds)) {
-            $this->info('No candidate answers found.');
-            return self::SUCCESS;
-        }
-
-        $answers = StudentAnswer::query()
-            ->with(['question.options'])
-            ->whereIn('id', $answerIds)
-            ->get();
+            ->select('student_answers.id as id')
+            ->when($attemptId, fn ($q) => $q->where('student_answers.exam_attempt_id', (int) $attemptId))
+            ->when(!$includeActive, fn ($q) => $q->whereNotNull('ea.submitted_at'));
 
         $fixed = 0;
         $skipped = 0;
+        $inspected = 0;
         $affectedAttemptIds = [];
 
-        foreach ($answers as $answer) {
-            $replacement = $this->findReplacementOptionId($answer);
-            if (!$replacement || $replacement === $answer->selected_option_id) {
-                $skipped++;
-                continue;
-            }
+        $base
+            ->orderBy('student_answers.id')
+            ->chunkById($chunkSize, function ($rows) use (&$inspected, &$fixed, &$skipped, &$affectedAttemptIds, $limit, $apply): bool {
+                $ids = collect($rows)->pluck('id')->map(fn ($id) => (int) $id)->all();
+                if (empty($ids)) {
+                    return true;
+                }
 
-            $affectedAttemptIds[$answer->exam_attempt_id] = true;
-            $fixed++;
+                $answers = StudentAnswer::query()
+                    ->with(['question.options'])
+                    ->whereIn('id', $ids)
+                    ->get();
 
-            if ($apply) {
-                $answer->update([
-                    'selected_option_id' => $replacement,
-                    // Keep compatibility with existing flow that persists option id string in `answer`.
-                    'answer' => (string) $replacement,
-                ]);
-            }
+                foreach ($answers as $answer) {
+                    if ($limit > 0 && $inspected >= $limit) {
+                        return false;
+                    }
+
+                    $inspected++;
+
+                    $replacement = $this->findReplacementOptionId($answer);
+                    if (!$replacement || $replacement === $answer->selected_option_id) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    $affectedAttemptIds[$answer->exam_attempt_id] = true;
+                    $fixed++;
+
+                    if ($apply) {
+                        $answer->update([
+                            'selected_option_id' => $replacement,
+                            // Keep compatibility with existing flow that persists option id string in `answer`.
+                            'answer' => (string) $replacement,
+                        ]);
+                    }
+                }
+
+                return true;
+            }, 'student_answers.id', 'student_answers.id');
+
+        if ($inspected === 0) {
+            $this->info('No candidate answers found.');
+            return self::SUCCESS;
         }
 
         $recalculated = 0;
         if ($apply && !empty($affectedAttemptIds)) {
             DB::transaction(function () use (&$recalculated, $affectedAttemptIds, $scoringService): void {
-                $attempts = ExamAttempt::query()
-                    ->with('exam.questions')
-                    ->whereIn('id', array_keys($affectedAttemptIds))
-                    ->get();
+                foreach (array_chunk(array_keys($affectedAttemptIds), 1000) as $attemptChunk) {
+                    $attempts = ExamAttempt::query()
+                        ->with('exam.questions')
+                        ->whereIn('id', $attemptChunk)
+                        ->get();
 
-                foreach ($attempts as $attempt) {
-                    $summary = $scoringService->recalculateAttempt($attempt->exam, $attempt);
-                    $attempt->update([
-                        'total_score' => $summary['total_score'],
-                        'percentage' => $summary['percentage'],
-                        'passed' => $summary['passed'],
-                    ]);
-                    $recalculated++;
+                    foreach ($attempts as $attempt) {
+                        $summary = $scoringService->recalculateAttempt($attempt->exam, $attempt);
+                        $attempt->update([
+                            'total_score' => $summary['total_score'],
+                            'percentage' => $summary['percentage'],
+                            'passed' => $summary['passed'],
+                        ]);
+                        $recalculated++;
+                    }
                 }
             });
         }
@@ -92,7 +112,7 @@ class FixExamAnswers extends Command
         $this->table(
             ['Metric', 'Value'],
             [
-                ['inspected_answers', count($answerIds)],
+                ['inspected_answers', $inspected],
                 ['fixed_selected_option_links', $fixed],
                 ['skipped_or_no_mapping', $skipped],
                 ['affected_attempts', count($affectedAttemptIds)],

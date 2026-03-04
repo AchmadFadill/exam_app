@@ -13,9 +13,10 @@ class RecalculateExamAttempts extends Command
         {--exam= : Recalculate attempts for one exam_id}
         {--student= : Recalculate attempts for one student_id}
         {--chunk=200 : Chunk size for batch processing}
+        {--include-active : Include in_progress/blocked attempts}
         {--apply : Persist recalculated values (default is dry-run)}';
 
-    protected $description = 'Recalculate total score, percentage, and pass flag for exam attempts using current scoring rules.';
+    protected $description = 'Recalculate total score, percentage, and pass flag for exam attempts using current scoring rules (safe mode skips active attempts).';
 
     public function handle(ScoringService $scoringService): int
     {
@@ -23,13 +24,15 @@ class RecalculateExamAttempts extends Command
         $examId = $this->option('exam');
         $studentId = $this->option('student');
         $apply = (bool) $this->option('apply');
+        $includeActive = (bool) $this->option('include-active');
         $chunk = max(50, (int) $this->option('chunk'));
 
         $query = ExamAttempt::query()
             ->with(['exam.questions.options'])
             ->when($attemptId, fn ($q) => $q->where('id', (int) $attemptId))
             ->when($examId, fn ($q) => $q->where('exam_id', (int) $examId))
-            ->when($studentId, fn ($q) => $q->where('student_id', (int) $studentId));
+            ->when($studentId, fn ($q) => $q->where('student_id', (int) $studentId))
+            ->when(!$includeActive, fn ($q) => $q->whereNotNull('submitted_at'));
 
         $total = (clone $query)->count();
         if ($total === 0) {

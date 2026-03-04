@@ -29,6 +29,7 @@ class ScoringService
 
         if ($selectedOptionId) {
             $option = QuestionOption::where('id', $selectedOptionId)
+                ->withTrashed()
                 ->where('question_id', $question->id)
                 ->first();
 
@@ -138,6 +139,7 @@ class ScoringService
         if ($selectedOptionId) {
             $option = QuestionOption::query()
                 ->where('id', (int) $selectedOptionId)
+                ->withTrashed()
                 ->where('question_id', $questionId)
                 ->first();
 
@@ -150,6 +152,7 @@ class ScoringService
         if ($raw !== '' && is_numeric($raw)) {
             return QuestionOption::query()
                 ->where('id', (int) $raw)
+                ->withTrashed()
                 ->where('question_id', $questionId)
                 ->first();
         }

@@ -16,7 +16,10 @@ class Index extends Component
         $user = auth()->user();
 
         $query = \App\Models\Exam::query()
-            ->with(['subject', 'classrooms'])
+            ->with(['subject', 'classrooms', 'teacher.user'])
+            ->whereHas('attempts', function ($q) {
+                $q->whereNotNull('submitted_at');
+            })
             ->withCount([
                 'attempts as participants_count' => function ($q) {
                     $q->whereNotNull('submitted_at');
@@ -40,6 +43,7 @@ class Index extends Component
             return [
                 'id' => $exam->id,
                 'exam_name' => $exam->name,
+                'teacher_name' => $exam->teacher?->user?->name ?? '-',
                 'class' => $exam->classrooms->pluck('name')->join(', '),
                 'subject' => $exam->subject->name ?? '-',
                 'date' => $exam->date ? $exam->date->format('d M Y') : '-',
