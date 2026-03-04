@@ -248,7 +248,23 @@ class ScoringService
 
         $optionIds = $attempt->options_order[(string) $questionId] ?? null;
         if (!is_array($optionIds) || empty($optionIds)) {
-            return null;
+            // Legacy fallback when options_order snapshot is missing:
+            // reconstruct deterministic order used by ExamStart.
+            $optionIds = QuestionOption::query()
+                ->withTrashed()
+                ->where('question_id', $questionId)
+                ->orderBy('id')
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all();
+
+            if (empty($optionIds)) {
+                return null;
+            }
+
+            $seed = (int) $attempt->student_id + (int) $exam->id + $questionId;
+            $optionIds = $this->seededShuffle($optionIds, $seed);
         }
 
         $indexes = [];
@@ -292,6 +308,34 @@ class ScoringService
         }
 
         return null;
+    }
+
+    /**
+     * Deterministic Fisher-Yates shuffle.
+     *
+     * @param  array<int>  $items
+     * @return array<int>
+     */
+    private function seededShuffle(array $items, int $seed): array
+    {
+        $items = array_values($items);
+        $count = count($items);
+        if ($count <= 1) {
+            return $items;
+        }
+
+        $a = 1664525;
+        $c = 1013904223;
+        $m = 2 ** 32;
+        $rand = $seed % $m;
+
+        for ($i = $count - 1; $i > 0; $i--) {
+            $rand = ($a * $rand + $c) % $m;
+            $j = $rand % ($i + 1);
+            [$items[$i], $items[$j]] = [$items[$j], $items[$i]];
+        }
+
+        return $items;
     }
 
     private function isLikelyPositionalRaw(string $raw): bool
