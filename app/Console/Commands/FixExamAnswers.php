@@ -31,7 +31,7 @@ class FixExamAnswers extends Command
             ->join('questions as q', 'q.id', '=', 'student_answers.question_id')
             ->join('exam_attempts as ea', 'ea.id', '=', 'student_answers.exam_attempt_id')
             ->where('q.type', 'multiple_choice')
-            ->select('student_answers.id as id')
+            ->select('student_answers.id')
             ->when($attemptId, fn ($q) => $q->where('student_answers.exam_attempt_id', (int) $attemptId))
             ->when(!$includeActive, fn ($q) => $q->whereNotNull('ea.submitted_at'));
 
@@ -79,7 +79,7 @@ class FixExamAnswers extends Command
                 }
 
                 return true;
-            }, 'student_answers.id', 'student_answers.id');
+            }, 'student_answers.id', 'id');
 
         if ($inspected === 0) {
             $this->info('No candidate answers found.');
