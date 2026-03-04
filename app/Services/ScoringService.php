@@ -36,16 +36,6 @@ class ScoringService
                 $isCorrect = true;
                 $scoreAwarded = $this->examPivotScore($exam, $question->id);
             }
-        } elseif (is_string($answerValue)) {
-            $correctOption = QuestionOption::query()
-                ->where('question_id', $question->id)
-                ->where('is_correct', true)
-                ->first();
-
-            if ($correctOption && $this->answersMatch($answerValue, $correctOption->text)) {
-                $isCorrect = true;
-                $scoreAwarded = $this->examPivotScore($exam, $question->id);
-            }
         }
 
         return [
@@ -83,89 +73,18 @@ class ScoringService
                 $canDetermine = true;
                 $isCorrect = false;
                 $normalizedSelectedOptionId = $answer->selected_option_id ? (int) $answer->selected_option_id : null;
-                $selectedOption = null;
+                $selectedOption = $this->resolveSelectedOptionById(
+                    questionId: (int) $answer->question_id,
+                    selectedOptionId: $answer->selected_option_id,
+                    rawAnswer: is_string($answer->answer) ? $answer->answer : null,
+                );
 
-                // 1) Resolve selected option from FK; if mismatched question, remap by label.
-                if ($answer->selected_option_id) {
-                    $rawSelected = QuestionOption::query()
-                        ->where('id', $answer->selected_option_id)
-                        ->first();
-
-                    if ($rawSelected && (int) $rawSelected->question_id === (int) $answer->question_id) {
-                        $selectedOption = $rawSelected;
-                    } elseif ($rawSelected) {
-                        $remapped = QuestionOption::query()
-                            ->where('question_id', $answer->question_id)
-                            ->where('label', $rawSelected->label)
-                            ->first();
-
-                        if ($remapped) {
-                            $selectedOption = $remapped;
-                            $normalizedSelectedOptionId = (int) $remapped->id;
-                        }
-                    }
-                }
-
-                // 2) Resolve from legacy/raw answer value when selected option is missing/stale.
-                if (!$selectedOption && is_string($answer->answer)) {
-                    $raw = trim($answer->answer);
-
-                    if ($raw !== '') {
-                        if (is_numeric($raw)) {
-                            $candidate = QuestionOption::query()
-                                ->where('id', (int) $raw)
-                                ->where('question_id', $answer->question_id)
-                                ->first();
-
-                            if ($candidate) {
-                                $selectedOption = $candidate;
-                                $normalizedSelectedOptionId = (int) $candidate->id;
-                            }
-                        }
-
-                        if (!$selectedOption && preg_match('/^[A-E]$/i', $raw) === 1) {
-                            $candidate = QuestionOption::query()
-                                ->where('question_id', $answer->question_id)
-                                ->where('label', strtoupper($raw))
-                                ->first();
-
-                            if ($candidate) {
-                                $selectedOption = $candidate;
-                                $normalizedSelectedOptionId = (int) $candidate->id;
-                            }
-                        }
-
-                        if (!$selectedOption) {
-                            $candidate = QuestionOption::query()
-                                ->where('question_id', $answer->question_id)
-                                ->get()
-                                ->first(fn (QuestionOption $opt) => $this->answersMatch($raw, $opt->text));
-
-                            if ($candidate) {
-                                $selectedOption = $candidate;
-                                $normalizedSelectedOptionId = (int) $candidate->id;
-                            }
-                        }
-                    }
+                if ($selectedOption) {
+                    $normalizedSelectedOptionId = (int) $selectedOption->id;
                 }
 
                 if ($selectedOption) {
                     $isCorrect = (bool) $selectedOption->is_correct;
-                } elseif (is_string($answer->answer)) {
-                    $correctOption = QuestionOption::query()
-                        ->where('question_id', $answer->question_id)
-                        ->where('is_correct', true)
-                        ->first();
-
-                    // If stored answer is numeric id-like string and no option can be resolved,
-                    // treat as indeterminate instead of forcing it to wrong.
-                    if (is_numeric(trim($answer->answer))) {
-                        $canDetermine = false;
-                    } elseif ($correctOption) {
-                        $isCorrect = $this->answersMatch($answer->answer, $correctOption->text);
-                    } else {
-                        $canDetermine = false;
-                    }
                 } else {
                     $canDetermine = false;
                 }
@@ -214,6 +133,30 @@ class ScoringService
         ];
     }
 
+    private function resolveSelectedOptionById(int $questionId, mixed $selectedOptionId, ?string $rawAnswer = null): ?QuestionOption
+    {
+        if ($selectedOptionId) {
+            $option = QuestionOption::query()
+                ->where('id', (int) $selectedOptionId)
+                ->where('question_id', $questionId)
+                ->first();
+
+            if ($option) {
+                return $option;
+            }
+        }
+
+        $raw = trim((string) $rawAnswer);
+        if ($raw !== '' && is_numeric($raw)) {
+            return QuestionOption::query()
+                ->where('id', (int) $raw)
+                ->where('question_id', $questionId)
+                ->first();
+        }
+
+        return null;
+    }
+
     private function examPivotScore(Exam $exam, int $questionId): int
     {
         $question = $exam->questions()
@@ -223,8 +166,4 @@ class ScoringService
         return (int) ($question?->pivot?->score ?? 0);
     }
 
-    private function answersMatch(?string $studentAnswer, ?string $correctAnswer): bool
-    {
-        return strtoupper(trim((string) $studentAnswer)) === strtoupper(trim((string) $correctAnswer));
-    }
 }

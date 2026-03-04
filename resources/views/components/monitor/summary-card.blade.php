@@ -8,6 +8,7 @@
     $valueClass = match($variant) {
         'primary' => 'text-primary',
         'success' => 'text-green-600',
+        'danger' => 'text-red-600',
         'gray' => 'text-gray-400',
         default => 'text-text-main',
     };

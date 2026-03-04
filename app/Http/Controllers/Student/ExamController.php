@@ -214,7 +214,7 @@ class ExamController extends Controller
         ]);
     }
 
-    public function statusCheck($id, ProcessExamSubmissionAction $processExamSubmission)
+    public function statusCheck($id)
     {
         $student = Auth::user()->student;
         $attempt = ExamAttempt::where('exam_id', $id)
@@ -222,41 +222,34 @@ class ExamController extends Controller
             ->first();
 
         if (!$attempt) {
-            return response()->json(['force_stop' => false]);
+            return response()->json(['force_stop' => false, 'blocked' => false]);
         }
 
-        // Enforce tab tolerance server-side (prevents refresh loophole).
         $attempt->loadMissing('exam:id,enable_tab_tolerance,tab_tolerance');
-        if (
-            (bool) ($attempt->exam?->enable_tab_tolerance ?? false)
-            && (int) ($attempt->exam?->tab_tolerance ?? 0) > 0
-            && (int) ($attempt->tab_switches ?? 0) >= (int) $attempt->exam->tab_tolerance
-        ) {
-            // Auto-submit server-side to prevent "stuck" in-progress attempts after refresh/offline.
-            if (!$attempt->submitted_at) {
-                $exam = Exam::with(['questions.options'])->findOrFail($id);
-                $attempt = $processExamSubmission->execute($exam, $attempt, [], null, ExamAttemptStatus::Completed);
-            }
-
-            return response()->json([
-                'force_stop' => true,
-                'redirect' => $this->resultRedirectUrl($attempt),
-                'message' => 'Ujian dihentikan karena pelanggaran terlalu banyak.',
-            ]);
-        }
-
         $attemptStatus = $attempt->status instanceof ExamAttemptStatus
             ? $attempt->status
             : ExamAttemptStatus::tryFrom((string) $attempt->status);
 
+        if ($attemptStatus === ExamAttemptStatus::Blocked) {
+            return response()->json([
+                'force_stop' => false,
+                'blocked' => true,
+                'message' => 'Ujian Anda diblokir sementara. Menunggu keputusan guru/pengawas.',
+            ]);
+        }
+
         if ($attempt->submitted_at || ($attemptStatus?->isFinalized() ?? false)) {
             return response()->json([
                 'force_stop' => true,
+                'blocked' => false,
                 'redirect' => $this->resultRedirectUrl($attempt)
             ]);
         }
 
-        return response()->json(['force_stop' => false]);
+        return response()->json([
+            'force_stop' => false,
+            'blocked' => false,
+        ]);
     }
 
     public function heartbeat(Request $request, $id)
@@ -288,7 +281,7 @@ class ExamController extends Controller
             // 1. Validate Attempt Exists and is In Progress
             $attempt = ExamAttempt::where('exam_id', $id)
                 ->where('student_id', $student->id)
-                ->where('status', ExamAttemptStatus::InProgress->value)
+                ->whereIn('status', [ExamAttemptStatus::InProgress->value, ExamAttemptStatus::Blocked->value])
                 ->whereNull('submitted_at')
                 ->first();
 
@@ -325,21 +318,45 @@ class ExamController extends Controller
 
             $max = (int) ($attempt->exam?->tab_tolerance ?? 0);
             $enabled = (bool) ($attempt->exam?->enable_tab_tolerance ?? false);
-            $forceStop = $enabled && $max > 0 && (int) $attempt->tab_switches >= $max;
+            $isBlocked = false;
 
-            if ($forceStop && !$attempt->submitted_at) {
-                $exam = Exam::with(['questions.options'])->findOrFail($id);
-                $attempt = app(ProcessExamSubmissionAction::class)
-                    ->execute($exam, $attempt, [], null, ExamAttemptStatus::Completed);
+            if (
+                $enabled
+                && $max > 0
+                && (int) $attempt->tab_switches >= $max
+                && !$attempt->submitted_at
+                && ($attempt->status instanceof ExamAttemptStatus ? $attempt->status : ExamAttemptStatus::tryFrom((string) $attempt->status)) !== ExamAttemptStatus::Blocked
+            ) {
+                $attempt->update([
+                    'status' => ExamAttemptStatus::Blocked,
+                ]);
+                $attempt->refresh();
+                $isBlocked = true;
+
+                \App\Models\ExamActivity::create([
+                    'user_id' => Auth::id(),
+                    'exam_id' => $id,
+                    'exam_attempt_id' => $attempt->id,
+                    'type' => 'blocked',
+                    'severity' => 'critical',
+                    'message' => 'Ujian diblokir otomatis karena pelanggaran melebihi batas. Menunggu keputusan guru.',
+                    'metadata' => [
+                        'ip' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'tab_switches' => (int) $attempt->tab_switches,
+                        'max' => $max,
+                    ],
+                ]);
             }
 
             return response()->json([
                 'success' => true,
                 'tab_switches' => (int) $attempt->tab_switches,
                 'max' => $max,
-                'force_stop' => $forceStop,
-                'message' => $forceStop ? 'Ujian dihentikan karena pelanggaran terlalu banyak.' : null,
-                'redirect' => $forceStop ? $this->resultRedirectUrl($attempt) : null,
+                'force_stop' => false,
+                'blocked' => $isBlocked || (($attempt->status instanceof ExamAttemptStatus ? $attempt->status : ExamAttemptStatus::tryFrom((string) $attempt->status)) === ExamAttemptStatus::Blocked),
+                'message' => $isBlocked ? 'Ujian diblokir sementara. Menunggu keputusan guru/pengawas.' : null,
+                'redirect' => null,
             ]);
 
         } catch (\Exception $e) {

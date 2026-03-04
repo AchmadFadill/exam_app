@@ -32,6 +32,8 @@ class Detail extends Component
         $statusType = 'info';
         if (in_array($event['violation_type'], ['tab_switch', 'fullscreen_exit'])) {
             $statusType = 'warning';
+        } elseif ($event['violation_type'] === 'blocked') {
+            $statusType = 'danger';
         }
 
         $newLog = [
@@ -68,6 +70,7 @@ class Detail extends Component
                 if ($activity->severity === 'warning') $statusType = 'warning';
                 if ($activity->severity === 'critical') $statusType = 'danger';
                 if ($activity->type === 'submit') $statusType = 'success';
+                if ($activity->type === 'resume') $statusType = 'primary';
 
                 return [
                     'id' => $activity->id,
@@ -194,6 +197,9 @@ class Detail extends Component
                 if ($this->filterStatus === 'working') {
                     return $student['status'] === ExamAttemptStatus::InProgress->value;
                 }
+                if ($this->filterStatus === 'blocked') {
+                    return $student['status'] === ExamAttemptStatus::Blocked->value;
+                }
                 if ($this->filterStatus === 'completed') {
                     $status = ExamAttemptStatus::tryFrom((string) $student['status']);
                     return $status?->isFinalized() ?? false;
@@ -219,17 +225,30 @@ class Detail extends Component
 
     public function forceSubmit($studentId)
     {
-        $exam = \App\Models\Exam::findOrFail($this->examId);
+        $exam = \App\Models\Exam::with(['questions.options', 'teacher.user'])->findOrFail($this->examId);
         Gate::authorize('grade', $exam);
 
         $attempt = \App\Models\ExamAttempt::where('exam_id', $this->examId)
             ->where('student_id', $studentId)
             ->first();
 
-        if ($attempt) {
-            $attempt->update([
-                'status' => ExamAttemptStatus::Submitted,
-                'submitted_at' => now()
+        if ($attempt && !$attempt->submitted_at) {
+            $attempt = app(ProcessExamSubmissionAction::class)->execute($exam, $attempt, [], function ($lockedAttempt) {
+                $lockedAttempt->update([
+                    'teacher_notes' => trim(trim((string) $lockedAttempt->teacher_notes) . ' Force-submitted by teacher after security block.'),
+                ]);
+            }, ExamAttemptStatus::Submitted);
+
+            \App\Models\ExamActivity::create([
+                'user_id' => Auth::id(),
+                'exam_id' => $this->examId,
+                'exam_attempt_id' => $attempt->id,
+                'type' => 'submit',
+                'severity' => 'critical',
+                'message' => 'Ujian diakhiri oleh guru/pengawas setelah pelanggaran.',
+                'metadata' => [
+                    'student_id' => $studentId,
+                ],
             ]);
             
             // Send Notification
@@ -248,6 +267,48 @@ class Detail extends Component
                 'message' => 'Siswa belum memulai ujian.'
             ]);
         }
+    }
+
+    public function resumeAttempt($studentId)
+    {
+        $exam = \App\Models\Exam::findOrFail($this->examId);
+        Gate::authorize('grade', $exam);
+
+        $attempt = \App\Models\ExamAttempt::where('exam_id', $this->examId)
+            ->where('student_id', $studentId)
+            ->first();
+
+        if (!$attempt) {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Siswa belum memulai ujian.'
+            ]);
+            return;
+        }
+
+        $attempt->update([
+            'status' => ExamAttemptStatus::InProgress,
+            'tab_switches' => 0,
+            'teacher_notes' => trim(trim((string) $attempt->teacher_notes) . ' Resumed by teacher; violation counter reset.'),
+        ]);
+
+        \App\Models\ExamActivity::create([
+            'user_id' => Auth::id(),
+            'exam_id' => $this->examId,
+            'exam_attempt_id' => $attempt->id,
+            'type' => 'resume',
+            'severity' => 'info',
+            'message' => 'Ujian dilanjutkan kembali oleh guru/pengawas. Counter pelanggaran direset ke 0.',
+            'metadata' => [
+                'student_id' => $studentId,
+                'reset_tab_switches' => true,
+            ],
+        ]);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Siswa diizinkan melanjutkan ujian. Counter pelanggaran direset.'
+        ]);
     }
 
 }

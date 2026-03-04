@@ -111,21 +111,6 @@ class FixExamAnswers extends Command
     {
         $questionId = (int) $answer->question_id;
 
-        // 1) If current selected option exists but belongs to another question, remap by same label.
-        if ($answer->selected_option_id) {
-            $selected = QuestionOption::find($answer->selected_option_id);
-            if ($selected && (int) $selected->question_id !== $questionId) {
-                $sameLabel = QuestionOption::query()
-                    ->where('question_id', $questionId)
-                    ->where('label', $selected->label)
-                    ->first();
-
-                if ($sameLabel) {
-                    return (int) $sameLabel->id;
-                }
-            }
-        }
-
         $raw = trim((string) ($answer->answer ?? ''));
         if ($raw === '') {
             return null;
@@ -143,27 +128,6 @@ class FixExamAnswers extends Command
                 return (int) $direct->id;
             }
         }
-
-        // 3) Label mapping (A-E).
-        $upper = strtoupper($raw);
-        if (preg_match('/^[A-E]$/', $upper) === 1) {
-            $byLabel = QuestionOption::query()
-                ->where('question_id', $questionId)
-                ->where('label', $upper)
-                ->first();
-
-            if ($byLabel) {
-                return (int) $byLabel->id;
-            }
-        }
-
-        // 4) Text mapping.
-        $options = $answer->question?->options ?? collect();
-        $match = $options->first(function (QuestionOption $option) use ($raw): bool {
-            return strtoupper(trim((string) $option->text)) === strtoupper(trim($raw));
-        });
-
-        return $match ? (int) $match->id : null;
+        return null;
     }
 }
-

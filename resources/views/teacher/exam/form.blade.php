@@ -325,7 +325,7 @@
                                     </div>
                                     <div class="flex flex-col">
                                         <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Anti Tab-Switching</span>
-                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Otomatis submit jika curang</span>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Blokir sementara jika curang (guru putuskan lanjut/akhiri)</span>
                                     </div>
                                 </div>
                                 <div class="relative">

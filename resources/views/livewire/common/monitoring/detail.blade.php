@@ -18,7 +18,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
         <!-- Token Card -->
         @if($exam->token)
         <div x-data="{ copied: false }" 
@@ -47,6 +47,7 @@
 
         <x-monitor.summary-card label="Total Siswa" :value="$exam->classrooms->sum('students_count')" />
         <x-monitor.summary-card label="Mengerjakan" :value="$students->where('status', 'in_progress')->count()" variant="primary" />
+        <x-monitor.summary-card label="Diblokir" :value="$students->where('status', 'blocked')->count()" variant="danger" />
         <x-monitor.summary-card label="Selesai" :value="$students->whereIn('status', ['completed', 'graded', 'submitted'])->count()" variant="success" />
         <x-monitor.summary-card label="Belum Mulai" :value="$students->where('status', 'not_started')->count()" variant="gray" />
     </div>
@@ -61,7 +62,21 @@
                 @foreach($students as $student)
                 <x-monitor.student-card :student="$student">
                     <x-button href="{{ route($student['detail_route'], ['examId' => $exam['id'], 'studentId' => $student['id'], 'from' => 'monitoring']) }}" variant="secondary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Detail Hasil</x-button>
-                    @if($student['status'] == 'working' || $student['status'] == 'in_progress')
+                    @if($student['status'] === 'blocked')
+                    <x-button
+                        wire:click="resumeAttempt({{ $student['id'] }})"
+                        variant="primary" size="xs" class="uppercase font-bold tracking-wider !rounded-lg">Lanjutkan</x-button>
+                    <x-button
+                        @click="$dispatch('show-confirm-modal', [{
+                            title: 'Akhiri Ujian?',
+                            message: 'Siswa {{ $student['name'] }} sedang diblokir karena pelanggaran. Akhiri ujian sekarang?',
+                            confirmText: 'Ya, Akhiri',
+                            type: 'danger',
+                            onConfirm: 'force-submit',
+                            onConfirmDetail: {{ $student['id'] }}
+                        }])"
+                        variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
+                    @elseif($student['status'] == 'working' || $student['status'] == 'in_progress')
                     <x-button 
                         @click="$dispatch('show-confirm-modal', [{ 
                             title: 'Akhiri Ujian?', 
@@ -73,6 +88,7 @@
                         }])" 
                         variant="danger" size="xs" class="!bg-red-50 !text-red-600 !border-red-100 hover:!bg-red-100 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @else
+                    <x-button variant="secondary" size="xs" disabled class="!text-gray-300 uppercase font-bold tracking-wider !rounded-lg">Lanjutkan</x-button>
                     <x-button variant="secondary" size="xs" disabled class="!text-gray-300 uppercase font-bold tracking-wider !rounded-lg">Akhiri</x-button>
                     @endif
                 </x-monitor.student-card>
@@ -103,6 +119,7 @@
                             {{ $log['type'] === 'success' ? 'bg-green-500' : '' }}
                             {{ $log['type'] === 'info' ? 'bg-blue-500' : '' }}
                             {{ $log['type'] === 'primary' ? 'bg-indigo-500' : '' }}
+                            {{ $log['type'] === 'danger' ? 'bg-red-500' : '' }}
                         "></div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-start mb-0.5">

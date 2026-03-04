@@ -5,6 +5,7 @@ namespace App\Enums;
 enum ExamAttemptStatus: string
 {
     case InProgress = 'in_progress';
+    case Blocked = 'blocked';
     case Submitted = 'submitted';
     case Graded = 'graded';
     case Abandoned = 'abandoned';

@@ -48,7 +48,7 @@
         </div>
 
         <!-- Fullscreen helper (best-effort: browsers may block fullscreen without a user gesture) -->
-        <div x-cloak x-show="needsFullscreen && Alpine.store('exam').isActive && !showStartOverlay && !showWarningModal && !showFinishModal"
+        <div x-cloak x-show="needsFullscreen && Alpine.store('exam').isActive && !showStartOverlay && !showWarningModal && !showFinishModal && !isBlocked"
             class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 flex items-start justify-between gap-3">
             <div>
                 <div class="font-semibold">Mode layar penuh diperlukan</div>
@@ -263,11 +263,25 @@
                 <span class="block text-lg font-semibold text-red-600 mb-2" x-text="violationMessage"></span>
                 Ini adalah pelanggaran <span class="font-bold text-red-600" x-text="violations"></span> dari <span class="font-bold">{{ $exam->tab_tolerance ?? 3 }}</span>.
                 <br><br>
-                Jika Anda melanggar lebih dari {{ $exam->tab_tolerance ?? 3 }} kali, ujian akan otomatis dihentikan.
+                Jika mencapai batas, ujian akan diblokir sementara sampai guru memutuskan lanjut atau akhiri.
             </p>
             <button @click="resumeExam()" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
                 Saya Mengerti, Kembali ke Ujian
             </button>
+        </div>
+    </div>
+
+    <!-- Blocked Overlay -->
+    <div x-cloak x-show="isBlocked" class="fixed inset-0 z-[70] flex items-center justify-center bg-white/95 backdrop-blur-sm">
+        <div class="max-w-lg w-full mx-6 rounded-2xl border border-red-200 bg-white p-8 text-center shadow-2xl">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+                <svg class="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01m-8-4a8 8 0 1116 0 8 8 0 01-16 0z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black text-red-700 mb-2">Ujian Diblokir Sementara</h3>
+            <p class="text-sm text-gray-600 mb-4" x-text="blockMessage"></p>
+            <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">Menunggu keputusan guru/pengawas</p>
         </div>
     </div>
 
@@ -347,6 +361,8 @@
                 flags: {},
                 violations: {{ (int) ($attempt->tab_switches ?? 0) }},
                 violationMessage: '',
+                isBlocked: {{ ($attempt->status instanceof \App\Enums\ExamAttemptStatus ? $attempt->status === \App\Enums\ExamAttemptStatus::Blocked : (string)$attempt->status === 'blocked') ? 'true' : 'false' }},
+                blockMessage: 'Ujian Anda diblokir sementara karena pelanggaran. Menunggu keputusan guru/pengawas.',
                 needsFullscreen: false,
                 screenshotLockUntil: 0,
                 showWarningModal: false,
@@ -359,6 +375,7 @@
                 lastHeartbeatFailed: false,
                 isRetryingSaves: false,
                 isSubmitting: false,
+                statusPollTick: 0,
 
                 async postJson(url, payload) {
                     const response = await fetch(url, {
@@ -424,7 +441,7 @@
                 },
 
                 async sendHeartbeat() {
-                    if (!Alpine.store('exam').isActive || !navigator.onLine) {
+                    if (!Alpine.store('exam').isActive || !navigator.onLine || this.isBlocked) {
                         return;
                     }
 
@@ -448,7 +465,7 @@
                 },
 
                 handleViolation(message, forcedType = null) {
-                    if (this.showFinishModal) return; 
+                    if (this.showFinishModal || this.isBlocked) return; 
 
                     const type = forcedType ?? (document.hidden ? 'tab_switch' : 'fullscreen_exit');
                     this.violationMessage = message || 'Terjadi pelanggaran aturan ujian.';
@@ -467,22 +484,14 @@
                             this.violations++;
                         }
 
-                        if (data.force_stop || this.violations >= maxViolations) {
-                            // Silent auto-finish. Also disable beforeunload to prevent
-                            // "Changes you made may not be saved." confirmation dialog.
-                            this.isSubmitting = true;
-                            window.onbeforeunload = null;
-
-                            const finalize = () => {
-                                if (data.redirect) {
-                                    window.location.href = data.redirect;
-                                    return;
-                                }
-                                this.submitExam();
-                            };
-
-                            // Best-effort: flush pending saves before leaving.
-                            this.flushPendingSaves().finally(() => finalize());
+                        if (data.blocked || this.violations >= maxViolations) {
+                            this.isBlocked = true;
+                            this.blockMessage = data.message || 'Ujian Anda diblokir sementara. Menunggu keputusan guru/pengawas.';
+                            this.showWarningModal = false;
+                            Alpine.store('exam').isActive = false;
+                            if (document.fullscreenElement) {
+                                document.exitFullscreen().catch(() => {});
+                            }
                             return;
                         }
 
@@ -545,6 +554,17 @@
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         });
                         const data = await res.json();
+                        if (data.blocked) {
+                            this.isBlocked = true;
+                            this.blockMessage = data.message || this.blockMessage;
+                            Alpine.store('exam').isActive = false;
+                            return;
+                        }
+                        if (this.isBlocked && !data.blocked) {
+                            this.isBlocked = false;
+                            this.blockMessage = 'Ujian Anda diblokir sementara karena pelanggaran. Menunggu keputusan guru/pengawas.';
+                            Alpine.store('exam').isActive = true;
+                        }
                         if (!data.force_stop) return;
 
                         // Silent redirect. Disable beforeunload so Chrome doesn't show confirmation.
@@ -558,6 +578,10 @@
                 },
 
                 tryEnterFullscreen() {
+                    if (this.isBlocked) {
+                        this.needsFullscreen = false;
+                        return Promise.resolve();
+                    }
                     // Browsers often require a user gesture for fullscreen.
                     // We attempt anyway, and if blocked we show a banner and retry on next click.
                     return document.documentElement.requestFullscreen()
@@ -569,7 +593,7 @@
                     // Auto-resume after refresh (prevents going back to "MULAI..." overlay).
                     // Uses sessionStorage so it's per-tab session and doesn't create a permanent bypass.
                     const startedKey = `exam_started_attempt_${this.attemptId}`;
-                    if (sessionStorage.getItem(startedKey) === '1') {
+                    if (sessionStorage.getItem(startedKey) === '1' && !this.isBlocked) {
                         this.showStartOverlay = false;
                         Alpine.store('exam').startTimer();
                         this.sendHeartbeat();
@@ -586,6 +610,11 @@
                             });
                         };
                         window.addEventListener('click', retryOnClick, true);
+                    }
+
+                    if (this.isBlocked) {
+                        this.showStartOverlay = false;
+                        Alpine.store('exam').isActive = false;
                     }
 
                     // Initial math render (KaTeX might load slightly after Alpine; retry briefly).
@@ -605,13 +634,14 @@
                     // Timer
                     setInterval(() => {
                         Alpine.store('exam').updateTime();
+                        this.statusPollTick++;
                         
-                        // Force Submit Check (every 5s approx)
-                        if (Alpine.store('exam').timeLeft % 5 === 0) {
+                        // Status check every 5 seconds even when timer is paused (e.g. blocked state).
+                        if (this.statusPollTick % 5 === 0) {
                             this.checkStatus();
                         }
 
-                        if (Alpine.store('exam').timeLeft <= 0 && Alpine.store('exam').isActive) {
+                        if (Alpine.store('exam').timeLeft <= 0 && Alpine.store('exam').isActive && !this.isBlocked) {
                             this.submitExam();
                         }
                     }, 1000);
@@ -629,7 +659,7 @@
                     // Visibility Change (Anti-Cheat) - Only if enabled
                     @if($exam->enable_tab_tolerance)
                     document.addEventListener('visibilitychange', () => {
-                         if (document.hidden && Alpine.store('exam').isActive) {
+                         if (document.hidden && Alpine.store('exam').isActive && !this.isBlocked) {
                             this.handleViolation('Anda terdeteksi meninggalkan halaman ujian (pindah tab/minimize).');
                         }
                     });
@@ -637,12 +667,12 @@
                     // Snipping Tool and some OS overlays do not always emit key events.
                     // Treat focus loss during active exam as a violation as well.
                     window.addEventListener('blur', () => {
-                        if (!Alpine.store('exam').isActive || this.showFinishModal || this.showWarningModal) {
+                        if (!Alpine.store('exam').isActive || this.showFinishModal || this.showWarningModal || this.isBlocked) {
                             return;
                         }
 
                         setTimeout(() => {
-                            if (!document.hasFocus() && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal) {
+                            if (!document.hasFocus() && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal && !this.isBlocked) {
                                 this.handleViolation(
                                     'Fokus jendela ujian terdeteksi keluar. Ini dianggap pelanggaran.',
                                     'fullscreen_exit'
@@ -655,7 +685,7 @@
                     // Fullscreen Exit Detection - Only if enabled
                     @if($exam->enable_tab_tolerance)
                     const onFullscreenChange = () => {
-                        if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal) {
+                        if (!document.fullscreenElement && Alpine.store('exam').isActive && !this.showFinishModal && !this.showWarningModal && !this.isBlocked) {
                             this.handleViolation('Anda keluar dari mode layar penuh (fullscreen).');
                         }
                     };
@@ -710,6 +740,9 @@
                 },
 
                 beginExam() {
+                    if (this.isBlocked) {
+                        return;
+                    }
                     this.showStartOverlay = false;
                     try {
                         sessionStorage.setItem(`exam_started_attempt_${this.attemptId}`, '1');
@@ -738,10 +771,16 @@
                 
                 resumeExam() {
                     this.showWarningModal = false;
+                    if (this.isBlocked) {
+                        return;
+                    }
                     document.documentElement.requestFullscreen().catch((e) => {});
                 },
 
                 finishExam() {
+                    if (this.isBlocked) {
+                        return;
+                    }
                     if (this.currentQuestion !== this.questions.length - 1) {
                         return;
                     }
@@ -749,6 +788,9 @@
                 },
 
                 async submitExam() {
+                     if (this.isBlocked) {
+                         return;
+                     }
                      this.isSubmitting = true;
                      await this.flushPendingSaves();
 
@@ -782,6 +824,7 @@
                 },
 
                 saveProgress(questionId) {
+                    if (this.isBlocked) return;
                     const answer = this.answers[questionId];
                     if (answer === undefined || answer === null) return;
 

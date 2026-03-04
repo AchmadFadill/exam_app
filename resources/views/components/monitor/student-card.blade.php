@@ -1,6 +1,6 @@
 @props(['student'])
 
-<div class="bg-white rounded-lg border {{ $student['tab_alert'] >= 3 ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200' }} p-4 shadow-sm relative overflow-hidden">
+<div class="bg-white rounded-lg border {{ $student['status'] === 'blocked' || $student['tab_alert'] >= 3 ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200' }} p-4 shadow-sm relative overflow-hidden">
     @if(in_array($student['status'], ['completed', 'submitted', 'graded']))
         <div class="absolute top-0 right-0 p-1.5 bg-green-500 rounded-bl-lg">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -14,8 +14,9 @@
         <div>
              <h4 class="font-semibold text-text-main text-sm truncate w-32 md:w-40">{{ $student['name'] }}</h4>
              <p class="text-xs text-text-muted mb-0.5">{{ $student['class'] ?? 'XI IPA 1' }}</p>
-             <p class="text-xs {{ $student['status'] == 'working' ? 'text-primary' : 'text-text-muted' }}">
+             <p class="text-xs {{ $student['status'] == 'working' || $student['status'] == 'in_progress' ? 'text-primary' : ($student['status'] === 'blocked' ? 'text-red-600 font-semibold' : 'text-text-muted') }}">
                  @if($student['status'] == 'working' || $student['status'] == 'in_progress') Sedang Mengerjakan
+                 @elseif($student['status'] === 'blocked') Diblokir - Menunggu Guru
                  @elseif(in_array($student['status'], ['completed', 'submitted', 'graded'])) Selesai
                  @else Belum Mulai @endif
              </p>

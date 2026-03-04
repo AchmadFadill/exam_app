@@ -37,7 +37,7 @@ class AutoSubmitExams extends Command
         $this->info('Starting auto-submission check...');
 
         $attempts = ExamAttempt::with('exam.questions')
-            ->where('status', ExamAttemptStatus::InProgress->value)
+            ->whereIn('status', [ExamAttemptStatus::InProgress->value, ExamAttemptStatus::Blocked->value])
             ->get();
 
         $count = 0;

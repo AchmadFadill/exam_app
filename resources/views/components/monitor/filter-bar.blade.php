@@ -24,6 +24,7 @@
                 <select wire:model.live="filterStatus" class="appearance-none w-full bg-gray-50 border border-gray-200 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 text-sm transition-all duration-200">
                     <option value="">Status Pengerjaan</option>
                     <option value="working">Sedang Mengerjakan</option>
+                    <option value="blocked">Diblokir</option>
                     <option value="completed">Selesai</option>
                     <option value="not_started">Belum Mulai</option>
                 </select>
