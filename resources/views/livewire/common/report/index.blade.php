@@ -58,4 +58,38 @@
             @endforelse
         </tbody>
     </x-table>
+
+    @if(method_exists($results, 'hasPages') && $results->hasPages())
+        <div class="mt-4 border border-border-main rounded-xl px-4 py-3 bg-bg-surface">
+            <div class="flex items-center justify-between gap-3">
+                <button
+                    type="button"
+                    wire:click="previousPage"
+                    @disabled($results->onFirstPage())
+                    class="h-8 w-8 rounded-lg border border-border-main bg-white text-text-muted hover:text-text-main hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                    aria-label="Halaman sebelumnya"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+
+                <p class="text-[11px] font-bold text-text-muted">
+                    Hal {{ $results->currentPage() }} dari {{ $results->lastPage() }}
+                </p>
+
+                <button
+                    type="button"
+                    wire:click="nextPage"
+                    @disabled(!$results->hasMorePages())
+                    class="h-8 w-8 rounded-lg border border-border-main bg-white text-text-muted hover:text-text-main hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                    aria-label="Halaman berikutnya"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
 </div>

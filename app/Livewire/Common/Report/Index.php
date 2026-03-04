@@ -49,6 +49,11 @@ class Index extends Component
                     $this->applyReportEligibility($q);
                 },
             ])
+            ->withMax([
+                'attempts as latest_attempt_at' => function ($q) {
+                    $this->applyReportEligibility($q);
+                },
+            ], 'updated_at')
             ->withAvg([
                 'attempts as avg_total_score' => function ($q) {
                     $this->applyReportEligibility($q);
@@ -70,14 +75,7 @@ class Index extends Component
         }
 
         $exams = $query
-            ->orderByRaw("
-                CASE status
-                    WHEN 'completed' THEN 0
-                    WHEN 'active' THEN 1
-                    WHEN 'scheduled' THEN 2
-                    ELSE 3
-                END
-            ")
+            ->orderByDesc('latest_attempt_at')
             ->orderByDesc('date')
             ->paginate(10);
 
