@@ -48,11 +48,7 @@ class Index extends Component
                 },
             ], 'total_score');
 
-        if ($isAdmin) {
-            // Admin reports should still list historical exams even when attempt
-            // rows are partially inconsistent after data recovery operations.
-            $query->where('status', '!=', 'draft');
-        } else {
+        if (!$isAdmin) {
             $query->where(function ($q) {
                 $q->whereHas('attempts', function ($attempts) {
                     $this->applyReportEligibility($attempts);
