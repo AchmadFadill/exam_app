@@ -113,7 +113,7 @@ class ExamController extends Controller
         }
 
         return $exam->examQuestions
-            ->sortBy('order')
+            ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
             ->pluck('question_id')
             ->map(fn ($id) => (int) $id)
             ->values()

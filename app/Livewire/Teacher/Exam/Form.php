@@ -319,6 +319,7 @@ class Form extends Component
             })
             ->where('title', $title)
             ->where('subject_id', $subjectId)
+            ->orderBy('id')
             ->get(['id', 'score']);
 
         $groupQuestionIds = $groupQuestions->pluck('id')->toArray();

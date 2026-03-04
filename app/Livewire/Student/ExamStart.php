@@ -93,7 +93,7 @@ class ExamStart extends Component
 
                 // Ordered question IDs (respects exam_questions.order column)
                 $orderedQuestionIds = $exam->examQuestions
-                    ->sortBy('order')
+                    ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
                     ->pluck('question_id')
                     ->values()
                     ->toArray();

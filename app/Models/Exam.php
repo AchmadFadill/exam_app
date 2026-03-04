@@ -46,14 +46,17 @@ class Exam extends Model
 
     public function examQuestions(): HasMany
     {
-        return $this->hasMany(ExamQuestion::class)->orderBy('order');
+        return $this->hasMany(ExamQuestion::class)
+            ->orderBy('order')
+            ->orderBy('question_id');
     }
 
     public function questions(): BelongsToMany
     {
         return $this->belongsToMany(Question::class, 'exam_questions')
             ->withPivot('order', 'score')
-            ->orderBy('exam_questions.order');
+            ->orderBy('exam_questions.order')
+            ->orderBy('exam_questions.question_id');
     }
 
     public function attempts(): HasMany
