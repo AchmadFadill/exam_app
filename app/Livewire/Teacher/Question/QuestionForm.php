@@ -291,6 +291,15 @@ class QuestionForm extends Component
                 if ($this->isEdit && $this->questionId) {
                     // Update
                     $question = Question::findOrFail($this->questionId);
+
+                    // Prevent answer-structure drift on questions that already have finalized attempts.
+                    if ($this->hasFinalizedAttemptsForQuestion((int) $question->id)
+                        && $this->isAnswerStructureChanged($question)) {
+                        throw new \Exception(
+                            'Soal ini sudah dipakai pada ujian yang selesai. Ubah opsi/kunci berpotensi merusak nilai historis. '
+                            . 'Silakan duplikasi soal lalu edit versi duplikat.'
+                        );
+                    }
                     
                     // Delete old image if new one uploaded
                     if ($this->questionImage && $question->image_path) {
@@ -348,6 +357,56 @@ class QuestionForm extends Component
         } catch (\Exception $e) {
             $this->dispatch('notify', ['message' => 'Error: ' . $e->getMessage(), 'type' => 'error']);
         }
+    }
+
+    private function hasFinalizedAttemptsForQuestion(int $questionId): bool
+    {
+        return DB::table('exam_questions as eq')
+            ->join('exam_attempts as ea', 'ea.exam_id', '=', 'eq.exam_id')
+            ->where('eq.question_id', $questionId)
+            ->whereNotNull('ea.submitted_at')
+            ->exists();
+    }
+
+    private function isAnswerStructureChanged(Question $question): bool
+    {
+        $newType = (string) ($this->questionForm['type'] ?? '');
+        if ($newType !== (string) $question->type) {
+            return true;
+        }
+
+        if ($newType !== 'multiple_choice') {
+            return false;
+        }
+
+        $labels = ['A', 'B', 'C', 'D', 'E'];
+        $existing = $question->options()->get()->keyBy('label');
+
+        // Option count change = structure change.
+        if ((int) $this->optionCount !== (int) $existing->count()) {
+            return true;
+        }
+
+        // Correct option label change.
+        $currentCorrectLabel = optional($existing->firstWhere('is_correct', true))->label;
+        if ((string) ($this->questionForm['correct_option'] ?? '') !== (string) ($currentCorrectLabel ?? '')) {
+            return true;
+        }
+
+        // Option text per label change.
+        foreach ($labels as $index => $label) {
+            if ($index >= (int) $this->optionCount) {
+                continue;
+            }
+
+            $existingText = trim((string) optional($existing->get($label))->text);
+            $incomingText = trim((string) ($this->questionForm['options'][$index] ?? ''));
+            if ($existingText !== $incomingText) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function createOptions($question)
