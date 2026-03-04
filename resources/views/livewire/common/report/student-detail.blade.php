@@ -60,21 +60,16 @@
                 $resolvedOption = $question->options->where('label', strtoupper($rawAnswer))->first();
             }
             $correctOption = $question->options->where('is_correct', true)->first();
-            $resolvedOptionId = $resolvedOption?->id
-                ?? ($answer?->selected_option_id ?? $legacyOptionId);
             $isAnswered = $answer !== null && ($question->type === 'essay'
                 ? $rawAnswer !== ''
                 : (!is_null($answer->selected_option_id) || !is_null($legacyOptionId) || $rawAnswer !== ''));
-            // For MC display, prefer deterministic comparison:
-            // selected option id vs active correct-option id.
+            // Keep correctness source aligned with report summary:
+            // use persisted grading result (score_awarded / is_correct), not
+            // current key inference from resolved option.
             if ($question->type === 'multiple_choice') {
-                if ($isAnswered && !is_null($resolvedOptionId) && $correctOption) {
-                    $isCorrect = (int) $resolvedOptionId === (int) $correctOption->id;
-                } else {
-                    $isCorrect = !is_null($answer?->is_correct)
-                        ? (bool) $answer->is_correct
-                        : ((int) ($answer?->score_awarded ?? 0) > 0);
-                }
+                $isCorrect = !is_null($answer?->is_correct)
+                    ? (bool) $answer->is_correct
+                    : ((int) ($answer?->score_awarded ?? 0) > 0);
             } else {
                 $isCorrect = (bool) ($answer?->is_correct === true);
             }

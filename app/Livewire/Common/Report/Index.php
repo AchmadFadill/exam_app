@@ -9,6 +9,8 @@ class Index extends Component
 {
     use HasDynamicLayout;
     use \Livewire\WithPagination;
+    
+    public string $subjectFilter = '';
 
     /**
      * @return array<int, string>
@@ -28,6 +30,11 @@ class Index extends Component
                 ->orWhereIn('status', $this->finalizedStatuses())
                 ->orWhereHas('answers');
         });
+    }
+
+    public function updatedSubjectFilter(): void
+    {
+        $this->resetPage();
     }
 
     public function render()
@@ -59,6 +66,10 @@ class Index extends Component
                     $this->applyReportEligibility($q);
                 },
             ], 'total_score');
+
+        if (filled($this->subjectFilter)) {
+            $query->where('subject_id', (int) $this->subjectFilter);
+        }
 
         if (!$isAdmin) {
             $query->where(function ($q) {
@@ -114,8 +125,17 @@ class Index extends Component
         // Re-set the collection to the paginator instance to preserve pagination links
         $exams->setCollection($results);
 
+        $subjects = \App\Models\Subject::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($subject) => [
+                'id' => (int) $subject->id,
+                'name' => (string) $subject->name,
+            ]);
+
         return $this->applyLayout('livewire.common.report.index', [
             'results' => $exams, // Passing paginator
+            'subjects' => $subjects,
             'detailRoute' => $isAdmin ? 'admin.reports.detail' : 'teacher.reports.detail'
         ]);
     }

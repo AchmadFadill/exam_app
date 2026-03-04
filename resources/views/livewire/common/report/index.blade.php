@@ -4,6 +4,16 @@
         subtitle="Lihat statistik dan hasil ujian per kelas" 
     />
 
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <label for="subjectFilter" class="text-[10px] font-black text-text-muted uppercase tracking-widest">Filter Mapel</label>
+        <select id="subjectFilter" wire:model.live="subjectFilter" class="w-full sm:w-auto px-3 py-2 border border-border-main rounded-xl bg-white text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
+            <option value="">Semua Mata Pelajaran</option>
+            @foreach($subjects as $subject)
+                <option value="{{ $subject['id'] }}">{{ $subject['name'] }}</option>
+            @endforeach
+        </select>
+    </div>
+
     <!-- Results List -->
     <x-table>
         <x-table.thead>
