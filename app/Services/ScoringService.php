@@ -149,12 +149,48 @@ class ScoringService
         }
 
         $raw = trim((string) $rawAnswer);
-        if ($raw !== '' && is_numeric($raw)) {
-            return QuestionOption::query()
+        if ($raw === '') {
+            return null;
+        }
+
+        if (is_numeric($raw)) {
+            $numericMatch = QuestionOption::query()
                 ->where('id', (int) $raw)
                 ->withTrashed()
                 ->where('question_id', $questionId)
                 ->first();
+
+            if ($numericMatch) {
+                return $numericMatch;
+            }
+        }
+
+        // Legacy fallback: label answer (A-E), still constrained to the same question.
+        if (preg_match('/^[A-E]$/i', $raw) === 1) {
+            $labelMatch = QuestionOption::query()
+                ->where('question_id', $questionId)
+                ->withTrashed()
+                ->where('label', strtoupper($raw))
+                ->first();
+
+            if ($labelMatch) {
+                return $labelMatch;
+            }
+        }
+
+        // Legacy fallback: full option text saved in answer column.
+        // To avoid false positives when duplicated text exists, only accept unique match.
+        $textMatches = QuestionOption::query()
+            ->where('question_id', $questionId)
+            ->withTrashed()
+            ->get()
+            ->filter(function (QuestionOption $option) use ($raw): bool {
+                return strtoupper(trim((string) $option->text)) === strtoupper($raw);
+            })
+            ->values();
+
+        if ($textMatches->count() === 1) {
+            return $textMatches->first();
         }
 
         return null;

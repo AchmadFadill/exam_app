@@ -56,10 +56,16 @@
             if (!$resolvedOption && $legacyOptionId) {
                 $resolvedOption = $question->options->where('id', $legacyOptionId)->first();
             }
+            if (!$resolvedOption && preg_match('/^[A-E]$/i', $rawAnswer) === 1) {
+                $resolvedOption = $question->options->where('label', strtoupper($rawAnswer))->first();
+            }
             $isAnswered = $answer !== null && ($question->type === 'essay'
                 ? $rawAnswer !== ''
                 : (!is_null($answer->selected_option_id) || !is_null($legacyOptionId) || $rawAnswer !== ''));
-            $isCorrect = $answer?->is_correct ?? false;
+            $isCorrect = (bool) (
+                $answer?->is_correct === true
+                || ($question->type === 'multiple_choice' && $resolvedOption && (bool) $resolvedOption->is_correct)
+            );
             // If shuffle is on, we might need original order, but for report default order is fine or use pivot order
         @endphp
         <div class="bg-white rounded-[1.5rem] sm:rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
