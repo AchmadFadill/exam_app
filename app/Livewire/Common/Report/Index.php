@@ -37,13 +37,6 @@ class Index extends Component
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
-            ->where(function ($q) {
-                $q->whereHas('attempts', function ($attempts) {
-                    $this->applyReportEligibility($attempts);
-                })
-                // Keep published exams visible even if legacy attempt rows are inconsistent.
-                ->orWhere('is_published', true);
-            })
             ->withCount([
                 'attempts as participants_count' => function ($q) {
                     $this->applyReportEligibility($q);
@@ -55,7 +48,20 @@ class Index extends Component
                 },
             ], 'total_score');
 
-        // Teacher only sees their own exams
+        if ($isAdmin) {
+            // Admin reports should still list historical exams even when attempt
+            // rows are partially inconsistent after data recovery operations.
+            $query->where('status', '!=', 'draft');
+        } else {
+            $query->where(function ($q) {
+                $q->whereHas('attempts', function ($attempts) {
+                    $this->applyReportEligibility($attempts);
+                })
+                ->orWhere('is_published', true);
+            });
+        }
+
+        // Teacher only sees their own exams.
         if (!$isAdmin && $user->isTeacher()) {
             $query->where('teacher_id', $user->teacher->id ?? 0);
         }
