@@ -59,16 +59,22 @@
             if (!$resolvedOption && preg_match('/^[A-E]$/i', $rawAnswer) === 1) {
                 $resolvedOption = $question->options->where('label', strtoupper($rawAnswer))->first();
             }
+            $correctOption = $question->options->where('is_correct', true)->first();
+            $resolvedOptionId = $resolvedOption?->id
+                ?? ($answer?->selected_option_id ?? $legacyOptionId);
             $isAnswered = $answer !== null && ($question->type === 'essay'
                 ? $rawAnswer !== ''
                 : (!is_null($answer->selected_option_id) || !is_null($legacyOptionId) || $rawAnswer !== ''));
-            // Use persisted grading result as source of truth.
-            // Do not infer correctness from current option key because historical
-            // option/key changes can make everything appear "correct" incorrectly.
+            // For MC display, prefer deterministic comparison:
+            // selected option id vs active correct-option id.
             if ($question->type === 'multiple_choice') {
-                $isCorrect = !is_null($answer?->is_correct)
-                    ? (bool) $answer->is_correct
-                    : ((int) ($answer?->score_awarded ?? 0) > 0);
+                if ($isAnswered && !is_null($resolvedOptionId) && $correctOption) {
+                    $isCorrect = (int) $resolvedOptionId === (int) $correctOption->id;
+                } else {
+                    $isCorrect = !is_null($answer?->is_correct)
+                        ? (bool) $answer->is_correct
+                        : ((int) ($answer?->score_awarded ?? 0) > 0);
+                }
             } else {
                 $isCorrect = (bool) ($answer?->is_correct === true);
             }
@@ -120,9 +126,6 @@
                         <div class="flex items-start gap-3 pt-3 border-t border-gray-200/50">
                             <div class="w-24 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wide pt-1">Kunci Jawaban</div>
                             <div class="flex-1">
-                                @php
-                                    $correctOption = $question->options->where('is_correct', true)->first();
-                                @endphp
                                 <div class="font-medium text-green-700 flex items-center gap-2">
                                     <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-green-100 border border-green-200 text-green-700">
                                         {{ $correctOption->label ?? '?' }}
