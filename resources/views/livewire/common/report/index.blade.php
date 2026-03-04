@@ -58,4 +58,10 @@
             @endforelse
         </tbody>
     </x-table>
+
+    @if(method_exists($results, 'hasPages') && $results->hasPages())
+    <div class="mt-6">
+        {{ $results->links() }}
+    </div>
+    @endif
 </div>

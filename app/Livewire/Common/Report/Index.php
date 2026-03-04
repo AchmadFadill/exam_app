@@ -49,14 +49,22 @@ class Index extends Component
                 'attempts as avg_total_score' => function ($q) {
                     $this->applyReportEligibility($q);
                 },
-            ], 'total_score');
+            ], 'total_score')
+            ->withMax([
+                'attempts as latest_attempt_at' => function ($q) {
+                    $this->applyReportEligibility($q);
+                },
+            ], 'updated_at');
 
         // Teacher only sees their own exams
         if (!$isAdmin && $user->isTeacher()) {
             $query->where('teacher_id', $user->teacher->id ?? 0);
         }
 
-        $exams = $query->latest('date')->paginate(10);
+        $exams = $query
+            ->orderByDesc('latest_attempt_at')
+            ->orderByDesc('date')
+            ->paginate(10);
 
         // Transform collection for view
         $results = $exams->getCollection()->map(function ($exam) {
