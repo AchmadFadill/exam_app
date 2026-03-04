@@ -21,6 +21,15 @@ class Index extends Component
         );
     }
 
+    private function applyReportEligibility($query): void
+    {
+        $query->where(function ($sub) {
+            $sub->whereNotNull('submitted_at')
+                ->orWhereIn('status', $this->finalizedStatuses())
+                ->orWhereHas('answers');
+        });
+    }
+
     public function render()
     {
         $isAdmin = request()->is('admin/*');
@@ -29,25 +38,16 @@ class Index extends Component
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
             ->whereHas('attempts', function ($q) {
-                $q->where(function ($sub) {
-                    $sub->whereNotNull('submitted_at')
-                        ->orWhereIn('status', $this->finalizedStatuses());
-                });
+                $this->applyReportEligibility($q);
             })
             ->withCount([
                 'attempts as participants_count' => function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->whereNotNull('submitted_at')
-                            ->orWhereIn('status', $this->finalizedStatuses());
-                    });
+                    $this->applyReportEligibility($q);
                 },
             ])
             ->withAvg([
                 'attempts as avg_total_score' => function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->whereNotNull('submitted_at')
-                            ->orWhereIn('status', $this->finalizedStatuses());
-                    });
+                    $this->applyReportEligibility($q);
                 },
             ], 'total_score');
 

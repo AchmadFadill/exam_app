@@ -174,7 +174,7 @@ class Detail extends Component
                         if ($questionType === 'multiple_choice') {
                             $raw = trim((string) ($answer->answer ?? ''));
                             return !is_null($answer->selected_option_id)
-                                || ($raw !== '' && is_numeric($raw));
+                                || $raw !== '';
                         }
 
                         if ($questionType === 'essay') {
