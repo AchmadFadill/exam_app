@@ -144,6 +144,19 @@ class ScoringService
         ?Exam $exam = null
     ): ?QuestionOption
     {
+        $raw = trim((string) $rawAnswer);
+
+        // Highest priority for shuffle-answer exams:
+        // if legacy raw answer looks positional (A/B/C... or small number),
+        // resolve by attempt snapshot (options_order) because that is what
+        // the student actually saw on screen.
+        if ($this->isLikelyPositionalRaw($raw)) {
+            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
+            if ($snapshotMatch) {
+                return $snapshotMatch;
+            }
+        }
+
         if ($selectedOptionId) {
             $option = QuestionOption::query()
                 ->where('id', (int) $selectedOptionId)
@@ -152,12 +165,6 @@ class ScoringService
 
             if ($option && (int) $option->question_id === $questionId) {
                 return $option;
-            }
-
-            // For shuffle-answer legacy rows, recover from stored display position first.
-            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, (string) ($rawAnswer ?? ''), $attempt, $exam);
-            if ($snapshotMatch) {
-                return $snapshotMatch;
             }
 
             // Legacy recovery: selected option id points to another question.
@@ -175,7 +182,6 @@ class ScoringService
             }
         }
 
-        $raw = trim((string) $rawAnswer);
         if ($raw === '') {
             return null;
         }
@@ -286,6 +292,28 @@ class ScoringService
         }
 
         return null;
+    }
+
+    private function isLikelyPositionalRaw(string $raw): bool
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return false;
+        }
+
+        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
+            return true;
+        }
+
+        if (!is_numeric($raw)) {
+            return false;
+        }
+
+        // Position-based answers are usually small integers (0..10).
+        // Large integers are likely true option IDs.
+        $n = (int) $raw;
+
+        return $n >= 0 && $n <= 10;
     }
 
     private function examPivotScore(Exam $exam, int $questionId): int
