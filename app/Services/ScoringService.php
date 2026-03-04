@@ -78,8 +78,6 @@ class ScoringService
                     questionId: (int) $answer->question_id,
                     selectedOptionId: $answer->selected_option_id,
                     rawAnswer: is_string($answer->answer) ? $answer->answer : null,
-                    attempt: $attempt,
-                    exam: $exam,
                 );
 
                 if ($selectedOption) {
@@ -136,13 +134,7 @@ class ScoringService
         ];
     }
 
-    private function resolveSelectedOptionById(
-        int $questionId,
-        mixed $selectedOptionId,
-        ?string $rawAnswer = null,
-        ?ExamAttempt $attempt = null,
-        ?Exam $exam = null
-    ): ?QuestionOption
+    private function resolveSelectedOptionById(int $questionId, mixed $selectedOptionId, ?string $rawAnswer = null): ?QuestionOption
     {
         $raw = trim((string) $rawAnswer);
 
@@ -157,14 +149,6 @@ class ScoringService
             // never override it with legacy raw-answer inference.
             if ($option && (int) $option->question_id === $questionId) {
                 return $option;
-            }
-
-            // If selected option id is invalid/mismatch, try positional legacy recovery.
-            if ($this->isLikelyPositionalRaw($raw)) {
-                $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
-                if ($snapshotMatch) {
-                    return $snapshotMatch;
-                }
             }
 
             // Legacy recovery: selected option id points to another question.
@@ -184,15 +168,6 @@ class ScoringService
 
         if ($raw === '') {
             return null;
-        }
-
-        // For shuffle-answer legacy rows, treat raw value as rendered position
-        // (e.g. A/B/C or 1/2/3) based on attempt snapshot.
-        if ($this->isLikelyPositionalRaw($raw)) {
-            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
-            if ($snapshotMatch) {
-                return $snapshotMatch;
-            }
         }
 
         if (is_numeric($raw)) {
@@ -236,130 +211,6 @@ class ScoringService
         }
 
         return null;
-    }
-
-    private function resolveFromAttemptOptionOrder(
-        int $questionId,
-        string $raw,
-        ?ExamAttempt $attempt,
-        ?Exam $exam
-    ): ?QuestionOption {
-        if (!$attempt || !$exam || !$exam->shuffle_answers) {
-            return null;
-        }
-
-        $optionIds = $attempt->options_order[(string) $questionId] ?? null;
-        if (!is_array($optionIds) || empty($optionIds)) {
-            // Legacy fallback when options_order snapshot is missing:
-            // reconstruct deterministic order used by ExamStart.
-            $optionIds = QuestionOption::query()
-                ->withTrashed()
-                ->where('question_id', $questionId)
-                ->orderBy('id')
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->values()
-                ->all();
-
-            if (empty($optionIds)) {
-                return null;
-            }
-
-            $seed = (int) $attempt->student_id + (int) $exam->id + $questionId;
-            $optionIds = $this->seededShuffle($optionIds, $seed);
-        }
-
-        $indexes = [];
-        $raw = trim($raw);
-        if ($raw === '') {
-            return null;
-        }
-
-        // Numeric legacy value can be either 1-based or 0-based position.
-        if (is_numeric($raw)) {
-            $n = (int) $raw;
-            $indexes[] = $n - 1;
-            $indexes[] = $n;
-        }
-
-        // Label legacy value A/B/C... can also represent rendered position.
-        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
-            $indexes[] = ord(strtoupper($raw)) - 65;
-        }
-
-        $indexes = array_values(array_unique(array_filter($indexes, fn ($idx) => $idx >= 0)));
-        if (empty($indexes)) {
-            return null;
-        }
-
-        foreach ($indexes as $idx) {
-            if (!array_key_exists($idx, $optionIds)) {
-                continue;
-            }
-
-            $candidateOptionId = (int) $optionIds[$idx];
-            $candidate = QuestionOption::query()
-                ->where('id', $candidateOptionId)
-                ->where('question_id', $questionId)
-                ->withTrashed()
-                ->first();
-
-            if ($candidate) {
-                return $candidate;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Deterministic Fisher-Yates shuffle.
-     *
-     * @param  array<int>  $items
-     * @return array<int>
-     */
-    private function seededShuffle(array $items, int $seed): array
-    {
-        $items = array_values($items);
-        $count = count($items);
-        if ($count <= 1) {
-            return $items;
-        }
-
-        $a = 1664525;
-        $c = 1013904223;
-        $m = 2 ** 32;
-        $rand = $seed % $m;
-
-        for ($i = $count - 1; $i > 0; $i--) {
-            $rand = ($a * $rand + $c) % $m;
-            $j = $rand % ($i + 1);
-            [$items[$i], $items[$j]] = [$items[$j], $items[$i]];
-        }
-
-        return $items;
-    }
-
-    private function isLikelyPositionalRaw(string $raw): bool
-    {
-        $raw = trim($raw);
-        if ($raw === '') {
-            return false;
-        }
-
-        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
-            return true;
-        }
-
-        if (!is_numeric($raw)) {
-            return false;
-        }
-
-        // Position-based answers are usually small integers (0..10).
-        // Large integers are likely true option IDs.
-        $n = (int) $raw;
-
-        return $n >= 0 && $n <= 10;
     }
 
     private function examPivotScore(Exam $exam, int $questionId): int
