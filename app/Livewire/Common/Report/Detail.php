@@ -139,9 +139,7 @@ class Detail extends Component
             ->map(fn (ExamAttemptStatus $status) => $status->value)
             ->all();
 
-        // Exam Summary (Calculations should filter for valid/finished attempts if needed, 
-        // but for now simple stats on all attempts is acceptable or we can filter strictly for stats)
-        // Let's keep stats based on submitted/graded attempts to avoid skewing with InProgress 0s
+        // Exam Summary: prefer score aggregated from student_answers to avoid stale total_score drift.
         $finishedAttempts = $submittedAttemptsCollection->filter(function ($attempt) use ($finalizedStatuses) {
             $status = $attempt->status instanceof ExamAttemptStatus
                 ? $attempt->status->value
@@ -149,6 +147,14 @@ class Detail extends Component
 
             return !is_null($attempt->submitted_at) || in_array($status, $finalizedStatuses, true);
         });
+
+        $resolvedFinishedScores = $finishedAttempts->map(function ($attempt) {
+            if ((int) ($attempt->answers_count ?? 0) > 0) {
+                return (float) ($attempt->answers_sum_score_awarded ?? 0);
+            }
+
+            return is_null($attempt->total_score) ? null : (float) $attempt->total_score;
+        })->filter(fn ($score) => !is_null($score))->values();
         
         $exam = [
             'id' => $examModel->id,
@@ -156,9 +162,9 @@ class Detail extends Component
             'class' => $examModel->classrooms->pluck('name')->join(', '),
             'subject' => $examModel->subject->name ?? '-',
             'date' => $examModel->date ? $examModel->date->format('d M Y') : '-',
-            'avg_score' => $finishedAttempts->count() > 0 ? number_format($finishedAttempts->avg('total_score'), 1) : 0,
-            'highest' => $finishedAttempts->max('total_score') ?? 0,
-            'lowest' => $finishedAttempts->min('total_score') ?? 0,
+            'avg_score' => $resolvedFinishedScores->count() > 0 ? number_format($resolvedFinishedScores->avg(), 1) : 0,
+            'highest' => $resolvedFinishedScores->count() > 0 ? (float) $resolvedFinishedScores->max() : 0,
+            'lowest' => $resolvedFinishedScores->count() > 0 ? (float) $resolvedFinishedScores->min() : 0,
             'participants' => $submittedAttemptsCollection->count() // Count all who started
         ];
 
@@ -195,16 +201,25 @@ class Detail extends Component
                     ->count();
             }
 
+            $resolvedScore = null;
+            if ($attempt) {
+                if ((int) ($attempt->answers_count ?? 0) > 0) {
+                    $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
+                } elseif (!is_null($attempt->total_score)) {
+                    $resolvedScore = (float) $attempt->total_score;
+                }
+            }
+
             if (!$attempt) {
                 $status = 'Belum Mengerjakan';
             } elseif ($attempt->status === ExamAttemptStatus::Graded) {
-                $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
             } elseif (in_array($attempt->status, [ExamAttemptStatus::Submitted, ExamAttemptStatus::Completed, ExamAttemptStatus::TimedOut, ExamAttemptStatus::Abandoned])) {
                 // Check if needs grading (has essays)
                 if ($essayQuestionCount > 0) {
                     $status = 'Pending Penilaian';
                 } else {
-                    $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+                    $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
                 }
             } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
                 $hasNoAnswer = $answeredCount === 0;
@@ -215,23 +230,20 @@ class Detail extends Component
                 }
             } else {
                 // Fallback
-                $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
             }
 
-            $resolvedScore = '-';
-            if ($attempt) {
-                if (!is_null($attempt->total_score)) {
-                    $resolvedScore = $attempt->total_score;
-                } elseif ($answeredCount > 0) {
-                    // Fallback for unfinished/timeout attempts: use accumulated awarded scores.
-                    $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
-                }
+            $displayScore = $resolvedScore;
+            if (is_null($displayScore) && !$attempt) {
+                $displayScore = '-';
+            } elseif (is_null($displayScore)) {
+                $displayScore = '-';
             }
             
             return [
                 'id' => $student->id,
                 'name' => $student->name,
-                'score' => $resolvedScore,
+                'score' => $displayScore,
                 'status' => $status,
                 'started_at' => $attempt && $attempt->started_at ? $attempt->started_at->format('H:i') : '-',
                 'submitted_at' => $attempt && $attempt->submitted_at ? $attempt->submitted_at->format('H:i') : '-',
