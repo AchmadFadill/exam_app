@@ -37,8 +37,12 @@ class Index extends Component
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
-            ->whereHas('attempts', function ($q) {
-                $this->applyReportEligibility($q);
+            ->where(function ($q) {
+                $q->whereHas('attempts', function ($attempts) {
+                    $this->applyReportEligibility($attempts);
+                })
+                // Keep published exams visible even if legacy attempt rows are inconsistent.
+                ->orWhere('is_published', true);
             })
             ->withCount([
                 'attempts as participants_count' => function ($q) {
