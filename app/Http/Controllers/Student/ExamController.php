@@ -47,8 +47,8 @@ class ExamController extends Controller
             ->map(fn ($qId) => $questionMap->get((int) $qId))
             ->filter()
             ->values()
-            ->map(function ($q) use ($attempt) {
-                $options = $this->resolveOptionOrder($q->options, $attempt, (int) $q->id);
+            ->map(function ($q) use ($attempt, $exam) {
+                $options = $this->resolveOptionOrder($q->options, $attempt, (int) $q->id, $exam);
 
             return [
                 'id' => $q->id,
@@ -108,6 +108,17 @@ class ExamController extends Controller
      */
     private function resolveQuestionOrder(Exam $exam, ExamAttempt $attempt): array
     {
+        // Fixed-order mode must always follow exam_questions.order.
+        // Do not trust old attempt snapshots created by previous logic.
+        if (!(bool) $exam->shuffle_questions) {
+            return $exam->examQuestions
+                ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
+                ->pluck('question_id')
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all();
+        }
+
         if (!empty($attempt->question_order) && is_array($attempt->question_order)) {
             return array_values(array_map('intval', $attempt->question_order));
         }
@@ -124,8 +135,13 @@ class ExamController extends Controller
      * @param  Collection<int, \App\Models\QuestionOption>  $options
      * @return Collection<int, \App\Models\QuestionOption>
      */
-    private function resolveOptionOrder(Collection $options, ExamAttempt $attempt, int $questionId): Collection
+    private function resolveOptionOrder(Collection $options, ExamAttempt $attempt, int $questionId, Exam $exam): Collection
     {
+        // In fixed answer-order mode, never apply snapshot reorder.
+        if (!(bool) $exam->shuffle_answers) {
+            return $options->values();
+        }
+
         $optionIds = $attempt->options_order[(string) $questionId] ?? null;
         if (!is_array($optionIds) || empty($optionIds)) {
             return $options->values();

@@ -159,6 +159,25 @@ class TakeExam extends Component
     public function getQuestionsProperty(): Collection
     {
         $attempt = $this->resolveOwnedAttempt();
+        $exam = $this->exam;
+
+        // Fixed-order mode must always follow exam_questions.order.
+        if (!(bool) $exam->shuffle_questions) {
+            $orderedIds = $exam->examQuestions
+                ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
+                ->pluck('question_id')
+                ->values();
+
+            $questionMap = Question::with('options')
+                ->whereIn('id', $orderedIds)
+                ->get()
+                ->keyBy('id');
+
+            return $orderedIds
+                ->map(fn (int $qId) => $questionMap->get($qId))
+                ->filter()
+                ->values();
+        }
 
         // ── Snapshot path (preferred) ────────────────────────────────────────
         if ($attempt && !empty($attempt->question_order)) {
@@ -220,6 +239,11 @@ class TakeExam extends Component
         }
 
         $attempt = $this->resolveOwnedAttempt();
+        $exam = $this->exam;
+
+        if (!(bool) $exam->shuffle_answers) {
+            return $question->options;
+        }
 
         // ── Snapshot path ────────────────────────────────────────────────────
         if ($attempt && !empty($attempt->options_order)) {

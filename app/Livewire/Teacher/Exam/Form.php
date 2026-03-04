@@ -424,7 +424,19 @@ class Form extends Component
 
             // Sync questions with scores and order
             $questionsData = [];
-            foreach ($this->selectedQuestions as $index => $questionId) {
+            $orderedQuestionIds = collect($this->selectedQuestions)
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn ($id) => $id > 0)
+                ->unique()
+                ->values();
+
+            // In fixed-order mode, persist a deterministic base order
+            // so question flow does not depend on click sequence in the UI.
+            if (!$this->shuffle_questions) {
+                $orderedQuestionIds = $orderedQuestionIds->sort()->values();
+            }
+
+            foreach ($orderedQuestionIds as $index => $questionId) {
                 $questionsData[$questionId] = [
                     'order' => $index + 1,
                     'score' => $this->questionScores[$questionId] ?? $this->default_score,
