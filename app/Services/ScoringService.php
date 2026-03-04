@@ -78,6 +78,8 @@ class ScoringService
                     questionId: (int) $answer->question_id,
                     selectedOptionId: $answer->selected_option_id,
                     rawAnswer: is_string($answer->answer) ? $answer->answer : null,
+                    attempt: $attempt,
+                    exam: $exam,
                 );
 
                 if ($selectedOption) {
@@ -134,7 +136,13 @@ class ScoringService
         ];
     }
 
-    private function resolveSelectedOptionById(int $questionId, mixed $selectedOptionId, ?string $rawAnswer = null): ?QuestionOption
+    private function resolveSelectedOptionById(
+        int $questionId,
+        mixed $selectedOptionId,
+        ?string $rawAnswer = null,
+        ?ExamAttempt $attempt = null,
+        ?Exam $exam = null
+    ): ?QuestionOption
     {
         if ($selectedOptionId) {
             $option = QuestionOption::query()
@@ -144,6 +152,12 @@ class ScoringService
 
             if ($option && (int) $option->question_id === $questionId) {
                 return $option;
+            }
+
+            // For shuffle-answer legacy rows, recover from stored display position first.
+            $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, (string) ($rawAnswer ?? ''), $attempt, $exam);
+            if ($snapshotMatch) {
+                return $snapshotMatch;
             }
 
             // Legacy recovery: selected option id points to another question.
@@ -164,6 +178,13 @@ class ScoringService
         $raw = trim((string) $rawAnswer);
         if ($raw === '') {
             return null;
+        }
+
+        // For shuffle-answer legacy rows, treat raw value as rendered position
+        // (e.g. A/B/C or 1/2/3) based on attempt snapshot.
+        $snapshotMatch = $this->resolveFromAttemptOptionOrder($questionId, $raw, $attempt, $exam);
+        if ($snapshotMatch) {
+            return $snapshotMatch;
         }
 
         if (is_numeric($raw)) {
@@ -204,6 +225,64 @@ class ScoringService
 
         if ($textMatches->count() === 1) {
             return $textMatches->first();
+        }
+
+        return null;
+    }
+
+    private function resolveFromAttemptOptionOrder(
+        int $questionId,
+        string $raw,
+        ?ExamAttempt $attempt,
+        ?Exam $exam
+    ): ?QuestionOption {
+        if (!$attempt || !$exam || !$exam->shuffle_answers) {
+            return null;
+        }
+
+        $optionIds = $attempt->options_order[(string) $questionId] ?? null;
+        if (!is_array($optionIds) || empty($optionIds)) {
+            return null;
+        }
+
+        $indexes = [];
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        // Numeric legacy value can be either 1-based or 0-based position.
+        if (is_numeric($raw)) {
+            $n = (int) $raw;
+            $indexes[] = $n - 1;
+            $indexes[] = $n;
+        }
+
+        // Label legacy value A/B/C... can also represent rendered position.
+        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
+            $indexes[] = ord(strtoupper($raw)) - 65;
+        }
+
+        $indexes = array_values(array_unique(array_filter($indexes, fn ($idx) => $idx >= 0)));
+        if (empty($indexes)) {
+            return null;
+        }
+
+        foreach ($indexes as $idx) {
+            if (!array_key_exists($idx, $optionIds)) {
+                continue;
+            }
+
+            $candidateOptionId = (int) $optionIds[$idx];
+            $candidate = QuestionOption::query()
+                ->where('id', $candidateOptionId)
+                ->where('question_id', $questionId)
+                ->withTrashed()
+                ->first();
+
+            if ($candidate) {
+                return $candidate;
+            }
         }
 
         return null;
