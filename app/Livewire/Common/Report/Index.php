@@ -37,6 +37,13 @@ class Index extends Component
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
+            ->with([
+                'attempts' => function ($q) {
+                    $this->applyReportEligibility($q);
+                    $q->withSum('answers', 'score_awarded')
+                        ->select(['id', 'exam_id', 'total_score']);
+                },
+            ])
             ->withCount([
                 'attempts as participants_count' => function ($q) {
                     $this->applyReportEligibility($q);
@@ -62,10 +69,36 @@ class Index extends Component
             $query->where('teacher_id', $user->teacher->id ?? 0);
         }
 
-        $exams = $query->latest('date')->paginate(10);
+        $exams = $query
+            ->orderByRaw("
+                CASE status
+                    WHEN 'completed' THEN 0
+                    WHEN 'active' THEN 1
+                    WHEN 'scheduled' THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderByDesc('date')
+            ->paginate(10);
 
         // Transform collection for view
         $results = $exams->getCollection()->map(function ($exam) {
+            $resolvedAttemptScores = $exam->attempts
+                ->map(function ($attempt) {
+                    $answersSum = $attempt->answers_sum_score_awarded;
+                    if (!is_null($answersSum)) {
+                        return (float) $answersSum;
+                    }
+
+                    return is_null($attempt->total_score) ? null : (float) $attempt->total_score;
+                })
+                ->filter(fn ($score) => !is_null($score))
+                ->values();
+
+            $avgScore = $resolvedAttemptScores->count() > 0
+                ? $resolvedAttemptScores->avg()
+                : (float) ($exam->avg_total_score ?? 0);
+
             return [
                 'id' => $exam->id,
                 'exam_name' => $exam->name,
@@ -75,7 +108,7 @@ class Index extends Component
                 'date' => $exam->date ? $exam->date->format('d M Y') : '-',
                 'participants' => (int) ($exam->participants_count ?? 0),
                 'avg_score' => $exam->participants_count > 0
-                    ? number_format((float) ($exam->avg_total_score ?? 0), 1)
+                    ? number_format($avgScore, 1)
                     : 0,
             ];
         });
