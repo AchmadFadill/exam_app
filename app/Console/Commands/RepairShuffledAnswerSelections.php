@@ -15,6 +15,7 @@ class RepairShuffledAnswerSelections extends Command
         {--exam= : Filter by exam_id}
         {--attempt= : Filter by exam_attempt_id}
         {--chunk=500 : Chunk size}
+        {--force-label-index : Also remap using selected option label index (A=0, B=1, ...) when raw answer is no longer positional}
         {--include-active : Include in-progress/blocked attempts}
         {--apply : Persist updates (default dry-run)}';
 
@@ -26,6 +27,7 @@ class RepairShuffledAnswerSelections extends Command
         $attemptId = $this->option('attempt');
         $apply = (bool) $this->option('apply');
         $includeActive = (bool) $this->option('include-active');
+        $forceLabelIndex = (bool) $this->option('force-label-index');
         $chunkSize = max(100, (int) $this->option('chunk'));
 
         if (!$examId && !$attemptId) {
@@ -71,6 +73,20 @@ class RepairShuffledAnswerSelections extends Command
                 ->orderBy('sa.id')
                 ->get();
 
+            $selectedOptionIds = $answers
+                ->pluck('selected_option_id')
+                ->filter(fn ($id) => !is_null($id))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+
+            $selectedOptionMap = QuestionOption::query()
+                ->withTrashed()
+                ->whereIn('id', $selectedOptionIds)
+                ->get(['id', 'label', 'question_id'])
+                ->keyBy('id');
+
             $candidateOptionIds = [];
             $updates = [];
 
@@ -79,6 +95,12 @@ class RepairShuffledAnswerSelections extends Command
 
                 $raw = trim((string) ($row->answer ?? ''));
                 $index = $this->extractPositionIndex($raw);
+                if ($index === null && $forceLabelIndex && !is_null($row->selected_option_id)) {
+                    $selected = $selectedOptionMap->get((int) $row->selected_option_id);
+                    if ($selected && (int) $selected->question_id === (int) $row->question_id) {
+                        $index = $this->labelToIndex((string) ($selected->label ?? ''));
+                    }
+                }
                 if ($index === null) {
                     $skipped++;
                     continue;
@@ -216,5 +238,16 @@ class RepairShuffledAnswerSelections extends Command
         }
 
         return $n > 0 ? $n - 1 : 0;
+    }
+
+    private function labelToIndex(string $label): ?int
+    {
+        $label = trim(strtoupper($label));
+        if (preg_match('/^[A-Z]$/', $label) !== 1) {
+            return null;
+        }
+
+        $idx = ord($label) - 65;
+        return $idx >= 0 ? $idx : null;
     }
 }
