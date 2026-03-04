@@ -10,24 +10,45 @@ class Index extends Component
     use HasDynamicLayout;
     use \Livewire\WithPagination;
 
+    /**
+     * @return array<int, string>
+     */
+    private function finalizedStatuses(): array
+    {
+        return \array_map(
+            static fn (\App\Enums\ExamAttemptStatus $status): string => $status->value,
+            \App\Enums\ExamAttemptStatus::finalized()
+        );
+    }
+
     public function render()
     {
         $isAdmin = request()->is('admin/*');
         $user = auth()->user();
+        $finalized = $this->finalizedStatuses();
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
             ->whereHas('attempts', function ($q) {
-                $q->whereNotNull('submitted_at');
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('submitted_at')
+                        ->orWhereIn('status', $this->finalizedStatuses());
+                });
             })
             ->withCount([
                 'attempts as participants_count' => function ($q) {
-                    $q->whereNotNull('submitted_at');
+                    $q->where(function ($sub) {
+                        $sub->whereNotNull('submitted_at')
+                            ->orWhereIn('status', $this->finalizedStatuses());
+                    });
                 },
             ])
             ->withAvg([
                 'attempts as avg_total_score' => function ($q) {
-                    $q->whereNotNull('submitted_at');
+                    $q->where(function ($sub) {
+                        $sub->whereNotNull('submitted_at')
+                            ->orWhereIn('status', $this->finalizedStatuses());
+                    });
                 },
             ], 'total_score');
 

@@ -114,6 +114,7 @@ class Detail extends Component
         $submittedAttempts = ExamAttempt::query()
             ->where('exam_id', $this->examId)
             // Removed whereNotNull('submitted_at') to include InProgress, Abandoned, etc.
+            ->with(['answers:id,exam_attempt_id,question_id,selected_option_id,answer'])
             ->withCount('answers')
             ->withSum('answers', 'score_awarded')
             ->get(['student_id', 'total_score', 'started_at', 'submitted_at', 'status'])
@@ -132,11 +133,22 @@ class Detail extends Component
             ->values()
             ->flip()
             ->map(fn ($index) => $index + 1);
+        $questionTypeMap = $examModel->questions()
+            ->pluck('questions.type', 'questions.id');
+        $finalizedStatuses = collect(ExamAttemptStatus::finalized())
+            ->map(fn (ExamAttemptStatus $status) => $status->value)
+            ->all();
 
         // Exam Summary (Calculations should filter for valid/finished attempts if needed, 
         // but for now simple stats on all attempts is acceptable or we can filter strictly for stats)
         // Let's keep stats based on submitted/graded attempts to avoid skewing with InProgress 0s
-        $finishedAttempts = $submittedAttemptsCollection->filter(fn($a) => $a->status !== ExamAttemptStatus::InProgress);
+        $finishedAttempts = $submittedAttemptsCollection->filter(function ($attempt) use ($finalizedStatuses) {
+            $status = $attempt->status instanceof ExamAttemptStatus
+                ? $attempt->status->value
+                : (string) $attempt->status;
+
+            return !is_null($attempt->submitted_at) || in_array($status, $finalizedStatuses, true);
+        });
         
         $exam = [
             'id' => $examModel->id,
@@ -162,8 +174,24 @@ class Detail extends Component
         $allStudents = $allStudentsQuery->get(['id', 'user_id', 'classroom_id']);
 
         // Merge with Attempts
-        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $examWindowEnded) {
+        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $examWindowEnded, $questionTypeMap) {
             $attempt = $submittedAttempts->get($student->id);
+            $answeredCount = 0;
+            if ($attempt) {
+                $answeredCount = $attempt->answers
+                    ->filter(function ($answer) use ($questionTypeMap) {
+                        $type = $questionTypeMap->get($answer->question_id);
+                        if ($type === 'multiple_choice') {
+                            return !is_null($answer->selected_option_id);
+                        }
+                        if ($type === 'essay') {
+                            return trim((string) ($answer->answer ?? '')) !== '';
+                        }
+
+                        return !is_null($answer->selected_option_id) || trim((string) ($answer->answer ?? '')) !== '';
+                    })
+                    ->count();
+            }
 
             if (!$attempt) {
                 $status = 'Belum Mengerjakan';
@@ -177,7 +205,7 @@ class Detail extends Component
                     $status = $attempt->total_score >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
                 }
             } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
-                $hasNoAnswer = (int) ($attempt->answers_count ?? 0) === 0;
+                $hasNoAnswer = $answeredCount === 0;
                 if ($hasNoAnswer) {
                     $status = $examWindowEnded ? 'Tidak Mengerjakan' : 'Belum Mengerjakan';
                 } else {
@@ -192,7 +220,7 @@ class Detail extends Component
             if ($attempt) {
                 if (!is_null($attempt->total_score)) {
                     $resolvedScore = $attempt->total_score;
-                } elseif ((int) ($attempt->answers_count ?? 0) > 0) {
+                } elseif ($answeredCount > 0) {
                     // Fallback for unfinished/timeout attempts: use accumulated awarded scores.
                     $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
                 }
@@ -251,7 +279,10 @@ class Detail extends Component
             ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
             ->join('questions', 'student_answers.question_id', '=', 'questions.id')
             ->where('exam_attempts.exam_id', $this->examId)
-            ->whereNotNull('exam_attempts.submitted_at')
+            ->where(function ($q) use ($finalizedStatuses) {
+                $q->whereNotNull('exam_attempts.submitted_at')
+                    ->orWhereIn('exam_attempts.status', $finalizedStatuses);
+            })
             ->where('student_answers.is_correct', false) // Provided grading sets this
             ->selectRaw('questions.id as question_id, questions.text, questions.answer_key, count(*) as failed_count')
             ->groupBy('questions.id', 'questions.text', 'questions.answer_key')

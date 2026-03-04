@@ -20,6 +20,10 @@ class ExamResults extends Component
     public function render()
     {
         $student = Auth::user()->student;
+        $finalizedStatuses = array_map(
+            static fn (ExamAttemptStatus $status): string => $status->value,
+            ExamAttemptStatus::finalized()
+        );
         
         if (!$student) {
             return view('student.exam.results', ['results' => []])
@@ -28,7 +32,10 @@ class ExamResults extends Component
 
         // Fetch all completed exam attempts for this student
         $results = \App\Models\ExamAttempt::where('student_id', $student->id)
-            ->whereNotNull('submitted_at')
+            ->where(function ($query) use ($finalizedStatuses) {
+                $query->whereNotNull('submitted_at')
+                    ->orWhereIn('status', $finalizedStatuses);
+            })
             ->when(filled($this->search), function ($query) {
                 $keyword = trim((string) $this->search);
 
@@ -44,7 +51,7 @@ class ExamResults extends Component
                 'exam.questions:id,type',
                 'answers:id,exam_attempt_id,question_id,is_correct',
             ])
-            ->latest('submitted_at')
+            ->latest(\Illuminate\Support\Facades\DB::raw('COALESCE(submitted_at, updated_at)'))
             ->paginate(10)
             ->through(function($attempt) {
                 $essayQuestionIds = $attempt->exam->questions
