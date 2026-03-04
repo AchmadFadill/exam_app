@@ -68,6 +68,8 @@ class RepairShuffledAnswerSelections extends Command
                     'sa.selected_option_id',
                     'sa.answer',
                     'ea.options_order',
+                    'ea.exam_id',
+                    'ea.student_id',
                 ])
                 ->whereIn('sa.id', $ids)
                 ->orderBy('sa.id')
@@ -107,12 +109,18 @@ class RepairShuffledAnswerSelections extends Command
                 }
 
                 $optionsOrder = json_decode((string) ($row->options_order ?? ''), true);
-                if (!is_array($optionsOrder)) {
-                    $skipped++;
-                    continue;
+                $orderedOptionIds = is_array($optionsOrder)
+                    ? ($optionsOrder[(string) $row->question_id] ?? null)
+                    : null;
+
+                if (!is_array($orderedOptionIds) || empty($orderedOptionIds)) {
+                    $orderedOptionIds = $this->buildSeededOptionOrder(
+                        questionId: (int) $row->question_id,
+                        examId: (int) $row->exam_id,
+                        studentId: (int) $row->student_id
+                    );
                 }
 
-                $orderedOptionIds = $optionsOrder[(string) $row->question_id] ?? null;
                 if (!is_array($orderedOptionIds) || !array_key_exists($index, $orderedOptionIds)) {
                     $skipped++;
                     continue;
@@ -249,5 +257,55 @@ class RepairShuffledAnswerSelections extends Command
 
         $idx = ord($label) - 65;
         return $idx >= 0 ? $idx : null;
+    }
+
+    /**
+     * Build deterministic option order when attempt snapshot is missing.
+     *
+     * @return array<int>
+     */
+    private function buildSeededOptionOrder(int $questionId, int $examId, int $studentId): array
+    {
+        $optionIds = QuestionOption::query()
+            ->withTrashed()
+            ->where('question_id', $questionId)
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        if (empty($optionIds)) {
+            return [];
+        }
+
+        $seed = $studentId + $examId + $questionId;
+        return $this->seededShuffle($optionIds, $seed);
+    }
+
+    /**
+     * @param  array<int>  $items
+     * @return array<int>
+     */
+    private function seededShuffle(array $items, int $seed): array
+    {
+        $items = array_values($items);
+        $count = count($items);
+        if ($count <= 1) {
+            return $items;
+        }
+
+        $a = 1664525;
+        $c = 1013904223;
+        $m = 2 ** 32;
+        $rand = $seed % $m;
+
+        for ($i = $count - 1; $i > 0; $i--) {
+            $rand = ($a * $rand + $c) % $m;
+            $j = $rand % ($i + 1);
+            [$items[$i], $items[$j]] = [$items[$j], $items[$i]];
+        }
+
+        return $items;
     }
 }
