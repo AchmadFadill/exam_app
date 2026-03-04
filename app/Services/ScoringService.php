@@ -213,6 +213,86 @@ class ScoringService
         return null;
     }
 
+    private function resolveFromAttemptOptionOrder(
+        int $questionId,
+        string $raw,
+        ?ExamAttempt $attempt,
+        ?Exam $exam
+    ): ?QuestionOption {
+        if (!$attempt || !$exam || !$exam->shuffle_answers) {
+            return null;
+        }
+
+        $optionIds = $attempt->options_order[(string) $questionId] ?? null;
+        if (!is_array($optionIds) || empty($optionIds)) {
+            return null;
+        }
+
+        $indexes = [];
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        // Numeric legacy value can be either 1-based or 0-based position.
+        if (is_numeric($raw)) {
+            $n = (int) $raw;
+            $indexes[] = $n - 1;
+            $indexes[] = $n;
+        }
+
+        // Label legacy value A/B/C... can also represent rendered position.
+        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
+            $indexes[] = ord(strtoupper($raw)) - 65;
+        }
+
+        $indexes = array_values(array_unique(array_filter($indexes, fn ($idx) => $idx >= 0)));
+        if (empty($indexes)) {
+            return null;
+        }
+
+        foreach ($indexes as $idx) {
+            if (!array_key_exists($idx, $optionIds)) {
+                continue;
+            }
+
+            $candidateOptionId = (int) $optionIds[$idx];
+            $candidate = QuestionOption::query()
+                ->where('id', $candidateOptionId)
+                ->where('question_id', $questionId)
+                ->withTrashed()
+                ->first();
+
+            if ($candidate) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function isLikelyPositionalRaw(string $raw): bool
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return false;
+        }
+
+        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
+            return true;
+        }
+
+        if (!is_numeric($raw)) {
+            return false;
+        }
+
+        // Position-based answers are usually small integers (0..10).
+        // Large integers are likely true option IDs.
+        $n = (int) $raw;
+
+        return $n >= 0 && $n <= 10;
+    }
+
     private function examPivotScore(Exam $exam, int $questionId): int
     {
         $question = $exam->questions()
