@@ -49,7 +49,16 @@
         @foreach($exam->questions as $index => $question)
         @php
             $answer = $attempt->answers->where('question_id', $question->id)->first();
-            $isAnswered = $answer !== null;
+            $rawAnswer = trim((string) ($answer->answer ?? ''));
+            $legacyOptionId = is_numeric($rawAnswer) ? (int) $rawAnswer : null;
+            $selectedOption = $answer?->selectedOption;
+            $resolvedOption = $selectedOption;
+            if (!$resolvedOption && $legacyOptionId) {
+                $resolvedOption = $question->options->where('id', $legacyOptionId)->first();
+            }
+            $isAnswered = $answer !== null && ($question->type === 'essay'
+                ? $rawAnswer !== ''
+                : (!is_null($answer->selected_option_id) || !is_null($legacyOptionId) || $rawAnswer !== ''));
             $isCorrect = $answer?->is_correct ?? false;
             // If shuffle is on, we might need original order, but for report default order is fine or use pivot order
         @endphp
@@ -73,30 +82,29 @@
                         <div class="flex items-start gap-3">
                             <div class="w-24 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wide pt-1">Jawaban Siswa</div>
                             <div class="flex-1">
-                                @php
-                                    $selectedOption = $isAnswered ? $question->options->where('id', $answer->selected_option_id)->first() : null;
-                                @endphp
                                 <div class="font-medium {{ $isCorrect ? 'text-green-700' : 'text-red-700' }} flex items-center gap-2">
-                                    @if($selectedOption)
+                                    @if($resolvedOption)
                                         <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border {{ $isCorrect ? 'bg-green-100 border-green-200 text-green-700' : 'bg-red-100 border-red-200 text-red-700' }}">
-                                            {{ $selectedOption->label }}
+                                            {{ $resolvedOption->label }}
                                         </span>
-                                        <span>{{ strip_tags($selectedOption->text) }}</span>
+                                        <span>{{ strip_tags($resolvedOption->text) }}</span>
                                     @else
-                                        <span class="text-gray-400 italic">Tidak menjawab</span>
+                                        <span class="text-gray-400 italic">{{ $isAnswered ? 'Jawaban tersimpan' : 'Tidak menjawab' }}</span>
                                     @endif
 
-                                    @if($isCorrect)
+                                    @if($isAnswered)
+                                        @if($isCorrect)
                                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                    @else
+                                        @else
                                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                         </div>
 
                         <!-- Show Correct Answer if Wrong -->
-                        @if(!$isCorrect)
+                        @if($isAnswered && !$isCorrect)
                         <div class="flex items-start gap-3 pt-3 border-t border-gray-200/50">
                             <div class="w-24 shrink-0 text-xs font-bold text-gray-500 uppercase tracking-wide pt-1">Kunci Jawaban</div>
                             <div class="flex-1">

@@ -24,7 +24,7 @@ class StudentDetail extends Component
         
         $this->attempt = \App\Models\ExamAttempt::where('exam_id', $examId)
             ->where('student_id', $studentId)
-            ->with(['answers'])
+            ->with(['answers.selectedOption'])
             ->first();
     }
 
