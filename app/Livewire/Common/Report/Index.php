@@ -25,7 +25,6 @@ class Index extends Component
     {
         $isAdmin = request()->is('admin/*');
         $user = auth()->user();
-        $finalized = $this->finalizedStatuses();
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])

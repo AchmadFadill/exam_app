@@ -182,7 +182,9 @@ class Detail extends Component
                     ->filter(function ($answer) use ($questionTypeMap) {
                         $type = $questionTypeMap->get($answer->question_id);
                         if ($type === 'multiple_choice') {
-                            return !is_null($answer->selected_option_id);
+                            $raw = trim((string) ($answer->answer ?? ''));
+                            return !is_null($answer->selected_option_id)
+                                || ($raw !== '' && is_numeric($raw));
                         }
                         if ($type === 'essay') {
                             return trim((string) ($answer->answer ?? '')) !== '';

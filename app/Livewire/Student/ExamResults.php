@@ -71,7 +71,7 @@ class ExamResults extends Component
                     'id' => $attempt->id,
                     'subject' => $attempt->exam->subject->name ?? '-',
                     'exam_name' => $attempt->exam->name,
-                    'submitted_at' => $attempt->submitted_at->translatedFormat('d M Y, H:i'),
+                    'submitted_at' => ($attempt->submitted_at ?? $attempt->updated_at)?->translatedFormat('d M Y, H:i') ?? '-',
                     'score' => $attempt->percentage ?? 0,
                     'passed' => $attempt->passed,
                     'status' => $attempt->status instanceof ExamAttemptStatus ? $attempt->status->value : $attempt->status,

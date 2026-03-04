@@ -172,7 +172,9 @@ class Detail extends Component
                         $questionType = $questionTypeMap->get($answer->question_id);
 
                         if ($questionType === 'multiple_choice') {
-                            return !is_null($answer->selected_option_id);
+                            $raw = trim((string) ($answer->answer ?? ''));
+                            return !is_null($answer->selected_option_id)
+                                || ($raw !== '' && is_numeric($raw));
                         }
 
                         if ($questionType === 'essay') {

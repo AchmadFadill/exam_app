@@ -93,21 +93,28 @@
                 $userOptionId = $studentAnswer->selected_option_id ?? null;
                 $userOption = $studentAnswer?->selectedOption;
                 $selectedOptionMatchesQuestion = $userOption && (int) $userOption->question_id === (int) $question->id;
+                $rawMcAnswerId = (!$isEssay && is_null($userOptionId) && is_numeric(trim((string) ($studentAnswer->answer ?? ''))))
+                    ? (int) trim((string) $studentAnswer->answer)
+                    : null;
+                $resolvedMcOption = $selectedOptionMatchesQuestion
+                    ? $userOption
+                    : ($rawMcAnswerId ? $question->options->firstWhere('id', $rawMcAnswerId) : null);
+                $resolvedMcText = $resolvedMcOption?->text;
 
                 // Prefer stored flag; fallback to option correctness when relation is consistent.
                 $isCorrect = $studentAnswer && (
                     $studentAnswer->is_correct === true
                     || (
                         !$isEssay
-                        && $selectedOptionMatchesQuestion
-                        && (bool) $userOption->is_correct
+                        && $resolvedMcOption
+                        && (bool) $resolvedMcOption->is_correct
                     )
                 );
                 $correctOption = $question->options->where('is_correct', true)->first();
                 $hasAnswer = $studentAnswer && (
                     $isEssay
                         ? filled(trim((string) ($studentAnswer->answer ?? '')))
-                        : (!is_null($userOptionId) || filled(trim((string) ($studentAnswer->answer ?? ''))))
+                        : (!is_null($userOptionId) || !is_null($rawMcAnswerId) || filled(trim((string) ($studentAnswer->answer ?? ''))))
                 );
                 $isWrong = $hasAnswer && !$isCorrect && (!$isEssay || !is_null($studentAnswer?->is_correct));
                 $maxQuestionScore = (float) ($question->pivot->score ?? $question->score ?? 0);
@@ -142,7 +149,7 @@
                     <div class="text-xs sm:text-sm">
                         <div class="font-semibold text-text-muted mb-2">Jawaban Kamu:</div>
                         <div class="p-3 {{ $isCorrect ? 'bg-green-50 border-green-200 text-green-700' : ($isWrong ? 'bg-red-50 border-red-200 text-red-700' : 'bg-gray-50 border-gray-200 text-gray-700') }} border rounded-xl font-medium">
-                             {{ $isEssay ? ($studentAnswer->answer ?? 'Belum ada jawaban essay') : (($selectedOptionMatchesQuestion ? $userOption->text : null) ?? (!is_null($userOptionId) ? 'Jawaban tersimpan' : 'Tidak Menjawab')) }}
+                             {{ $isEssay ? ($studentAnswer->answer ?? 'Belum ada jawaban essay') : ($resolvedMcText ?? ($hasAnswer ? 'Jawaban tersimpan' : 'Tidak Menjawab')) }}
                         </div>
                     </div>
                      <div class="text-xs sm:text-sm">

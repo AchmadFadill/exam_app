@@ -18,6 +18,9 @@ class QuestionAnalysis extends Component
     {
         $this->exam = \App\Models\Exam::findOrFail($examId);
         Gate::authorize('viewReport', $this->exam);
+        $finalizedStatuses = collect(\App\Enums\ExamAttemptStatus::finalized())
+            ->map(fn (\App\Enums\ExamAttemptStatus $status) => $status->value)
+            ->all();
 
         $questions = $this->exam->questions()
             ->with(['options'])
@@ -29,7 +32,10 @@ class QuestionAnalysis extends Component
             ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
             ->where('exam_attempts.exam_id', $examId)
             ->whereIn('student_answers.question_id', $questionIds)
-            ->whereNotNull('exam_attempts.submitted_at')
+            ->where(function ($q) use ($finalizedStatuses) {
+                $q->whereNotNull('exam_attempts.submitted_at')
+                    ->orWhereIn('exam_attempts.status', $finalizedStatuses);
+            })
             ->groupBy('student_answers.question_id')
             ->select(
                 'student_answers.question_id',
@@ -44,7 +50,10 @@ class QuestionAnalysis extends Component
             ->join('exam_attempts', 'student_answers.exam_attempt_id', '=', 'exam_attempts.id')
             ->where('exam_attempts.exam_id', $examId)
             ->whereIn('student_answers.question_id', $questionIds)
-            ->whereNotNull('exam_attempts.submitted_at')
+            ->where(function ($q) use ($finalizedStatuses) {
+                $q->whereNotNull('exam_attempts.submitted_at')
+                    ->orWhereIn('exam_attempts.status', $finalizedStatuses);
+            })
             ->whereNotNull('student_answers.selected_option_id')
             ->groupBy('student_answers.question_id', 'student_answers.selected_option_id')
             ->select(
