@@ -11,6 +11,7 @@ class NormalizeScheduledExamQuestionOrder extends Command
     protected $signature = 'exam:normalize-order
         {--exam= : Normalize only one exam_id}
         {--status=scheduled : Filter exam status (default: scheduled)}
+        {--strategy=current : Rebuild order using current order or question_id (current|question_id)}
         {--apply : Persist changes (default dry-run)}';
 
     protected $description = 'Normalize question order for non-shuffled exams so fixed-order mode is deterministic.';
@@ -19,7 +20,13 @@ class NormalizeScheduledExamQuestionOrder extends Command
     {
         $examId = $this->option('exam');
         $status = (string) $this->option('status');
+        $strategy = (string) $this->option('strategy');
         $apply = (bool) $this->option('apply');
+
+        if (!in_array($strategy, ['current', 'question_id'], true)) {
+            $this->error('Invalid --strategy value. Allowed: current, question_id');
+            return self::FAILURE;
+        }
 
         $query = Exam::query()
             ->select(['id', 'name', 'status'])
@@ -38,16 +45,21 @@ class NormalizeScheduledExamQuestionOrder extends Command
         $changed = 0;
         $rowsUpdated = 0;
 
-        $query->chunkById(100, function ($exams) use (&$checked, &$changed, &$rowsUpdated, $apply) {
+        $query->chunkById(100, function ($exams) use (&$checked, &$changed, &$rowsUpdated, $apply, $strategy) {
             foreach ($exams as $exam) {
                 $checked++;
 
-                $rows = DB::table('exam_questions')
+                $rowsQuery = DB::table('exam_questions')
                     ->select(['id', 'order', 'question_id'])
-                    ->where('exam_id', $exam->id)
-                    ->orderBy('order')
-                    ->orderBy('question_id')
-                    ->get();
+                    ->where('exam_id', $exam->id);
+
+                if ($strategy === 'question_id') {
+                    $rowsQuery->orderBy('question_id');
+                } else {
+                    $rowsQuery->orderBy('order')->orderBy('question_id');
+                }
+
+                $rows = $rowsQuery->get();
 
                 if ($rows->isEmpty()) {
                     continue;
@@ -96,10 +108,9 @@ class NormalizeScheduledExamQuestionOrder extends Command
 
         if (!$apply) {
             $this->warn('No data changed. Run again with --apply to persist.');
-            $this->line('Example: php artisan exam:normalize-order --status=scheduled --apply');
+            $this->line('Example: php artisan exam:normalize-order --status=scheduled --strategy=question_id --apply');
         }
 
         return self::SUCCESS;
     }
 }
-
