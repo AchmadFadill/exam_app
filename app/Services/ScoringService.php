@@ -140,11 +140,24 @@ class ScoringService
             $option = QuestionOption::query()
                 ->where('id', (int) $selectedOptionId)
                 ->withTrashed()
-                ->where('question_id', $questionId)
                 ->first();
 
-            if ($option) {
+            if ($option && (int) $option->question_id === $questionId) {
                 return $option;
+            }
+
+            // Legacy recovery: selected option id points to another question.
+            // Remap by the same label within the target question (A/B/C/D/E).
+            if ($option && !empty($option->label)) {
+                $sameLabel = QuestionOption::query()
+                    ->where('question_id', $questionId)
+                    ->withTrashed()
+                    ->where('label', $option->label)
+                    ->get();
+
+                if ($sameLabel->count() === 1) {
+                    return $sameLabel->first();
+                }
             }
         }
 
