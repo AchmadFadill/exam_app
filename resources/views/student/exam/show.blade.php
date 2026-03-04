@@ -90,21 +90,21 @@
                     <div class="space-y-3 sm:space-y-4">
                         <template x-if="questions[currentQuestion].type === 'multiple_choice'">
                             <div class="space-y-3 sm:space-y-4">
-                                <template x-for="(option, index) in questions[currentQuestion].options" :key="index">
+                                <template x-for="(option, index) in questions[currentQuestion].options" :key="`${questions[currentQuestion].id}-${option.id}`">
                                     <label class="flex items-start p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 group hover:bg-gray-50 active:scale-[0.98]"
                                         :class="{
-                                            'border-blue-600 bg-blue-50': answers[questions[currentQuestion].id] === option.id,
-                                            'border-gray-200': answers[questions[currentQuestion].id] !== option.id
+                                            'border-blue-600 bg-blue-50': Number(answers[questions[currentQuestion].id]) === Number(option.id),
+                                            'border-gray-200': Number(answers[questions[currentQuestion].id]) !== Number(option.id)
                                         }">
                                         <input type="radio"
                                             :name="'question_' + questions[currentQuestion].id"
                                             :value="option.id"
-                                            x-model="answers[questions[currentQuestion].id]"
+                                            x-model.number="answers[questions[currentQuestion].id]"
                                             @change="saveProgress(questions[currentQuestion].id)"
                                             class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 focus:ring-blue-500 border-gray-300 flex-shrink-0">
                                         <span class="ml-3 flex-1">
                                             <span class="block text-sm sm:text-base text-gray-700 group-hover:text-gray-900"
-                                                :class="{'font-medium text-blue-900': answers[questions[currentQuestion].id] === option.id}"
+                                                :class="{'font-medium text-blue-900': Number(answers[questions[currentQuestion].id]) === Number(option.id)}"
                                                 x-text="option.text"></span>
                                             <template x-if="option.image_path">
                                                 <img :src="option.image_path" class="mt-3 max-h-56 w-auto max-w-full rounded-lg border border-gray-200 object-contain bg-white">
@@ -825,7 +825,16 @@
 
                 saveProgress(questionId) {
                     if (this.isBlocked) return;
-                    const answer = this.answers[questionId];
+                    const question = this.questions.find(q => Number(q.id) === Number(questionId));
+                    let answer = this.answers[questionId];
+
+                    if (question?.type === 'multiple_choice') {
+                        const normalized = Number(answer);
+                        if (!Number.isFinite(normalized) || normalized <= 0) return;
+                        answer = normalized;
+                        this.answers[questionId] = normalized;
+                    }
+
                     if (answer === undefined || answer === null) return;
 
                     this.pendingSaves[questionId] = answer;

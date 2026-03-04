@@ -203,6 +203,23 @@ class ExamController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid question for this exam'], 403);
         }
 
+        if ($question->type === 'multiple_choice') {
+            if (!is_numeric($answerValue)) {
+                return response()->json(['success' => false, 'message' => 'Invalid multiple-choice payload'], 422);
+            }
+
+            $answerValue = (int) $answerValue;
+
+            $isOptionBelongsToQuestion = \App\Models\QuestionOption::query()
+                ->where('id', $answerValue)
+                ->where('question_id', $question->id)
+                ->exists();
+
+            if (!$isOptionBelongsToQuestion) {
+                return response()->json(['success' => false, 'message' => 'Option does not belong to question'], 422);
+            }
+        }
+
         $scored = $scoringService->scoreSingleAnswer($exam, $question, $answerValue);
 
         StudentAnswer::updateOrCreate(
