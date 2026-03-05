@@ -3,6 +3,7 @@
 namespace App\Livewire\Teacher;
 
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use App\Models\Subject;
 use App\Exports\QuestionGroupExport;
@@ -19,6 +20,7 @@ class QuestionGroupDetail extends Component
 {
     use WithFileUploads, WithPagination;
 
+    public $groupId;
     public $title;
     public $subjectId = null;
     public $subjectName = null;
@@ -98,16 +100,15 @@ class QuestionGroupDetail extends Component
         })->validate($this->rules());
     }
 
-    public function mount($title)
+    public function mount($group)
     {
-        $this->title = urldecode($title);
-        $incomingSubjectId = request()->query('subject_id');
-        $this->subjectId = is_numeric($incomingSubjectId) ? (int) $incomingSubjectId : null;
-        $this->newGroupTitle = $this->title;
+        $this->groupId = (int) $group;
+        $groupModel = QuestionGroup::query()->with('subject')->findOrFail($this->groupId);
 
-        if ($this->subjectId) {
-            $this->subjectName = Subject::query()->whereKey($this->subjectId)->value('name');
-        }
+        $this->title = $groupModel->title;
+        $this->subjectId = (int) $groupModel->subject_id;
+        $this->subjectName = $groupModel->subject?->name;
+        $this->newGroupTitle = $this->title;
 
         Gate::allowIf(function ($user) {
             if ($user->isAdmin()) {
@@ -118,9 +119,8 @@ class QuestionGroupDetail extends Component
                 return false;
             }
 
-            return Question::query()
-                ->where('title', $this->title)
-                ->when($this->subjectId, fn ($query) => $query->where('subject_id', $this->subjectId))
+            return QuestionGroup::query()
+                ->whereKey($this->groupId)
                 ->where('teacher_id', $user->teacher?->id)
                 ->exists();
         });
@@ -148,18 +148,17 @@ class QuestionGroupDetail extends Component
         }
 
         DB::transaction(function () {
+            QuestionGroup::query()
+                ->whereKey($this->groupId)
+                ->update(['title' => $this->newGroupTitle]);
+
+            // Keep legacy column in sync.
             $this->groupQuestionsQuery()->update(['title' => $this->newGroupTitle]);
         });
 
         // Redirect to new URL
         $route = Auth::user()->isAdmin() ? 'admin.questions.group' : 'teacher.questions.group';
-
-        $params = ['title' => urlencode($this->newGroupTitle)];
-        if ($this->subjectId) {
-            $params['subject_id'] = $this->subjectId;
-        }
-
-        return redirect()->route($route, $params)
+        return redirect()->route($route, ['group' => $this->groupId])
             ->with('success', 'Nama kelompok soal berhasil diubah!');
     }
 
@@ -184,12 +183,7 @@ class QuestionGroupDetail extends Component
     {
         $this->resetForm();
         $this->questionForm['title'] = $this->title; // Pre-fill with current group title
-        
-        // Auto-fill subject from first question in this group
-        $firstQuestion = $this->groupQuestionsQuery()->first();
-        if ($firstQuestion) {
-            $this->questionForm['subject_id'] = $firstQuestion->subject_id;
-        }
+        $this->questionForm['subject_id'] = $this->subjectId;
         
         $this->optionCount = 5;
         $this->showAddModal = true;
@@ -280,6 +274,9 @@ class QuestionGroupDetail extends Component
             if ($this->showEditModal && $this->selectedQuestion) {
                 // Update existing question
                 $question = Question::findOrFail($this->selectedQuestion);
+                if ($question->hasAttemptedExamUsage()) {
+                    throw new \Exception('Soal sudah digunakan dalam ujian yang dikerjakan siswa, sehingga tidak dapat diubah.');
+                }
                 
                 // Delete old image if new one uploaded
                 if ($this->questionImage && $question->image_path) {
@@ -366,13 +363,19 @@ class QuestionGroupDetail extends Component
 
     private function getQuestionData()
     {
-        $user = Auth::user();
-        $teacherId = $user->isTeacher()
-            ? $user->teacher->id
-            : \App\Models\Teacher::firstOrCreate(['user_id' => $user->id], ['nip' => null])->id;
+        $groupTeacherId = QuestionGroup::query()->whereKey($this->groupId)->value('teacher_id');
+        $teacherId = $groupTeacherId;
+
+        if (!$teacherId) {
+            $user = Auth::user();
+            $teacherId = $user->isTeacher()
+                ? $user->teacher->id
+                : \App\Models\Teacher::firstOrCreate(['user_id' => $user->id], ['nip' => null])->id;
+        }
 
         return [
             'teacher_id' => $teacherId,
+            'question_group_id' => $this->groupId,
             'title' => $this->questionForm['title'],
             'subject_id' => $this->questionForm['subject_id'],
             'type' => $this->questionForm['type'],
@@ -607,7 +610,7 @@ class QuestionGroupDetail extends Component
         $teacherId = Auth::user()->isTeacher() ? Auth::user()->teacher?->id : null;
 
         return Excel::download(
-            new QuestionGroupExport($this->title, $teacherId, $this->subjectId),
+            new QuestionGroupExport(groupId: $this->groupId, teacherId: $teacherId),
             'soal_' . \Illuminate\Support\Str::slug($this->title) . '_' . now()->format('Ymd_His') . '.xlsx'
         );
     }
@@ -633,8 +636,7 @@ class QuestionGroupDetail extends Component
     private function groupQuestionsQuery()
     {
         return Question::query()
-            ->where('title', $this->title)
-            ->when($this->subjectId, fn ($query) => $query->where('subject_id', $this->subjectId))
+            ->where('question_group_id', $this->groupId)
             ->when(\Illuminate\Support\Facades\Auth::user()->isTeacher(), function ($query) {
                 $query->where('teacher_id', \Illuminate\Support\Facades\Auth::user()->teacher->id);
             });

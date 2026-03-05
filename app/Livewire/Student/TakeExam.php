@@ -161,10 +161,11 @@ class TakeExam extends Component
         $attempt = $this->resolveOwnedAttempt();
         $exam = $this->exam;
 
-        // Fixed-order mode must always follow exam_questions.order.
+        // Fixed-order mode: enforce stable ASC by question_id.
+        // This prevents legacy reversed pivot order from showing descending questions.
         if (!(bool) $exam->shuffle_questions) {
             $orderedIds = $exam->examQuestions
-                ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
+                ->sortBy(fn ($row) => (int) $row->question_id)
                 ->pluck('question_id')
                 ->values();
 
@@ -238,28 +239,7 @@ class TakeExam extends Component
             return collect();
         }
 
-        $attempt = $this->resolveOwnedAttempt();
-        $exam = $this->exam;
-
-        if (!(bool) $exam->shuffle_answers) {
-            return $question->options;
-        }
-
-        // ── Snapshot path ────────────────────────────────────────────────────
-        if ($attempt && !empty($attempt->options_order)) {
-            $optionIds = $attempt->options_order[(string) $question->id] ?? null;
-
-            if ($optionIds) {
-                $optionObjects = $question->options->keyBy('id');
-
-                return collect($optionIds)
-                    ->map(fn (int $oId) => $optionObjects->get($oId))
-                    ->filter()
-                    ->values();
-            }
-        }
-
-        // ── Legacy fallback ──────────────────────────────────────────────────
+        // Answer shuffling is globally disabled.
         return $question->options;
     }
 
@@ -644,3 +624,4 @@ class TakeExam extends Component
         return $this->_cachedAttempt;
     }
 }
+

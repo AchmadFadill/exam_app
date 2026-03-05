@@ -11,6 +11,7 @@ class AuditExamAnswers extends Command
 {
     protected $signature = 'exam:audit-answers
         {--limit=100 : Maximum rows shown per anomaly type}
+        {--exam= : Filter by a specific exam_id}
         {--attempt= : Filter by a specific exam_attempt_id}
         {--export= : Export anomalies to CSV under storage/app/<path>}';
 
@@ -19,6 +20,7 @@ class AuditExamAnswers extends Command
     public function handle(): int
     {
         $limit = max(1, (int) $this->option('limit'));
+        $examId = $this->option('exam');
         $attemptId = $this->option('attempt');
 
         $definitions = [
@@ -56,7 +58,7 @@ class AuditExamAnswers extends Command
         $allRows = collect();
 
         foreach ($definitions as $name => $constraint) {
-            $countQuery = $this->baseQuery($attemptId);
+            $countQuery = $this->baseQuery($examId, $attemptId);
             $constraint($countQuery);
             $counts[$name] = (clone $countQuery)->count();
 
@@ -64,7 +66,7 @@ class AuditExamAnswers extends Command
                 continue;
             }
 
-            $rowsQuery = $this->baseQuery($attemptId)->selectRaw('? as anomaly_type', [$name]);
+            $rowsQuery = $this->baseQuery($examId, $attemptId)->selectRaw('? as anomaly_type', [$name]);
             $constraint($rowsQuery);
 
             $rows = $rowsQuery
@@ -115,7 +117,7 @@ class AuditExamAnswers extends Command
         return self::SUCCESS;
     }
 
-    private function baseQuery(?string $attemptId): Builder
+    private function baseQuery(?string $examId, ?string $attemptId): Builder
     {
         $q = DB::table('student_answers as sa')
             ->join('questions as q', 'q.id', '=', 'sa.question_id')
@@ -135,6 +137,10 @@ class AuditExamAnswers extends Command
                 'e.name as exam_name',
                 'u.name as student_name',
             ]);
+
+        if ($examId !== null && $examId !== '') {
+            $q->where('ea.exam_id', (int) $examId);
+        }
 
         if ($attemptId !== null && $attemptId !== '') {
             $q->where('sa.exam_attempt_id', (int) $attemptId);
@@ -188,4 +194,3 @@ class AuditExamAnswers extends Command
         fclose($fp);
     }
 }
-

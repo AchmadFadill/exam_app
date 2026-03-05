@@ -9,27 +9,25 @@ use App\Services\ScoringService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class RepairShuffledAnswerSelections extends Command
+class UndoShuffledLabelRemap extends Command
 {
-    protected $signature = 'exam:repair-shuffled-answers
+    protected $signature = 'exam:undo-shuffled-label-remap
         {--exam= : Filter by exam_id}
         {--attempt= : Filter by exam_attempt_id}
         {--chunk=500 : Chunk size}
-        {--force-label-index : Also remap using selected option label index (A=0, B=1, ...) when raw answer is no longer positional}
         {--ignore-shuffle-flag : Process even when exams.shuffle_answers is currently false}
         {--include-active : Include in-progress/blocked attempts}
         {--apply : Persist updates (default dry-run)}';
 
-    protected $description = 'Repair multiple-choice answers for shuffle-answers exams by remapping positional legacy values using exam_attempts.options_order.';
+    protected $description = 'Undo accidental label-index remap for shuffle-answers exams by mapping current selected option position back to canonical label (A-E).';
 
     public function handle(ScoringService $scoringService): int
     {
         $examId = $this->option('exam');
         $attemptId = $this->option('attempt');
         $apply = (bool) $this->option('apply');
-        $includeActive = (bool) $this->option('include-active');
-        $forceLabelIndex = (bool) $this->option('force-label-index');
         $ignoreShuffleFlag = (bool) $this->option('ignore-shuffle-flag');
+        $includeActive = (bool) $this->option('include-active');
         $chunkSize = max(100, (int) $this->option('chunk'));
 
         if (!$examId && !$attemptId) {
@@ -43,6 +41,7 @@ class RepairShuffledAnswerSelections extends Command
             ->join('questions as q', 'q.id', '=', 'sa.question_id')
             ->where('q.type', 'multiple_choice')
             ->when(!$ignoreShuffleFlag, fn ($q) => $q->where('e.shuffle_answers', 1))
+            ->whereNotNull('sa.selected_option_id')
             ->when($examId, fn ($q) => $q->where('ea.exam_id', (int) $examId))
             ->when($attemptId, fn ($q) => $q->where('ea.id', (int) $attemptId))
             ->when(!$includeActive, fn ($q) => $q->whereNotNull('ea.submitted_at'))
@@ -51,11 +50,11 @@ class RepairShuffledAnswerSelections extends Command
 
         $inspected = 0;
         $eligible = 0;
-        $remapped = 0;
+        $reverted = 0;
         $skipped = 0;
         $affectedAttemptIds = [];
 
-        $base->chunkById($chunkSize, function ($rows) use (&$inspected, &$eligible, &$remapped, &$skipped, &$affectedAttemptIds, $apply, $forceLabelIndex): bool {
+        $base->chunkById($chunkSize, function ($rows) use (&$inspected, &$eligible, &$reverted, &$skipped, &$affectedAttemptIds, $apply): bool {
             $ids = collect($rows)->pluck('id')->map(fn ($v) => (int) $v)->all();
             if (empty($ids)) {
                 return true;
@@ -68,7 +67,6 @@ class RepairShuffledAnswerSelections extends Command
                     'sa.exam_attempt_id',
                     'sa.question_id',
                     'sa.selected_option_id',
-                    'sa.answer',
                     'ea.options_order',
                     'ea.exam_id',
                     'ea.student_id',
@@ -77,38 +75,19 @@ class RepairShuffledAnswerSelections extends Command
                 ->orderBy('sa.id')
                 ->get();
 
-            $selectedOptionIds = $answers
-                ->pluck('selected_option_id')
-                ->filter(fn ($id) => !is_null($id))
-                ->map(fn ($id) => (int) $id)
-                ->unique()
-                ->values()
-                ->all();
-
-            $selectedOptionMap = QuestionOption::query()
+            $questionIds = $answers->pluck('question_id')->map(fn ($id) => (int) $id)->unique()->values()->all();
+            $optionsByQuestionAndLabel = QuestionOption::query()
                 ->withTrashed()
-                ->whereIn('id', $selectedOptionIds)
-                ->get(['id', 'label', 'question_id'])
-                ->keyBy('id');
-
-            $candidateOptionIds = [];
-            $updates = [];
+                ->whereIn('question_id', $questionIds)
+                ->get(['id', 'question_id', 'label'])
+                ->groupBy(fn (QuestionOption $o) => (int) $o->question_id)
+                ->map(fn ($rows) => $rows->keyBy(fn (QuestionOption $o) => strtoupper((string) $o->label)));
 
             foreach ($answers as $row) {
                 $inspected++;
 
-                $raw = trim((string) ($row->answer ?? ''));
-                $index = $this->extractPositionIndex($raw);
-                if ($index === null && $forceLabelIndex && !is_null($row->selected_option_id)) {
-                    $selected = $selectedOptionMap->get((int) $row->selected_option_id);
-                    // Guard for one-time recovery only:
-                    // use selected option label index fallback when the stored option reference
-                    // is inconsistent (points to a different question).
-                    if ($selected && (int) $selected->question_id !== (int) $row->question_id) {
-                        $index = $this->labelToIndex((string) ($selected->label ?? ''));
-                    }
-                }
-                if ($index === null) {
+                $currentSelected = (int) ($row->selected_option_id ?? 0);
+                if ($currentSelected <= 0) {
                     $skipped++;
                     continue;
                 }
@@ -126,56 +105,43 @@ class RepairShuffledAnswerSelections extends Command
                     );
                 }
 
-                if (!is_array($orderedOptionIds) || !array_key_exists($index, $orderedOptionIds)) {
+                if (!is_array($orderedOptionIds) || empty($orderedOptionIds)) {
                     $skipped++;
                     continue;
                 }
 
+                $pos = array_search($currentSelected, array_map('intval', $orderedOptionIds), true);
+                if ($pos === false) {
+                    $skipped++;
+                    continue;
+                }
+
+                $label = chr(65 + (int) $pos); // 0->A
+                $canonical = $optionsByQuestionAndLabel
+                    ->get((int) $row->question_id)
+                    ?->get($label);
+
+                if (!$canonical) {
+                    $skipped++;
+                    continue;
+                }
+
+                $targetOptionId = (int) $canonical->id;
                 $eligible++;
-                $mappedOptionId = (int) $orderedOptionIds[$index];
-                $candidateOptionIds[$mappedOptionId] = true;
 
-                if ((int) ($row->selected_option_id ?? 0) === $mappedOptionId) {
+                if ($targetOptionId === $currentSelected) {
                     continue;
                 }
 
-                $updates[] = [
-                    'id' => (int) $row->id,
-                    'exam_attempt_id' => (int) $row->exam_attempt_id,
-                    'question_id' => (int) $row->question_id,
-                    'selected_option_id' => $mappedOptionId,
-                ];
-            }
-
-            if (empty($updates)) {
-                return true;
-            }
-
-            $optionsById = QuestionOption::query()
-                ->withTrashed()
-                ->whereIn('id', array_keys($candidateOptionIds))
-                ->get(['id', 'question_id'])
-                ->keyBy('id');
-
-            foreach ($updates as $upd) {
-                $option = $optionsById->get((int) $upd['selected_option_id']);
-                if (!$option) {
-                    continue;
-                }
-
-                if ((int) $option->question_id !== (int) $upd['question_id']) {
-                    continue;
-                }
-
-                $remapped++;
-                $affectedAttemptIds[$upd['exam_attempt_id']] = true;
+                $reverted++;
+                $affectedAttemptIds[(int) $row->exam_attempt_id] = true;
 
                 if ($apply) {
                     StudentAnswer::query()
-                        ->whereKey((int) $upd['id'])
+                        ->whereKey((int) $row->id)
                         ->update([
-                            'selected_option_id' => (int) $upd['selected_option_id'],
-                            'answer' => (string) $upd['selected_option_id'],
+                            'selected_option_id' => $targetOptionId,
+                            'answer' => (string) $targetOptionId,
                         ]);
                 }
             }
@@ -214,8 +180,8 @@ class RepairShuffledAnswerSelections extends Command
             ['Metric', 'Value'],
             [
                 ['inspected_answers', $inspected],
-                ['eligible_positional_answers', $eligible],
-                ['remapped_answers', $remapped],
+                ['eligible_answers', $eligible],
+                ['reverted_answers', $reverted],
                 ['skipped_answers', $skipped],
                 ['affected_attempts', count($affectedAttemptIds)],
                 ['recalculated_attempts', $recalculated],
@@ -229,44 +195,7 @@ class RepairShuffledAnswerSelections extends Command
         return self::SUCCESS;
     }
 
-    private function extractPositionIndex(string $raw): ?int
-    {
-        $raw = trim($raw);
-        if ($raw === '') {
-            return null;
-        }
-
-        if (preg_match('/^[A-Z]$/i', $raw) === 1) {
-            $index = ord(strtoupper($raw)) - 65;
-            return $index >= 0 ? $index : null;
-        }
-
-        if (!is_numeric($raw)) {
-            return null;
-        }
-
-        $n = (int) $raw;
-        if ($n < 0 || $n > 10) {
-            return null;
-        }
-
-        return $n > 0 ? $n - 1 : 0;
-    }
-
-    private function labelToIndex(string $label): ?int
-    {
-        $label = trim(strtoupper($label));
-        if (preg_match('/^[A-Z]$/', $label) !== 1) {
-            return null;
-        }
-
-        $idx = ord($label) - 65;
-        return $idx >= 0 ? $idx : null;
-    }
-
     /**
-     * Build deterministic option order when attempt snapshot is missing.
-     *
      * @return array<int>
      */
     private function buildSeededOptionOrder(int $questionId, int $examId, int $studentId): array

@@ -108,11 +108,11 @@ class ExamController extends Controller
      */
     private function resolveQuestionOrder(Exam $exam, ExamAttempt $attempt): array
     {
-        // Fixed-order mode must always follow exam_questions.order.
-        // Do not trust old attempt snapshots created by previous logic.
+        // Fixed-order mode: enforce stable ASC by question_id.
+        // This prevents legacy reversed pivot order from showing descending questions.
         if (!(bool) $exam->shuffle_questions) {
             return $exam->examQuestions
-                ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
+                ->sortBy(fn ($row) => (int) $row->question_id)
                 ->pluck('question_id')
                 ->map(fn ($id) => (int) $id)
                 ->values()
@@ -137,22 +137,9 @@ class ExamController extends Controller
      */
     private function resolveOptionOrder(Collection $options, ExamAttempt $attempt, int $questionId, Exam $exam): Collection
     {
-        // In fixed answer-order mode, never apply snapshot reorder.
-        if (!(bool) $exam->shuffle_answers) {
-            return $options->values();
-        }
-
-        $optionIds = $attempt->options_order[(string) $questionId] ?? null;
-        if (!is_array($optionIds) || empty($optionIds)) {
-            return $options->values();
-        }
-
-        $optionMap = $options->keyBy('id');
-
-        return collect($optionIds)
-            ->map(fn ($optionId) => $optionMap->get((int) $optionId))
-            ->filter()
-            ->values();
+        // Answer shuffling is globally disabled.
+        // Never apply snapshot reorder for options.
+        return $options->values();
     }
 
     public function submit(Request $request, $id, ProcessExamSubmissionAction $processExamSubmission)

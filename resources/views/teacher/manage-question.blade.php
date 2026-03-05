@@ -75,6 +75,7 @@
         @forelse($groupedQuestions as $group)
         @php
             $title = (string) data_get($group, 'title', '');
+            $groupId = (int) data_get($group, 'group_id', 0);
             $subjectId = (int) data_get($group, 'subject_id', 0);
             $subjectName = (string) data_get($group, 'subject_name', '-');
             $questions = data_get($group, 'questions');
@@ -117,20 +118,20 @@
                             @if($isArchived)
                             <button type="button"
                                     @click.stop="open = false"
-                                    wire:click="restoreGroup('{{ addslashes($title) }}', {{ $subjectId }}, '{{ $questions->pluck('id')->implode(',') }}')"
+                                    wire:click="restoreGroup({{ $groupId }})"
                                     class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-emerald-700 hover:bg-emerald-50 transition-colors">
                                 Pulihkan Soal
                             </button>
                             @else
                             <button type="button"
                                     @click.stop="open = false"
-                                    wire:click="duplicateGroup('{{ addslashes($title) }}', {{ $subjectId }})"
+                                    wire:click="duplicateGroup({{ $groupId }})"
                                     class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-text-main hover:bg-gray-50 hover:text-primary transition-colors">
                                 Duplikat Soal
                             </button>
                             <button type="button"
                                     @click.stop="open = false"
-                                    wire:click="confirmDeleteGroup('{{ addslashes($title) }}', {{ $subjectId }}, '{{ $questions->pluck('id')->implode(',') }}')"
+                                    wire:click="confirmDeleteGroup({{ $groupId }})"
                                     class="w-full px-4 py-3 rounded-xl text-left text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors">
                                 Hapus Soal Tersimpan
                             </button>
@@ -170,14 +171,14 @@
                     </div>
                     @else
                     <div class="grid grid-cols-2 gap-2.5">
-                        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['title' => urlencode($title)]) : route('teacher.questions.group', ['title' => urlencode($title)]) }}?subject_id={{ $subjectId }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                        <x-button href="{{ auth()->user()->isAdmin() ? route('admin.questions.group', ['group' => $groupId]) : route('teacher.questions.group', ['group' => $groupId]) }}" variant="primary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                             </svg>
                             Detail
                         </x-button>
-                        <x-button wire:click="exportGroup('{{ addslashes($title) }}', {{ $subjectId }})" variant="secondary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
+                        <x-button wire:click="exportGroup({{ $groupId }})" variant="secondary" class="w-full h-11 !rounded-xl !px-4 !text-[10px] sm:!text-xs font-black uppercase tracking-widest">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>

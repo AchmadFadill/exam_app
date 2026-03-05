@@ -4,6 +4,7 @@ namespace App\Livewire\Teacher;
 
 use App\Imports\QuestionsImport;
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use App\Models\Subject;
 use App\Exports\QuestionGroupExport;
@@ -27,9 +28,7 @@ class ManageQuestion extends Component
     public $showDeleteGroupModal = false;
     public $selectedQuestion = null;
     public $selectedQuestions = [];
-    public $selectedGroupTitle = null;
-    public $selectedGroupSubjectId = null;
-    public $selectedGroupQuestionIds = [];
+    public $selectedGroupId = null;
     public $importFile;
     public $importTitle = ''; 
     
@@ -98,27 +97,21 @@ class ManageQuestion extends Component
         $this->showDeleteModal = true;
     }
 
-    public function confirmDeleteGroup(string $title, int $subjectId, string $questionIds = ''): void
+    public function confirmDeleteGroup(int $groupId): void
     {
-        $this->selectedGroupTitle = $title;
-        $this->selectedGroupSubjectId = $subjectId;
-        $this->selectedGroupQuestionIds = collect(explode(',', $questionIds))
-            ->map(fn ($id) => (int) trim($id))
-            ->filter(fn ($id) => $id > 0)
-            ->values()
-            ->all();
+        $this->selectedGroupId = $groupId;
         $this->showDeleteGroupModal = true;
     }
 
     public function deleteGroup(): void
     {
-        if (!$this->selectedGroupTitle || !$this->selectedGroupSubjectId || empty($this->selectedGroupQuestionIds)) {
+        if (!$this->selectedGroupId) {
             return;
         }
 
         DB::transaction(function () {
             $questions = Question::with('options')
-                ->whereIn('id', $this->selectedGroupQuestionIds)
+                ->where('question_group_id', $this->selectedGroupId)
                 ->when(Auth::user()->isTeacher(), function ($query) {
                     $teacherId = $this->getTeacherId();
                     if ($teacherId) {
@@ -133,29 +126,17 @@ class ManageQuestion extends Component
         });
 
         $this->showDeleteGroupModal = false;
-        $deletedTitle = $this->selectedGroupTitle;
-        $this->selectedGroupTitle = null;
-        $this->selectedGroupSubjectId = null;
-        $this->selectedGroupQuestionIds = [];
+        $deletedTitle = QuestionGroup::query()->whereKey($this->selectedGroupId)->value('title') ?? 'kelompok soal';
+        $this->selectedGroupId = null;
 
         $this->dispatch('notify', ['message' => "Kelompok soal {$deletedTitle} berhasil dipindahkan ke arsip!"]);
     }
 
-    public function restoreGroup(string $title, int $subjectId, string $questionIds = ''): void
+    public function restoreGroup(int $groupId): void
     {
-        $questionIds = collect(explode(',', $questionIds))
-            ->map(fn ($id) => (int) trim($id))
-            ->filter(fn ($id) => $id > 0)
-            ->values()
-            ->all();
-
-        if (empty($questionIds)) {
-            return;
-        }
-
-        DB::transaction(function () use ($questionIds) {
+        DB::transaction(function () use ($groupId) {
             $questions = Question::onlyTrashed()
-                ->whereIn('id', $questionIds)
+                ->where('question_group_id', $groupId)
                 ->when(Auth::user()->isTeacher(), function ($query) {
                     $teacherId = $this->getTeacherId();
                     if ($teacherId) {
@@ -169,15 +150,21 @@ class ManageQuestion extends Component
             }
         });
 
+        $title = QuestionGroup::query()->whereKey($groupId)->value('title') ?? 'kelompok soal';
         $this->dispatch('notify', ['message' => "Kelompok soal {$title} berhasil dipulihkan."]);
     }
 
-    public function duplicateGroup(string $title, int $subjectId): void
+    public function duplicateGroup(int $groupId): void
     {
         $teacherId = $this->getTeacherId();
+        $group = QuestionGroup::query()->find($groupId);
+        if (!$group) {
+            $this->dispatch('notify', ['message' => 'Kelompok soal tidak ditemukan.', 'type' => 'error']);
+            return;
+        }
+
         $questions = Question::with('options')
-            ->where('title', $title)
-            ->where('subject_id', $subjectId)
+            ->where('question_group_id', $groupId)
             ->when(Auth::user()->isTeacher(), function ($query) use ($teacherId) {
                 if ($teacherId) {
                     $query->where('teacher_id', $teacherId);
@@ -191,13 +178,20 @@ class ManageQuestion extends Component
             return;
         }
 
-        $copyTitle = $this->generateDuplicateTitle($title, $subjectId, $teacherId);
+        $copyTitle = $this->generateDuplicateTitle($group->title, (int) $group->subject_id, $teacherId);
 
-        DB::transaction(function () use ($questions, $copyTitle) {
+        DB::transaction(function () use ($questions, $copyTitle, $group) {
+            $newGroup = QuestionGroup::query()->create([
+                'teacher_id' => $group->teacher_id,
+                'subject_id' => $group->subject_id,
+                'title' => $copyTitle,
+            ]);
+
             foreach ($questions as $question) {
                 $newQuestion = Question::create([
                     'teacher_id' => $question->teacher_id,
                     'subject_id' => $question->subject_id,
+                    'question_group_id' => $newGroup->id,
                     'title' => $copyTitle,
                     'type' => $question->type,
                     'text' => $question->text,
@@ -247,8 +241,10 @@ class ManageQuestion extends Component
             Excel::import($import, $this->importFile->getRealPath());
             
             if ($import->importedCount > 0) {
-                // Auto-distribute scores to 100 only when records exist
-                Question::distributeScoresByTitle($this->importTitle);
+                // Auto-distribute scores to 100 per imported group only when records exist.
+                foreach ($import->importedGroupIds as $groupId) {
+                    Question::distributeScoresByGroupId((int) $groupId);
+                }
             }
             
             $this->showImportModal = false;
@@ -333,13 +329,17 @@ class ManageQuestion extends Component
         ]);
     }
 
-    public function exportGroup(string $title, ?int $subjectId = null)
+    public function exportGroup(int $groupId)
     {
         $teacherId = Auth::user()->isTeacher() ? $this->getTeacherId() : null;
+        $group = QuestionGroup::query()->find($groupId);
+        if (!$group) {
+            abort(404);
+        }
 
         return Excel::download(
-            new QuestionGroupExport($title, $teacherId, $subjectId),
-            'soal_' . \Illuminate\Support\Str::slug($title) . '_' . now()->format('Ymd_His') . '.xlsx'
+            new QuestionGroupExport(groupId: $groupId, teacherId: $teacherId),
+            'soal_' . \Illuminate\Support\Str::slug($group->title) . '_' . now()->format('Ymd_His') . '.xlsx'
         );
     }
 
@@ -348,7 +348,7 @@ class ManageQuestion extends Component
         $user = Auth::user();
 
         // 1. Base query for filtering
-        $query = Question::query();
+        $query = Question::query()->whereNotNull('question_group_id');
 
         if ($this->showArchived) {
             $query->onlyTrashed();
@@ -362,11 +362,6 @@ class ManageQuestion extends Component
             }
         }
 
-        // Apply filters
-        if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
-        }
-
         if ($this->filterSubject) {
             $query->where('subject_id', $this->filterSubject);
         }
@@ -375,33 +370,29 @@ class ManageQuestion extends Component
             $query->where('type', $this->filterType);
         }
 
-        // 2. Paginate distinct groups by title + subject
-        $paginatedTitles = $query->select('title', 'subject_id')
-            ->groupBy('title', 'subject_id')
+        if ($this->search) {
+            $query->whereHas('questionGroup', function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        // 2. Paginate distinct groups by group id
+        $paginatedTitles = $query->select('question_group_id')
+            ->groupBy('question_group_id')
             ->orderByRaw('MAX(created_at) DESC')
             ->paginate(9); // 9 groups per page
 
         // 3. Fetch ALL questions for the exact groups shown on this page
-        $groups = $paginatedTitles->getCollection()
-            ->map(fn ($row) => [
-                'title' => (string) $row->title,
-                'subject_id' => (int) $row->subject_id,
-            ])
+        $groupIds = $paginatedTitles->getCollection()
+            ->map(fn ($row) => (int) $row->question_group_id)
+            ->filter(fn ($id) => $id > 0)
             ->all();
 
         $questionsInPage = collect();
-        if (!empty($groups)) {
-            $questionsInPage = Question::with(['subject', 'options'])
+        if (!empty($groupIds)) {
+            $questionsInPage = Question::with(['subject', 'options', 'questionGroup'])
                 ->when($this->showArchived, fn ($q) => $q->onlyTrashed())
-                ->where(function ($groupQuery) use ($groups) {
-                    foreach ($groups as $group) {
-                        $groupQuery->orWhere(function ($rowQuery) use ($group) {
-                            $rowQuery
-                                ->where('title', $group['title'])
-                                ->where('subject_id', $group['subject_id']);
-                        });
-                    }
-                })
+                ->whereIn('question_group_id', $groupIds)
                 ->when($user->isTeacher(), function($q) {
                     $teacherId = $this->getTeacherId();
                      if ($teacherId) {
@@ -412,17 +403,17 @@ class ManageQuestion extends Component
                 ->get();
         }
 
-        // 4. Group by title + subject and prepare safe payload for Blade
+        // 4. Group by question_group_id and prepare safe payload for Blade
         $groupedQuestions = $questionsInPage
-            ->groupBy(function ($question) {
-                return $this->buildGroupKey((string) ($question->title ?: 'Tanpa Kelompok'), (int) $question->subject_id);
-            })
+            ->groupBy('question_group_id')
             ->map(function ($questions) {
                 $first = $questions->first();
+                $group = $first->questionGroup;
 
                 return [
-                    'title' => (string) ($first->title ?: 'Tanpa Kelompok'),
-                    'subject_id' => (int) $first->subject_id,
+                    'group_id' => (int) ($first->question_group_id ?? 0),
+                    'title' => (string) ($group?->title ?: $first->title ?: 'Tanpa Kelompok'),
+                    'subject_id' => (int) ($group?->subject_id ?? $first->subject_id),
                     'subject_name' => $first->subject?->name ?? '-',
                     'questions' => $questions->values(),
                     'latest_created_at' => $questions->max('created_at'),
@@ -443,11 +434,6 @@ class ManageQuestion extends Component
         ])->layout($user->isAdmin() ? 'layouts.admin' : 'layouts.teacher')->title('Bank Soal');
     }
 
-    private function buildGroupKey(string $title, int $subjectId): string
-    {
-        return $title . '||' . $subjectId;
-    }
-
     private function generateDuplicateTitle(string $title, int $subjectId, ?int $teacherId): string
     {
         $baseTitle = $title . ' (Copy)';
@@ -455,7 +441,7 @@ class ManageQuestion extends Component
         $counter = 2;
 
         while (
-            Question::query()
+            QuestionGroup::query()
                 ->where('title', $candidate)
                 ->where('subject_id', $subjectId)
                 ->when(Auth::user()->isTeacher(), function ($query) use ($teacherId) {

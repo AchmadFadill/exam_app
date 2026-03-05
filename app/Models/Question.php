@@ -13,7 +13,7 @@ class Question extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['teacher_id', 'subject_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key', 'score'];
+    protected $fillable = ['teacher_id', 'subject_id', 'question_group_id', 'title', 'type', 'text', 'image_path', 'explanation', 'answer_key', 'score'];
 
     protected $casts = [
         'score' => 'float',
@@ -54,6 +54,11 @@ class Question extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function questionGroup(): BelongsTo
+    {
+        return $this->belongsTo(QuestionGroup::class);
+    }
+
     public function options(): HasMany
     {
         return $this->hasMany(QuestionOption::class)->orderBy('label');
@@ -80,6 +85,15 @@ class Question extends Model
         return $this->type === 'essay';
     }
 
+    public function hasAttemptedExamUsage(): bool
+    {
+        return $this->exams()
+            ->whereHas('attempts', function ($query) {
+                $query->whereNotNull('submitted_at');
+            })
+            ->exists();
+    }
+
     public static function distributeScoresByTitle($title)
     {
         $questions = self::where('title', $title)->get();
@@ -96,6 +110,27 @@ class Question extends Model
             if ($index < $remainder) {
                 $score++;
             }
+            $question->update(['score' => $score]);
+        }
+    }
+
+    public static function distributeScoresByGroupId(int $groupId): void
+    {
+        $questions = self::where('question_group_id', $groupId)
+            ->orderBy('id')
+            ->get();
+
+        $count = $questions->count();
+        if ($count === 0) {
+            return;
+        }
+
+        $totalScore = 100;
+        $baseScore = intdiv($totalScore, $count);
+        $remainder = $totalScore % $count;
+
+        foreach ($questions as $index => $question) {
+            $score = $baseScore + ($index < $remainder ? 1 : 0);
             $question->update(['score' => $score]);
         }
     }

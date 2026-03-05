@@ -91,9 +91,10 @@ class ExamStart extends Component
                 // ── Build the SNAPSHOT ────────────────────────────────────────
                 $exam = $this->exam;
 
-                // Ordered question IDs (respects exam_questions.order column)
+                // Fixed-order mode: enforce stable ASC by question_id.
+                // This prevents legacy reversed pivot order from showing descending questions.
                 $orderedQuestionIds = $exam->examQuestions
-                    ->sortBy(fn ($row) => sprintf('%010d-%010d', (int) $row->order, (int) $row->question_id))
+                    ->sortBy(fn ($row) => (int) $row->question_id)
                     ->pluck('question_id')
                     ->values()
                     ->toArray();
@@ -120,9 +121,8 @@ class ExamStart extends Component
 
                     $optionIds = $question->options->pluck('id')->toArray();
 
-                    if ($exam->shuffle_answers && $question->type === 'multiple_choice') {
-                        $optionIds = $this->seededShuffle($optionIds, $student->id + $exam->id + $qId);
-                    }
+                    // Answer shuffling is globally disabled for stability.
+                    // Keep canonical option order for all attempts.
 
                     $optionsOrder[(string) $qId] = $optionIds;
                 }

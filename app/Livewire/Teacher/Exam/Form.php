@@ -5,6 +5,7 @@ namespace App\Livewire\Teacher\Exam;
 use App\Models\Classroom;
 use App\Models\Exam;
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -220,14 +221,13 @@ class Form extends Component
         }
     }
 
-    public function isGroupSelected($title, $subjectId)
+    public function isGroupSelected(int $groupId): bool
     {
         $groupQuestions = Question::query()
             ->when(Auth::user()->isTeacher(), function ($q) {
                 $q->where('teacher_id', $this->currentTeacherId());
             })
-            ->where('title', $title)
-            ->where('subject_id', $subjectId)
+            ->where('question_group_id', $groupId)
             ->pluck('id')
             ->toArray();
         
@@ -284,7 +284,7 @@ class Form extends Component
             ->when(Auth::user()->isTeacher(), function ($q) {
                 $q->where('teacher_id', $this->currentTeacherId());
             })
-            ->select('id', 'score', 'title', 'subject_id')
+            ->select('id', 'score', 'question_group_id')
             ->find($questionId);
         if (!$question) {
             return;
@@ -296,9 +296,9 @@ class Form extends Component
             unset($this->questionScores[$questionId]);
         } else {
             $selectedGroup = $this->getSelectedGroupKey();
-            $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
+            $candidateGroup = (int) ($question->question_group_id ?? 0);
 
-            if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
+            if ($selectedGroup !== null && $candidateGroup > 0 && $selectedGroup !== $candidateGroup) {
                 // Switch group automatically: keep only the newly selected question.
                 $this->selectedQuestions = [];
                 $this->questionScores = [];
@@ -310,15 +310,14 @@ class Form extends Component
         }
     }
 
-    public function toggleQuestionGroup($title, $subjectId)
+    public function toggleQuestionGroup(int $groupId): void
     {
-        // Get all questions with this title and subject (including score)
+        // Get all questions in this group (including score)
         $groupQuestions = Question::query()
             ->when(Auth::user()->isTeacher(), function ($q) {
                 $q->where('teacher_id', $this->currentTeacherId());
             })
-            ->where('title', $title)
-            ->where('subject_id', $subjectId)
+            ->where('question_group_id', $groupId)
             ->orderBy('id')
             ->get(['id', 'score']);
 
@@ -406,7 +405,8 @@ class Form extends Component
                 'passing_grade' => $this->passing_grade,
                 'default_score' => $this->default_score,
                 'shuffle_questions' => $this->shuffle_questions,
-                'shuffle_answers' => $this->shuffle_answers,
+                // Temporarily disabled globally.
+                'shuffle_answers' => false,
                 'enable_tab_tolerance' => $this->enable_tab_tolerance,
                 'tab_tolerance' => $this->tab_tolerance,
                 'show_score_to_student' => (bool) $this->show_score_to_student,
@@ -483,15 +483,15 @@ class Form extends Component
 
     public function handleInstantQuestionSaved($questionId)
     {
-        $question = \App\Models\Question::select('id', 'title', 'subject_id', 'score')->find($questionId);
+        $question = \App\Models\Question::select('id', 'question_group_id', 'score')->find($questionId);
         if (!$question) {
             return;
         }
 
         $selectedGroup = $this->getSelectedGroupKey();
-        $candidateGroup = $this->buildGroupKey($question->title, (int) $question->subject_id);
+        $candidateGroup = (int) ($question->question_group_id ?? 0);
 
-        if ($selectedGroup !== null && $selectedGroup !== $candidateGroup) {
+        if ($selectedGroup !== null && $candidateGroup > 0 && $selectedGroup !== $candidateGroup) {
             // Switch group to the newly created instant question.
             $this->selectedQuestions = [];
             $this->questionScores = [];
@@ -527,10 +527,13 @@ class Form extends Component
             : Subject::orderBy('name')->get();
         $classrooms = Classroom::orderBy('name')->get();
         
-        // Group questions by title for selection
-        $questionGroups = Question::with(['subject'])
+        // Group questions by stable group id for selection
+        $baseGroupQuestions = Question::query()
+            ->whereNotNull('question_group_id')
             ->when($this->searchQuery, function ($q) {
-                $q->where('title', 'like', '%' . $this->searchQuery . '%');
+                $q->whereHas('questionGroup', function ($groupQuery) {
+                    $groupQuery->where('title', 'like', '%' . $this->searchQuery . '%');
+                });
             })
             ->when(Auth::user()->isTeacher(), function ($q) {
                 $q->where('teacher_id', $this->currentTeacherId());
@@ -552,15 +555,39 @@ class Form extends Component
                 $q->where('type', $this->filterType);
             })
             ->select(
-                'title',
-                'subject_id',
+                'question_group_id',
                 \DB::raw('COUNT(*) as question_count'),
-                \DB::raw('MIN(id) as first_id'),
                 \DB::raw('COALESCE(SUM(score), 0) as total_points')
             )
-            ->groupBy('title', 'subject_id')
-            ->orderBy('title')
+            ->groupBy('question_group_id')
+            ->orderBy('question_group_id')
             ->get();
+
+        $groupIds = $baseGroupQuestions->pluck('question_group_id')->map(fn ($id) => (int) $id)->all();
+        $groupModels = QuestionGroup::query()
+            ->with('subject')
+            ->whereIn('id', $groupIds)
+            ->get()
+            ->keyBy('id');
+
+        $questionGroups = $baseGroupQuestions
+            ->map(function ($row) use ($groupModels) {
+                $group = $groupModels->get((int) $row->question_group_id);
+                if (!$group) {
+                    return null;
+                }
+
+                return (object) [
+                    'id' => (int) $group->id,
+                    'title' => (string) $group->title,
+                    'subject_id' => (int) $group->subject_id,
+                    'subject' => $group->subject,
+                    'question_count' => (int) $row->question_count,
+                    'total_points' => (float) $row->total_points,
+                ];
+            })
+            ->filter()
+            ->values();
 
         return view('teacher.exam.form', [
             'subjects' => $subjects,
@@ -580,7 +607,8 @@ class Form extends Component
                 $q->where('teacher_id', $this->currentTeacherId());
             })
             ->whereIn('id', $this->selectedQuestions)
-            ->select('title', 'subject_id')
+            ->whereNotNull('question_group_id')
+            ->select('question_group_id')
             ->distinct()
             ->count();
 
@@ -606,7 +634,7 @@ class Form extends Component
                 $q->where('teacher_id', $this->currentTeacherId());
             })
             ->whereIn('id', $selectedIds->all())
-            ->select('id', 'title', 'subject_id', 'score')
+            ->select('id', 'question_group_id', 'subject_id', 'score')
             ->get();
 
         if ($questions->isEmpty()) {
@@ -615,7 +643,7 @@ class Form extends Component
             return;
         }
 
-        $grouped = $questions->groupBy(fn ($q) => $this->buildGroupKey((string) $q->title, (int) $q->subject_id));
+        $grouped = $questions->groupBy(fn ($q) => (int) ($q->question_group_id ?? 0));
         if ($grouped->count() <= 1) {
             $this->selectedQuestions = $questions->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
             return;
@@ -641,7 +669,7 @@ class Form extends Component
         $this->questionScores = $newScores;
     }
 
-    private function getSelectedGroupKey(): ?string
+    private function getSelectedGroupKey(): ?int
     {
         if (empty($this->selectedQuestions)) {
             return null;
@@ -652,19 +680,14 @@ class Form extends Component
                 $q->where('teacher_id', $this->currentTeacherId());
             })
             ->whereIn('id', $this->selectedQuestions)
-            ->select('title', 'subject_id')
+            ->select('question_group_id')
             ->first();
 
-        if (!$question) {
+        if (!$question || !$question->question_group_id) {
             return null;
         }
 
-        return $this->buildGroupKey($question->title, (int) $question->subject_id);
-    }
-
-    private function buildGroupKey(string $title, int $subjectId): string
-    {
-        return $subjectId . '::' . $title;
+        return (int) $question->question_group_id;
     }
 
     private function currentTeacherId(): ?int

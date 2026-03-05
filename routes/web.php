@@ -59,9 +59,19 @@ Route::prefix('admin')->middleware(['auth', 'admin', 'force_admin_password_chang
     Route::get('/classes/{classroom}/assign', App\Livewire\Admin\AssignClassStudents::class)->name('admin.classes.assign');
     Route::get('/subjects', App\Livewire\Admin\ManageSubject::class)->name('admin.subjects');
     Route::get('/questions', App\Livewire\Teacher\ManageQuestion::class)->name('admin.questions');
-    Route::get('/questions/group/{title}', App\Livewire\Teacher\QuestionGroupDetail::class)
-        ->where('title', '.*')
+    Route::get('/questions/group/{group}', App\Livewire\Teacher\QuestionGroupDetail::class)
+        ->whereNumber('group')
         ->name('admin.questions.group');
+    Route::get('/questions/group/{title}', function (string $title) {
+        $subjectId = (int) request()->query('subject_id', 0);
+        $group = \App\Models\QuestionGroup::query()
+            ->where('title', urldecode($title))
+            ->when($subjectId > 0, fn ($q) => $q->where('subject_id', $subjectId))
+            ->orderBy('id')
+            ->firstOrFail();
+
+        return redirect()->route('admin.questions.group', ['group' => $group->id]);
+    })->name('admin.questions.group.legacy');
     Route::get('/exams', App\Livewire\Admin\ManageExam::class)->name('admin.exams');
     Route::get('/exams/create', \App\Livewire\Teacher\Exam\Form::class)->name('admin.exams.create');
     Route::get('/exams/{id}/edit', \App\Livewire\Teacher\Exam\Form::class)->name('admin.exams.edit');
@@ -89,9 +99,22 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'guru'])->group(
     
     // Question Management (single-page CRUD)
     Route::get('/questions', App\Livewire\Teacher\ManageQuestion::class)->name('questions');
-    Route::get('/questions/group/{title}', App\Livewire\Teacher\QuestionGroupDetail::class)
-        ->where('title', '.*')
+    Route::get('/questions/group/{group}', App\Livewire\Teacher\QuestionGroupDetail::class)
+        ->whereNumber('group')
         ->name('questions.group');
+    Route::get('/questions/group/{title}', function (string $title) {
+        $teacherId = \App\Models\Teacher::query()->where('user_id', auth()->id())->value('id');
+        $subjectId = (int) request()->query('subject_id', 0);
+
+        $group = \App\Models\QuestionGroup::query()
+            ->where('teacher_id', $teacherId)
+            ->where('title', urldecode($title))
+            ->when($subjectId > 0, fn ($q) => $q->where('subject_id', $subjectId))
+            ->orderBy('id')
+            ->firstOrFail();
+
+        return redirect()->route('teacher.questions.group', ['group' => $group->id]);
+    })->name('questions.group.legacy');
     
     // Exam Management
     Route::get('/exams', App\Livewire\Teacher\Exam\Index::class)->name('exams.index');

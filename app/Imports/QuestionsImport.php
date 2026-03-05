@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use App\Models\Subject;
 use Illuminate\Support\Collection;
@@ -16,6 +17,7 @@ class QuestionsImport implements ToCollection, WithHeadingRow
     public int $importedCount = 0;
     public int $skippedCount = 0;
     public array $errors = [];
+    public array $importedGroupIds = [];
 
     public function __construct($title)
     {
@@ -65,9 +67,17 @@ class QuestionsImport implements ToCollection, WithHeadingRow
             }
 
             // Create question with title from modal
+            $group = QuestionGroup::firstOrCreate([
+                'teacher_id' => $teacherId,
+                'subject_id' => $subject->id,
+                'title' => $this->title,
+            ]);
+            $this->importedGroupIds[(int) $group->id] = (int) $group->id;
+
             $question = Question::create([
                 'teacher_id' => $teacherId,
                 'subject_id' => $subject->id,
+                'question_group_id' => $group->id,
                 'title' => $this->title, // Use title from modal
                 'type' => $tipe,
                 'text' => $pertanyaan,

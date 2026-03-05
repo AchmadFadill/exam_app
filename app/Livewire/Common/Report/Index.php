@@ -39,8 +39,8 @@ class Index extends Component
 
     public function render()
     {
-        $isAdmin = request()->is('admin/*');
         $user = auth()->user();
+        $isAdmin = (bool) $user?->isAdmin();
 
         $query = \App\Models\Exam::query()
             ->with(['subject', 'classrooms', 'teacher.user'])
@@ -136,6 +136,7 @@ class Index extends Component
         return $this->applyLayout('livewire.common.report.index', [
             'results' => $exams, // Passing paginator
             'subjects' => $subjects,
+            'isAdmin' => $isAdmin,
             'detailRoute' => $isAdmin ? 'admin.reports.detail' : 'teacher.reports.detail'
         ]);
     }

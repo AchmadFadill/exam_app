@@ -3,6 +3,7 @@
 namespace App\Livewire\Teacher\Question;
 
 use App\Models\Question;
+use App\Models\QuestionGroup;
 use App\Models\QuestionOption;
 use Illuminate\Validation\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -291,6 +292,10 @@ class QuestionForm extends Component
                 if ($this->isEdit && $this->questionId) {
                     // Update
                     $question = Question::findOrFail($this->questionId);
+                    if ($question->hasAttemptedExamUsage()) {
+                        throw new \Exception('Soal sudah digunakan dalam ujian yang dikerjakan siswa, sehingga tidak dapat diubah.');
+                    }
+                    $data['question_group_id'] = $this->resolveQuestionGroupId((int) $question->teacher_id);
                     
                     // Delete old image if new one uploaded
                     if ($this->questionImage && $question->image_path) {
@@ -317,6 +322,7 @@ class QuestionForm extends Component
                     if (!$teacherId) throw new \Exception('Teacher ID not found.');
                     
                     $data['teacher_id'] = $teacherId;
+                    $data['question_group_id'] = $this->resolveQuestionGroupId((int) $teacherId);
                     $question = Question::create($data);
                     
                     if ($this->questionForm['type'] === 'multiple_choice') {
@@ -435,6 +441,17 @@ class QuestionForm extends Component
             return \App\Models\Teacher::where('user_id', $user->id)->first()?->id;
         }
         return null;
+    }
+
+    private function resolveQuestionGroupId(int $teacherId): int
+    {
+        $group = QuestionGroup::query()->firstOrCreate([
+            'teacher_id' => $teacherId,
+            'subject_id' => (int) $this->questionForm['subject_id'],
+            'title' => (string) ($this->questionForm['title'] ?? ''),
+        ]);
+
+        return (int) $group->id;
     }
 
     private function resetForm()

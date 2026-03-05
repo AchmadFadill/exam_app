@@ -19,7 +19,7 @@
         <x-table.thead>
             <x-table.tr>
                 <x-table.th>Nama Ujian</x-table.th>
-                @if(request()->is('admin/*'))
+                @if($isAdmin)
                 <x-table.th>Guru</x-table.th>
                 @endif
                 <x-table.th>Kelas</x-table.th>
@@ -36,7 +36,7 @@
                 <x-table.td>
                     <span class="font-black text-text-main uppercase tracking-tight group-hover:text-primary transition-colors">{{ $result['exam_name'] }}</span>
                 </x-table.td>
-                @if(request()->is('admin/*'))
+                @if($isAdmin)
                 <x-table.td class="font-bold text-text-muted">{{ $result['teacher_name'] }}</x-table.td>
                 @endif
                 <x-table.td class="italic font-bold text-text-muted">{{ $result['class'] }}</x-table.td>
@@ -60,7 +60,7 @@
             </x-table.tr>
             @empty
             <x-empty-state 
-                colspan="{{ request()->is('admin/*') ? 8 : 7 }}" 
+                colspan="{{ $isAdmin ? 8 : 7 }}" 
                 title="Hasil ujian kosong" 
                 message="Belum ada hasil ujian yang dapat ditampilkan saat ini." 
                 icon="folder-open" 

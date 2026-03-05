@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Common\Report;
 
+use App\Exports\ReportStudentsExport;
 use App\Models\ExamAttempt;
 use App\Models\Student;
 use App\Models\StudentAnswer;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Enums\ExamAttemptStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Detail extends Component
 {
@@ -104,6 +106,155 @@ class Detail extends Component
         return $end->diffInMinutes($start);
     }
 
+    private function buildStudentsRows(\App\Models\Exam $examModel, $submittedAttempts, int $essayQuestionCount, bool $examWindowEnded, $questionTypeMap): array
+    {
+        $classIds = $examModel->classrooms->pluck('id');
+        $allStudentsQuery = Student::query()
+            ->with(['user:id,name', 'classroom:id,name'])
+            ->whereIn('classroom_id', $classIds)
+            ->when(
+                filled($this->classroomFilter),
+                fn ($q) => $q->where('classroom_id', (int) $this->classroomFilter)
+            );
+        $allStudents = $allStudentsQuery->get(['id', 'user_id', 'classroom_id']);
+
+        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $examWindowEnded, $questionTypeMap) {
+            $attempt = $submittedAttempts->get($student->id);
+            $answeredCount = 0;
+            if ($attempt) {
+                $answeredCount = $attempt->answers
+                    ->filter(function ($answer) use ($questionTypeMap) {
+                        $type = $questionTypeMap->get($answer->question_id);
+                        if ($type === 'multiple_choice') {
+                            $raw = trim((string) ($answer->answer ?? ''));
+                            return !is_null($answer->selected_option_id)
+                                || $raw !== '';
+                        }
+                        if ($type === 'essay') {
+                            return trim((string) ($answer->answer ?? '')) !== '';
+                        }
+
+                        return !is_null($answer->selected_option_id) || trim((string) ($answer->answer ?? '')) !== '';
+                    })
+                    ->count();
+            }
+
+            $resolvedScore = null;
+            if ($attempt) {
+                if ((int) ($attempt->answers_count ?? 0) > 0) {
+                    $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
+                } elseif (!is_null($attempt->total_score)) {
+                    $resolvedScore = (float) $attempt->total_score;
+                }
+            }
+
+            if (!$attempt) {
+                $status = 'Belum Mengerjakan';
+            } elseif ($attempt->status === ExamAttemptStatus::Graded) {
+                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+            } elseif (in_array($attempt->status, [ExamAttemptStatus::Submitted, ExamAttemptStatus::Completed, ExamAttemptStatus::TimedOut, ExamAttemptStatus::Abandoned])) {
+                if ($essayQuestionCount > 0) {
+                    $status = 'Pending Penilaian';
+                } else {
+                    $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+                }
+            } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
+                $hasNoAnswer = $answeredCount === 0;
+                if ($hasNoAnswer) {
+                    $status = $examWindowEnded ? 'Tidak Mengerjakan' : 'Belum Mengerjakan';
+                } else {
+                    $status = $examWindowEnded ? 'Waktu Habis' : 'Sedang Mengerjakan';
+                }
+            } else {
+                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
+            }
+
+            $displayScore = $resolvedScore;
+            if (is_null($displayScore)) {
+                $displayScore = '-';
+            }
+
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'class_name' => (string) ($student->classroom->name ?? '-'),
+                'score' => $displayScore,
+                'status' => $status,
+                'started_at' => $attempt && $attempt->started_at ? $attempt->started_at->format('H:i') : '-',
+                'submitted_at' => $attempt && $attempt->submitted_at ? $attempt->submitted_at->format('H:i') : '-',
+                'duration_minutes' => $attempt ? $this->calculateDuration($attempt->started_at, $attempt->submitted_at) : 999999,
+                'has_attempt' => (bool) $attempt
+            ];
+        })->toArray();
+
+        if ($this->sortBy === 'highest') {
+            usort($students, fn($a, $b) => ($b['score'] === '-' ? -1 : $b['score']) <=> ($a['score'] === '-' ? -1 : $a['score']));
+        } elseif ($this->sortBy === 'lowest') {
+            usort($students, fn($a, $b) => ($a['score'] === '-' ? 999 : $a['score']) <=> ($b['score'] === '-' ? 999 : $b['score']));
+        } elseif ($this->sortBy === 'fastest') {
+            usort($students, function($a, $b) {
+                if (!$a['has_attempt']) return 1;
+                if (!$b['has_attempt']) return -1;
+                return $a['duration_minutes'] <=> $b['duration_minutes'];
+            });
+        } elseif ($this->sortBy === 'slowest') {
+             usort($students, function($a, $b) {
+                if (!$a['has_attempt']) return 1;
+                if (!$b['has_attempt']) return -1;
+                return $b['duration_minutes'] <=> $a['duration_minutes'];
+            });
+        }
+
+        return $students;
+    }
+
+    public function exportStudentsExcel()
+    {
+        $examModel = \App\Models\Exam::with(['subject', 'classrooms'])->findOrFail($this->examId);
+        Gate::authorize('viewReport', $examModel);
+
+        $submittedAttempts = ExamAttempt::query()
+            ->where('exam_id', $this->examId)
+            ->with(['answers:id,exam_attempt_id,question_id,selected_option_id,answer'])
+            ->withCount('answers')
+            ->withSum('answers', 'score_awarded')
+            ->get(['student_id', 'total_score', 'started_at', 'submitted_at', 'status'])
+            ->keyBy('student_id');
+
+        $submittedAttemptsCollection = $submittedAttempts->values();
+        $essayQuestionCount = $examModel->questions()->where('type', 'essay')->count();
+        $examEndAt = \Carbon\Carbon::parse($examModel->date->format('Y-m-d') . ' ' . $examModel->end_time);
+        $examWindowEnded = now()->gt($examEndAt);
+        $questionTypeMap = $examModel->questions()->pluck('questions.type', 'questions.id');
+
+        $resolvedFinishedScores = $submittedAttemptsCollection->map(function ($attempt) {
+            if ((int) ($attempt->answers_count ?? 0) > 0) {
+                return (float) ($attempt->answers_sum_score_awarded ?? 0);
+            }
+
+            return is_null($attempt->total_score) ? null : (float) $attempt->total_score;
+        })->filter(fn ($score) => !is_null($score))->values();
+
+        $exam = [
+            'id' => $examModel->id,
+            'exam_name' => $examModel->name,
+            'class' => $examModel->classrooms->pluck('name')->join(', '),
+            'subject' => $examModel->subject->name ?? '-',
+            'date' => $examModel->date ? $examModel->date->format('d M Y') : '-',
+            'avg_score' => $resolvedFinishedScores->count() > 0 ? number_format($resolvedFinishedScores->avg(), 1) : 0,
+            'highest' => $resolvedFinishedScores->count() > 0 ? (float) $resolvedFinishedScores->max() : 0,
+            'lowest' => $resolvedFinishedScores->count() > 0 ? (float) $resolvedFinishedScores->min() : 0,
+            'participants' => $submittedAttemptsCollection->count()
+        ];
+
+        $students = $this->buildStudentsRows($examModel, $submittedAttempts, $essayQuestionCount, $examWindowEnded, $questionTypeMap);
+
+        return Excel::download(
+            new ReportStudentsExport($students),
+            'hasil_siswa_' . \Illuminate\Support\Str::slug($examModel->name) . '_' . now()->format('Ymd_His') . '.xlsx'
+        );
+    }
+
     public function render()
     {
         $isAdmin = request()->is('admin/*');
@@ -168,109 +319,7 @@ class Detail extends Component
             'participants' => $submittedAttemptsCollection->count() // Count all who started
         ];
 
-        // Fetch All Students in Exam Classrooms (with optional class filter)
-        $classIds = $examModel->classrooms->pluck('id');
-        $allStudentsQuery = Student::query()
-            ->with('user:id,name')
-            ->whereIn('classroom_id', $classIds)
-            ->when(
-                filled($this->classroomFilter),
-                fn ($q) => $q->where('classroom_id', (int) $this->classroomFilter)
-            );
-        $allStudents = $allStudentsQuery->get(['id', 'user_id', 'classroom_id']);
-
-        // Merge with Attempts
-        $students = $allStudents->map(function($student) use ($submittedAttempts, $examModel, $essayQuestionCount, $examWindowEnded, $questionTypeMap) {
-            $attempt = $submittedAttempts->get($student->id);
-            $answeredCount = 0;
-            if ($attempt) {
-                $answeredCount = $attempt->answers
-                    ->filter(function ($answer) use ($questionTypeMap) {
-                        $type = $questionTypeMap->get($answer->question_id);
-                        if ($type === 'multiple_choice') {
-                            $raw = trim((string) ($answer->answer ?? ''));
-                            return !is_null($answer->selected_option_id)
-                                || $raw !== '';
-                        }
-                        if ($type === 'essay') {
-                            return trim((string) ($answer->answer ?? '')) !== '';
-                        }
-
-                        return !is_null($answer->selected_option_id) || trim((string) ($answer->answer ?? '')) !== '';
-                    })
-                    ->count();
-            }
-
-            $resolvedScore = null;
-            if ($attempt) {
-                if ((int) ($attempt->answers_count ?? 0) > 0) {
-                    $resolvedScore = (float) ($attempt->answers_sum_score_awarded ?? 0);
-                } elseif (!is_null($attempt->total_score)) {
-                    $resolvedScore = (float) $attempt->total_score;
-                }
-            }
-
-            if (!$attempt) {
-                $status = 'Belum Mengerjakan';
-            } elseif ($attempt->status === ExamAttemptStatus::Graded) {
-                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
-            } elseif (in_array($attempt->status, [ExamAttemptStatus::Submitted, ExamAttemptStatus::Completed, ExamAttemptStatus::TimedOut, ExamAttemptStatus::Abandoned])) {
-                // Check if needs grading (has essays)
-                if ($essayQuestionCount > 0) {
-                    $status = 'Pending Penilaian';
-                } else {
-                    $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
-                }
-            } elseif ($attempt->status === ExamAttemptStatus::InProgress || $attempt->status === ExamAttemptStatus::Ongoing) {
-                $hasNoAnswer = $answeredCount === 0;
-                if ($hasNoAnswer) {
-                    $status = $examWindowEnded ? 'Tidak Mengerjakan' : 'Belum Mengerjakan';
-                } else {
-                    $status = $examWindowEnded ? 'Waktu Habis' : 'Sedang Mengerjakan';
-                }
-            } else {
-                // Fallback
-                $status = ($resolvedScore ?? 0) >= $examModel->passing_grade ? 'Lulus' : 'Tidak Lulus';
-            }
-
-            $displayScore = $resolvedScore;
-            if (is_null($displayScore) && !$attempt) {
-                $displayScore = '-';
-            } elseif (is_null($displayScore)) {
-                $displayScore = '-';
-            }
-            
-            return [
-                'id' => $student->id,
-                'name' => $student->name,
-                'score' => $displayScore,
-                'status' => $status,
-                'started_at' => $attempt && $attempt->started_at ? $attempt->started_at->format('H:i') : '-',
-                'submitted_at' => $attempt && $attempt->submitted_at ? $attempt->submitted_at->format('H:i') : '-',
-                'duration_minutes' => $attempt ? $this->calculateDuration($attempt->started_at, $attempt->submitted_at) : 999999,
-                'has_attempt' => (bool) $attempt
-            ];
-        })->toArray(); // Convert to array for sorting
-
-        // Apply sorting
-        if ($this->sortBy === 'highest') {
-            usort($students, fn($a, $b) => ($b['score'] === '-' ? -1 : $b['score']) <=> ($a['score'] === '-' ? -1 : $a['score']));
-        } elseif ($this->sortBy === 'lowest') {
-            usort($students, fn($a, $b) => ($a['score'] === '-' ? 999 : $a['score']) <=> ($b['score'] === '-' ? 999 : $b['score']));
-        } elseif ($this->sortBy === 'fastest') {
-            usort($students, function($a, $b) {
-                // If has_attempt is false, push to bottom
-                if (!$a['has_attempt']) return 1; 
-                if (!$b['has_attempt']) return -1;
-                return $a['duration_minutes'] <=> $b['duration_minutes'];
-            });
-        } elseif ($this->sortBy === 'slowest') {
-             usort($students, function($a, $b) {
-                if (!$a['has_attempt']) return 1; 
-                if (!$b['has_attempt']) return -1;
-                return $b['duration_minutes'] <=> $a['duration_minutes'];
-            });
-        }
+        $students = $this->buildStudentsRows($examModel, $submittedAttempts, $essayQuestionCount, $examWindowEnded, $questionTypeMap);
 
         $perPage = 10;
         $currentPage = LengthAwarePaginator::resolveCurrentPage('studentsPage');

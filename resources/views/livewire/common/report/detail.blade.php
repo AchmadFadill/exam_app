@@ -82,9 +82,14 @@
                     @endforeach
                 </select>
             </div>
-            <x-button href="{{ route($printRoute, ['id' => $exam['id'], 'classroomFilter' => $classroomFilter, 'sortBy' => $sortBy]) }}" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
-                Cetak Rekap
-            </x-button>
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <x-button wire:click="exportStudentsExcel" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
+                    Download Excel
+                </x-button>
+                <x-button href="{{ route($printRoute, ['id' => $exam['id'], 'classroomFilter' => $classroomFilter, 'sortBy' => $sortBy]) }}" variant="soft" class="text-[10px] sm:text-xs uppercase tracking-widest w-full sm:w-auto">
+                    Cetak Rekap
+                </x-button>
+            </div>
         </div>
 
         <!-- Filter Buttons -->

@@ -267,17 +267,20 @@
                             </label>
 
                             <!-- Toggle Card: Shuffle Answers -->
-                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-pointer group hover:bg-primary/5 hover:border-primary/20 transition-all">
+                            <label class="relative flex items-center justify-between p-6 bg-gray-100/50 dark:bg-slate-900 border border-border-main dark:border-border-main rounded-[2rem] cursor-not-allowed opacity-70">
                                 <div class="flex items-center gap-4">
                                     <div class="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-sm group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                                     </div>
-                                    <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Acak Jawaban</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-text-main">Acak Jawaban</span>
+                                        <span class="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">Sementara dinonaktifkan</span>
+                                    </div>
                                 </div>
                                 <div class="relative">
-                                    <input type="checkbox" wire:model.live="shuffle_answers" class="sr-only peer">
-                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 peer-checked:bg-primary transition-colors duration-200 ease-in-out"></div>
-                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ease-in-out peer-checked:translate-x-6 pointer-events-none"></div>
+                                    <input type="checkbox" disabled class="sr-only peer">
+                                    <div class="w-12 h-6 bg-gray-300 dark:bg-slate-800 rounded-full shadow-inner dark:shadow-black/20 transition-colors duration-200 ease-in-out"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-200 ease-in-out pointer-events-none"></div>
                                 </div>
                             </label>
 
@@ -448,9 +451,9 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             @forelse($questionGroups as $group)
                             @php
-                                $isSelected = $this->isGroupSelected($group->title, $group->subject_id);
+                                $isSelected = $this->isGroupSelected($group->id);
                             @endphp
-                            <div wire:click="toggleQuestionGroup('{{ addslashes($group->title) }}', {{ $group->subject_id }})" 
+                            <div wire:click="toggleQuestionGroup({{ $group->id }})" 
                                  class="relative p-8 rounded-[2.5rem] cursor-pointer group transition-all duration-300 border-2 {{ $isSelected ? 'bg-blue-50 border-blue-600 dark:bg-blue-900/10 dark:border-blue-500' : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-blue-400 hover:shadow-lg' }}">
                                 
                                 <!-- Header -->
